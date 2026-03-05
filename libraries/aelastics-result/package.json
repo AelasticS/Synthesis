@@ -1,5 +1,5 @@
 {
-  "name": "aelastics-result",
+  "name": "@aelastics/result",
   "description": "Framework for handling results of software services",
   "version": "2.0.8",
   "main": "lib/aelastics-result.js",

@@ -15,7 +15,7 @@
 /* tslint:disable:array-type */
 /* tslint:disable:ban-types */
 
-import { ObjectLiteral, ObjectType } from "aelastics-types";
+import { ObjectLiteral, ObjectType } from '@aelastics/types';
 
 //  Transaction is changed to Action!
 

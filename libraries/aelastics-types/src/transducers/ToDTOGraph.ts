@@ -4,7 +4,7 @@
 
 import { IProcessor, WhatToDo } from './Processor'
 import { Node } from '../common/Node'
-import { ServiceError } from 'aelastics-result'
+import { ServiceError } from '@aelastics/result'
 import { getTypeInfo } from './FromDTOGraph'
 import { System } from '../type/TypeSchema'
 

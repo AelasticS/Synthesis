@@ -9,7 +9,7 @@
  * Copyright (c) 2023 Aelastics (https://github.com/AelasticS)
  */
 
-import * as t from "aelastics-types";
+import * as t from '@aelastics/types';
 import { Repository } from "./Repository";
 import {
   observable,
@@ -22,11 +22,11 @@ import {
 import { EventLog } from "../eventLog/EventLog";
 import { ServerProxy } from "../server-proxy/ServerProxy";
 import { getUnderlyingType } from "../common/CommonConstants";
-import { isSuccess } from "aelastics-result";
+import { isSuccess } from '@aelastics/result';
 import { IStoreObject, objectType } from "../common/CommonConstants";
 import { Schema } from "inspector";
 import { Command, ObjectCommand } from "../server-proxy/CommandMaker";
-import { ObjectLiteral } from "aelastics-types";
+import { ObjectLiteral } from '@aelastics/types';
 import { Base } from "./Base";
 
 /**

@@ -4,7 +4,7 @@
 
 import * as t from '../../common/DefinitionAPI'
 import { identityReducer , naturalReducer , transducer } from '../../transducers/Transducer'
-import { isFailure, ServiceResult } from 'aelastics-result'
+import { isFailure, ServiceResult } from '@aelastics/result'
 import { DefaultSchema } from '../../type/TypeSchema'
 
 /**

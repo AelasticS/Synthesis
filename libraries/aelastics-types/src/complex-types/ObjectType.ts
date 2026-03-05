@@ -3,7 +3,7 @@ import { ExtraInfo, RoleType, Type } from '../type/Type';
 import { Any, DtoGraphTypeOf, DtoTreeTypeOf, TypeOf } from '../common/DefinitionAPI';
 import { Node } from '../common/Node';
 import { InstanceReference, TypeCategory } from '../type/TypeDefinisions';
-import { ServiceError } from 'aelastics-result';
+import { ServiceError } from '@aelastics/result';
 import { TypeSchema } from '../type/TypeSchema';
 import { OptionalType } from '../special-types/Optional';
 

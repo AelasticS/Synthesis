@@ -1,5 +1,5 @@
 import * as t from '../..'
-import { isSuccess } from 'aelastics-result'
+import { isSuccess } from '@aelastics/result'
 
 describe('Test cases for void type', () => {
   it("should verify that 'undefined' is void.", () => {

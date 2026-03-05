@@ -4,7 +4,7 @@
 
 import { InterfaceDecl, ObjectType } from "./ObjectType"
 import { DefaultSchema, TypeSchema } from "../type/TypeSchema"
-import { ServiceError } from "aelastics-result"
+import { ServiceError } from '@aelastics/result'
 import { LinkType } from "../special-types/LinkType"
 import { ArrayType } from "./ArrayType"
 import { OptionalType } from "../special-types/Optional"

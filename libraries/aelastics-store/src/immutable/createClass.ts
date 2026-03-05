@@ -9,7 +9,7 @@
  * Copyright (c) 2023 Aelastics (https://github.com/AelasticS)
  */
 
-import { AnyObjectType } from "aelastics-types"
+import { AnyObjectType } from '@aelastics/types'
 
 import {
   ImmutableObject,

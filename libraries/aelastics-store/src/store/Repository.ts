@@ -3,13 +3,13 @@
  * Author: Sinisa Neskovic
  */
 
-import * as t from "aelastics-types";
+import * as t from '@aelastics/types';
 import {
   identityReducer,
   ObjectLiteral,
   stepperReducer,
   transducer,
-} from "aelastics-types";
+} from '@aelastics/types';
 import { observable } from "mobx";
 import { EventLog } from "../eventLog/EventLog";
 import { getUnderlyingType } from "../common/CommonConstants";

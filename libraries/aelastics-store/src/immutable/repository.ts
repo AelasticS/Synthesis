@@ -3,19 +3,19 @@
  * Author: Sinisa Neskovic
  */
 
-import * as t from "aelastics-types";
+import * as t from '@aelastics/types';
 import {
   identityReducer,
   ObjectLiteral,
   stepperReducer,
   transducer,
-} from "aelastics-types";
+} from '@aelastics/types';
 
 import { AddEventListeners } from "../eventLog/AddEventListenersTransformer";
 import { ObjectObservable } from "../eventLog/ObservableTransformer";
 import { v4 as uuidv4 } from "uuid";
 import { IStoreObject, getUnderlyingType } from "../common/CommonConstants";
-import { ServiceError } from "aelastics-result";
+import { ServiceError } from '@aelastics/result';
 
 let counter: number = 100;
 

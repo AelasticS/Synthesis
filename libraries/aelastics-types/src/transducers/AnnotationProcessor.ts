@@ -6,7 +6,7 @@
 // TODO: make AnnotationProcessor as usual Processor, other can acces annotations via Node
 // Map<AnnotationName, AnnotationProcessor> getCurrentAnnotation, 
 import { Node } from '../common/Node'
-import { ServiceError } from 'aelastics-result'
+import { ServiceError } from '@aelastics/result'
 import { IProcessor, WhatToDo } from './Processor'
 import { AnyAnnotation, TypedAnnotation } from '../annotations/Annotation'
 

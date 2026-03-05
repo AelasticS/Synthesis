@@ -6,7 +6,7 @@ import { ErrorObject, TypeCategory } from './TypeDefinisions';
 import { Any } from '../common/DefinitionAPI';
 import { Node } from '../common/Node';
 import { DefaultSchema, System, TypeSchema } from './TypeSchema';
-import { failures, ServiceError, ServiceResult, success } from 'aelastics-result';
+import { failures, ServiceError, ServiceResult, success } from '@aelastics/result';
 import { IProcessor, WhatToDo } from '../transducers/Processor';
 import { identityReducer, naturalReducer, transducer } from '../transducers/Transducer';
 

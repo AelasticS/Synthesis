@@ -1,4 +1,4 @@
-import * as t from "aelastics-types"
+import * as t from '@aelastics/types'
 import { ImmutableStore } from "./immutable-store"
 import { ImmutableObject } from "../common/CommonConstants"
 

@@ -11,7 +11,7 @@
 
 
 
-import { ITransformer, WhatToDo, Node } from 'aelastics-types'
+import { ITransformer, WhatToDo, Node } from '@aelastics/types'
 import { observable } from 'mobx'
 // import { handleProps } from './HandleProps'
 

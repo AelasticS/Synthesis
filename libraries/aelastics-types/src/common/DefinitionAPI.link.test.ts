@@ -1,5 +1,5 @@
 import { TypeSchema, LinkType, link, Type, object } from '../index';
-import { ServiceError } from 'aelastics-result';
+import { ServiceError } from '@aelastics/result';
 
 describe('link function tests', () => {
     let schema: TypeSchema;

@@ -1,5 +1,5 @@
 import * as t from '../..'
-import { isSuccess } from 'aelastics-result'
+import { isSuccess } from '@aelastics/result'
 
 describe('Test cases for null type', () => {
   it("should verify that 'null' is null type.", () => {

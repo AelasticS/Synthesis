@@ -9,7 +9,7 @@
  * Copyright (c) 2023 Aelastics (https://github.com/AelasticS)
  */
 
-import * as t from 'aelastics-types';
+import * as t from '@aelastics/types';
 
 export const RequestResponseSchema = t.schema('RequestResposneSchema');
 

@@ -11,7 +11,7 @@ import { InstanceReference } from '../type/TypeDefinisions'
 import { ComplexType } from './ComplexType'
 import { ExtraInfo } from '../type/Type'
 import { TypeSchema } from '../type/TypeSchema'
-import { ServiceError } from 'aelastics-result'
+import { ServiceError } from '@aelastics/result'
 import { Node } from '../common/Node'
 
 const findTypeFromDiscriminator = (d: string, t: InterfaceDecl): Any | undefined => {

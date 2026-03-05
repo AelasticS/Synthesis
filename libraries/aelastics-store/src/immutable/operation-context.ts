@@ -9,7 +9,7 @@
  * Copyright (c) 2023 Aelastics (https://github.com/AelasticS)
  */
 
-import { Any, AnyObjectType, ObjectLiteral } from "aelastics-types"
+import { Any, AnyObjectType, ObjectLiteral } from '@aelastics/types'
 import { capitalizeFirstLetter, getIDPropName } from "../common/CommonConstants"
 import { Class } from "./createClass"
 

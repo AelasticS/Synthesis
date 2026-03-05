@@ -4,7 +4,7 @@
 
 import { IProcessor , WhatToDo } from './Processor'
 import { Node } from '../common/Node'
-import { isFailure } from 'aelastics-result'
+import { isFailure } from '@aelastics/result'
 
 export class Validation implements IProcessor {
   private xf: IProcessor

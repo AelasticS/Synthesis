@@ -1,5 +1,5 @@
 {
-  "name": "aelastics-types",
+  "name": "@aelastics/types",
   "version": "2.0.0",
   "description": "",
   "keywords": [],
@@ -15,7 +15,7 @@
     "test": "heft test --clean"
   },
   "dependencies": {
-    "aelastics-result": "workspace:*",
+    "@aelastics/result": "workspace:*",
     "mobx": "^6.13.7"
   },
   "devDependencies": {

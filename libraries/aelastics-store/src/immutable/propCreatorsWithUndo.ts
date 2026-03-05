@@ -9,7 +9,7 @@
  * Copyright (c) 2023 Aelastics (https://github.com/AelasticS)
  */
 
-import { Any, AnyObjectType } from "aelastics-types"
+import { Any, AnyObjectType } from '@aelastics/types'
 import { OperationContext, ObjectNotFoundError, Operation } from "./operation-context"
 import {
   capitalizeFirstLetter,

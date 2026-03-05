@@ -1,5 +1,5 @@
 {
-  "name": "aelastics-store",
+  "name": "@aelastics/store",
   "author": "Sinisa Neskovic",
   "version": "0.1.0",
   "license": "Apache-2.0",
@@ -13,8 +13,8 @@
     "test": "heft test --clean"
   },
   "dependencies": {
-    "aelastics-result": "workspace:*",
-    "aelastics-types": "workspace:*",
+    "@aelastics/result": "workspace:*",
+    "@aelastics/types": "workspace:*",
     "mobx": "^6.13.7",
     "uuid": "~9.0.0"
   },

@@ -1,5 +1,5 @@
 import * as t from '../..'
-import { isSuccess } from 'aelastics-result'
+import { isSuccess } from '@aelastics/result'
 
 describe('Test cases for undefined type', () => {
   it('should be valid undefined type.', () => {

@@ -12,7 +12,7 @@
  * Copyright (c) AelasticS 2020.
  */
 
-import { ITransformer, WhatToDo, Node, ObjectType } from 'aelastics-types';
+import { ITransformer, WhatToDo, Node, ObjectType } from '@aelastics/types';
 import { Lambda, observable, observe } from 'mobx';
 import { prefixValue } from "../common/CommonConstants";
 import { EventLog } from './EventLog';

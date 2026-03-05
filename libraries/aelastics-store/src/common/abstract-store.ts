@@ -14,7 +14,7 @@
 
 
 
-import * as t from "aelastics-types";
+import * as t from '@aelastics/types';
 import { IStoreObject, objectType } from "./CommonConstants";
 
 export abstract class AbstractStore {

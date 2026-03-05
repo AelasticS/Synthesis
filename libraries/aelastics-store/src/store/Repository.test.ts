@@ -1,5 +1,5 @@
 import { Repository } from "./Repository"
-import * as t from "aelastics-types"
+import * as t from '@aelastics/types'
 import { observable } from "mobx"
 import { Action, CollectionElementInserted, EventLog, EventType, PropertyChanged } from "../eventLog/EventLog"
 import { Aggregate } from "./Aggregate"

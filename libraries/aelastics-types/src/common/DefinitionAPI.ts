@@ -18,7 +18,7 @@ import { UndefinedType } from '../simple-types/Undefined';
 import { NullType } from '../simple-types/Null';
 import { LiteralType, LiteralValue } from '../simple-types/Literal';
 import { ObjectReference } from '../special-types/ObjectReference';
-import { ServiceError } from 'aelastics-result';
+import { ServiceError } from '@aelastics/result';
 import { TaggedUnionType } from '../complex-types/TaggedUnionType';
 import { IntersectionType } from '../complex-types/IntersectionType';
 

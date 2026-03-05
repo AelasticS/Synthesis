@@ -3,8 +3,7 @@ import type { Config } from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
 import type { PluginOptions as TypeDocOptions } from 'docusaurus-plugin-typedoc';
 
-// Replace with your GitHub username / org name
-const GITHUB_ORG = 'YOUR_GITHUB_USERNAME';
+const GITHUB_ORG = 'AelasticS';
 const REPO_NAME = 'Synthesis';
 
 const config: Config = {
@@ -80,27 +79,30 @@ const config: Config = {
       title: 'Synthesis',
       items: [
         {
-          type: 'docSidebar',
-          sidebarId: 'result',
+          label: 'Documentation',
           position: 'left',
-          label: 'aelastics-result',
+          type: 'dropdown',
+          items: [
+            { type: 'docSidebar', sidebarId: 'cli', label: 'synth CLI' },
+            { type: 'docSidebar', sidebarId: 'result', label: 'aelastics-result' },
+            { type: 'docSidebar', sidebarId: 'types', label: 'aelastics-types' },
+            { type: 'docSidebar', sidebarId: 'store', label: 'aelastics-store' },
+          ],
         },
         {
-          type: 'docSidebar',
-          sidebarId: 'types',
+          label: 'Resources',
           position: 'left',
-          label: 'aelastics-types',
-        },
-        {
-          type: 'docSidebar',
-          sidebarId: 'store',
-          position: 'left',
-          label: 'aelastics-store',
-        },
-        {
-          href: `https://github.com/${GITHUB_ORG}/${REPO_NAME}`,
-          label: 'GitHub',
-          position: 'right',
+          type: 'dropdown',
+          items: [
+            {
+              label: 'Contributing',
+              to: '/contributing',
+            },
+            {
+              label: 'GitHub',
+              href: `https://github.com/${GITHUB_ORG}/${REPO_NAME}`,
+            },
+          ],
         },
       ],
     },

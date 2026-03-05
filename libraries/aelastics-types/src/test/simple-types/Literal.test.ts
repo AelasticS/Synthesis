@@ -1,5 +1,5 @@
 import * as t from '../..'
-import { isSuccess } from 'aelastics-result'
+import { isSuccess } from '@aelastics/result'
 // import {TypeOf} from "..";
 
 describe('Test cases for literal type', () => {

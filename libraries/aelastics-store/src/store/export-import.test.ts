@@ -10,7 +10,7 @@
  */
 
 
-import * as t from "aelastics-types";
+import * as t from '@aelastics/types';
 import { Repository } from "./Repository";
 import { Store } from "./Store";
 import exp from "constants";

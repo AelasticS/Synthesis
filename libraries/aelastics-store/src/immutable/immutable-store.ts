@@ -1,4 +1,4 @@
-import * as t from "aelastics-types"
+import * as t from '@aelastics/types'
 import { Class, createClass } from "./createClass"
 import { OperationContext } from "./operation-context"
 // import { immerable, produce, enableMapSet, Immer, Draft, produceWithPatches } from "immer"
@@ -11,7 +11,7 @@ import {
   objectUUID,
   shallowCloneObject,
 } from "../common/CommonConstants"
-import { IProcessorInit, IProcessorResult, IProcessorStep } from "aelastics-types/lib/transducers"
+import { IProcessorInit, IProcessorResult, IProcessorStep } from "@aelastics/types/lib/transducers"
 // enableMapSet()
 /*
  * Project: aelastics-store

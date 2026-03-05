@@ -170,7 +170,7 @@ describe('ServiceResult', () => {
 
 3. **Commit your changes** with clear messages (see format below):
    ```bash
-   git commit -m "feat(aelastics-types): add functional type support"
+   git commit -m "feat(@aelastics/types): add functional type support"
    ```
 
 4. **Push to your fork**:
@@ -195,7 +195,7 @@ Follow [Conventional Commits](https://www.conventionalcommits.org/):
 [optional footer]
 ```
 
-Scope should be the package name, e.g. `aelastics-result`, `aelastics-types`, `aelastics-store`.
+Scope should be the package name, e.g. `@aelastics/result`, `@aelastics/types`, `@aelastics/store`.
 
 Types:
 - `feat`: New feature
@@ -209,11 +209,11 @@ Types:
 
 Examples:
 ```
-feat(aelastics-store): add undo/redo support
-fix(aelastics-types): correct union type inference
-docs(aelastics-result): update README with examples
-test(aelastics-store): add tests for event log replay
-build(aelastics-types): upgrade TypeScript to 5.9
+feat(@aelastics/store): add undo/redo support
+fix(@aelastics/types): correct union type inference
+docs(@aelastics/result): update README with examples
+test(@aelastics/store): add tests for event log replay
+build(@aelastics/types): upgrade TypeScript to 5.9
 ```
 
 ## Reporting Issues

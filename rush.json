@@ -329,15 +329,15 @@
    */
   "projects": [
     {
-      "packageName": "aelastics-result",
+      "packageName": "@aelastics/result",
       "projectFolder": "libraries/aelastics-result"
     },
     {
-      "packageName": "aelastics-types",
+      "packageName": "@aelastics/types",
       "projectFolder": "libraries/aelastics-types"
     },
     {
-      "packageName": "aelastics-store",
+      "packageName": "@aelastics/store",
       "projectFolder": "libraries/aelastics-store"
     },
     {

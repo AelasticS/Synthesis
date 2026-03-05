@@ -3,7 +3,7 @@
  */
 
 import * as t from '../common/DefinitionAPI'
-import { isSuccess } from 'aelastics-result'
+import { isSuccess } from '@aelastics/result'
 
 const FileSchema = t.schema('FileSchema')
 // t.setDefaultSchema(FileSchema)

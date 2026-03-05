@@ -5,7 +5,7 @@
 import * as t from '../../common/DefinitionAPI'
 import { DefaultSchema } from '../../type/TypeSchema'
 import { identityReducer , naturalReducer , transducer } from '../../transducers/Transducer'
-import { ServiceError } from 'aelastics-result'
+import { ServiceError } from '@aelastics/result'
 import { NewInstance } from '../../transducers/NewInstance'
 
 let OptionalNumber = t.optional(t.number)

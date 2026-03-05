@@ -1,0 +1,8 @@
+# Docusaurus build output
+.docusaurus/
+build/
+
+# TypeDoc generated API reference (regenerated at build time, lives in apps/docs/ root)
+/result/
+/store/
+/types/

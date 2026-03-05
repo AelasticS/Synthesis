@@ -2,7 +2,7 @@ import { objectStatus } from '../common/CommonConstants';
 import { StatusValue } from '../common/Status';
 import { ImmutableStore } from './immutable-store';
 import { defineOneToOne, defineManyToOne, defineOneToMany, defineManyToMany, defineSimpleValue } from './propCreatorsWithUndo'; // Replace with the actual module where these functions are defined
-import { AnyObjectType } from 'aelastics-types';
+import { AnyObjectType } from '@aelastics/types';
 
 describe("Undo and Redo functionality", () => {
   test("should set and get one-to-one relationship with ID", () => {

@@ -9,11 +9,11 @@
  * Copyright (c) 2023 Aelastics (https://github.com/AelasticS)
  */
 
-import * as t from "aelastics-types";
+import * as t from '@aelastics/types';
 import { Repository } from "./Repository";
 import { EventLog } from "../eventLog/EventLog";
 import { ServerProxy } from "../server-proxy/ServerProxy";
-import { InstanceReference, ObjectLiteral } from "aelastics-types";
+import { InstanceReference, ObjectLiteral } from '@aelastics/types';
 import { IStoreObject, objectType, objectUUID } from "../common/CommonConstants";
 import { AbstractStore } from "../common/abstract-store";
 

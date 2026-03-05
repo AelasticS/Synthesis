@@ -1,5 +1,5 @@
 import * as t from '../..'
-import { isFailure, isSuccess } from 'aelastics-result'
+import { isFailure, isSuccess } from '@aelastics/result'
 describe('DateType tests', () => {
   const dateAfter2000 = t.date.derive('year after 2000').addValidator({
     message: (value, label) => `Expected ${label} to be after 2000,got ${value}`,

@@ -1,4 +1,4 @@
-import { isSuccess } from 'aelastics-result'
+import { isSuccess } from '@aelastics/result'
 import * as t from '../..'
 
 

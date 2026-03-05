@@ -4,7 +4,7 @@
  */
 
 import * as t from '../..'
-import { ServiceError, isSuccess } from 'aelastics-result'
+import { ServiceError, isSuccess } from '@aelastics/result'
 
 const person = t.entity(
   {

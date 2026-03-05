@@ -3,7 +3,7 @@
  */
 
 import { Any, string } from '../common/DefinitionAPI'
-import { failure, failures, ServiceError, ServiceResult, success } from 'aelastics-result'
+import { failure, failures, ServiceError, ServiceResult, success } from '@aelastics/result'
 import { LinkType } from '../special-types/LinkType'
 
 export enum ValidateStatusEnum {

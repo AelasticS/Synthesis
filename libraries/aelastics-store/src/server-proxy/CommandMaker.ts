@@ -9,13 +9,13 @@
  * Copyright (c) 2023 Aelastics (https://github.com/AelasticS)
  */
 
-import { ObjectType, TypeSchema, undefinedType } from "aelastics-types";
+import { ObjectType, TypeSchema, undefinedType } from '@aelastics/types';
 import * as EventLog from "../eventLog/EventLog";
 import {
   objectType as OBJECT_TYPE_PROPERTY,
   objectUUID,
 } from "../common/CommonConstants";
-import { findTypeCategory } from "aelastics-types";
+import { findTypeCategory } from '@aelastics/types';
 
 /*
  * Copyright (c) 2020 AelasticS

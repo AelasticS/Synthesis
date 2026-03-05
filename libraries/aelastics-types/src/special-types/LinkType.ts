@@ -5,7 +5,7 @@
 
 import { Any, TypeOf } from '../common/DefinitionAPI'
 import { TypeSchema } from '../type/TypeSchema'
-import { ServiceError } from 'aelastics-result'
+import { ServiceError } from '@aelastics/result'
 import { ExtraInfo, Type } from '../type/Type'
 import { Node } from '../common/Node'
 import { IProcessor , WhatToDo } from '../transducers/Processor'

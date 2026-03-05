@@ -19,7 +19,7 @@ import {
   IMapDidChange,
   IObjectDidChange,
 } from "mobx";
-import { Any } from "aelastics-types";
+import { Any } from '@aelastics/types';
 import { objectSync } from "../common/CommonConstants";
 
 export const getObjectListener = (

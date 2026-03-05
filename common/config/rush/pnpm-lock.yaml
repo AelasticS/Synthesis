@@ -110,10 +110,10 @@ importers:
 
   ../../libraries/aelastics-store:
     dependencies:
-      aelastics-result:
+      '@aelastics/result':
         specifier: workspace:*
         version: link:../aelastics-result
-      aelastics-types:
+      '@aelastics/types':
         specifier: workspace:*
         version: link:../aelastics-types
       mobx:
@@ -156,7 +156,7 @@ importers:
 
   ../../libraries/aelastics-types:
     dependencies:
-      aelastics-result:
+      '@aelastics/result':
         specifier: workspace:*
         version: link:../aelastics-result
       mobx:

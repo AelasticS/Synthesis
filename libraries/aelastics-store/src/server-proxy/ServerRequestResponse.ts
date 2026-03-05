@@ -16,7 +16,7 @@ import {
   isSuccess,
   ServiceResult,
   success,
-} from 'aelastics-result';
+} from '@aelastics/result';
 
 export interface ServerCommand<CmdType> {
   command: CmdType;
