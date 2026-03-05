@@ -15,7 +15,7 @@
     "test": "heft test --clean"
   },
   "dependencies": {
-    "aelastics-result": "~2.0.8",
+    "aelastics-result": "workspace:*",
     "mobx": "^5.15.6"
   },
   "devDependencies": {
