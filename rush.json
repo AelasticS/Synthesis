@@ -335,6 +335,10 @@
     {
       "packageName": "aelastics-types",
       "projectFolder": "libraries/aelastics-types"
+    },
+    {
+      "packageName": "aelastics-store",
+      "projectFolder": "libraries/aelastics-store"
     }
 
     // {
