@@ -1,0 +1,33 @@
+{
+  "name": "@synthesis/cli",
+  "description": "Synthesis model-driven engineering CLI",
+  "version": "0.1.0",
+  "license": "Apache-2.0",
+  "private": true,
+  "bin": {
+    "synth": "bin/synth.js"
+  },
+  "main": "lib/cli.js",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "build": "heft build --clean",
+    "test": "heft test --clean"
+  },
+  "dependencies": {
+    "@synthesis/synth-cli-core": "workspace:*",
+    "chalk": "~4.1.2",
+    "commander": "~12.1.0"
+  },
+  "devDependencies": {
+    "@rushstack/eslint-config": "~4.6.4",
+    "eslint": "~10.0.2",
+    "@rushstack/heft": "~1.2.6",
+    "@rushstack/heft-jest-plugin": "~1.2.6",
+    "@rushstack/heft-typescript-plugin": "~1.3.1",
+    "@types/node": "~25.3.3",
+    "@types/heft-jest": "~1.0.6",
+    "typescript": "~5.9.3"
+  }
+}

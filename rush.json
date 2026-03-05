@@ -343,6 +343,14 @@
     {
       "packageName": "synthesis-docs",
       "projectFolder": "apps/docs"
+    },
+    {
+      "packageName": "@synthesis/synth-cli-core",
+      "projectFolder": "libraries/synth-cli-core"
+    },
+    {
+      "packageName": "@synthesis/cli",
+      "projectFolder": "apps/cli"
     }
 
     // {
