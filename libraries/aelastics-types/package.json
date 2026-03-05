@@ -6,7 +6,7 @@
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "author": "Sinisa Neskovic",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "engines": {
     "node": ">=18.0.0"
   },
