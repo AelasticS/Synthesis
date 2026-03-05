@@ -72,5 +72,14 @@ common/autoinstallers/*/.npmrc
 # Heft temporary files
 .heft
 
+# Build outputs
+lib/
+temp/
+*.js.map
+
+# Docusaurus build output
+apps/docs/build/
+apps/docs/.docusaurus/
+
 # Claude Code local settings
 .claude/
