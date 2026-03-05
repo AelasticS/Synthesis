@@ -1,5 +1,18 @@
 name: Deploy Docs
 
+# Triggered manually only — run via GitHub UI: Actions → Deploy Docs → Run workflow.
+#
+# Intentionally NOT triggered on push to main: docs are deployed only when
+# explicitly ready, not on every commit during active development.
+#
+# To enable automatic deployment on release, change the trigger to:
+#   on:
+#     push:
+#       tags:
+#         - 'v*'
+#
+# Branch protection (main): configure in GitHub → Settings → Branches.
+# Require PR + 1 review before merging to main.
 on:
   workflow_dispatch:
 
