@@ -36,37 +36,21 @@ export class AddEventListeners implements ITransformer {
   }
 
   init(value: any, currNode: Node): [any, WhatToDo] {
-    let disposer: Lambda;
-
-    switch (currNode.type.typeCategory) {
-      case 'Object':
-        disposer = observe(
-          value,
-          getObjectListener(this.eventLog, this.getPropertyNames(currNode.type as ObjectType<any, any>))
-        );
-        this.eventLog.listeners.set(value, disposer);
-        break;
-      case 'Array':
-        break;
-      case 'Map':
-        break;
-      case 'Union':
-        break;
-      case 'TaggedUnion':
-        break;
-      case 'Intersection':
-        break;
-    }
     return this.xf.init(value, currNode);
   }
 
   result(result: any, currNode: Node): [any, WhatToDo] {
-    switch (currNode.type.typeCategory) {
-      case 'Object':
-        //   result = handleProps(result, currNode.type)
-        break;
+    // Call inner result first so HandleProps.result makes the object observable
+    const ret = this.xf.result(result, currNode);
+    if (currNode.type.typeCategory === 'Object') {
+      // result is now observable (HandleProps ran), safe to observe
+      const disposer = observe(
+        result,
+        getObjectListener(this.eventLog, this.getPropertyNames(currNode.type as ObjectType<any, any>))
+      );
+      this.eventLog.listeners.set(result, disposer);
     }
-    return this.xf.result(result, currNode);
+    return ret;
   }
 
   step(result: any, currNode: Node, item: any): [any, WhatToDo] {

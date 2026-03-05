@@ -25,7 +25,7 @@ export class ObjectObservable implements ITransformer {
   init(value: any, currNode: Node): [any, WhatToDo] {
     switch (currNode.type.typeCategory) {
       case 'Object':
-          value = observable({})
+          value = {}
         break
       case 'Array':
           value = observable([])
