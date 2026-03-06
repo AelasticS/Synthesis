@@ -20,8 +20,10 @@ One traversal mechanism handles both.
 | [Overview](./overview.md) | How graph transducers work. Builds the concept from `reduce` on arrays up to the three-phase traversal protocol, with code examples at each step. |
 | [Transducer API](./transducer-api.md) | The fluent builder (`transducer()`) that assembles processor pipelines without implementing the protocol directly. |
 | [Custom Processors](./custom-processors.md) | How to build reusable processing components with `ProcessorBuilder`, `InitBuilder`, `StepBuilder`, and `ResultBuilder`. |
-| [Annotations](./annotations.md) | How to define typed metadata on type definitions and process it using the transducer pipeline. |
 
 Start with [Overview](./overview.md) if this is your first encounter with the
 concept. Skip to [Transducer API](./transducer-api.md) if you already understand
 the protocol and want to use the fluent builder.
+
+Annotations are covered in their own top-level section. The transducer pipeline's
+`processAnnotations()` step is described there alongside the annotation system itself.
