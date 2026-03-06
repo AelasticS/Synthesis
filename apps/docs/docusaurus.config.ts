@@ -83,6 +83,7 @@ const config: Config = {
           position: 'left',
           type: 'dropdown',
           items: [
+            { type: 'docSidebar', sidebarId: 'synthesis', label: 'Synthesis eDSL' },
             { type: 'docSidebar', sidebarId: 'cli', label: 'synth CLI' },
             { type: 'docSidebar', sidebarId: 'result', label: 'aelastics-result' },
             { type: 'docSidebar', sidebarId: 'types', label: 'aelastics-types' },

@@ -7,6 +7,12 @@ sidebar_class_name: hidden
 
 Synthesis is a TypeScript monorepo providing a toolkit for model-driven software engineering.
 
+## Foundations
+
+| Section | Description |
+|---|---|
+| [Synthesis eDSL](./synthesis/) | Developer guide for writing model-driven transformations in TypeScript with JSX |
+
 ## Packages
 
 | Package | Description |
