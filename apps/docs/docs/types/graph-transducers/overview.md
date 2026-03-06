@@ -1,6 +1,7 @@
 ---
 sidebar_position: 1
-title: Data Processing with Graph Transducers
+title: The Traversal Protocol - From Reduce to Graph Traversal
+sidebar_label: The Traversal Protocol
 ---
 
 This page builds the concept of graph transducers from first principles. If you
@@ -113,6 +114,14 @@ A reducer covers only the second of these. The other two have nowhere to go.
 `IProcessor` is the graph equivalent of a reducer. It has three methods, one for
 each phase described above. The traversal is depth-first.
 
+:::note Name history
+The interface was originally named `ITransformer`. It was later renamed to
+`IProcessor` to better reflect its role. Both names are exported from
+`@aelastics/types`. `ITransformer` is kept only for backward compatibility with
+existing code and should not be used in new code.
+:::
+
+
 ```ts
 type WhatToDo =
   | 'continue'              // proceed to the next processor in the chain
@@ -221,6 +230,21 @@ type graph.
 ---
 
 ## Summary
+
+The graph traversal protocol is three functions, each returning the same shape:
+
+```ts
+// linear reducer — one phase
+(acc, value) => acc
+
+// graph transducer — three phases, same return shape
+init:   (value, node)       => [acc, ctrl]  // before children
+step:   (acc,   node, item) => [acc, ctrl]  // after each child
+result: (acc,   node)       => [acc, ctrl]  // after all children
+```
+
+`ctrl` is a `WhatToDo` directive that controls traversal flow.
+`step` is the only phase that receives the child result (`item`).
 
 | Concept | Linear transducer | Graph transducer |
 |---|---|---|
