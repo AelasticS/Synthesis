@@ -29,6 +29,7 @@ instances, including cycles. One traversal mechanism handles both.
 |---|---|
 | [The Traversal Protocol - From Reduce to Graph Traversal](./overview.md) | How graph transducers work. Builds the concept from `reduce` on arrays up to the three-phase traversal protocol, with code examples at each step. |
 | [Transducer API](./transducer-api.md) | The fluent builder (`transducer()`) that assembles processor pipelines without implementing the protocol directly. |
+| [Pipeline Chain Rules](./chain-rules.md) | How chain composition works, what step order means, and which chain structures are valid or invalid. |
 | [Custom Processors](./custom-processors.md) | How to build reusable processing components with `ProcessorBuilder`, `InitBuilder`, `StepBuilder`, and `ResultBuilder`. |
 | [Examples](./examples.md) | End-to-end examples showing common pipeline patterns. |
 

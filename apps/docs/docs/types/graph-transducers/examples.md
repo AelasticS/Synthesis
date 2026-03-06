@@ -1,5 +1,5 @@
 ---
-sidebar_position: 4
+sidebar_position: 5
 title: Examples
 ---
 
@@ -18,7 +18,7 @@ Validation errors and the conversion both happen as each node is finalized.
 import { transducer, identityReducer } from '@aelastics/types'
 
 const tr = transducer()
-  .recurse('makeItem')
+  .dftMap()
   .validate()
   .toDtoGraph()
   .doFinally(identityReducer())
@@ -55,7 +55,7 @@ const Collector = new ProcessorBuilder()
   .build()
 
 const tr = transducer()
-  .recurse('accumulate')
+  .dftReduce()
   .do(Collector)
   .doFinally(naturalReducer())
 
@@ -72,7 +72,7 @@ its value to it during the traversal.
 ```ts
 import { transducer } from '@aelastics/types'
 
-const tr = transducer().recurse('accumulate').count()
+const tr = transducer().dftReduce().count()
 const total = PersonType.transduce(tr, person, 0)
 ```
 
@@ -84,7 +84,7 @@ const total = PersonType.transduce(tr, person, 0)
 import { transducer, naturalReducer } from '@aelastics/types'
 
 const tr = transducer()
-  .recurse('makeItem')
+  .dftMap()
   .newInstance({ name: 'unnamed', active: false })
   .doFinally(naturalReducer())
 

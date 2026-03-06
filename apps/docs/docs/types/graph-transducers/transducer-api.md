@@ -27,22 +27,36 @@ then call a terminator to get the final `IProcessor`.
 ## Pipeline steps
 
 Each method below returns `this`, so you can chain them freely. Steps run in the order
-they are added. The `recurse()` step drives depth-first traversal and must appear in
-the chain for any operation that needs to visit child nodes.
+they are added. A traversal step (`dftMap` or `dftReduce`) must appear in the chain
+for any operation that needs to visit child nodes.
 
-### `recurse(mode)`
+See [Pipeline Chain Rules](./chain-rules.md) for detailed rules on ordering and
+valid combinations.
 
-Drives depth-first graph traversal.
+:::note API rename
+The current source exposes `recurse('makeItem')` and `recurse('accumulate')`.
+These will be renamed to `dftMap()` and `dftReduce()` in an upcoming release.
+:::
+
+### `dftMap()`
+
+Drives depth-first graph traversal in bottom-up construction mode. Each node's
+result is derived from its children's results. Use this for conversions,
+transformations, DTO serialization, and instance creation.
 
 ```ts
-transducer().recurse('makeItem')
-transducer().recurse('accumulate')
+transducer().dftMap()
 ```
 
-| Mode | Behaviour |
-|---|---|
-| `'makeItem'` | Builds the output bottom-up. Each node's result is derived from its children's results. Use this for conversions and transformations. |
-| `'accumulate'` | Accumulates into an existing structure passed as `initObj`. Use this for collecting values (counts, lists, sums). |
+### `dftReduce()`
+
+Drives depth-first graph traversal in accumulation mode. A single accumulator is
+threaded through the traversal. Use this for collecting values: counts, sums,
+flat lists, or any fold over the graph.
+
+```ts
+transducer().dftReduce()
+```
 
 ### `map(f)`
 
@@ -50,7 +64,7 @@ Transforms the value at each node.
 
 ```ts
 transducer()
-  .recurse('makeItem')
+  .dftMap()
   .map((item, node) => ({ ...item, label: node.propName }))
 ```
 
@@ -62,7 +76,7 @@ Skips nodes where `f` returns `false`. The node is excluded from the output.
 
 ```ts
 transducer()
-  .recurse('makeItem')
+  .dftMap()
   .filter((item, node) => item !== null)
 ```
 
@@ -72,7 +86,7 @@ Attaches validation errors to each node. The output mirrors the input structure 
 `@hasErrors` and `@errors` fields added where validation fails.
 
 ```ts
-transducer().recurse('makeItem').validate()
+transducer().dftMap().validate()
 ```
 
 ### `newInstance(initValues?, generateID?)`
@@ -81,7 +95,7 @@ Creates a new typed instance, optionally seeded with `initValues` as a template.
 Pass a `generateID` function to control how identifiers are assigned.
 
 ```ts
-transducer().recurse('makeItem').newInstance({ name: 'default' })
+transducer().dftMap().newInstance({ name: 'default' })
 ```
 
 ### `toDtoGraph()`
@@ -90,7 +104,7 @@ Converts a typed instance to the graph DTO format — a flat, reference-based
 representation suitable for serialization or transport.
 
 ```ts
-transducer().recurse('makeItem').toDtoGraph()
+transducer().dftMap().toDtoGraph()
 ```
 
 ### `fromDtoGraph()`
@@ -98,7 +112,7 @@ transducer().recurse('makeItem').toDtoGraph()
 Converts a graph DTO back into a typed instance.
 
 ```ts
-transducer().recurse('makeItem').fromDtoGraph()
+transducer().dftMap().fromDtoGraph()
 ```
 
 ### `processAnnotations(annot)`
@@ -107,7 +121,7 @@ Applies an annotation during traversal. The annotation is invoked at each node
 that carries the relevant annotation metadata.
 
 ```ts
-transducer().recurse('makeItem').processAnnotations(myAnnotation)
+transducer().dftMap().processAnnotations(myAnnotation)
 ```
 
 ### `do(Ctor, ...args)`
@@ -115,7 +129,7 @@ transducer().recurse('makeItem').processAnnotations(myAnnotation)
 Attaches any custom `IProcessor` constructor to the chain.
 
 ```ts
-transducer().recurse('makeItem').do(MyProcessor, extraArg)
+transducer().dftMap().do(MyProcessor, extraArg)
 ```
 
 `Ctor` must have signature `new (xfNext: IProcessor, ...args: any[]): IProcessor`.
@@ -128,7 +142,7 @@ entirely and the chain continues unchanged.
 
 ```ts
 transducer()
-  .recurse('makeItem')
+  .dftMap()
   .doIf(process.env.NODE_ENV !== 'production', DebugLogger)
 ```
 
@@ -146,7 +160,7 @@ This is the most common terminator.
 
 ```ts
 const tr = transducer()
-  .recurse('makeItem')
+  .dftMap()
   .validate()
   .doFinally(naturalReducer())
 ```
@@ -157,7 +171,7 @@ Builds a custom terminal reducer from a plain step function.
 
 ```ts
 const tr = transducer()
-  .recurse('accumulate')
+  .dftReduce()
   .reduce((acc, node, item) => acc + item.value, 0)
 ```
 
@@ -166,7 +180,7 @@ const tr = transducer()
 Returns a processor that counts the number of nodes visited.
 
 ```ts
-const tr = transducer().recurse('accumulate').count()
+const tr = transducer().dftReduce().count()
 ```
 
 ### `sum()`
@@ -174,7 +188,7 @@ const tr = transducer().recurse('accumulate').count()
 Returns a processor that sums numeric node values.
 
 ```ts
-const tr = transducer().recurse('accumulate').sum()
+const tr = transducer().dftReduce().sum()
 ```
 
 ---

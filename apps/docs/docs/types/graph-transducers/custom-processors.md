@@ -1,5 +1,5 @@
 ---
-sidebar_position: 3
+sidebar_position: 4
 title: Custom Processors
 ---
 
@@ -82,7 +82,7 @@ Composes all registered handlers and returns an `IProcessorConstructor`.
 const MyProcessor = builder.build()
 
 const tr = transducer()
-  .recurse('makeItem')
+  .dftMap()
   .do(MyProcessor)
   .doFinally(naturalReducer())
 ```
@@ -175,7 +175,7 @@ const Collector = new ProcessorBuilder()
 
 // Assemble and run the pipeline
 const tr = transducer()
-  .recurse('accumulate')
+  .dftReduce()
   .do(Collector)
   .doFinally(naturalReducer())
 
@@ -184,5 +184,5 @@ const values = PersonType.transduce(tr, person, [])
 ```
 
 The empty array `[]` passed as `initObj` is the accumulator that each `step` handler
-appends to. The `'accumulate'` mode passes this object through the traversal rather
+appends to. The `dftReduce` mode passes this object through the traversal rather
 than building a new output bottom-up.
