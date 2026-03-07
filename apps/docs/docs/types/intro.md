@@ -22,7 +22,7 @@ const User = t.object({
   name: t.string,
 });
 
-type User = t.TypeOf<typeof User>;
+type IUser = t.TypeOf<typeof User>;
 ```
 
 ## API Reference
