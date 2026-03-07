@@ -109,7 +109,7 @@ const config: Config = {
     },
     footer: {
       style: 'dark',
-      copyright: `Copyright © ${new Date().getFullYear()} Sinisa Neskovic. Built with Docusaurus.`,
+      copyright: `Copyright © 2019–${new Date().getFullYear()} AelasticS.`,
     },
     prism: {
       theme: prismThemes.github,
