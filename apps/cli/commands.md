@@ -375,7 +375,7 @@ ARGUMENTS
   FILE  Path to the JSON file to import.
 
 FLAGS
-  --as=<value>  Ref to assign to the imported model.
+  --as=<value>  Ref to assign to the imported model (namespace/name).
 
 GLOBAL FLAGS
   -q, --quiet              Suppress informational output.
@@ -395,23 +395,21 @@ EXAMPLES
 
 ## `synth model ls`
 
-List all models, optionally filtered by namespace.
+List all models in the current namespace.
 
 ```
 USAGE
   $ synth model ls [--workspace <value>] [--ns <value>] [--json] [-q] [-v]
 
-FLAGS
-  --ns=<value>  Filter models by namespace.
-
 GLOBAL FLAGS
   -q, --quiet              Suppress informational output.
   -v, --verbose            Print debug-level logs.
       --json               Emit machine-readable JSON.
+      --ns=<value>         Namespace context override (otherwise resolved from config).
       --workspace=<value>  Override active workspace for this invocation.
 
 DESCRIPTION
-  List all models, optionally filtered by namespace.
+  List all models in the current namespace.
 
 EXAMPLES
   $ synth model ls
@@ -446,7 +444,7 @@ EXAMPLES
 
 ## `synth model show REF`
 
-Print a model's metadata and element summary.
+Read and display a model file.
 
 ```
 USAGE
@@ -463,7 +461,7 @@ GLOBAL FLAGS
       --workspace=<value>  Override active workspace for this invocation.
 
 DESCRIPTION
-  Print a model's metadata and element summary.
+  Read and display a model file.
 
 EXAMPLES
   $ synth model show com.example/order-1

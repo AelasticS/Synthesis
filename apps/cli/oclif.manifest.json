@@ -1,75 +1,5 @@
 {
   "commands": {
-    "cd": {
-      "aliases": [],
-      "args": {
-        "namespace": {
-          "description": "Namespace to switch to. If omitted, shows current namespace.",
-          "name": "namespace",
-          "required": false
-        }
-      },
-      "description": "Change or display the current namespace.",
-      "examples": [
-        "<%= config.bin %> <%= command.id %>",
-        "<%= config.bin %> <%= command.id %> com.example.orders"
-      ],
-      "flags": {
-        "workspace": {
-          "description": "Override active workspace for this invocation.",
-          "helpGroup": "GLOBAL",
-          "name": "workspace",
-          "hasDynamicHelp": false,
-          "multiple": false,
-          "type": "option"
-        },
-        "ns": {
-          "description": "Namespace context override (otherwise resolved from config).",
-          "helpGroup": "GLOBAL",
-          "name": "ns",
-          "hasDynamicHelp": false,
-          "multiple": false,
-          "type": "option"
-        },
-        "json": {
-          "description": "Emit machine-readable JSON.",
-          "helpGroup": "GLOBAL",
-          "name": "json",
-          "allowNo": false,
-          "type": "boolean"
-        },
-        "quiet": {
-          "char": "q",
-          "description": "Suppress informational output.",
-          "helpGroup": "GLOBAL",
-          "name": "quiet",
-          "allowNo": false,
-          "type": "boolean"
-        },
-        "verbose": {
-          "char": "v",
-          "description": "Print debug-level logs.",
-          "helpGroup": "GLOBAL",
-          "name": "verbose",
-          "allowNo": false,
-          "type": "boolean"
-        }
-      },
-      "hasDynamicHelp": false,
-      "hiddenAliases": [],
-      "id": "cd",
-      "pluginAlias": "@synthesis/cli",
-      "pluginName": "@synthesis/cli",
-      "pluginType": "core",
-      "strict": true,
-      "enableJsonFlag": false,
-      "isESM": true,
-      "relativePath": [
-        "lib",
-        "commands",
-        "cd.js"
-      ]
-    },
     "doctor": {
       "aliases": [],
       "args": {},
@@ -808,7 +738,6 @@
       "pluginName": "@synthesis/cli",
       "pluginType": "core",
       "strict": true,
-      "enableJsonFlag": false,
       "isESM": true,
       "relativePath": [
         "lib",
@@ -878,7 +807,6 @@
       "pluginName": "@synthesis/cli",
       "pluginType": "core",
       "strict": true,
-      "enableJsonFlag": false,
       "isESM": true,
       "relativePath": [
         "lib",
@@ -955,7 +883,6 @@
       "pluginName": "@synthesis/cli",
       "pluginType": "core",
       "strict": true,
-      "enableJsonFlag": false,
       "isESM": true,
       "relativePath": [
         "lib",
@@ -1699,6 +1626,7 @@
       "pluginName": "@synthesis/cli",
       "pluginType": "core",
       "strict": true,
+      "enableJsonFlag": false,
       "isESM": true,
       "relativePath": [
         "lib",
@@ -1762,7 +1690,7 @@
           "type": "boolean"
         },
         "as": {
-          "description": "Ref to assign to the imported model.",
+          "description": "Ref to assign to the imported model (namespace/name).",
           "name": "as",
           "hasDynamicHelp": false,
           "multiple": false,
@@ -1776,6 +1704,7 @@
       "pluginName": "@synthesis/cli",
       "pluginType": "core",
       "strict": true,
+      "enableJsonFlag": false,
       "isESM": true,
       "relativePath": [
         "lib",
@@ -1787,7 +1716,7 @@
     "model:ls": {
       "aliases": [],
       "args": {},
-      "description": "List all models, optionally filtered by namespace.",
+      "description": "List all models in the current namespace.",
       "examples": [
         "<%= config.bin %> <%= command.id %>",
         "<%= config.bin %> <%= command.id %> --ns com.example.orders"
@@ -1802,7 +1731,8 @@
           "type": "option"
         },
         "ns": {
-          "description": "Filter models by namespace.",
+          "description": "Namespace context override (otherwise resolved from config).",
+          "helpGroup": "GLOBAL",
           "name": "ns",
           "hasDynamicHelp": false,
           "multiple": false,
@@ -1839,6 +1769,7 @@
       "pluginName": "@synthesis/cli",
       "pluginType": "core",
       "strict": true,
+      "enableJsonFlag": false,
       "isESM": true,
       "relativePath": [
         "lib",
@@ -1908,6 +1839,7 @@
       "pluginName": "@synthesis/cli",
       "pluginType": "core",
       "strict": true,
+      "enableJsonFlag": false,
       "isESM": true,
       "relativePath": [
         "lib",
@@ -1925,7 +1857,7 @@
           "required": true
         }
       },
-      "description": "Print a model's metadata and element summary.",
+      "description": "Read and display a model file.",
       "examples": [
         "<%= config.bin %> <%= command.id %> com.example/order-1"
       ],
@@ -1977,6 +1909,7 @@
       "pluginName": "@synthesis/cli",
       "pluginType": "core",
       "strict": true,
+      "enableJsonFlag": false,
       "isESM": true,
       "relativePath": [
         "lib",
