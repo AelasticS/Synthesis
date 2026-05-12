@@ -5,7 +5,7 @@ export default class TxTest extends StubCommand {
 
   static override examples = ['<%= config.bin %> <%= command.id %>']
 
-  public async run(): Promise<void> {
+  public async execute(): Promise<void> {
     await this.printStub({
       command: 'tx test',
       args: {},

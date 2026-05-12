@@ -14,7 +14,7 @@ export default class NsMk extends StubCommand {
     })
   }
 
-  public async run(): Promise<void> {
+  public async execute(): Promise<void> {
     const { args } = await this.parse(NsMk)
 
     await this.printStub({

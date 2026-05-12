@@ -23,7 +23,7 @@ export default class ModelExport extends StubCommand {
     })
   }
 
-  public async run(): Promise<void> {
+  public async execute(): Promise<void> {
     const { args, flags } = await this.parse(ModelExport)
 
     const destination = flags.to ?? `./<name>.json`

@@ -24,7 +24,7 @@ export default class NsRm extends StubCommand {
     })
   }
 
-  public async run(): Promise<void> {
+  public async execute(): Promise<void> {
     const { args, flags } = await this.parse(NsRm)
 
     await this.printStub({

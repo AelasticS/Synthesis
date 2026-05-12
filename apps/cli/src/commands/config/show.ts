@@ -14,7 +14,7 @@ export default class ConfigShow extends StubCommand {
     })
   }
 
-  public async run(): Promise<void> {
+  public async execute(): Promise<void> {
     const { args } = await this.parse(ConfigShow)
 
     await this.printStub({

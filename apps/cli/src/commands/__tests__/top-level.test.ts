@@ -4,22 +4,16 @@ describe('init', () => {
   it('runs with default path', async () => {
     const { stdout, error } = await runCli(['init'])
     expect(error).toBeUndefined()
-    expect(stdout).toContain('[stub] synth init')
-    expect(stdout).toContain('would:')
+    // Either creates new workspace or says it exists
+    expect(stdout).toMatch(/Creating workspace|Workspace already exists/)
   })
 
-  it('accepts --path flag', async () => {
-    const { stdout, error } = await runCli(['init', '--path', '/custom/path'])
+  it('accepts --path flag with temp directory', async () => {
+    const tmpPath = `/tmp/synth-test-${Date.now()}`
+    const { stdout, error } = await runCli(['init', '--path', tmpPath])
     expect(error).toBeUndefined()
-    expect(stdout).toContain('/custom/path')
-  })
-
-  it('outputs JSON with --json flag', async () => {
-    const { stdout, error } = await runCli(['init', '--json'])
-    expect(error).toBeUndefined()
-    const parsed = JSON.parse(stdout)
-    expect(parsed.stub).toBe(true)
-    expect(parsed.command).toBe('init')
+    expect(stdout).toContain('Creating workspace')
+    expect(stdout).toContain(tmpPath)
   })
 })
 
@@ -40,24 +34,16 @@ describe('doctor', () => {
 })
 
 describe('workspace', () => {
-  it('runs without --set', async () => {
+  it('shows workspace info', async () => {
     const { stdout, error } = await runCli(['workspace'])
     expect(error).toBeUndefined()
-    expect(stdout).toContain('[stub] synth workspace')
+    // Shows workspace path or says none initialized
+    expect(stdout).toMatch(/Workspace:|No workspace initialized/)
   })
 
-  it('runs with --set', async () => {
-    const { stdout, error } = await runCli(['workspace', '--set', '/new/path'])
-    expect(error).toBeUndefined()
-    expect(stdout).toContain('/new/path')
-  })
-
-  it('outputs JSON with --json flag', async () => {
-    const { stdout, error } = await runCli(['workspace', '--json'])
-    expect(error).toBeUndefined()
-    const parsed = JSON.parse(stdout)
-    expect(parsed.stub).toBe(true)
-    expect(parsed.command).toBe('workspace')
+  it('rejects invalid workspace path', async () => {
+    const { error } = await runCli(['workspace', '--set', '/nonexistent/path'])
+    expect(error).toBeDefined()
   })
 })
 

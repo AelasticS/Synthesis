@@ -34,7 +34,7 @@ export default class Run extends StubCommand {
     })
   }
 
-  public async run(): Promise<void> {
+  public async execute(): Promise<void> {
     const { args, flags } = await this.parse(Run)
 
     const outRef = flags.out ?? `<computed from ${flags.in}>`

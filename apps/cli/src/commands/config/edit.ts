@@ -14,7 +14,7 @@ export default class ConfigEdit extends StubCommand {
     })
   }
 
-  public async run(): Promise<void> {
+  public async execute(): Promise<void> {
     const { args } = await this.parse(ConfigEdit)
 
     await this.printStub({
