@@ -13,9 +13,16 @@ runnable today.
 :::
 
 `synth` is the command-line tool for the Synthesis model-driven engineering
-toolkit. It manages a local workspace of metamodels, models, and
-transformations, and applies those transformations to produce target models or
-generated text.
+toolkit. It does three things:
+
+1. **Builds and packages transformations** — scaffold a new transformation
+   project, compile and validate it, and publish it to npm as an installable
+   package others can use.
+2. **Installs and manages a local workspace** of metamodels, models, and
+   transformations — install transformations from npm (or git, or local
+   paths), upload and download models, organize them by namespace.
+3. **Runs transformations** against models in the workspace to produce target
+   models or generated text.
 
 ## Why a CLI
 
