@@ -1,8 +1,11 @@
 import { Flags } from '@oclif/core'
+import { readdir } from 'node:fs/promises'
+import { existsSync } from 'node:fs'
 
-import { StubCommand } from '../../base/stub-command.js'
+import { BaseCommand } from '../../base/base-command.js'
+import { getConfigsPath } from '../../config/index.js'
 
-export default class ConfigLs extends StubCommand {
+export default class ConfigLs extends BaseCommand {
   static override description = 'List configurations, optionally filtered by transformation.'
 
   static override examples = [
@@ -18,14 +21,35 @@ export default class ConfigLs extends StubCommand {
 
   public async execute(): Promise<void> {
     const { flags } = await this.parse(ConfigLs)
+    const configsPath = getConfigsPath(this.workspaceConfig)
 
-    const filterStep = flags.for ? `filter by transformation ${flags.for}` : 'show all'
+    if (!existsSync(configsPath)) {
+      this.log('No configurations found.')
+      return
+    }
 
-    await this.printStub({
-      command: 'config ls',
-      args: {},
-      flags: { for: flags.for },
-      wouldDo: ['enumerate configurations', filterStep]
-    })
+    const entries = await readdir(configsPath, { withFileTypes: true })
+    const configFiles = entries
+      .filter(entry => entry.isFile())
+      .filter(entry => entry.name.endsWith('.json') || entry.name.endsWith('.cfg.json'))
+      .map(entry => entry.name)
+
+    // Filter by transformation if --for flag provided
+    const filteredFiles = flags.for
+      ? configFiles.filter(file => file.includes(flags.for!))
+      : configFiles
+
+    if (filteredFiles.length === 0) {
+      if (flags.for) {
+        this.log(`No configurations found for transformation: ${flags.for}`)
+      } else {
+        this.log('No configurations found.')
+      }
+      return
+    }
+
+    for (const file of filteredFiles) {
+      this.log(file)
+    }
   }
 }
