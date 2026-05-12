@@ -1,13 +1,20 @@
 import { Command, Flags } from '@oclif/core'
+import {
+  WorkspaceConfig,
+  loadConfig,
+  getWorkspacePath,
+  getCurrentNamespacePath,
+  expandPath,
+  isWorkspaceInitialized
+} from '../config/index.js'
 
 /**
  * Base command class for all synth commands.
- * Defines global flags that are inherited by every subclass.
+ * Defines global flags and handles namespace switching.
  */
 export abstract class BaseCommand<T extends typeof Command = typeof Command> extends Command {
   /**
    * Global flags available on every command.
-   * These are automatically merged with each subclass's static flags.
    */
   static baseFlags = {
     workspace: Flags.string({
@@ -15,7 +22,7 @@ export abstract class BaseCommand<T extends typeof Command = typeof Command> ext
       helpGroup: 'GLOBAL'
     }),
     ns: Flags.string({
-      description: 'Namespace context override (otherwise resolved from pwd).',
+      description: 'Namespace context override (otherwise resolved from config).',
       helpGroup: 'GLOBAL'
     }),
     json: Flags.boolean({
@@ -34,12 +41,81 @@ export abstract class BaseCommand<T extends typeof Command = typeof Command> ext
     })
   } as const
 
+  protected workspaceConfig!: WorkspaceConfig
+  protected savedPwd!: string
+
   /**
-   * Resolve the active workspace path.
-   * Currently returns a placeholder; will be implemented to read from config.
+   * Subclasses implement this instead of run().
+   * When execute() is called, the working directory is already
+   * set to the current namespace (if one is set).
    */
-  protected resolveWorkspace(): string {
-    // TODO: Read from ~/.synth/config.json or --workspace flag
-    return '<unresolved>'
+  abstract execute(): Promise<void>
+
+  /**
+   * Main entry point. Handles namespace switching, then calls execute().
+   */
+  async run(): Promise<void> {
+    this.savedPwd = process.cwd()
+    this.workspaceConfig = await loadConfig()
+
+    // Apply --workspace override if provided
+    const { flags } = await this.parse(this.constructor as typeof BaseCommand)
+    if (flags.workspace) {
+      this.workspaceConfig.workspace = expandPath(flags.workspace)
+    }
+
+    // Apply --ns override if provided
+    if (flags.ns) {
+      this.workspaceConfig.currentNamespace = flags.ns
+    }
+
+    // Switch to namespace directory if set
+    const nsPath = getCurrentNamespacePath(this.workspaceConfig)
+    if (nsPath) {
+      try {
+        process.chdir(nsPath)
+      } catch {
+        // Namespace folder doesn't exist, stay in current dir
+        // Commands can handle this as needed
+      }
+    }
+
+    try {
+      await this.execute()
+    } finally {
+      // Always restore original working directory
+      process.chdir(this.savedPwd)
+    }
+  }
+
+  /**
+   * Get the resolved workspace path.
+   */
+  protected getWorkspacePath(): string {
+    return getWorkspacePath(this.workspaceConfig)
+  }
+
+  /**
+   * Check if workspace is initialized.
+   */
+  protected isWorkspaceInitialized(): boolean {
+    return isWorkspaceInitialized(this.workspaceConfig)
+  }
+
+  /**
+   * Log only if not in quiet mode.
+   */
+  protected logInfo(message: string): void {
+    // Access flags through parse - for now just log
+    // TODO: Check quiet flag
+    this.log(message)
+  }
+
+  /**
+   * Log debug message only in verbose mode.
+   */
+  protected logDebug(message: string): void {
+    // TODO: Check verbose flag
+    this.debug(message)
   }
 }

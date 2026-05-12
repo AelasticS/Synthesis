@@ -16,7 +16,7 @@ export default class ModelLs extends StubCommand {
     })
   }
 
-  public async run(): Promise<void> {
+  public async execute(): Promise<void> {
     const { flags } = await this.parse(ModelLs)
 
     const filterStep = flags.ns ? `filter by namespace ${flags.ns}` : 'show all namespaces'

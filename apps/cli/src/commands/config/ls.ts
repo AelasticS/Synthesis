@@ -16,7 +16,7 @@ export default class ConfigLs extends StubCommand {
     })
   }
 
-  public async run(): Promise<void> {
+  public async execute(): Promise<void> {
     const { flags } = await this.parse(ConfigLs)
 
     const filterStep = flags.for ? `filter by transformation ${flags.for}` : 'show all'

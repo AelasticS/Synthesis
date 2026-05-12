@@ -14,7 +14,7 @@ export default class TxShow extends StubCommand {
     })
   }
 
-  public async run(): Promise<void> {
+  public async execute(): Promise<void> {
     const { args } = await this.parse(TxShow)
 
     await this.printStub({

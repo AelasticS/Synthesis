@@ -104,7 +104,7 @@ GLOBAL FLAGS
   -q, --quiet              Suppress informational output.
   -v, --verbose            Print debug-level logs.
       --json               Emit machine-readable JSON.
-      --ns=<value>         Namespace context override (otherwise resolved from pwd).
+      --ns=<value>         Namespace context override (otherwise resolved from config).
       --workspace=<value>  Override active workspace for this invocation.
 
 DESCRIPTION
@@ -133,7 +133,7 @@ GLOBAL FLAGS
   -q, --quiet              Suppress informational output.
   -v, --verbose            Print debug-level logs.
       --json               Emit machine-readable JSON.
-      --ns=<value>         Namespace context override (otherwise resolved from pwd).
+      --ns=<value>         Namespace context override (otherwise resolved from config).
       --workspace=<value>  Override active workspace for this invocation.
 
 DESCRIPTION
@@ -158,7 +158,7 @@ GLOBAL FLAGS
   -q, --quiet              Suppress informational output.
   -v, --verbose            Print debug-level logs.
       --json               Emit machine-readable JSON.
-      --ns=<value>         Namespace context override (otherwise resolved from pwd).
+      --ns=<value>         Namespace context override (otherwise resolved from config).
       --workspace=<value>  Override active workspace for this invocation.
 
 DESCRIPTION
@@ -185,7 +185,7 @@ GLOBAL FLAGS
   -q, --quiet              Suppress informational output.
   -v, --verbose            Print debug-level logs.
       --json               Emit machine-readable JSON.
-      --ns=<value>         Namespace context override (otherwise resolved from pwd).
+      --ns=<value>         Namespace context override (otherwise resolved from config).
       --workspace=<value>  Override active workspace for this invocation.
 
 DESCRIPTION
@@ -210,7 +210,7 @@ GLOBAL FLAGS
   -q, --quiet              Suppress informational output.
   -v, --verbose            Print debug-level logs.
       --json               Emit machine-readable JSON.
-      --ns=<value>         Namespace context override (otherwise resolved from pwd).
+      --ns=<value>         Namespace context override (otherwise resolved from config).
       --workspace=<value>  Override active workspace for this invocation.
 
 DESCRIPTION
@@ -232,7 +232,7 @@ GLOBAL FLAGS
   -q, --quiet              Suppress informational output.
   -v, --verbose            Print debug-level logs.
       --json               Emit machine-readable JSON.
-      --ns=<value>         Namespace context override (otherwise resolved from pwd).
+      --ns=<value>         Namespace context override (otherwise resolved from config).
       --workspace=<value>  Override active workspace for this invocation.
 
 DESCRIPTION
@@ -277,7 +277,7 @@ GLOBAL FLAGS
   -q, --quiet              Suppress informational output.
   -v, --verbose            Print debug-level logs.
       --json               Emit machine-readable JSON.
-      --ns=<value>         Namespace context override (otherwise resolved from pwd).
+      --ns=<value>         Namespace context override (otherwise resolved from config).
       --workspace=<value>  Override active workspace for this invocation.
 
 DESCRIPTION
@@ -310,7 +310,7 @@ GLOBAL FLAGS
   -q, --quiet              Suppress informational output.
   -v, --verbose            Print debug-level logs.
       --json               Emit machine-readable JSON.
-      --ns=<value>         Namespace context override (otherwise resolved from pwd).
+      --ns=<value>         Namespace context override (otherwise resolved from config).
       --workspace=<value>  Override active workspace for this invocation.
 
 DESCRIPTION
@@ -338,7 +338,7 @@ GLOBAL FLAGS
   -q, --quiet              Suppress informational output.
   -v, --verbose            Print debug-level logs.
       --json               Emit machine-readable JSON.
-      --ns=<value>         Namespace context override (otherwise resolved from pwd).
+      --ns=<value>         Namespace context override (otherwise resolved from config).
       --workspace=<value>  Override active workspace for this invocation.
 
 DESCRIPTION
@@ -368,7 +368,7 @@ GLOBAL FLAGS
   -q, --quiet              Suppress informational output.
   -v, --verbose            Print debug-level logs.
       --json               Emit machine-readable JSON.
-      --ns=<value>         Namespace context override (otherwise resolved from pwd).
+      --ns=<value>         Namespace context override (otherwise resolved from config).
       --workspace=<value>  Override active workspace for this invocation.
 
 DESCRIPTION
@@ -421,7 +421,7 @@ GLOBAL FLAGS
   -q, --quiet              Suppress informational output.
   -v, --verbose            Print debug-level logs.
       --json               Emit machine-readable JSON.
-      --ns=<value>         Namespace context override (otherwise resolved from pwd).
+      --ns=<value>         Namespace context override (otherwise resolved from config).
       --workspace=<value>  Override active workspace for this invocation.
 
 DESCRIPTION
@@ -446,7 +446,7 @@ GLOBAL FLAGS
   -q, --quiet              Suppress informational output.
   -v, --verbose            Print debug-level logs.
       --json               Emit machine-readable JSON.
-      --ns=<value>         Namespace context override (otherwise resolved from pwd).
+      --ns=<value>         Namespace context override (otherwise resolved from config).
       --workspace=<value>  Override active workspace for this invocation.
 
 DESCRIPTION
@@ -474,7 +474,7 @@ GLOBAL FLAGS
   -q, --quiet              Suppress informational output.
   -v, --verbose            Print debug-level logs.
       --json               Emit machine-readable JSON.
-      --ns=<value>         Namespace context override (otherwise resolved from pwd).
+      --ns=<value>         Namespace context override (otherwise resolved from config).
       --workspace=<value>  Override active workspace for this invocation.
 
 DESCRIPTION
@@ -498,7 +498,7 @@ GLOBAL FLAGS
   -q, --quiet              Suppress informational output.
   -v, --verbose            Print debug-level logs.
       --json               Emit machine-readable JSON.
-      --ns=<value>         Namespace context override (otherwise resolved from pwd).
+      --ns=<value>         Namespace context override (otherwise resolved from config).
       --workspace=<value>  Override active workspace for this invocation.
 
 DESCRIPTION
@@ -523,7 +523,7 @@ GLOBAL FLAGS
   -q, --quiet              Suppress informational output.
   -v, --verbose            Print debug-level logs.
       --json               Emit machine-readable JSON.
-      --ns=<value>         Namespace context override (otherwise resolved from pwd).
+      --ns=<value>         Namespace context override (otherwise resolved from config).
       --workspace=<value>  Override active workspace for this invocation.
 
 DESCRIPTION
@@ -551,7 +551,7 @@ GLOBAL FLAGS
   -q, --quiet              Suppress informational output.
   -v, --verbose            Print debug-level logs.
       --json               Emit machine-readable JSON.
-      --ns=<value>         Namespace context override (otherwise resolved from pwd).
+      --ns=<value>         Namespace context override (otherwise resolved from config).
       --workspace=<value>  Override active workspace for this invocation.
 
 DESCRIPTION
@@ -875,7 +875,7 @@ GLOBAL FLAGS
   -q, --quiet              Suppress informational output.
   -v, --verbose            Print debug-level logs.
       --json               Emit machine-readable JSON.
-      --ns=<value>         Namespace context override (otherwise resolved from pwd).
+      --ns=<value>         Namespace context override (otherwise resolved from config).
       --workspace=<value>  Override active workspace for this invocation.
 
 DESCRIPTION
@@ -899,7 +899,7 @@ GLOBAL FLAGS
   -q, --quiet              Suppress informational output.
   -v, --verbose            Print debug-level logs.
       --json               Emit machine-readable JSON.
-      --ns=<value>         Namespace context override (otherwise resolved from pwd).
+      --ns=<value>         Namespace context override (otherwise resolved from config).
       --workspace=<value>  Override active workspace for this invocation.
 
 DESCRIPTION
@@ -924,7 +924,7 @@ GLOBAL FLAGS
   -q, --quiet              Suppress informational output.
   -v, --verbose            Print debug-level logs.
       --json               Emit machine-readable JSON.
-      --ns=<value>         Namespace context override (otherwise resolved from pwd).
+      --ns=<value>         Namespace context override (otherwise resolved from config).
       --workspace=<value>  Override active workspace for this invocation.
 
 DESCRIPTION
@@ -949,7 +949,7 @@ GLOBAL FLAGS
   -q, --quiet              Suppress informational output.
   -v, --verbose            Print debug-level logs.
       --json               Emit machine-readable JSON.
-      --ns=<value>         Namespace context override (otherwise resolved from pwd).
+      --ns=<value>         Namespace context override (otherwise resolved from config).
       --workspace=<value>  Override active workspace for this invocation.
 
 DESCRIPTION
@@ -977,7 +977,7 @@ GLOBAL FLAGS
   -q, --quiet              Suppress informational output.
   -v, --verbose            Print debug-level logs.
       --json               Emit machine-readable JSON.
-      --ns=<value>         Namespace context override (otherwise resolved from pwd).
+      --ns=<value>         Namespace context override (otherwise resolved from config).
       --workspace=<value>  Override active workspace for this invocation.
 
 DESCRIPTION
@@ -999,7 +999,7 @@ GLOBAL FLAGS
   -q, --quiet              Suppress informational output.
   -v, --verbose            Print debug-level logs.
       --json               Emit machine-readable JSON.
-      --ns=<value>         Namespace context override (otherwise resolved from pwd).
+      --ns=<value>         Namespace context override (otherwise resolved from config).
       --workspace=<value>  Override active workspace for this invocation.
 
 DESCRIPTION
@@ -1021,7 +1021,7 @@ GLOBAL FLAGS
   -q, --quiet              Suppress informational output.
   -v, --verbose            Print debug-level logs.
       --json               Emit machine-readable JSON.
-      --ns=<value>         Namespace context override (otherwise resolved from pwd).
+      --ns=<value>         Namespace context override (otherwise resolved from config).
       --workspace=<value>  Override active workspace for this invocation.
 
 DESCRIPTION
@@ -1046,7 +1046,7 @@ GLOBAL FLAGS
   -q, --quiet              Suppress informational output.
   -v, --verbose            Print debug-level logs.
       --json               Emit machine-readable JSON.
-      --ns=<value>         Namespace context override (otherwise resolved from pwd).
+      --ns=<value>         Namespace context override (otherwise resolved from config).
       --workspace=<value>  Override active workspace for this invocation.
 
 DESCRIPTION
@@ -1068,7 +1068,7 @@ GLOBAL FLAGS
   -q, --quiet              Suppress informational output.
   -v, --verbose            Print debug-level logs.
       --json               Emit machine-readable JSON.
-      --ns=<value>         Namespace context override (otherwise resolved from pwd).
+      --ns=<value>         Namespace context override (otherwise resolved from config).
       --workspace=<value>  Override active workspace for this invocation.
 
 DESCRIPTION
@@ -1093,7 +1093,7 @@ GLOBAL FLAGS
   -q, --quiet              Suppress informational output.
   -v, --verbose            Print debug-level logs.
       --json               Emit machine-readable JSON.
-      --ns=<value>         Namespace context override (otherwise resolved from pwd).
+      --ns=<value>         Namespace context override (otherwise resolved from config).
       --workspace=<value>  Override active workspace for this invocation.
 
 DESCRIPTION
@@ -1118,7 +1118,7 @@ GLOBAL FLAGS
   -q, --quiet              Suppress informational output.
   -v, --verbose            Print debug-level logs.
       --json               Emit machine-readable JSON.
-      --ns=<value>         Namespace context override (otherwise resolved from pwd).
+      --ns=<value>         Namespace context override (otherwise resolved from config).
       --workspace=<value>  Override active workspace for this invocation.
 
 DESCRIPTION

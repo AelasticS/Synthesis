@@ -31,7 +31,7 @@ export default class M2T extends StubCommand {
     })
   }
 
-  public async run(): Promise<void> {
+  public async execute(): Promise<void> {
     const { args, flags } = await this.parse(M2T)
 
     const action = flags['dry-run'] ? 'list files (dry run)' : `write files to ${flags.out}`
