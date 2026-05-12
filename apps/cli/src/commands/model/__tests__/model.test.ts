@@ -251,24 +251,24 @@ describe('model validate', () => {
     expect(error).toBeDefined()
   })
 
-  it('runs with ref arg', async () => {
-    const { stdout, error } = await runCli(['model', 'validate', 'ns/name'])
-    expect(error).toBeUndefined()
-    expect(stdout).toContain('[stub] synth model validate')
+  it('errors when model not found', async () => {
+    const { error, stderr } = await runCli(['model', 'validate', 'ns/name'])
+    expect(error).toBeDefined()
+    // Should report model not found (verifies real file check)
+    expect(stderr).toContain('Model not found')
   })
 
-  it('accepts --against flag', async () => {
-    const { stdout, error } = await runCli(
-      ['model', 'validate', 'ns/name', '--against', '@pkg/mm']
+  it('validates model ref format', async () => {
+    const { error, stderr } = await runCli(['model', 'validate', 'invalid-ref'])
+    expect(error).toBeDefined()
+    expect(stderr).toContain('Invalid model ref')
+  })
+
+  it('reports not found for nonexistent model', async () => {
+    const { error, stderr } = await runCli(
+      ['model', 'validate', 'nonexistent/model', '--against', '@pkg/mm']
     )
-    expect(error).toBeUndefined()
-    expect(stdout).toContain('@pkg/mm')
-  })
-
-  it('outputs JSON with --json flag', async () => {
-    const { stdout, error } = await runCli(['model', 'validate', 'ns/name', '--json'])
-    expect(error).toBeUndefined()
-    const parsed = JSON.parse(stdout)
-    expect(parsed.stub).toBe(true)
+    expect(error).toBeDefined()
+    expect(stderr).toContain('Model not found: nonexistent/model')
   })
 })

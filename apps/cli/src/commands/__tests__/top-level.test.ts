@@ -43,15 +43,17 @@ describe('doctor', () => {
   it('runs successfully', async () => {
     const { stdout, error } = await runCli(['doctor'])
     expect(error).toBeUndefined()
-    expect(stdout).toContain('[stub] synth doctor')
+    expect(stdout).toContain('Workspace Health Check')
+    expect(stdout).toContain('Summary:')
   })
 
   it('outputs JSON with --json flag', async () => {
     const { stdout, error } = await runCli(['doctor', '--json'])
     expect(error).toBeUndefined()
     const parsed = JSON.parse(stdout)
-    expect(parsed.stub).toBe(true)
-    expect(parsed.command).toBe('doctor')
+    expect(parsed.workspace).toBeDefined()
+    expect(parsed.checks).toBeDefined()
+    expect(Array.isArray(parsed.checks)).toBe(true)
   })
 })
 
@@ -75,21 +77,17 @@ describe('run', () => {
     expect(error).toBeDefined()
   })
 
-  it('runs with required args', async () => {
-    const { stdout, error } = await runCli(['run', 'my-tx', '--in', 'ns/model'])
-    expect(error).toBeUndefined()
-    expect(stdout).toContain('[stub] synth run')
-    expect(stdout).toContain('my-tx')
-    expect(stdout).toContain('ns/model')
+  it('errors when transformation not found', async () => {
+    const { error, stderr } = await runCli(['run', 'my-tx', '--in', 'ns/model'])
+    expect(error).toBeDefined()
+    // Should report transformation not found (verifies real file check)
+    expect(stderr).toContain('Transformation not found')
   })
 
-  it('outputs JSON with --json flag', async () => {
-    const { stdout, error } = await runCli(['run', 'my-tx', '--in', 'ns/model', '--json'])
-    expect(error).toBeUndefined()
-    const parsed = JSON.parse(stdout)
-    expect(parsed.stub).toBe(true)
-    expect(parsed.command).toBe('run')
-    expect(parsed.args.tx).toBe('my-tx')
+  it('validates transformation exists before running', async () => {
+    const { error, stderr } = await runCli(['run', 'nonexistent-tx', '--in', 'ns/model'])
+    expect(error).toBeDefined()
+    expect(stderr).toContain('Transformation not found: nonexistent-tx')
   })
 })
 
@@ -99,22 +97,20 @@ describe('m2t', () => {
     expect(error).toBeDefined()
   })
 
-  it('runs with required args', async () => {
-    const { stdout, error } = await runCli(
+  it('errors when model not found', async () => {
+    const { error, stderr } = await runCli(
       ['m2t', 'ns/model', '--template', 'my-template', '--out', './output']
     )
-    expect(error).toBeUndefined()
-    expect(stdout).toContain('[stub] synth m2t')
-    expect(stdout).toContain('ns/model')
+    expect(error).toBeDefined()
+    // Should report model not found (verifies real file check)
+    expect(stderr).toContain('Model not found')
   })
 
-  it('outputs JSON with --json flag', async () => {
-    const { stdout, error } = await runCli(
-      ['m2t', 'ns/model', '--template', 'tpl', '--out', './out', '--json']
+  it('validates model exists before running', async () => {
+    const { error, stderr } = await runCli(
+      ['m2t', 'nonexistent/model', '--template', 'tpl', '--out', './out']
     )
-    expect(error).toBeUndefined()
-    const parsed = JSON.parse(stdout)
-    expect(parsed.stub).toBe(true)
-    expect(parsed.command).toBe('m2t')
+    expect(error).toBeDefined()
+    expect(stderr).toContain('Model not found: nonexistent/model')
   })
 })
