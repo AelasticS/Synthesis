@@ -382,6 +382,7 @@
       "pluginName": "@synthesis/cli",
       "pluginType": "core",
       "strict": true,
+      "enableJsonFlag": false,
       "isESM": true,
       "relativePath": [
         "lib",
@@ -537,6 +538,7 @@
       "pluginName": "@synthesis/cli",
       "pluginType": "core",
       "strict": true,
+      "enableJsonFlag": false,
       "isESM": true,
       "relativePath": [
         "lib",
@@ -606,6 +608,7 @@
       "pluginName": "@synthesis/cli",
       "pluginType": "core",
       "strict": true,
+      "enableJsonFlag": false,
       "isESM": true,
       "relativePath": [
         "lib",
@@ -675,220 +678,13 @@
       "pluginName": "@synthesis/cli",
       "pluginType": "core",
       "strict": true,
+      "enableJsonFlag": false,
       "isESM": true,
       "relativePath": [
         "lib",
         "commands",
         "config",
         "show.js"
-      ]
-    },
-    "ns:ls": {
-      "aliases": [],
-      "args": {},
-      "description": "List all namespaces in the workspace.",
-      "examples": [
-        "<%= config.bin %> <%= command.id %>"
-      ],
-      "flags": {
-        "workspace": {
-          "description": "Override active workspace for this invocation.",
-          "helpGroup": "GLOBAL",
-          "name": "workspace",
-          "hasDynamicHelp": false,
-          "multiple": false,
-          "type": "option"
-        },
-        "ns": {
-          "description": "Namespace context override (otherwise resolved from config).",
-          "helpGroup": "GLOBAL",
-          "name": "ns",
-          "hasDynamicHelp": false,
-          "multiple": false,
-          "type": "option"
-        },
-        "json": {
-          "description": "Emit machine-readable JSON.",
-          "helpGroup": "GLOBAL",
-          "name": "json",
-          "allowNo": false,
-          "type": "boolean"
-        },
-        "quiet": {
-          "char": "q",
-          "description": "Suppress informational output.",
-          "helpGroup": "GLOBAL",
-          "name": "quiet",
-          "allowNo": false,
-          "type": "boolean"
-        },
-        "verbose": {
-          "char": "v",
-          "description": "Print debug-level logs.",
-          "helpGroup": "GLOBAL",
-          "name": "verbose",
-          "allowNo": false,
-          "type": "boolean"
-        }
-      },
-      "hasDynamicHelp": false,
-      "hiddenAliases": [],
-      "id": "ns:ls",
-      "pluginAlias": "@synthesis/cli",
-      "pluginName": "@synthesis/cli",
-      "pluginType": "core",
-      "strict": true,
-      "isESM": true,
-      "relativePath": [
-        "lib",
-        "commands",
-        "ns",
-        "ls.js"
-      ]
-    },
-    "ns:mk": {
-      "aliases": [],
-      "args": {
-        "namespace": {
-          "description": "Name of the namespace to create.",
-          "name": "namespace",
-          "required": true
-        }
-      },
-      "description": "Create an empty namespace.",
-      "examples": [
-        "<%= config.bin %> <%= command.id %> com.example.orders"
-      ],
-      "flags": {
-        "workspace": {
-          "description": "Override active workspace for this invocation.",
-          "helpGroup": "GLOBAL",
-          "name": "workspace",
-          "hasDynamicHelp": false,
-          "multiple": false,
-          "type": "option"
-        },
-        "ns": {
-          "description": "Namespace context override (otherwise resolved from config).",
-          "helpGroup": "GLOBAL",
-          "name": "ns",
-          "hasDynamicHelp": false,
-          "multiple": false,
-          "type": "option"
-        },
-        "json": {
-          "description": "Emit machine-readable JSON.",
-          "helpGroup": "GLOBAL",
-          "name": "json",
-          "allowNo": false,
-          "type": "boolean"
-        },
-        "quiet": {
-          "char": "q",
-          "description": "Suppress informational output.",
-          "helpGroup": "GLOBAL",
-          "name": "quiet",
-          "allowNo": false,
-          "type": "boolean"
-        },
-        "verbose": {
-          "char": "v",
-          "description": "Print debug-level logs.",
-          "helpGroup": "GLOBAL",
-          "name": "verbose",
-          "allowNo": false,
-          "type": "boolean"
-        }
-      },
-      "hasDynamicHelp": false,
-      "hiddenAliases": [],
-      "id": "ns:mk",
-      "pluginAlias": "@synthesis/cli",
-      "pluginName": "@synthesis/cli",
-      "pluginType": "core",
-      "strict": true,
-      "isESM": true,
-      "relativePath": [
-        "lib",
-        "commands",
-        "ns",
-        "mk.js"
-      ]
-    },
-    "ns:rm": {
-      "aliases": [],
-      "args": {
-        "namespace": {
-          "description": "Name of the namespace to remove.",
-          "name": "namespace",
-          "required": true
-        }
-      },
-      "description": "Remove a namespace (must be empty unless --force).",
-      "examples": [
-        "<%= config.bin %> <%= command.id %> com.example.orders",
-        "<%= config.bin %> <%= command.id %> com.example.orders --force"
-      ],
-      "flags": {
-        "workspace": {
-          "description": "Override active workspace for this invocation.",
-          "helpGroup": "GLOBAL",
-          "name": "workspace",
-          "hasDynamicHelp": false,
-          "multiple": false,
-          "type": "option"
-        },
-        "ns": {
-          "description": "Namespace context override (otherwise resolved from config).",
-          "helpGroup": "GLOBAL",
-          "name": "ns",
-          "hasDynamicHelp": false,
-          "multiple": false,
-          "type": "option"
-        },
-        "json": {
-          "description": "Emit machine-readable JSON.",
-          "helpGroup": "GLOBAL",
-          "name": "json",
-          "allowNo": false,
-          "type": "boolean"
-        },
-        "quiet": {
-          "char": "q",
-          "description": "Suppress informational output.",
-          "helpGroup": "GLOBAL",
-          "name": "quiet",
-          "allowNo": false,
-          "type": "boolean"
-        },
-        "verbose": {
-          "char": "v",
-          "description": "Print debug-level logs.",
-          "helpGroup": "GLOBAL",
-          "name": "verbose",
-          "allowNo": false,
-          "type": "boolean"
-        },
-        "force": {
-          "description": "Remove even if the namespace contains models.",
-          "name": "force",
-          "allowNo": false,
-          "type": "boolean"
-        }
-      },
-      "hasDynamicHelp": false,
-      "hiddenAliases": [],
-      "id": "ns:rm",
-      "pluginAlias": "@synthesis/cli",
-      "pluginName": "@synthesis/cli",
-      "pluginType": "core",
-      "strict": true,
-      "isESM": true,
-      "relativePath": [
-        "lib",
-        "commands",
-        "ns",
-        "rm.js"
       ]
     },
     "model:export": {
@@ -1323,13 +1119,151 @@
         "validate.js"
       ]
     },
-    "workspace": {
+    "ns:ls": {
       "aliases": [],
       "args": {},
-      "description": "Print or switch the active workspace.",
+      "description": "List all namespaces in the workspace.",
       "examples": [
-        "<%= config.bin %> <%= command.id %>",
-        "<%= config.bin %> <%= command.id %> --set ~/other-workspace"
+        "<%= config.bin %> <%= command.id %>"
+      ],
+      "flags": {
+        "workspace": {
+          "description": "Override active workspace for this invocation.",
+          "helpGroup": "GLOBAL",
+          "name": "workspace",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "ns": {
+          "description": "Namespace context override (otherwise resolved from config).",
+          "helpGroup": "GLOBAL",
+          "name": "ns",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "json": {
+          "description": "Emit machine-readable JSON.",
+          "helpGroup": "GLOBAL",
+          "name": "json",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "quiet": {
+          "char": "q",
+          "description": "Suppress informational output.",
+          "helpGroup": "GLOBAL",
+          "name": "quiet",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "verbose": {
+          "char": "v",
+          "description": "Print debug-level logs.",
+          "helpGroup": "GLOBAL",
+          "name": "verbose",
+          "allowNo": false,
+          "type": "boolean"
+        }
+      },
+      "hasDynamicHelp": false,
+      "hiddenAliases": [],
+      "id": "ns:ls",
+      "pluginAlias": "@synthesis/cli",
+      "pluginName": "@synthesis/cli",
+      "pluginType": "core",
+      "strict": true,
+      "isESM": true,
+      "relativePath": [
+        "lib",
+        "commands",
+        "ns",
+        "ls.js"
+      ]
+    },
+    "ns:mk": {
+      "aliases": [],
+      "args": {
+        "namespace": {
+          "description": "Name of the namespace to create.",
+          "name": "namespace",
+          "required": true
+        }
+      },
+      "description": "Create an empty namespace.",
+      "examples": [
+        "<%= config.bin %> <%= command.id %> com.example.orders"
+      ],
+      "flags": {
+        "workspace": {
+          "description": "Override active workspace for this invocation.",
+          "helpGroup": "GLOBAL",
+          "name": "workspace",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "ns": {
+          "description": "Namespace context override (otherwise resolved from config).",
+          "helpGroup": "GLOBAL",
+          "name": "ns",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "json": {
+          "description": "Emit machine-readable JSON.",
+          "helpGroup": "GLOBAL",
+          "name": "json",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "quiet": {
+          "char": "q",
+          "description": "Suppress informational output.",
+          "helpGroup": "GLOBAL",
+          "name": "quiet",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "verbose": {
+          "char": "v",
+          "description": "Print debug-level logs.",
+          "helpGroup": "GLOBAL",
+          "name": "verbose",
+          "allowNo": false,
+          "type": "boolean"
+        }
+      },
+      "hasDynamicHelp": false,
+      "hiddenAliases": [],
+      "id": "ns:mk",
+      "pluginAlias": "@synthesis/cli",
+      "pluginName": "@synthesis/cli",
+      "pluginType": "core",
+      "strict": true,
+      "isESM": true,
+      "relativePath": [
+        "lib",
+        "commands",
+        "ns",
+        "mk.js"
+      ]
+    },
+    "ns:rm": {
+      "aliases": [],
+      "args": {
+        "namespace": {
+          "description": "Name of the namespace to remove.",
+          "name": "namespace",
+          "required": true
+        }
+      },
+      "description": "Remove a namespace (must be empty unless --force).",
+      "examples": [
+        "<%= config.bin %> <%= command.id %> com.example.orders",
+        "<%= config.bin %> <%= command.id %> com.example.orders --force"
       ],
       "flags": {
         "workspace": {
@@ -1371,28 +1305,26 @@
           "allowNo": false,
           "type": "boolean"
         },
-        "set": {
-          "description": "Switch the active workspace to this path.",
-          "name": "set",
-          "hasDynamicHelp": false,
-          "multiple": false,
-          "type": "option"
+        "force": {
+          "description": "Remove even if the namespace contains models.",
+          "name": "force",
+          "allowNo": false,
+          "type": "boolean"
         }
       },
       "hasDynamicHelp": false,
       "hiddenAliases": [],
-      "id": "workspace",
+      "id": "ns:rm",
       "pluginAlias": "@synthesis/cli",
       "pluginName": "@synthesis/cli",
       "pluginType": "core",
       "strict": true,
-      "enableJsonFlag": false,
       "isESM": true,
       "relativePath": [
         "lib",
         "commands",
-        "workspace",
-        "index.js"
+        "ns",
+        "rm.js"
       ]
     },
     "tx:build": {
@@ -1987,6 +1919,78 @@
         "commands",
         "tx",
         "uninstall.js"
+      ]
+    },
+    "workspace": {
+      "aliases": [],
+      "args": {},
+      "description": "Print or switch the active workspace.",
+      "examples": [
+        "<%= config.bin %> <%= command.id %>",
+        "<%= config.bin %> <%= command.id %> --set ~/other-workspace"
+      ],
+      "flags": {
+        "workspace": {
+          "description": "Override active workspace for this invocation.",
+          "helpGroup": "GLOBAL",
+          "name": "workspace",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "ns": {
+          "description": "Namespace context override (otherwise resolved from config).",
+          "helpGroup": "GLOBAL",
+          "name": "ns",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "json": {
+          "description": "Emit machine-readable JSON.",
+          "helpGroup": "GLOBAL",
+          "name": "json",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "quiet": {
+          "char": "q",
+          "description": "Suppress informational output.",
+          "helpGroup": "GLOBAL",
+          "name": "quiet",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "verbose": {
+          "char": "v",
+          "description": "Print debug-level logs.",
+          "helpGroup": "GLOBAL",
+          "name": "verbose",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "set": {
+          "description": "Switch the active workspace to this path.",
+          "name": "set",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        }
+      },
+      "hasDynamicHelp": false,
+      "hiddenAliases": [],
+      "id": "workspace",
+      "pluginAlias": "@synthesis/cli",
+      "pluginName": "@synthesis/cli",
+      "pluginType": "core",
+      "strict": true,
+      "enableJsonFlag": false,
+      "isESM": true,
+      "relativePath": [
+        "lib",
+        "commands",
+        "workspace",
+        "index.js"
       ]
     }
   },

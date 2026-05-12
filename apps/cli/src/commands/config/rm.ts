@@ -1,8 +1,12 @@
 import { Args } from '@oclif/core'
+import { unlink } from 'node:fs/promises'
+import { existsSync } from 'node:fs'
+import { join } from 'node:path'
 
-import { StubCommand } from '../../base/stub-command.js'
+import { BaseCommand } from '../../base/base-command.js'
+import { getConfigsPath } from '../../config/index.js'
 
-export default class ConfigRm extends StubCommand {
+export default class ConfigRm extends BaseCommand {
   static override description = 'Delete a configuration.'
 
   static override examples = ['<%= config.bin %> <%= command.id %> com.example/library.cfg']
@@ -16,12 +20,17 @@ export default class ConfigRm extends StubCommand {
 
   public async execute(): Promise<void> {
     const { args } = await this.parse(ConfigRm)
+    const configsPath = getConfigsPath(this.workspaceConfig)
 
-    await this.printStub({
-      command: 'config rm',
-      args: { ref: args.ref },
-      flags: {},
-      wouldDo: [`delete configuration ${args.ref}`]
-    })
+    // Resolve the config file path
+    const configFile = args.ref.endsWith('.json') ? args.ref : `${args.ref}.json`
+    const configPath = join(configsPath, configFile)
+
+    if (!existsSync(configPath)) {
+      this.error(`Configuration not found: ${args.ref}`)
+    }
+
+    await unlink(configPath)
+    this.log(`Deleted configuration: ${args.ref}`)
   }
 }
