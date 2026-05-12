@@ -1000,7 +1000,14 @@ Publish the transformation to npm.
 
 ```
 USAGE
-  $ synth tx publish [--workspace <value>] [--ns <value>] [--json] [-q] [-v]
+  $ synth tx publish [--workspace <value>] [--ns <value>] [--json] [-q] [-v] [--access public|restricted] [--tag
+    <value>] [--dry-run]
+
+FLAGS
+  --access=<option>  Package access level (public or restricted).
+                     <options: public|restricted>
+  --dry-run          Perform a dry run without actually publishing.
+  --tag=<value>      [default: latest] Tag to publish with (e.g., beta, next).
 
 GLOBAL FLAGS
   -q, --quiet              Suppress informational output.
@@ -1014,6 +1021,10 @@ DESCRIPTION
 
 EXAMPLES
   $ synth tx publish
+
+  $ synth tx publish --access public
+
+  $ synth tx publish --tag beta
 ```
 
 ## `synth tx show NAME`

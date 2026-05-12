@@ -14,13 +14,20 @@ export interface RunResult {
   error?: Error
 }
 
+export interface RunOptions {
+  /** Working directory to run the command from */
+  cwd?: string
+}
+
 /**
  * Run the CLI as a subprocess and capture output.
  * Use this instead of @oclif/test's runCommand to avoid Jest ESM issues.
  */
-export async function runCli(args: string[]): Promise<RunResult> {
+export async function runCli(args: string[], options?: RunOptions): Promise<RunResult> {
   try {
-    const { stdout, stderr } = await execAsync(`node ${binPath} ${args.join(' ')}`)
+    const { stdout, stderr } = await execAsync(`node ${binPath} ${args.join(' ')}`, {
+      cwd: options?.cwd
+    })
     return { stdout, stderr }
   } catch (err: unknown) {
     const execError = err as { stdout?: string; stderr?: string; message?: string }

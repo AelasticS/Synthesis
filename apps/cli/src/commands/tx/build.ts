@@ -1,22 +1,50 @@
-import { StubCommand } from '../../base/stub-command.js'
+import { existsSync } from 'node:fs'
+import { execSync } from 'node:child_process'
+import { readFile } from 'node:fs/promises'
+import { join } from 'node:path'
 
-export default class TxBuild extends StubCommand {
+import { BaseCommand } from '../../base/base-command.js'
+
+export default class TxBuild extends BaseCommand {
   static override description = 'Build the transformation in the current directory.'
 
   static override examples = ['<%= config.bin %> <%= command.id %>']
 
   public async execute(): Promise<void> {
-    await this.printStub({
-      command: 'tx build',
-      args: {},
-      flags: {},
-      wouldDo: [
-        'compile src/ to dist/',
-        'validate synth.json against schema',
-        'confirm entry export',
-        'verify variability issue ids match @VarPoint',
-        'copy synth.json into dist/'
-      ]
-    })
+    const cwd = this.savedPwd
+
+    // Check for package.json
+    const packageJsonPath = join(cwd, 'package.json')
+    if (!existsSync(packageJsonPath)) {
+      this.error('No package.json found in current directory. Run this command from a transformation project root.')
+    }
+
+    // Read package.json to check for build script
+    const packageJson = JSON.parse(await readFile(packageJsonPath, 'utf-8'))
+
+    this.log('Building transformation...')
+
+    try {
+      // Prefer npm run build if available, fallback to tsc
+      if (packageJson.scripts?.build) {
+        this.log('Running npm run build...')
+        execSync('npm run build', {
+          cwd,
+          stdio: 'inherit'
+        })
+      } else {
+        // Check if tsc is available
+        this.log('No build script found, running tsc directly...')
+        execSync('npx tsc', {
+          cwd,
+          stdio: 'inherit'
+        })
+      }
+
+      this.log('')
+      this.log('Build completed successfully.')
+    } catch {
+      this.error('Build failed. Check the output above for errors.')
+    }
   }
 }
