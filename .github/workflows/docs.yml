@@ -2,31 +2,22 @@ name: Deploy Docs
 
 # Triggered manually only — run via GitHub UI: Actions → Deploy Docs → Run workflow.
 #
-# Intentionally NOT triggered on push to main: docs are deployed only when
-# explicitly ready, not on every commit during active development.
+# Builds the Docusaurus site in this repo (AelasticS/Synthesis) and publishes it
+# to the gh-pages branch of AelasticS/aelastics, which serves it at
+# https://AelasticS.github.io/aelastics/.
 #
-# To enable automatic deployment on release, change the trigger to:
-#   on:
-#     push:
-#       tags:
-#         - 'v*'
-#
-# Branch protection (main): configure in GitHub → Settings → Branches.
-# Require PR + 1 review before merging to main.
+# Prerequisites:
+#   1. Create a Personal Access Token (classic) with `repo` scope, or a
+#      fine-grained PAT with Contents: Read & Write on AelasticS/aelastics.
+#   2. Add it as a secret named DOCS_DEPLOY_TOKEN in this repo:
+#      Settings → Secrets and variables → Actions → New repository secret.
+#   3. On AelasticS/aelastics: Settings → Pages → Source = "Deploy from a branch",
+#      Branch = gh-pages, Folder = / (root).
 on:
   workflow_dispatch:
 
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: pages
-  cancel-in-progress: false
-
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -50,18 +41,11 @@ jobs:
         working-directory: apps/docs
         run: node ../../common/scripts/install-run-rushx.js build
 
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+      - name: Publish to AelasticS/aelastics gh-pages
+        uses: peaceiris/actions-gh-pages@v4
         with:
-          path: apps/docs/build
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+          personal_token: ${{ secrets.DOCS_DEPLOY_TOKEN }}
+          external_repository: AelasticS/aelastics
+          publish_branch: gh-pages
+          publish_dir: apps/docs/build
+          commit_message: "deploy: ${{ github.sha }}"

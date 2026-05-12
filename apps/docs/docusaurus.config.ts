@@ -4,7 +4,8 @@ import type * as Preset from '@docusaurus/preset-classic';
 import type { PluginOptions as TypeDocOptions } from 'docusaurus-plugin-typedoc';
 
 const GITHUB_ORG = 'AelasticS';
-const REPO_NAME = 'Synthesis';
+const SOURCE_REPO = 'Synthesis';
+const PAGES_REPO = 'aelastics';
 
 const config: Config = {
   title: 'Synthesis',
@@ -12,13 +13,17 @@ const config: Config = {
   favicon: 'img/favicon.ico',
 
   url: `https://${GITHUB_ORG}.github.io`,
-  baseUrl: `/${REPO_NAME}/`,
+  baseUrl: `/${PAGES_REPO}/`,
   organizationName: GITHUB_ORG,
-  projectName: REPO_NAME,
+  projectName: PAGES_REPO,
   trailingSlash: false,
 
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
+
+  markdown: {
+    format: 'detect',
+  },
 
   i18n: {
     defaultLocale: 'en',
@@ -32,8 +37,7 @@ const config: Config = {
         id: 'api-result',
         entryPoints: ['../../libraries/aelastics-result/src/aelastics-result.ts'],
         tsconfig: '../../libraries/aelastics-result/tsconfig.json',
-        out: 'result/api',
-        sidebar: { categoryLabel: 'API Reference' },
+        out: 'docs/result/api',
       } satisfies Partial<TypeDocOptions>,
     ],
     [
@@ -42,8 +46,7 @@ const config: Config = {
         id: 'api-types',
         entryPoints: ['../../libraries/aelastics-types/src/index.ts'],
         tsconfig: '../../libraries/aelastics-types/tsconfig.json',
-        out: 'types/api',
-        sidebar: { categoryLabel: 'API Reference' },
+        out: 'docs/types/api',
       } satisfies Partial<TypeDocOptions>,
     ],
     [
@@ -52,8 +55,7 @@ const config: Config = {
         id: 'api-store',
         entryPoints: ['../../libraries/aelastics-store/src/index.ts'],
         tsconfig: '../../libraries/aelastics-store/tsconfig.json',
-        out: 'store/api',
-        sidebar: { categoryLabel: 'API Reference' },
+        out: 'docs/store/api',
       } satisfies Partial<TypeDocOptions>,
     ],
   ],
@@ -101,7 +103,7 @@ const config: Config = {
             },
             {
               label: 'GitHub',
-              href: `https://github.com/${GITHUB_ORG}/${REPO_NAME}`,
+              href: `https://github.com/${GITHUB_ORG}/${SOURCE_REPO}`,
             },
           ],
         },

@@ -15,9 +15,3 @@ defined by the annotation schema.
 
 Annotations are processed using the graph transducer pipeline, so they can be
 read during the same traversal pass that performs validation or DTO conversion.
-
-## What is in this section
-
-| Page | What it covers |
-|---|---|
-| [Annotations](./annotations.md) | Defining annotation schemas, creating annotation values for types, the keyword constants (`$props`, `$elem`, `$union`, `$super`), and processing annotations in a transducer pipeline. |

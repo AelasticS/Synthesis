@@ -46,9 +46,9 @@ Templates are functions returning JSX. Transformations are templates parameteriz
 
 | Page | What you will learn |
 |---|---|
-| [Defining Metamodels](./defining-metamodels) | Type schemas, entity types, associations, subtype hierarchies |
-| [Creating JSX Components](./jsx-components) | Element class, ConnectionInfo, Template/CpxTemplate types, JSX pragma |
-| [Building Model Instances](./building-models) | ModelStore, rendering, references, parameterized templates |
-| [Writing Transformations](./writing-transformations) | abstractM2M, @M2M, @E2E, template method, tracing |
-| [Polymorphic Rule Dispatch](./polymorphic-dispatch) | @SpecPoint, @SpecOption, subtype-based rule selection |
-| [Design Decisions in Transformations](./variability) | Issues, options, bindings, configurations, @VarPoint, @VarOption |
+| [Defining Metamodels](./defining-metamodels.md) | Type schemas, entity types, associations, subtype hierarchies |
+| [Creating JSX Components](./jsx-components.md) | Element class, ConnectionInfo, Template/CpxTemplate types, JSX pragma |
+| [Building Model Instances](./building-models.md) | ModelStore, rendering, references, parameterized templates |
+| [Writing Transformations](./writing-transformations.md) | abstractM2M, @M2M, @E2E, template method, tracing |
+| [Polymorphic Rule Dispatch](./polymorphic-dispatch.md) | @SpecPoint, @SpecOption, subtype-based rule selection |
+| [Design Decisions in Transformations](./variability.md) | Issues, options, bindings, configurations, @VarPoint, @VarOption |
