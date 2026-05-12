@@ -3,6 +3,7 @@
 This document is auto-generated from the oclif command definitions.
 
 * [`synth autocomplete [SHELL]`](#synth-autocomplete-shell)
+* [`synth cd [NAMESPACE]`](#synth-cd-namespace)
 * [`synth config edit REF`](#synth-config-edit-ref)
 * [`synth config init TX`](#synth-config-init-tx)
 * [`synth config ls`](#synth-config-ls)
@@ -73,6 +74,33 @@ EXAMPLES
 ```
 
 _See code: [@oclif/plugin-autocomplete](https://github.com/oclif/plugin-autocomplete/blob/v3.2.49/src/commands/autocomplete/index.ts)_
+
+## `synth cd [NAMESPACE]`
+
+Change or display the current namespace.
+
+```
+USAGE
+  $ synth cd [NAMESPACE] [--workspace <value>] [--ns <value>] [--json] [-q] [-v]
+
+ARGUMENTS
+  [NAMESPACE]  Namespace to switch to. If omitted, shows current namespace.
+
+GLOBAL FLAGS
+  -q, --quiet              Suppress informational output.
+  -v, --verbose            Print debug-level logs.
+      --json               Emit machine-readable JSON.
+      --ns=<value>         Namespace context override (otherwise resolved from config).
+      --workspace=<value>  Override active workspace for this invocation.
+
+DESCRIPTION
+  Change or display the current namespace.
+
+EXAMPLES
+  $ synth cd
+
+  $ synth cd com.example.orders
+```
 
 ## `synth config edit REF`
 

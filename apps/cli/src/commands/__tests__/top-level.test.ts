@@ -1,5 +1,27 @@
 import { runCli } from '../../test-utils/run-cli.js'
 
+describe('cd', () => {
+  it('shows current namespace when no arg given', async () => {
+    const { stdout, error } = await runCli(['cd'])
+    expect(error).toBeUndefined()
+    // Either shows current namespace or "No namespace set"
+    expect(stdout).toBeTruthy()
+  })
+
+  it('switches to existing namespace', async () => {
+    // First ensure namespace exists
+    await runCli(['ns', 'mk', 'com.example.cdtest'])
+    const { stdout, error } = await runCli(['cd', 'com.example.cdtest'])
+    expect(error).toBeUndefined()
+    expect(stdout).toContain('com.example.cdtest')
+  })
+
+  it('errors on non-existent namespace', async () => {
+    const { error } = await runCli(['cd', 'nonexistent.namespace.12345'])
+    expect(error).toBeDefined()
+  })
+})
+
 describe('init', () => {
   it('runs with default path', async () => {
     const { stdout, error } = await runCli(['init'])
