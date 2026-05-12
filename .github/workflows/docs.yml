@@ -33,9 +33,7 @@ jobs:
 
       - name: Build libraries
         run: |
-          node common/scripts/install-run-rush.js build --to aelastics-result
-          node common/scripts/install-run-rush.js build --to aelastics-types
-          node common/scripts/install-run-rush.js build --to aelastics-store
+          node common/scripts/install-run-rush.js build --to @aelastics/result --to @aelastics/types --to @aelastics/store
 
       - name: Build docs
         working-directory: apps/docs
