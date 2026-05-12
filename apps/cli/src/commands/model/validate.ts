@@ -1,8 +1,14 @@
+import { existsSync } from 'node:fs'
+import { readFile } from 'node:fs/promises'
+import { join } from 'node:path'
+
 import { Args, Flags } from '@oclif/core'
 
-import { StubCommand } from '../../base/stub-command.js'
+import { BaseCommand } from '../../base/base-command.js'
+import { getModelsPath } from '../../config/index.js'
+import { EXIT_CODES } from '../../support/exit-codes.js'
 
-export default class ModelValidate extends StubCommand {
+export default class ModelValidate extends BaseCommand {
   static override description = 'Check the model against its metamodel.'
 
   static override examples = [
@@ -26,17 +32,60 @@ export default class ModelValidate extends StubCommand {
   public async execute(): Promise<void> {
     const { args, flags } = await this.parse(ModelValidate)
 
-    const metamodel = flags.against ?? '<from model header>'
+    // Parse the ref (namespace/name format)
+    const refParts = args.ref.split('/')
+    if (refParts.length < 2) {
+      this.error(`Invalid model ref: ${args.ref}. Expected format: namespace/name`, {
+        exit: EXIT_CODES.FAILURE
+      })
+    }
 
-    await this.printStub({
-      command: 'model validate',
-      args: { ref: args.ref },
-      flags: { against: flags.against },
-      wouldDo: [
-        `load model ${args.ref}`,
-        `resolve metamodel ${metamodel}`,
-        'run validator, report errors'
-      ]
-    })
+    const namespace = refParts.slice(0, -1).join('/')
+    const modelName = refParts[refParts.length - 1]
+
+    // Resolve the model file path
+    const modelsDir = getModelsPath(this.workspaceConfig)
+    const modelPath = join(modelsDir, namespace, `${modelName}.json`)
+
+    // Check if the model file exists
+    if (!existsSync(modelPath)) {
+      this.error(`Model not found: ${args.ref} (looked for ${modelPath})`, {
+        exit: EXIT_CODES.NOT_FOUND
+      })
+    }
+
+    // Try to read and parse the JSON
+    let content: string
+    try {
+      content = await readFile(modelPath, 'utf-8')
+    } catch (err) {
+      this.error(`Failed to read model file: ${modelPath}`, {
+        exit: EXIT_CODES.FAILURE
+      })
+    }
+
+    // Validate JSON syntax
+    let parsedModel: unknown
+    try {
+      parsedModel = JSON.parse(content)
+    } catch (err) {
+      const parseError = err as SyntaxError
+      this.error(`Invalid JSON in model ${args.ref}: ${parseError.message}`, {
+        exit: EXIT_CODES.VALIDATION_FAILURE
+      })
+    }
+
+    // Store the --against flag for future metamodel validation
+    const metamodel = flags.against ?? null
+    if (metamodel) {
+      this.log(`[info] Metamodel validation against ${metamodel} not yet implemented`)
+    }
+
+    // Report success
+    this.log(`Model ${args.ref} is valid JSON`)
+    if (typeof parsedModel === 'object' && parsedModel !== null) {
+      const keys = Object.keys(parsedModel)
+      this.log(`  Top-level keys: ${keys.length > 0 ? keys.join(', ') : '(empty object)'}`)
+    }
   }
 }

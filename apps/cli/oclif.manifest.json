@@ -55,6 +55,7 @@
       "pluginName": "@synthesis/cli",
       "pluginType": "core",
       "strict": true,
+      "enableJsonFlag": false,
       "isESM": true,
       "relativePath": [
         "lib",
@@ -217,6 +218,7 @@
       "pluginName": "@synthesis/cli",
       "pluginType": "core",
       "strict": true,
+      "enableJsonFlag": false,
       "isESM": true,
       "relativePath": [
         "lib",
@@ -314,6 +316,7 @@
       "pluginName": "@synthesis/cli",
       "pluginType": "core",
       "strict": true,
+      "enableJsonFlag": false,
       "isESM": true,
       "relativePath": [
         "lib",
@@ -1315,6 +1318,7 @@
       "pluginName": "@synthesis/cli",
       "pluginType": "core",
       "strict": true,
+      "enableJsonFlag": false,
       "isESM": true,
       "relativePath": [
         "lib",
