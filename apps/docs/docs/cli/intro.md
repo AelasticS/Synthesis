@@ -4,8 +4,17 @@ sidebar_position: 1
 
 # Synthesis CLI
 
-`synth` is the command-line tool for the Synthesis model-driven engineering toolkit.
-It lets you validate models, apply transformations, and generate code from templates.
+:::warning Under development
+
+`synth` is not yet implemented. This page describes the intended design and is
+included here to document the planned interface. Commands shown below are not
+runnable today.
+
+:::
+
+`synth` is the planned command-line tool for the Synthesis model-driven
+engineering toolkit. It will let you validate models, apply transformations,
+and generate code from templates.
 
 ## Running
 
