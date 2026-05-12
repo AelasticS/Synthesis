@@ -2,7 +2,7 @@
 sidebar_position: 1
 ---
 
-# Synthesis CLI
+# Synthesis CLI - synth
 
 :::warning Under development
 
