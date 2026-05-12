@@ -320,6 +320,438 @@
         "run.js"
       ]
     },
+    "model:export": {
+      "aliases": [],
+      "args": {
+        "ref": {
+          "description": "Model ref to export.",
+          "name": "ref",
+          "required": true
+        }
+      },
+      "description": "Write a model from the workspace to a file on disk.",
+      "examples": [
+        "<%= config.bin %> <%= command.id %> com.example/order-1",
+        "<%= config.bin %> <%= command.id %> com.example/order-1 --to ./out/order.json"
+      ],
+      "flags": {
+        "workspace": {
+          "description": "Override active workspace for this invocation.",
+          "helpGroup": "GLOBAL",
+          "name": "workspace",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "ns": {
+          "description": "Namespace context override (otherwise resolved from pwd).",
+          "helpGroup": "GLOBAL",
+          "name": "ns",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "json": {
+          "description": "Emit machine-readable JSON.",
+          "helpGroup": "GLOBAL",
+          "name": "json",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "quiet": {
+          "char": "q",
+          "description": "Suppress informational output.",
+          "helpGroup": "GLOBAL",
+          "name": "quiet",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "verbose": {
+          "char": "v",
+          "description": "Print debug-level logs.",
+          "helpGroup": "GLOBAL",
+          "name": "verbose",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "to": {
+          "description": "Destination file path.",
+          "name": "to",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        }
+      },
+      "hasDynamicHelp": false,
+      "hiddenAliases": [],
+      "id": "model:export",
+      "pluginAlias": "@synthesis/cli",
+      "pluginName": "@synthesis/cli",
+      "pluginType": "core",
+      "strict": true,
+      "isESM": true,
+      "relativePath": [
+        "lib",
+        "commands",
+        "model",
+        "export.js"
+      ]
+    },
+    "model:import": {
+      "aliases": [],
+      "args": {
+        "file": {
+          "description": "Path to the JSON file to import.",
+          "name": "file",
+          "required": true
+        }
+      },
+      "description": "Copy a JSON file from disk into the workspace.",
+      "examples": [
+        "<%= config.bin %> <%= command.id %> ./examples/order.json",
+        "<%= config.bin %> <%= command.id %> ./examples/order.json --as com.example/order-1"
+      ],
+      "flags": {
+        "workspace": {
+          "description": "Override active workspace for this invocation.",
+          "helpGroup": "GLOBAL",
+          "name": "workspace",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "ns": {
+          "description": "Namespace context override (otherwise resolved from pwd).",
+          "helpGroup": "GLOBAL",
+          "name": "ns",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "json": {
+          "description": "Emit machine-readable JSON.",
+          "helpGroup": "GLOBAL",
+          "name": "json",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "quiet": {
+          "char": "q",
+          "description": "Suppress informational output.",
+          "helpGroup": "GLOBAL",
+          "name": "quiet",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "verbose": {
+          "char": "v",
+          "description": "Print debug-level logs.",
+          "helpGroup": "GLOBAL",
+          "name": "verbose",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "as": {
+          "description": "Ref to assign to the imported model.",
+          "name": "as",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        }
+      },
+      "hasDynamicHelp": false,
+      "hiddenAliases": [],
+      "id": "model:import",
+      "pluginAlias": "@synthesis/cli",
+      "pluginName": "@synthesis/cli",
+      "pluginType": "core",
+      "strict": true,
+      "isESM": true,
+      "relativePath": [
+        "lib",
+        "commands",
+        "model",
+        "import.js"
+      ]
+    },
+    "model:ls": {
+      "aliases": [],
+      "args": {},
+      "description": "List all models, optionally filtered by namespace.",
+      "examples": [
+        "<%= config.bin %> <%= command.id %>",
+        "<%= config.bin %> <%= command.id %> --ns com.example.orders"
+      ],
+      "flags": {
+        "workspace": {
+          "description": "Override active workspace for this invocation.",
+          "helpGroup": "GLOBAL",
+          "name": "workspace",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "ns": {
+          "description": "Filter models by namespace.",
+          "name": "ns",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "json": {
+          "description": "Emit machine-readable JSON.",
+          "helpGroup": "GLOBAL",
+          "name": "json",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "quiet": {
+          "char": "q",
+          "description": "Suppress informational output.",
+          "helpGroup": "GLOBAL",
+          "name": "quiet",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "verbose": {
+          "char": "v",
+          "description": "Print debug-level logs.",
+          "helpGroup": "GLOBAL",
+          "name": "verbose",
+          "allowNo": false,
+          "type": "boolean"
+        }
+      },
+      "hasDynamicHelp": false,
+      "hiddenAliases": [],
+      "id": "model:ls",
+      "pluginAlias": "@synthesis/cli",
+      "pluginName": "@synthesis/cli",
+      "pluginType": "core",
+      "strict": true,
+      "isESM": true,
+      "relativePath": [
+        "lib",
+        "commands",
+        "model",
+        "ls.js"
+      ]
+    },
+    "model:rm": {
+      "aliases": [],
+      "args": {
+        "ref": {
+          "description": "Model ref to delete.",
+          "name": "ref",
+          "required": true
+        }
+      },
+      "description": "Delete a model from the workspace.",
+      "examples": [
+        "<%= config.bin %> <%= command.id %> com.example/order-1"
+      ],
+      "flags": {
+        "workspace": {
+          "description": "Override active workspace for this invocation.",
+          "helpGroup": "GLOBAL",
+          "name": "workspace",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "ns": {
+          "description": "Namespace context override (otherwise resolved from pwd).",
+          "helpGroup": "GLOBAL",
+          "name": "ns",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "json": {
+          "description": "Emit machine-readable JSON.",
+          "helpGroup": "GLOBAL",
+          "name": "json",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "quiet": {
+          "char": "q",
+          "description": "Suppress informational output.",
+          "helpGroup": "GLOBAL",
+          "name": "quiet",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "verbose": {
+          "char": "v",
+          "description": "Print debug-level logs.",
+          "helpGroup": "GLOBAL",
+          "name": "verbose",
+          "allowNo": false,
+          "type": "boolean"
+        }
+      },
+      "hasDynamicHelp": false,
+      "hiddenAliases": [],
+      "id": "model:rm",
+      "pluginAlias": "@synthesis/cli",
+      "pluginName": "@synthesis/cli",
+      "pluginType": "core",
+      "strict": true,
+      "isESM": true,
+      "relativePath": [
+        "lib",
+        "commands",
+        "model",
+        "rm.js"
+      ]
+    },
+    "model:show": {
+      "aliases": [],
+      "args": {
+        "ref": {
+          "description": "Model ref (namespace/name).",
+          "name": "ref",
+          "required": true
+        }
+      },
+      "description": "Print a model's metadata and element summary.",
+      "examples": [
+        "<%= config.bin %> <%= command.id %> com.example/order-1"
+      ],
+      "flags": {
+        "workspace": {
+          "description": "Override active workspace for this invocation.",
+          "helpGroup": "GLOBAL",
+          "name": "workspace",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "ns": {
+          "description": "Namespace context override (otherwise resolved from pwd).",
+          "helpGroup": "GLOBAL",
+          "name": "ns",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "json": {
+          "description": "Emit machine-readable JSON.",
+          "helpGroup": "GLOBAL",
+          "name": "json",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "quiet": {
+          "char": "q",
+          "description": "Suppress informational output.",
+          "helpGroup": "GLOBAL",
+          "name": "quiet",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "verbose": {
+          "char": "v",
+          "description": "Print debug-level logs.",
+          "helpGroup": "GLOBAL",
+          "name": "verbose",
+          "allowNo": false,
+          "type": "boolean"
+        }
+      },
+      "hasDynamicHelp": false,
+      "hiddenAliases": [],
+      "id": "model:show",
+      "pluginAlias": "@synthesis/cli",
+      "pluginName": "@synthesis/cli",
+      "pluginType": "core",
+      "strict": true,
+      "isESM": true,
+      "relativePath": [
+        "lib",
+        "commands",
+        "model",
+        "show.js"
+      ]
+    },
+    "model:validate": {
+      "aliases": [],
+      "args": {
+        "ref": {
+          "description": "Model ref to validate.",
+          "name": "ref",
+          "required": true
+        }
+      },
+      "description": "Check the model against its metamodel.",
+      "examples": [
+        "<%= config.bin %> <%= command.id %> com.example/order-1",
+        "<%= config.bin %> <%= command.id %> com.example/order-1 --against @aelastics/order-metamodel"
+      ],
+      "flags": {
+        "workspace": {
+          "description": "Override active workspace for this invocation.",
+          "helpGroup": "GLOBAL",
+          "name": "workspace",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "ns": {
+          "description": "Namespace context override (otherwise resolved from pwd).",
+          "helpGroup": "GLOBAL",
+          "name": "ns",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "json": {
+          "description": "Emit machine-readable JSON.",
+          "helpGroup": "GLOBAL",
+          "name": "json",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "quiet": {
+          "char": "q",
+          "description": "Suppress informational output.",
+          "helpGroup": "GLOBAL",
+          "name": "quiet",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "verbose": {
+          "char": "v",
+          "description": "Print debug-level logs.",
+          "helpGroup": "GLOBAL",
+          "name": "verbose",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "against": {
+          "description": "Metamodel to validate against (defaults to model header).",
+          "name": "against",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        }
+      },
+      "hasDynamicHelp": false,
+      "hiddenAliases": [],
+      "id": "model:validate",
+      "pluginAlias": "@synthesis/cli",
+      "pluginName": "@synthesis/cli",
+      "pluginType": "core",
+      "strict": true,
+      "isESM": true,
+      "relativePath": [
+        "lib",
+        "commands",
+        "model",
+        "validate.js"
+      ]
+    },
     "config:edit": {
       "aliases": [],
       "args": {
@@ -888,6 +1320,77 @@
         "commands",
         "ns",
         "rm.js"
+      ]
+    },
+    "workspace": {
+      "aliases": [],
+      "args": {},
+      "description": "Print or switch the active workspace.",
+      "examples": [
+        "<%= config.bin %> <%= command.id %>",
+        "<%= config.bin %> <%= command.id %> --set ~/other-workspace"
+      ],
+      "flags": {
+        "workspace": {
+          "description": "Override active workspace for this invocation.",
+          "helpGroup": "GLOBAL",
+          "name": "workspace",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "ns": {
+          "description": "Namespace context override (otherwise resolved from pwd).",
+          "helpGroup": "GLOBAL",
+          "name": "ns",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "json": {
+          "description": "Emit machine-readable JSON.",
+          "helpGroup": "GLOBAL",
+          "name": "json",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "quiet": {
+          "char": "q",
+          "description": "Suppress informational output.",
+          "helpGroup": "GLOBAL",
+          "name": "quiet",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "verbose": {
+          "char": "v",
+          "description": "Print debug-level logs.",
+          "helpGroup": "GLOBAL",
+          "name": "verbose",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "set": {
+          "description": "Switch the active workspace to this path.",
+          "name": "set",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        }
+      },
+      "hasDynamicHelp": false,
+      "hiddenAliases": [],
+      "id": "workspace",
+      "pluginAlias": "@synthesis/cli",
+      "pluginName": "@synthesis/cli",
+      "pluginType": "core",
+      "strict": true,
+      "isESM": true,
+      "relativePath": [
+        "lib",
+        "commands",
+        "workspace",
+        "index.js"
       ]
     },
     "tx:build": {
@@ -1482,509 +1985,6 @@
         "commands",
         "tx",
         "uninstall.js"
-      ]
-    },
-    "workspace": {
-      "aliases": [],
-      "args": {},
-      "description": "Print or switch the active workspace.",
-      "examples": [
-        "<%= config.bin %> <%= command.id %>",
-        "<%= config.bin %> <%= command.id %> --set ~/other-workspace"
-      ],
-      "flags": {
-        "workspace": {
-          "description": "Override active workspace for this invocation.",
-          "helpGroup": "GLOBAL",
-          "name": "workspace",
-          "hasDynamicHelp": false,
-          "multiple": false,
-          "type": "option"
-        },
-        "ns": {
-          "description": "Namespace context override (otherwise resolved from pwd).",
-          "helpGroup": "GLOBAL",
-          "name": "ns",
-          "hasDynamicHelp": false,
-          "multiple": false,
-          "type": "option"
-        },
-        "json": {
-          "description": "Emit machine-readable JSON.",
-          "helpGroup": "GLOBAL",
-          "name": "json",
-          "allowNo": false,
-          "type": "boolean"
-        },
-        "quiet": {
-          "char": "q",
-          "description": "Suppress informational output.",
-          "helpGroup": "GLOBAL",
-          "name": "quiet",
-          "allowNo": false,
-          "type": "boolean"
-        },
-        "verbose": {
-          "char": "v",
-          "description": "Print debug-level logs.",
-          "helpGroup": "GLOBAL",
-          "name": "verbose",
-          "allowNo": false,
-          "type": "boolean"
-        },
-        "set": {
-          "description": "Switch the active workspace to this path.",
-          "name": "set",
-          "hasDynamicHelp": false,
-          "multiple": false,
-          "type": "option"
-        }
-      },
-      "hasDynamicHelp": false,
-      "hiddenAliases": [],
-      "id": "workspace",
-      "pluginAlias": "@synthesis/cli",
-      "pluginName": "@synthesis/cli",
-      "pluginType": "core",
-      "strict": true,
-      "isESM": true,
-      "relativePath": [
-        "lib",
-        "commands",
-        "workspace",
-        "index.js"
-      ]
-    },
-    "model:export": {
-      "aliases": [],
-      "args": {
-        "ref": {
-          "description": "Model ref to export.",
-          "name": "ref",
-          "required": true
-        }
-      },
-      "description": "Write a model from the workspace to a file on disk.",
-      "examples": [
-        "<%= config.bin %> <%= command.id %> com.example/order-1",
-        "<%= config.bin %> <%= command.id %> com.example/order-1 --to ./out/order.json"
-      ],
-      "flags": {
-        "workspace": {
-          "description": "Override active workspace for this invocation.",
-          "helpGroup": "GLOBAL",
-          "name": "workspace",
-          "hasDynamicHelp": false,
-          "multiple": false,
-          "type": "option"
-        },
-        "ns": {
-          "description": "Namespace context override (otherwise resolved from pwd).",
-          "helpGroup": "GLOBAL",
-          "name": "ns",
-          "hasDynamicHelp": false,
-          "multiple": false,
-          "type": "option"
-        },
-        "json": {
-          "description": "Emit machine-readable JSON.",
-          "helpGroup": "GLOBAL",
-          "name": "json",
-          "allowNo": false,
-          "type": "boolean"
-        },
-        "quiet": {
-          "char": "q",
-          "description": "Suppress informational output.",
-          "helpGroup": "GLOBAL",
-          "name": "quiet",
-          "allowNo": false,
-          "type": "boolean"
-        },
-        "verbose": {
-          "char": "v",
-          "description": "Print debug-level logs.",
-          "helpGroup": "GLOBAL",
-          "name": "verbose",
-          "allowNo": false,
-          "type": "boolean"
-        },
-        "to": {
-          "description": "Destination file path.",
-          "name": "to",
-          "hasDynamicHelp": false,
-          "multiple": false,
-          "type": "option"
-        }
-      },
-      "hasDynamicHelp": false,
-      "hiddenAliases": [],
-      "id": "model:export",
-      "pluginAlias": "@synthesis/cli",
-      "pluginName": "@synthesis/cli",
-      "pluginType": "core",
-      "strict": true,
-      "isESM": true,
-      "relativePath": [
-        "lib",
-        "commands",
-        "model",
-        "export.js"
-      ]
-    },
-    "model:import": {
-      "aliases": [],
-      "args": {
-        "file": {
-          "description": "Path to the JSON file to import.",
-          "name": "file",
-          "required": true
-        }
-      },
-      "description": "Copy a JSON file from disk into the workspace.",
-      "examples": [
-        "<%= config.bin %> <%= command.id %> ./examples/order.json",
-        "<%= config.bin %> <%= command.id %> ./examples/order.json --as com.example/order-1"
-      ],
-      "flags": {
-        "workspace": {
-          "description": "Override active workspace for this invocation.",
-          "helpGroup": "GLOBAL",
-          "name": "workspace",
-          "hasDynamicHelp": false,
-          "multiple": false,
-          "type": "option"
-        },
-        "ns": {
-          "description": "Namespace context override (otherwise resolved from pwd).",
-          "helpGroup": "GLOBAL",
-          "name": "ns",
-          "hasDynamicHelp": false,
-          "multiple": false,
-          "type": "option"
-        },
-        "json": {
-          "description": "Emit machine-readable JSON.",
-          "helpGroup": "GLOBAL",
-          "name": "json",
-          "allowNo": false,
-          "type": "boolean"
-        },
-        "quiet": {
-          "char": "q",
-          "description": "Suppress informational output.",
-          "helpGroup": "GLOBAL",
-          "name": "quiet",
-          "allowNo": false,
-          "type": "boolean"
-        },
-        "verbose": {
-          "char": "v",
-          "description": "Print debug-level logs.",
-          "helpGroup": "GLOBAL",
-          "name": "verbose",
-          "allowNo": false,
-          "type": "boolean"
-        },
-        "as": {
-          "description": "Ref to assign to the imported model.",
-          "name": "as",
-          "hasDynamicHelp": false,
-          "multiple": false,
-          "type": "option"
-        }
-      },
-      "hasDynamicHelp": false,
-      "hiddenAliases": [],
-      "id": "model:import",
-      "pluginAlias": "@synthesis/cli",
-      "pluginName": "@synthesis/cli",
-      "pluginType": "core",
-      "strict": true,
-      "isESM": true,
-      "relativePath": [
-        "lib",
-        "commands",
-        "model",
-        "import.js"
-      ]
-    },
-    "model:ls": {
-      "aliases": [],
-      "args": {},
-      "description": "List all models, optionally filtered by namespace.",
-      "examples": [
-        "<%= config.bin %> <%= command.id %>",
-        "<%= config.bin %> <%= command.id %> --ns com.example.orders"
-      ],
-      "flags": {
-        "workspace": {
-          "description": "Override active workspace for this invocation.",
-          "helpGroup": "GLOBAL",
-          "name": "workspace",
-          "hasDynamicHelp": false,
-          "multiple": false,
-          "type": "option"
-        },
-        "ns": {
-          "description": "Filter models by namespace.",
-          "name": "ns",
-          "hasDynamicHelp": false,
-          "multiple": false,
-          "type": "option"
-        },
-        "json": {
-          "description": "Emit machine-readable JSON.",
-          "helpGroup": "GLOBAL",
-          "name": "json",
-          "allowNo": false,
-          "type": "boolean"
-        },
-        "quiet": {
-          "char": "q",
-          "description": "Suppress informational output.",
-          "helpGroup": "GLOBAL",
-          "name": "quiet",
-          "allowNo": false,
-          "type": "boolean"
-        },
-        "verbose": {
-          "char": "v",
-          "description": "Print debug-level logs.",
-          "helpGroup": "GLOBAL",
-          "name": "verbose",
-          "allowNo": false,
-          "type": "boolean"
-        }
-      },
-      "hasDynamicHelp": false,
-      "hiddenAliases": [],
-      "id": "model:ls",
-      "pluginAlias": "@synthesis/cli",
-      "pluginName": "@synthesis/cli",
-      "pluginType": "core",
-      "strict": true,
-      "isESM": true,
-      "relativePath": [
-        "lib",
-        "commands",
-        "model",
-        "ls.js"
-      ]
-    },
-    "model:rm": {
-      "aliases": [],
-      "args": {
-        "ref": {
-          "description": "Model ref to delete.",
-          "name": "ref",
-          "required": true
-        }
-      },
-      "description": "Delete a model from the workspace.",
-      "examples": [
-        "<%= config.bin %> <%= command.id %> com.example/order-1"
-      ],
-      "flags": {
-        "workspace": {
-          "description": "Override active workspace for this invocation.",
-          "helpGroup": "GLOBAL",
-          "name": "workspace",
-          "hasDynamicHelp": false,
-          "multiple": false,
-          "type": "option"
-        },
-        "ns": {
-          "description": "Namespace context override (otherwise resolved from pwd).",
-          "helpGroup": "GLOBAL",
-          "name": "ns",
-          "hasDynamicHelp": false,
-          "multiple": false,
-          "type": "option"
-        },
-        "json": {
-          "description": "Emit machine-readable JSON.",
-          "helpGroup": "GLOBAL",
-          "name": "json",
-          "allowNo": false,
-          "type": "boolean"
-        },
-        "quiet": {
-          "char": "q",
-          "description": "Suppress informational output.",
-          "helpGroup": "GLOBAL",
-          "name": "quiet",
-          "allowNo": false,
-          "type": "boolean"
-        },
-        "verbose": {
-          "char": "v",
-          "description": "Print debug-level logs.",
-          "helpGroup": "GLOBAL",
-          "name": "verbose",
-          "allowNo": false,
-          "type": "boolean"
-        }
-      },
-      "hasDynamicHelp": false,
-      "hiddenAliases": [],
-      "id": "model:rm",
-      "pluginAlias": "@synthesis/cli",
-      "pluginName": "@synthesis/cli",
-      "pluginType": "core",
-      "strict": true,
-      "isESM": true,
-      "relativePath": [
-        "lib",
-        "commands",
-        "model",
-        "rm.js"
-      ]
-    },
-    "model:show": {
-      "aliases": [],
-      "args": {
-        "ref": {
-          "description": "Model ref (namespace/name).",
-          "name": "ref",
-          "required": true
-        }
-      },
-      "description": "Print a model's metadata and element summary.",
-      "examples": [
-        "<%= config.bin %> <%= command.id %> com.example/order-1"
-      ],
-      "flags": {
-        "workspace": {
-          "description": "Override active workspace for this invocation.",
-          "helpGroup": "GLOBAL",
-          "name": "workspace",
-          "hasDynamicHelp": false,
-          "multiple": false,
-          "type": "option"
-        },
-        "ns": {
-          "description": "Namespace context override (otherwise resolved from pwd).",
-          "helpGroup": "GLOBAL",
-          "name": "ns",
-          "hasDynamicHelp": false,
-          "multiple": false,
-          "type": "option"
-        },
-        "json": {
-          "description": "Emit machine-readable JSON.",
-          "helpGroup": "GLOBAL",
-          "name": "json",
-          "allowNo": false,
-          "type": "boolean"
-        },
-        "quiet": {
-          "char": "q",
-          "description": "Suppress informational output.",
-          "helpGroup": "GLOBAL",
-          "name": "quiet",
-          "allowNo": false,
-          "type": "boolean"
-        },
-        "verbose": {
-          "char": "v",
-          "description": "Print debug-level logs.",
-          "helpGroup": "GLOBAL",
-          "name": "verbose",
-          "allowNo": false,
-          "type": "boolean"
-        }
-      },
-      "hasDynamicHelp": false,
-      "hiddenAliases": [],
-      "id": "model:show",
-      "pluginAlias": "@synthesis/cli",
-      "pluginName": "@synthesis/cli",
-      "pluginType": "core",
-      "strict": true,
-      "isESM": true,
-      "relativePath": [
-        "lib",
-        "commands",
-        "model",
-        "show.js"
-      ]
-    },
-    "model:validate": {
-      "aliases": [],
-      "args": {
-        "ref": {
-          "description": "Model ref to validate.",
-          "name": "ref",
-          "required": true
-        }
-      },
-      "description": "Check the model against its metamodel.",
-      "examples": [
-        "<%= config.bin %> <%= command.id %> com.example/order-1",
-        "<%= config.bin %> <%= command.id %> com.example/order-1 --against @aelastics/order-metamodel"
-      ],
-      "flags": {
-        "workspace": {
-          "description": "Override active workspace for this invocation.",
-          "helpGroup": "GLOBAL",
-          "name": "workspace",
-          "hasDynamicHelp": false,
-          "multiple": false,
-          "type": "option"
-        },
-        "ns": {
-          "description": "Namespace context override (otherwise resolved from pwd).",
-          "helpGroup": "GLOBAL",
-          "name": "ns",
-          "hasDynamicHelp": false,
-          "multiple": false,
-          "type": "option"
-        },
-        "json": {
-          "description": "Emit machine-readable JSON.",
-          "helpGroup": "GLOBAL",
-          "name": "json",
-          "allowNo": false,
-          "type": "boolean"
-        },
-        "quiet": {
-          "char": "q",
-          "description": "Suppress informational output.",
-          "helpGroup": "GLOBAL",
-          "name": "quiet",
-          "allowNo": false,
-          "type": "boolean"
-        },
-        "verbose": {
-          "char": "v",
-          "description": "Print debug-level logs.",
-          "helpGroup": "GLOBAL",
-          "name": "verbose",
-          "allowNo": false,
-          "type": "boolean"
-        },
-        "against": {
-          "description": "Metamodel to validate against (defaults to model header).",
-          "name": "against",
-          "hasDynamicHelp": false,
-          "multiple": false,
-          "type": "option"
-        }
-      },
-      "hasDynamicHelp": false,
-      "hiddenAliases": [],
-      "id": "model:validate",
-      "pluginAlias": "@synthesis/cli",
-      "pluginName": "@synthesis/cli",
-      "pluginType": "core",
-      "strict": true,
-      "isESM": true,
-      "relativePath": [
-        "lib",
-        "commands",
-        "model",
-        "validate.js"
       ]
     }
   },

@@ -13,6 +13,26 @@
           "taskPlugin": {
             "pluginPackage": "@rushstack/heft-typescript-plugin"
           }
+        },
+        "oclif-manifest": {
+          "taskDependencies": ["typescript"],
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft",
+            "pluginName": "run-script-plugin",
+            "options": {
+              "scriptPath": "./config/generate-oclif-manifest.mjs"
+            }
+          }
+        },
+        "oclif-readme": {
+          "taskDependencies": ["oclif-manifest"],
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft",
+            "pluginName": "run-script-plugin",
+            "options": {
+              "scriptPath": "./config/generate-oclif-readme.mjs"
+            }
+          }
         }
       }
     },
