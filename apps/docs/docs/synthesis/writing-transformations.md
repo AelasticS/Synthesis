@@ -249,3 +249,5 @@ abstractM2M<Source, Destination, ExtraModels, ConfigModel>
 | `ConfigModel` | Decision/configuration model for variability | `undefined` |
 
 Extra models and configuration models are covered in [Design Decisions in Transformations](./variability).
+
+Once your transformation is written, see [Packaging Transformations](../cli/packaging-transformations) for how to build, package, and publish it so others can install it with `synth tx install`.
