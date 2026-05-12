@@ -12,10 +12,14 @@ Synthesis is a TypeScript monorepo for model-driven software engineering. It pro
 | Section | Description |
 |---|---|
 | [Synthesis eDSL](./synthesis/) | Developer guide for the core eDSL. Define metamodels as type schemas, build models with JSX, write transformations with typed rules and automatic tracing, configure variability with design decisions. |
-| [synth CLI](./cli/intro) | Command-line tool for running transformations and generating code |
+| [synth CLI](./cli/intro) | Run, package, install, and share transformations as npm packages |
 | [@aelastics/types](./types/intro) | Runtime type system with schemas, validation, and graph transducers |
 | [@aelastics/store](./store/intro) | Reactive model store built on MobX |
 | [@aelastics/result](./result/intro) | Typed success/failure result handling without exceptions |
+
+## Ecosystem
+
+Transformations are first-class, distributable artifacts. Authors package transformations with `synth tx build` and publish to npm; users install with `synth tx install` and run with `synth run`. See [Packaging Transformations](./cli/packaging-transformations).
 
 ## History
 

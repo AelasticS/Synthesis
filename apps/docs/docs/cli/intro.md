@@ -33,6 +33,17 @@ ceremony for everyday tasks:
 The CLI is not a replacement for the libraries; it is a thin layer that
 operates on the same artifacts.
 
+## Two kinds of users
+
+The CLI serves two audiences in one tool:
+
+- **Consumers** — install community transformations, validate models, run
+  transformations against their data. Most users start here.
+- **Authors** — scaffold a new transformation project (`synth tx init`),
+  build and validate it (`synth tx build`), publish to npm
+  (`synth tx publish`). See [Packaging Transformations](./packaging-transformations)
+  for the full workflow.
+
 ## Installation
 
 ```bash

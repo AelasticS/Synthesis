@@ -52,3 +52,7 @@ Templates are functions returning JSX. Transformations are templates parameteriz
 | [Writing Transformations](./writing-transformations.md) | abstractM2M, @M2M, @E2E, template method, tracing |
 | [Polymorphic Rule Dispatch](./polymorphic-dispatch.md) | @SpecPoint, @SpecOption, subtype-based rule selection |
 | [Design Decisions in Transformations](./variability.md) | Issues, options, bindings, configurations, @VarPoint, @VarOption |
+
+## Sharing your work
+
+A transformation is more than code — it can be packaged as an installable npm package with a `synth.json` manifest describing its source and target metamodels and any variability points. See [Packaging Transformations](../cli/packaging-transformations.md) in the CLI section.
