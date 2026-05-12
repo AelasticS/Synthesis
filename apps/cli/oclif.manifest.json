@@ -891,78 +891,6 @@
         "rm.js"
       ]
     },
-    "workspace": {
-      "aliases": [],
-      "args": {},
-      "description": "Print or switch the active workspace.",
-      "examples": [
-        "<%= config.bin %> <%= command.id %>",
-        "<%= config.bin %> <%= command.id %> --set ~/other-workspace"
-      ],
-      "flags": {
-        "workspace": {
-          "description": "Override active workspace for this invocation.",
-          "helpGroup": "GLOBAL",
-          "name": "workspace",
-          "hasDynamicHelp": false,
-          "multiple": false,
-          "type": "option"
-        },
-        "ns": {
-          "description": "Namespace context override (otherwise resolved from config).",
-          "helpGroup": "GLOBAL",
-          "name": "ns",
-          "hasDynamicHelp": false,
-          "multiple": false,
-          "type": "option"
-        },
-        "json": {
-          "description": "Emit machine-readable JSON.",
-          "helpGroup": "GLOBAL",
-          "name": "json",
-          "allowNo": false,
-          "type": "boolean"
-        },
-        "quiet": {
-          "char": "q",
-          "description": "Suppress informational output.",
-          "helpGroup": "GLOBAL",
-          "name": "quiet",
-          "allowNo": false,
-          "type": "boolean"
-        },
-        "verbose": {
-          "char": "v",
-          "description": "Print debug-level logs.",
-          "helpGroup": "GLOBAL",
-          "name": "verbose",
-          "allowNo": false,
-          "type": "boolean"
-        },
-        "set": {
-          "description": "Switch the active workspace to this path.",
-          "name": "set",
-          "hasDynamicHelp": false,
-          "multiple": false,
-          "type": "option"
-        }
-      },
-      "hasDynamicHelp": false,
-      "hiddenAliases": [],
-      "id": "workspace",
-      "pluginAlias": "@synthesis/cli",
-      "pluginName": "@synthesis/cli",
-      "pluginType": "core",
-      "strict": true,
-      "enableJsonFlag": false,
-      "isESM": true,
-      "relativePath": [
-        "lib",
-        "commands",
-        "workspace",
-        "index.js"
-      ]
-    },
     "tx:build": {
       "aliases": [],
       "args": {},
@@ -1018,6 +946,7 @@
       "pluginName": "@synthesis/cli",
       "pluginType": "core",
       "strict": true,
+      "enableJsonFlag": false,
       "isESM": true,
       "relativePath": [
         "lib",
@@ -1087,6 +1016,7 @@
       "pluginName": "@synthesis/cli",
       "pluginType": "core",
       "strict": true,
+      "enableJsonFlag": false,
       "isESM": true,
       "relativePath": [
         "lib",
@@ -1159,7 +1089,6 @@
       "pluginName": "@synthesis/cli",
       "pluginType": "core",
       "strict": true,
-      "enableJsonFlag": false,
       "isESM": true,
       "relativePath": [
         "lib",
@@ -1223,7 +1152,6 @@
       "pluginName": "@synthesis/cli",
       "pluginType": "core",
       "strict": true,
-      "enableJsonFlag": false,
       "isESM": true,
       "relativePath": [
         "lib",
@@ -1287,6 +1215,7 @@
       "pluginName": "@synthesis/cli",
       "pluginType": "core",
       "strict": true,
+      "enableJsonFlag": false,
       "isESM": true,
       "relativePath": [
         "lib",
@@ -1300,7 +1229,9 @@
       "args": {},
       "description": "Publish the transformation to npm.",
       "examples": [
-        "<%= config.bin %> <%= command.id %>"
+        "<%= config.bin %> <%= command.id %>",
+        "<%= config.bin %> <%= command.id %> --access public",
+        "<%= config.bin %> <%= command.id %> --tag beta"
       ],
       "flags": {
         "workspace": {
@@ -1341,6 +1272,31 @@
           "name": "verbose",
           "allowNo": false,
           "type": "boolean"
+        },
+        "access": {
+          "description": "Package access level (public or restricted).",
+          "name": "access",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "options": [
+            "public",
+            "restricted"
+          ],
+          "type": "option"
+        },
+        "tag": {
+          "description": "Tag to publish with (e.g., beta, next).",
+          "name": "tag",
+          "default": "latest",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "dry-run": {
+          "description": "Perform a dry run without actually publishing.",
+          "name": "dry-run",
+          "allowNo": false,
+          "type": "boolean"
         }
       },
       "hasDynamicHelp": false,
@@ -1350,6 +1306,7 @@
       "pluginName": "@synthesis/cli",
       "pluginType": "core",
       "strict": true,
+      "enableJsonFlag": false,
       "isESM": true,
       "relativePath": [
         "lib",
@@ -1419,7 +1376,6 @@
       "pluginName": "@synthesis/cli",
       "pluginType": "core",
       "strict": true,
-      "enableJsonFlag": false,
       "isESM": true,
       "relativePath": [
         "lib",
@@ -1483,6 +1439,7 @@
       "pluginName": "@synthesis/cli",
       "pluginType": "core",
       "strict": true,
+      "enableJsonFlag": false,
       "isESM": true,
       "relativePath": [
         "lib",
@@ -1552,13 +1509,84 @@
       "pluginName": "@synthesis/cli",
       "pluginType": "core",
       "strict": true,
-      "enableJsonFlag": false,
       "isESM": true,
       "relativePath": [
         "lib",
         "commands",
         "tx",
         "uninstall.js"
+      ]
+    },
+    "workspace": {
+      "aliases": [],
+      "args": {},
+      "description": "Print or switch the active workspace.",
+      "examples": [
+        "<%= config.bin %> <%= command.id %>",
+        "<%= config.bin %> <%= command.id %> --set ~/other-workspace"
+      ],
+      "flags": {
+        "workspace": {
+          "description": "Override active workspace for this invocation.",
+          "helpGroup": "GLOBAL",
+          "name": "workspace",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "ns": {
+          "description": "Namespace context override (otherwise resolved from config).",
+          "helpGroup": "GLOBAL",
+          "name": "ns",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        },
+        "json": {
+          "description": "Emit machine-readable JSON.",
+          "helpGroup": "GLOBAL",
+          "name": "json",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "quiet": {
+          "char": "q",
+          "description": "Suppress informational output.",
+          "helpGroup": "GLOBAL",
+          "name": "quiet",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "verbose": {
+          "char": "v",
+          "description": "Print debug-level logs.",
+          "helpGroup": "GLOBAL",
+          "name": "verbose",
+          "allowNo": false,
+          "type": "boolean"
+        },
+        "set": {
+          "description": "Switch the active workspace to this path.",
+          "name": "set",
+          "hasDynamicHelp": false,
+          "multiple": false,
+          "type": "option"
+        }
+      },
+      "hasDynamicHelp": false,
+      "hiddenAliases": [],
+      "id": "workspace",
+      "pluginAlias": "@synthesis/cli",
+      "pluginName": "@synthesis/cli",
+      "pluginType": "core",
+      "strict": true,
+      "enableJsonFlag": false,
+      "isESM": true,
+      "relativePath": [
+        "lib",
+        "commands",
+        "workspace",
+        "index.js"
       ]
     },
     "model:export": {
