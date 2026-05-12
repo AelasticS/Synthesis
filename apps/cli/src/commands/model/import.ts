@@ -1,8 +1,13 @@
+import { readFile, writeFile, mkdir } from 'node:fs/promises'
+import { existsSync } from 'node:fs'
+import { join, basename } from 'node:path'
 import { Args, Flags } from '@oclif/core'
 
-import { StubCommand } from '../../base/stub-command.js'
+import { BaseCommand } from '../../base/base-command.js'
+import { getNamespacePath } from '../../config/index.js'
+import { parseRef } from '../../types/refs.js'
 
-export default class ModelImport extends StubCommand {
+export default class ModelImport extends BaseCommand {
   static override description = 'Copy a JSON file from disk into the workspace.'
 
   static override examples = [
@@ -19,20 +24,88 @@ export default class ModelImport extends StubCommand {
 
   static override flags = {
     as: Flags.string({
-      description: 'Ref to assign to the imported model.'
+      description: 'Ref to assign to the imported model (namespace/name).'
     })
   }
 
   public async execute(): Promise<void> {
     const { args, flags } = await this.parse(ModelImport)
 
-    const refTarget = flags.as ?? '<derived from file>'
+    // Resolve source file path
+    const sourcePath = args.file.startsWith('/')
+      ? args.file
+      : join(this.savedPwd, args.file)
 
-    await this.printStub({
-      command: 'model import',
-      args: { file: args.file },
-      flags: { as: flags.as },
-      wouldDo: [`read ${args.file}`, `copy into <workspace>/models/${refTarget}`]
-    })
+    if (!existsSync(sourcePath)) {
+      if (flags.json) {
+        this.log(JSON.stringify({ error: `Source file not found: ${sourcePath}` }))
+      } else {
+        this.error(`Source file not found: ${sourcePath}`)
+      }
+      return
+    }
+
+    // Determine target ref
+    let namespace: string
+    let name: string
+
+    if (flags.as) {
+      const parsed = parseRef(flags.as)
+      if (!parsed) {
+        if (flags.json) {
+          this.log(JSON.stringify({ error: `Invalid ref format: ${flags.as}. Expected namespace/name.` }))
+        } else {
+          this.error(`Invalid ref format: ${flags.as}. Expected namespace/name.`)
+        }
+        return
+      }
+      namespace = parsed.namespace
+      name = parsed.name
+    } else {
+      // Use current namespace and derive name from filename
+      if (!this.workspaceConfig.currentNamespace) {
+        if (flags.json) {
+          this.log(JSON.stringify({ error: 'No namespace set. Use --as or set a current namespace.' }))
+        } else {
+          this.error('No namespace set. Use --as or set a current namespace.')
+        }
+        return
+      }
+      namespace = this.workspaceConfig.currentNamespace
+      name = basename(sourcePath, '.json')
+    }
+
+    // Read source file
+    const content = await readFile(sourcePath, 'utf-8')
+
+    // Validate it's valid JSON
+    try {
+      JSON.parse(content)
+    } catch {
+      if (flags.json) {
+        this.log(JSON.stringify({ error: `Source file is not valid JSON: ${sourcePath}` }))
+      } else {
+        this.error(`Source file is not valid JSON: ${sourcePath}`)
+      }
+      return
+    }
+
+    // Ensure namespace directory exists
+    const nsPath = getNamespacePath(this.workspaceConfig, namespace)
+    if (!existsSync(nsPath)) {
+      await mkdir(nsPath, { recursive: true })
+    }
+
+    // Write to destination
+    const destPath = join(nsPath, `${name}.json`)
+    await writeFile(destPath, content, 'utf-8')
+
+    const ref = `${namespace}/${name}`
+
+    if (flags.json) {
+      this.log(JSON.stringify({ imported: ref, source: sourcePath, destination: destPath }))
+    } else {
+      this.log(`Imported ${ref}`)
+    }
   }
 }

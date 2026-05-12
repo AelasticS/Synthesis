@@ -14,13 +14,31 @@ export interface RunResult {
   error?: Error
 }
 
+export interface RunOptions {
+  /** Override HOME directory for config resolution */
+  home?: string
+  /** Working directory for the command */
+  cwd?: string
+}
+
 /**
  * Run the CLI as a subprocess and capture output.
  * Use this instead of @oclif/test's runCommand to avoid Jest ESM issues.
  */
-export async function runCli(args: string[]): Promise<RunResult> {
+export async function runCli(args: string[], options?: RunOptions): Promise<RunResult> {
+  const env = { ...process.env }
+  if (options?.home) {
+    env.HOME = options.home
+  }
+
   try {
-    const { stdout, stderr } = await execAsync(`node ${binPath} ${args.join(' ')}`)
+    const { stdout, stderr } = await execAsync(
+      `node ${binPath} ${args.join(' ')}`,
+      {
+        env,
+        cwd: options?.cwd
+      }
+    )
     return { stdout, stderr }
   } catch (err: unknown) {
     const execError = err as { stdout?: string; stderr?: string; message?: string }
