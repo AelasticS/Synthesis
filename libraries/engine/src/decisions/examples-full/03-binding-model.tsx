@@ -5,7 +5,7 @@ import { ExprNode } from "@synthesis/jsx-runtime"
 import { ModelStore } from "../../index"
 
 import * as dbmC from "../2.binding-model/binding-meta.model-components"
-import * as etC from "../../types-metamodel/types-components"
+import * as etC from "@synthesis/standard-metamodels/types-metamodel/components"
 import * as gdmC from "../1.decision-model/decision-meta.model-components"
 
 // We assume the GDM and Source Metamodel are loaded in the store

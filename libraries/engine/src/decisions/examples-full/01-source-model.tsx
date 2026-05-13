@@ -12,7 +12,7 @@ import {
   Subtype,
   Specialization,
   SpecializationMapping,
-} from "../../test/eer-model/EER-components"
+} from "@synthesis/standard-metamodels/eer"
 
 export const createUniversityModel = (store: ModelStore) => {
   return (

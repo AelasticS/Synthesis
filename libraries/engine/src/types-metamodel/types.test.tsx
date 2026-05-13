@@ -2,7 +2,7 @@
 
 import { createExprNode } from "@synthesis/jsx-runtime"
 import { ExprNode } from "@synthesis/jsx-runtime"
-import * as t from "./types-meta.model"
+import * as t from "@synthesis/standard-metamodels/types-metamodel/model"
 import {
   TypeObject,
   Property,
@@ -13,7 +13,7 @@ import {
   TypeOfOptional,
   PropertyDomain, TypeObjectReference, TypeArray, ArrayElementType,
   TypeEntity,
-} from "./types-components"
+} from "@synthesis/standard-metamodels/types-metamodel/components"
 import { Context } from "@synthesis/jsx-runtime"
 import { ModelStore } from "../index"
 
@@ -38,7 +38,7 @@ const store = new ModelStore()
 //   </TypeModel>
 // );
 
-import { importPredefinedTypes } from "./predefined-model"
+import { importPredefinedTypes } from "@synthesis/standard-metamodels/types-metamodel/predefined-model"
 
 const typeModel: ExprNode<t.ITypeModel> = (
   <TypeModel name="FirstTypeModel" store={store}>

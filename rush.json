@@ -349,6 +349,10 @@
       "projectFolder": "libraries/jsx-runtime"
     },
     {
+      "packageName": "@synthesis/standard-metamodels",
+      "projectFolder": "libraries/standard-metamodels"
+    },
+    {
       "packageName": "@synthesis/runner",
       "projectFolder": "libraries/runner"
     },

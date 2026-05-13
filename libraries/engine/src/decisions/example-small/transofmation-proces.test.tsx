@@ -4,7 +4,7 @@
 import { Context } from "@synthesis/jsx-runtime"
 import { ModelStore } from "../../index"
 
-import * as etT from "../../types-metamodel/types-meta.model"
+import * as etT from "@synthesis/standard-metamodels/types-metamodel/model"
 import * as eerMMFn from "./er-metamodel"
 
 import * as bmT from "../2.binding-model/binding-meta.model"
@@ -12,7 +12,7 @@ import * as bmT from "../2.binding-model/binding-meta.model"
 import * as sm2ddm
   from "../4.source-model-2-default-configuration-model/SourceModel2DefaultConfigurationModel"
 
-import * as eerT from "../../test/eer-model/EER.meta.model.type"
+import * as eerT from "@synthesis/standard-metamodels/eer/model"
 
 import * as smFn from "./01-source-model"
 import * as dmFn from "./02-decision-model"

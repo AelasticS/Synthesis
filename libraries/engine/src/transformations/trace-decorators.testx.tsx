@@ -7,16 +7,16 @@
 
 import { createExprNode } from "@synthesis/jsx-runtime";
 import { M2M, E2E } from "./trace-decorators";
-import * as e from "../test/eer-model/EER.meta.model.type";
-import * as r from "../test/relational-model/REL.meta.model.type";
+import * as e from "@synthesis/standard-metamodels/eer/model";
+import * as r from "@synthesis/standard-metamodels/relational/model";
 import {
   Attribute,
   Domain,
   EERSchema,
   Kernel,
-} from "../test/eer-model/EER-components";
-import { Column } from "../test/relational-model/REL-components";
-import { Table, RelSchema } from "../test/relational-model/REL-components";
+} from "@synthesis/standard-metamodels/eer";
+import { Column } from "@synthesis/standard-metamodels/relational";
+import { Table, RelSchema } from "@synthesis/standard-metamodels/relational";
 import { abstractM2M } from "./abstractM2M";
 import { ExprNode, Template } from "@synthesis/jsx-runtime";
 import { Context } from "@synthesis/jsx-runtime";

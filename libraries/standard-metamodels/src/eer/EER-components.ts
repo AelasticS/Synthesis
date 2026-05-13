@@ -2,12 +2,12 @@ import * as e from "./EER.meta.model.type"
 import {
   CpxTemplate,
   ExprNode,
+  IStore,
   Template,
   WithRefProps,
 } from "@synthesis/jsx-runtime"
-import { ModelStore } from "../../index"
 
-export type IModelProps = WithRefProps<e.IEERSchema> & { store?: ModelStore };
+export type IModelProps = WithRefProps<e.IEERSchema> & { store?: IStore };
 
 export const EERSchema: CpxTemplate<IModelProps, e.IEERSchema> = (props) => {
   return new ExprNode(e.EERSchema, props, undefined)

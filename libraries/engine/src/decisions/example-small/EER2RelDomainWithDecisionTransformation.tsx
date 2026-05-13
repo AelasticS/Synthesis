@@ -19,14 +19,14 @@ import {
   Entity,
   IDomain,
   Attribute,
-} from "../../test/eer-model/EER.meta.model.type"
-import * as rmT from "./../09-relational-schema/REL.meta.model.type"
+} from "@synthesis/standard-metamodels/eer/model"
+import * as rmT from "@synthesis/standard-metamodels/relational/model-legacy"
 import { abstractM2M } from "../../transformations/abstractM2M"
 import { ExprNode, Resolve } from "@synthesis/jsx-runtime"
 import { E2E, ModelStore, M2M, SpecPoint, SpecOption } from "../../index"
 import * as cm from "./../3.configuration-model/configuration-meta.model"
 
-import { RelSchema, Table, Column } from "./../09-relational-schema/REL-components"
+import { RelSchema, Table, Column } from "@synthesis/standard-metamodels/relational/components-legacy"
 
 @M2M()
 export class EER2RelDomainWithDecisionTransformation extends abstractM2M<

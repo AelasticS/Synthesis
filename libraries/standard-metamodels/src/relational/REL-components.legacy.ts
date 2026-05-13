@@ -1,4 +1,4 @@
-import * as r from "./REL.meta.model.type"
+import * as r from "./REL.meta.model.type.legacy"
 import { CpxTemplate, ExprNode, IStore, Template, WithRefProps } from "@synthesis/jsx-runtime"
 
 export type IModelProps = WithRefProps<r.IRelSchema> & { store?: IStore }

@@ -7,8 +7,8 @@ import { createExprNode } from "@synthesis/jsx-runtime"
 import { Context } from "@synthesis/jsx-runtime";
 import { ExprNode } from "@synthesis/jsx-runtime";
 import { ModelStore } from '../../index'
-import { Process, Sequence, Task, Document, OutputDocument, InputDocument } from './BPM.components'
-import { IProcess, ISequence } from './BPM.meta.model.type'
+import { Process, Sequence, Task, Document, OutputDocument, InputDocument } from '@synthesis/standard-metamodels/bpm'
+import { IProcess, ISequence } from '@synthesis/standard-metamodels/bpm/model'
 
 describe("Dummy test", () => {
   it("works if true is truthy", () => {

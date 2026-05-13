@@ -2,7 +2,7 @@
 
 import { createExprNode } from "@synthesis/jsx-runtime"
 import { ExprNode } from "@synthesis/jsx-runtime"
-import * as t from "../../types-metamodel/types-meta.model"
+import * as t from "@synthesis/standard-metamodels/types-metamodel/model"
 import {
     TypeObject,
     Property,
@@ -12,7 +12,7 @@ import {
     PropertyDomain,
     TypeUnion,
     UnionElement,
-} from "../../types-metamodel/types-components"
+} from "@synthesis/standard-metamodels/types-metamodel/components"
 
 import { ModelStore } from "../../index"
 import { IIssue, IOption } from "../1.decision-model/decision-meta.model"

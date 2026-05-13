@@ -1,8 +1,7 @@
 import * as r from './REL.meta.model.type.v2'
-import { CpxTemplate, ExprNode, Template, WithRefProps } from "@synthesis/jsx-runtime"
-import { ModelStore } from '../../index'
+import { CpxTemplate, ExprNode, IStore, Template, WithRefProps } from "@synthesis/jsx-runtime"
 
-export type IModelProps = WithRefProps<r.IRelSchema> & { store?: ModelStore }
+export type IModelProps = WithRefProps<r.IRelSchema> & { store?: IStore }
 
 export const RelSchema: CpxTemplate<IModelProps, r.IRelSchema> = (props) => {
   return new ExprNode(r.RelSchema, props, undefined)

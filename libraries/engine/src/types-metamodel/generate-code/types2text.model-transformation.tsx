@@ -9,7 +9,7 @@ import {
   SecParent,
 } from "./../../m2t/m2t-model/m2t.jsx";
 import * as m2tmm from "./../../m2t/m2t-model/m2t.meta.model";
-import * as tmm from "./../types-meta.model";
+import * as tmm from "@synthesis/standard-metamodels/types-metamodel/model";
 import { ModelStore, Context, ExprNode, E2E, M2M } from "./../../index";
 import { abstractM2M } from "./../../transformations/abstractM2M";
 import { SpecPoint, SpecOption } from "./../../transformations/spec-decorators";

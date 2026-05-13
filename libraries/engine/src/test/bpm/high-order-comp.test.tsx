@@ -5,10 +5,10 @@
 
 import { createExprNode } from "@synthesis/jsx-runtime"
 import * as t from "@aelastics/types"
-import { Process, Sequence, Task, Document, OutputDocument, InputDocument, Parallel } from "./BPM.components"
-import { IProcess, ISequence, ITask } from "./BPM.meta.model.type"
-import { dep1 } from "./example-department"
-import { IOrganization } from "./organization.model.type"
+import { Process, Sequence, Task, Document, OutputDocument, InputDocument, Parallel } from "@synthesis/standard-metamodels/bpm"
+import { IProcess, ISequence, ITask } from "@synthesis/standard-metamodels/bpm/model"
+import { dep1 } from "@synthesis/standard-metamodels/bpm/example-department"
+import { IOrganization } from "@synthesis/standard-metamodels/bpm/organization"
 import { ModelStore } from "../../index"
 import { ExprNode } from "@synthesis/jsx-runtime"
 

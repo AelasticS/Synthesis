@@ -17,7 +17,8 @@
     "@aelastics/types": "workspace:*",
     "@aelastics/store": "workspace:*",
     "@synthesis/metamodel-core": "workspace:*",
-    "@synthesis/jsx-runtime": "workspace:*"
+    "@synthesis/jsx-runtime": "workspace:*",
+    "@synthesis/standard-metamodels": "workspace:*"
   },
   "devDependencies": {
     "@rushstack/eslint-config": "~4.6.4",

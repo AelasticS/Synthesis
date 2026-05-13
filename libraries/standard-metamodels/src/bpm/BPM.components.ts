@@ -1,8 +1,7 @@
 import * as bpmn from './BPM.meta.model.type'
-import { CpxTemplate, ExprNode, Template, WithRefProps } from "@synthesis/jsx-runtime"
-import { ModelStore } from '../../index'
+import { CpxTemplate, ExprNode, IStore, Template, WithRefProps } from "@synthesis/jsx-runtime"
 
-export type IModelProps = WithRefProps<bpmn.IProcess> & { store?: ModelStore }
+export type IModelProps = WithRefProps<bpmn.IProcess> & { store?: IStore }
 
 export const Process: CpxTemplate<IModelProps, bpmn.IProcess> = (props) => {
     return new ExprNode(bpmn.Process, props, undefined)

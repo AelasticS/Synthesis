@@ -1,6 +1,6 @@
 import * as t from "@aelastics/types"
 import { Model, ModelElement } from "@synthesis/metamodel-core"
-import { Type } from "../../types-metamodel/types-meta.model"
+import { Type } from "@synthesis/standard-metamodels/types-metamodel/model"
 
 
 export const Decision_TypeSchema = t.schema("Decision_TypeSchema")

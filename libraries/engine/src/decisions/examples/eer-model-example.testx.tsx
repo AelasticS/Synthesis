@@ -3,8 +3,8 @@
 
 import { createExprNode } from "@synthesis/jsx-runtime";
 import { ExprNode } from "@synthesis/jsx-runtime";
-import * as et from "../../test/eer-model/EER.meta.model.type";
-import { EERSchema, Kernel, Attribute, Domain, Relationship, OrdinaryMapping, Weak, WeakMapping } from "../../test/eer-model/EER-components";
+import * as et from "@synthesis/standard-metamodels/eer/model";
+import { EERSchema, Kernel, Attribute, Domain, Relationship, OrdinaryMapping, Weak, WeakMapping } from "@synthesis/standard-metamodels/eer";
 
 
 import { Context } from "@synthesis/jsx-runtime";

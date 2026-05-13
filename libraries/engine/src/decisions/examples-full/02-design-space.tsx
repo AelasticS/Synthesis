@@ -10,7 +10,7 @@ import {
   Option,
   SimpleOption,
 } from "../1.decision-model/decision-meta.model-components"
-import { TypeNumber, TypeString, TypeBoolean } from "../../types-metamodel/predefined-types"
+import { TypeNumber, TypeString, TypeBoolean } from "@synthesis/standard-metamodels/types-metamodel/predefined-types"
 
 export const createPersistenceDesignSpace = (store: ModelStore) => (
   <DecisionModel

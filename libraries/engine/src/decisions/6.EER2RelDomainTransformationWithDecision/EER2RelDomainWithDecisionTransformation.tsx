@@ -9,10 +9,10 @@
 
 import { createExprNode } from "@synthesis/jsx-runtime";
 import { VarPoint, VarOption } from "../../variability/var-decorators";
-import * as et from "../../test/eer-model/EER.meta.model.type";
-import * as rt from "../../test/relational-model/REL.meta.model.type.v2";
-import * as e from "../../test/eer-model/EER-components";
-import * as r from "../../test/relational-model/REL-components.v2";
+import * as et from "@synthesis/standard-metamodels/eer/model";
+import * as rt from "@synthesis/standard-metamodels/relational/model-v2";
+import * as e from "@synthesis/standard-metamodels/eer";
+import * as r from "@synthesis/standard-metamodels/relational/components-v2";
 import { abstractM2M } from "../../transformations/abstractM2M";
 import { ExprNode, Resolve } from "@synthesis/jsx-runtime";
 import { Context } from "@synthesis/jsx-runtime";

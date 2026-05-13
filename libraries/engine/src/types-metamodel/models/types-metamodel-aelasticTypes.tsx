@@ -2,7 +2,7 @@
 
 import { createExprNode } from "@synthesis/jsx-runtime"
 import { ExprNode } from "@synthesis/jsx-runtime"
-import * as t from "../types-meta.model"
+import * as t from "@synthesis/standard-metamodels/types-metamodel/model"
 import {
     TypeObject,
     Property,
@@ -13,7 +13,7 @@ import {
     TypeOfOptional,
     PropertyDomain, TypeObjectReference, TypeArray, ArrayElementType,
     TypeEntity,
-} from "../types-components"
+} from "@synthesis/standard-metamodels/types-metamodel/components"
 import { Context } from "@synthesis/jsx-runtime"
 import { ModelStore, P } from "../../index"
 

@@ -3,8 +3,8 @@
 import { createExprNode } from "@synthesis/jsx-runtime"
 import { ModelStore } from "../../index"
 import { TraceModel, TraceEntry, VarPointTraceEntry } from "../8.trace-model/trace-model-meta.model-components"
-import { EERSchema as ERSchema, Attribute, Kernel as Entity, Relationship } from "../../test/eer-model/EER-components"
-import { RelSchema, Column, Table } from "../09-relational-schema/REL-components"
+import { EERSchema as ERSchema, Attribute, Kernel as Entity, Relationship } from "@synthesis/standard-metamodels/eer"
+import { RelSchema, Column, Table } from "@synthesis/standard-metamodels/relational/components-legacy"
 import { ConfigurationModel, Choice } from "../3.configuration-model/configuration-meta.model-components"
 import { ElementIssue, Option } from "../1.decision-model/decision-meta.model-components"
 

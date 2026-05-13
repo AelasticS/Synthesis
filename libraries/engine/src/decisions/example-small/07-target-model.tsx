@@ -6,7 +6,7 @@ import {
   Column,
   RelSchema,
   Table,
-} from "./../09-relational-schema/REL-components"
+} from "@synthesis/standard-metamodels/relational/components-legacy"
 
 export const RelationalSchema_Company = (store: ModelStore) => (
   <RelSchema name="CompanyRelationalSchema" store={store}>

@@ -1,14 +1,14 @@
 import * as t from "./types-meta.model"
-import { ModelStore } from "../index"
 import {
   CpxTemplate,
   ExprNode,
+  IStore,
   Template,
   WithRefProps,
 } from "@synthesis/jsx-runtime"
 
 export type IModelProps = WithRefProps<t.ITypeModel> & {
-  store?: ModelStore;
+  store?: IStore;
 };
 
 export const TypeModel: CpxTemplate<IModelProps, t.ITypeModel> = (props) => {
