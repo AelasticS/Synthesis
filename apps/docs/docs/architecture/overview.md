@@ -4,7 +4,7 @@ sidebar_position: 1
 
 # Monorepo Architecture
 
-Synthesis is organized as a 10-package monorepo with a strict, acyclic dependency graph. Packages are layered from generic infrastructure at the bottom to applications at the top.
+Synthesis is organized as a 12-package monorepo with a strict, acyclic dependency graph. Packages are layered from generic infrastructure at the bottom to applications at the top.
 
 ## Packages by Layer
 
@@ -14,7 +14,7 @@ Synthesis is organized as a 10-package monorepo with a strict, acyclic dependenc
 - `@aelastics/result`
 - `@aelastics/store`
 
-**Layer 1 — Synthesis foundations** (siblings, neither depends on the other)
+**Layer 1 — Synthesis foundations**
 
 - `@synthesis/metamodel-core` — depends on `@aelastics/types`
 - `@synthesis/jsx-runtime` — depends on `@aelastics/types`, `@synthesis/metamodel-core`
@@ -92,9 +92,9 @@ An arrow `A → B` means *A depends on B* — A imports from B.
 ## Rules
 
 - No cycles. Arrows always go from higher layers down.
-- `@synthesis/metamodel-core` exports type schemas via the default subpath AND JSX wrappers (`Element`, `Model`) via its `/jsx` subpath — both are in the same package.
+- `@synthesis/metamodel-core` contains only type schemas. The foundational JSX wrappers (`Element`, `Model`) for those types live in `@synthesis/jsx-runtime` alongside the JSX primitives, because `jsx-runtime` already imports the foundational types — adding a `metamodel-core/jsx` subpath would introduce a workspace-level package cycle that Rush cannot resolve.
 - `@synthesis/standard-metamodels` does NOT depend on `@synthesis/engine` — it depends only on `metamodel-core` and `jsx-runtime`.
-- `@synthesis/jsx-runtime` is a foundational sibling of `metamodel-core`, NOT downstream of engine. This is what breaks what would otherwise be a cycle.
+- `@synthesis/jsx-runtime` is the boundary between "data shape" (in `metamodel-core`) and "M2M transformation" (in `engine`). It carries enough engine-decoupling abstractions (`IM2MContext`, `IStore`) that `engine` is the *only* package that knows about the M2M runtime itself.
 
 ## Layer 0 — Generic infra
 
@@ -102,9 +102,9 @@ Three `@aelastics/*` packages with no Synthesis-specific knowledge. `@aelastics/
 
 ## Layer 1 — Synthesis foundations
 
-Two sibling packages with no mutual dependency. `@synthesis/metamodel-core` defines the M3-level type schemas (`Model`, `ModelElement`, `Namespace`, `Diagram`, `RepositoryObject`, plus basic types like `IDType`, `NameType`, `DescriptionType`). `@synthesis/jsx-runtime` provides JSX authoring primitives (`ExprNode`, `Template`, `Context`, the `IM2MContext` and `IStore` interfaces, URL/path parsing).
+`@synthesis/metamodel-core` defines the M3-level type schemas (`Model`, `ModelElement`, `Namespace`, `Diagram`, `RepositoryObject`, plus basic types like `IDType`, `NameType`, `DescriptionType`). It contains pure `@aelastics/types` schema values and no JSX.
 
-Keeping the JSX runtime here — not bundled inside the engine — is what lets `metamodel-core` define its own JSX wrappers (`Element`, `Model`) for its foundational types, co-located with their type definitions, without creating a cycle.
+`@synthesis/jsx-runtime` builds on top of `metamodel-core`. It provides the JSX authoring primitives (`ExprNode`, `Template`, `CpxTemplate`, `Context`, the `IM2MContext` and `IStore` interfaces, URL/path parsing), plus the foundational JSX wrappers (`Element`, `Model`) for `metamodel-core`'s most-used types. Keeping the JSX runtime here — not bundled inside the engine — is what lets `@synthesis/standard-metamodels` and other downstream packages author JSX content without pulling in the full M2M engine.
 
 ## Layer 2 — Runtime + utility packages
 
@@ -120,19 +120,16 @@ Keeping the JSX runtime here — not bundled inside the engine — is what lets 
 
 Four user-facing packages. `@synthesis/standard-metamodels` ships canonical domain metamodels (EER, Relational, BPM, types-metamodel); it depends only on `metamodel-core` + `jsx-runtime`, never on the engine, which keeps it usable in arbitrary contexts. `@synthesis/examples` provides demonstrations as `Runnable` instances. `@synthesis/cli` is the user entry point — it discovers and runs examples via the Runner contract. `@synthesis/docs` is the Docusaurus documentation site, independent of the build graph.
 
-## Subpaths on `@synthesis/metamodel-core`
+## Where the foundational JSX wrappers live
 
-`@synthesis/metamodel-core` is a single package that exposes two subpaths:
-
-- `.` — the type schemas (`Model`, `ModelElement`, `Namespace`, etc.) as `@aelastics/types` schemas
-- `/jsx` — matching JSX wrapper components (`Element`, `Model`, etc.) for authoring instances
+The JSX wrappers (`Element`, `Model`) for `metamodel-core`'s foundational types live in `@synthesis/jsx-runtime`, **not** in `metamodel-core`. Consumers import the schema and the wrapper from different packages:
 
 ```ts
 import { Model, ModelElement } from '@synthesis/metamodel-core';
-import { Element } from '@synthesis/metamodel-core/jsx';
+import { Element, Model as ModelComponent } from '@synthesis/jsx-runtime';
 ```
 
-The two subpaths live in one package so the schemas and their JSX wrappers stay co-located, with no cross-package coupling.
+The original design instinct was to co-locate the wrappers next to their type schemas as a `metamodel-core/jsx` subpath. That turns out not to be possible at the workspace level: `jsx-runtime` already depends on `metamodel-core` (its wrappers and `ExprNode` reference `IModelElement` / `IModel`), so making `metamodel-core` depend on `jsx-runtime` for its subpath would form a cycle that Rush rejects. Putting the wrappers in `jsx-runtime` instead — where they are conceptually JSX primitives — keeps the dependency graph acyclic with no loss of semantic clarity. Domain-specific JSX components (BPM `<Process>`, EER `<Kernel>`, etc.) remain co-located with their type definitions inside `@synthesis/standard-metamodels`, because those packages depend on `jsx-runtime` rather than being depended on by it.
 
 ## Why this structure?
 
