@@ -1,0 +1,93 @@
+{
+  "name": "@synthesis/decision-framework",
+  "author": "Sinisa Neskovic",
+  "version": "0.1.0",
+  "license": "Apache-2.0",
+  "main": "lib/index.js",
+  "typings": "lib/index.d.ts",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "build": "heft build --clean",
+    "test": "heft test --clean"
+  },
+  "exports": {
+    ".": {
+      "types": "./lib/index.d.ts",
+      "default": "./lib/index.js"
+    },
+    "./decisions/1.decision-model/decision-meta.model": {
+      "types": "./lib/decisions/1.decision-model/decision-meta.model.d.ts",
+      "default": "./lib/decisions/1.decision-model/decision-meta.model.js"
+    },
+    "./decisions/1.decision-model/decision-meta.model-components": {
+      "types": "./lib/decisions/1.decision-model/decision-meta.model-components.d.ts",
+      "default": "./lib/decisions/1.decision-model/decision-meta.model-components.js"
+    },
+    "./decisions/2.binding-model/binding-meta.model": {
+      "types": "./lib/decisions/2.binding-model/binding-meta.model.d.ts",
+      "default": "./lib/decisions/2.binding-model/binding-meta.model.js"
+    },
+    "./decisions/2.binding-model/binding-meta.model-components": {
+      "types": "./lib/decisions/2.binding-model/binding-meta.model-components.d.ts",
+      "default": "./lib/decisions/2.binding-model/binding-meta.model-components.js"
+    },
+    "./decisions/3.configuration-model/configuration-meta.model": {
+      "types": "./lib/decisions/3.configuration-model/configuration-meta.model.d.ts",
+      "default": "./lib/decisions/3.configuration-model/configuration-meta.model.js"
+    },
+    "./decisions/3.configuration-model/configuration-meta.model-components": {
+      "types": "./lib/decisions/3.configuration-model/configuration-meta.model-components.d.ts",
+      "default": "./lib/decisions/3.configuration-model/configuration-meta.model-components.js"
+    },
+    "./decisions/4.source-model-2-default-configuration-model/SourceModel2DefaultConfigurationModel": {
+      "types": "./lib/decisions/4.source-model-2-default-configuration-model/SourceModel2DefaultConfigurationModel.d.ts",
+      "default": "./lib/decisions/4.source-model-2-default-configuration-model/SourceModel2DefaultConfigurationModel.js"
+    },
+    "./decisions/trace-extensions": {
+      "types": "./lib/decisions/trace-extensions/index.d.ts",
+      "default": "./lib/decisions/trace-extensions/index.js"
+    },
+    "./decisions/trace-extensions/trace-extensions-components": {
+      "types": "./lib/decisions/trace-extensions/trace-extensions-components.d.ts",
+      "default": "./lib/decisions/trace-extensions/trace-extensions-components.js"
+    },
+    "./decisions/trace-extensions/trace-extensions.meta.model": {
+      "types": "./lib/decisions/trace-extensions/trace-extensions.meta.model.d.ts",
+      "default": "./lib/decisions/trace-extensions/trace-extensions.meta.model.js"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "decisions/1.decision-model/decision-meta.model": ["lib/decisions/1.decision-model/decision-meta.model.d.ts"],
+      "decisions/1.decision-model/decision-meta.model-components": ["lib/decisions/1.decision-model/decision-meta.model-components.d.ts"],
+      "decisions/2.binding-model/binding-meta.model": ["lib/decisions/2.binding-model/binding-meta.model.d.ts"],
+      "decisions/2.binding-model/binding-meta.model-components": ["lib/decisions/2.binding-model/binding-meta.model-components.d.ts"],
+      "decisions/3.configuration-model/configuration-meta.model": ["lib/decisions/3.configuration-model/configuration-meta.model.d.ts"],
+      "decisions/3.configuration-model/configuration-meta.model-components": ["lib/decisions/3.configuration-model/configuration-meta.model-components.d.ts"],
+      "decisions/4.source-model-2-default-configuration-model/SourceModel2DefaultConfigurationModel": ["lib/decisions/4.source-model-2-default-configuration-model/SourceModel2DefaultConfigurationModel.d.ts"],
+      "decisions/trace-extensions": ["lib/decisions/trace-extensions/index.d.ts"],
+      "decisions/trace-extensions/trace-extensions-components": ["lib/decisions/trace-extensions/trace-extensions-components.d.ts"],
+      "decisions/trace-extensions/trace-extensions.meta.model": ["lib/decisions/trace-extensions/trace-extensions.meta.model.d.ts"]
+    }
+  },
+  "dependencies": {
+    "@aelastics/types": "workspace:*",
+    "@synthesis/metamodel-core": "workspace:*",
+    "@synthesis/jsx-runtime": "workspace:*",
+    "@synthesis/standard-metamodels": "workspace:*",
+    "@synthesis/engine": "workspace:*"
+  },
+  "devDependencies": {
+    "@rushstack/eslint-config": "~4.6.4",
+    "eslint": "~10.0.2",
+    "@rushstack/heft": "~1.2.6",
+    "@rushstack/heft-jest-plugin": "~1.2.6",
+    "@rushstack/heft-typescript-plugin": "~1.3.1",
+    "@types/node": "~25.3.3",
+    "@types/heft-jest": "~1.0.6",
+    "tslib": "^2.6.0",
+    "typescript": "~5.9.3"
+  }
+}

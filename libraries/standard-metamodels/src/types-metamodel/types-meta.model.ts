@@ -1,0 +1,150 @@
+/**
+ *
+ */
+import * as t from "@aelastics/types"
+import { Model, ModelElement } from "@synthesis/metamodel-core"
+
+export const TypesMM_TypeSchema = t.schema("TypesMM_TypeSchema")
+
+export const Type = t.subtype(ModelElement, {}, "Type", TypesMM_TypeSchema)
+
+export const SimpleType = t.subtype(Type, {}, "SimpleType", TypesMM_TypeSchema)
+
+export const Number = t.subtype(SimpleType, {}, "Number", TypesMM_TypeSchema)
+export const String = t.subtype(SimpleType, {}, "String", TypesMM_TypeSchema)
+export const Boolean = t.subtype(SimpleType, {}, "Boolean", TypesMM_TypeSchema)
+
+export const TypeModel = t.subtype(
+  Model,
+  {
+    types: t.arrayOf(Type),
+  },
+  "TypeModel",
+  TypesMM_TypeSchema,
+)
+
+export const Optional = t.subtype(
+  Type,
+  {
+    optionalType: Type,
+  },
+  "Optional",
+  TypesMM_TypeSchema,
+)
+
+export const Property = t.subtype(
+  ModelElement,
+  {
+    domain: Type,
+  },
+  "Property",
+  TypesMM_TypeSchema,
+)
+
+export const Object = t.subtype(
+  Type,
+  {
+    properties: t.arrayOf(Property),
+  },
+  "Object",
+  TypesMM_TypeSchema,
+)
+
+export const ObjectReference = t.subtype(
+  Object,
+  {
+    referencedType: Object,
+  },
+  "ObjectReference",
+  TypesMM_TypeSchema,
+)
+
+export const Link = t.subtype(
+  Type,
+  {
+    schema: TypeModel,
+    path: t.string,
+  },
+  "Link",
+  TypesMM_TypeSchema,
+)
+
+export const Subtype = t.subtype(
+  Object,
+  {
+    superType: Object,
+  },
+  "Subtype",
+  TypesMM_TypeSchema,
+)
+
+export const Entity = t.subtype(
+  Object,
+  {
+    identifiers: t.arrayOf(t.string),
+  },
+  "Entity",
+  TypesMM_TypeSchema
+);
+
+export const Array = t.subtype(
+  Type,
+  {
+    elementType: Type,
+  },
+  "Array",
+  TypesMM_TypeSchema,
+)
+
+export const Union = t.subtype(
+  Type,
+  {
+    elements: t.arrayOf(Property),
+    descriminator: t.string,
+  },
+  "Union",
+  TypesMM_TypeSchema,
+)
+
+export const Literal = t.subtype(
+  Type,
+  {
+    value: SimpleType,
+  },
+  "Literal",
+  TypesMM_TypeSchema,
+);
+
+export const InverseProperty = t.subtype(
+  ModelElement,
+  {
+    firstType: Object,
+    firstProperty: t.string,
+    secondType: Object,
+    secondProperty: t.string,
+  },
+  "InverseProperty",
+  TypesMM_TypeSchema,
+)
+
+// type ISimpleType = t.TypeOf<typeof SimpleType>;
+
+
+export type IObject = t.TypeOf<typeof Object>;
+export type IArray = t.TypeOf<typeof Array>;
+export type ISubtype = t.TypeOf<typeof Subtype>;
+export type IUnion = t.TypeOf<typeof Union>;
+export type IProperty = t.TypeOf<typeof Property>;
+export type ITypeModel = t.TypeOf<typeof TypeModel>;
+export type IType = t.TypeOf<typeof Type>;
+export type IOptional = t.TypeOf<typeof Optional>;
+
+export type ISimpleType = t.TypeOf<typeof SimpleType>;
+export type INumber = t.TypeOf<typeof Number>;
+export type IString = t.TypeOf<typeof String>;
+export type IBoolean = t.TypeOf<typeof Boolean>;
+export type IObjectReference = t.TypeOf<typeof ObjectReference>;
+export type IEntity = t.TypeOf<typeof Entity>;
+export type ILink = t.TypeOf<typeof Link>;
+export type IInverseProperty = t.TypeOf<typeof InverseProperty>;
+export type ILiteral = t.TypeOf<typeof Literal>;

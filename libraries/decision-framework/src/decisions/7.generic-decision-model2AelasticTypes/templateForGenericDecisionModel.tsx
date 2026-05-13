@@ -1,0 +1,80 @@
+/** @jsx createExprNode */
+
+import { createExprNode } from "@synthesis/jsx-runtime"
+import { ExprNode } from "@synthesis/jsx-runtime"
+import * as t from "@synthesis/standard-metamodels/types-metamodel/model"
+import {
+    TypeObject,
+    Property,
+    TypeModel,
+    TypeOptional,
+    TypeOfOptional,
+    PropertyDomain,
+    TypeUnion,
+    UnionElement,
+} from "@synthesis/standard-metamodels/types-metamodel/components"
+
+import { ModelStore } from "@synthesis/engine"
+import { IIssue, IOption } from "../1.decision-model/decision-meta.model"
+import { IModelElement } from "@synthesis/metamodel-core"
+import { IBindingElement } from "../2.binding-model/binding-meta.model"
+
+const store = new ModelStore();
+
+export const typeForDecisionModel = (store: ModelStore, element: IModelElement, bindings: IBindingElement[]): ExprNode<t.ITypeModel> => {
+
+    const definedProperties: Map<string, boolean> = new Map(); // Map<propertyName, isOptional>
+
+    return <TypeModel name="AelasticsTypes" store={store}>
+        <TypeObject name={`${element.name}Type`}>
+            {
+                bindings.flatMap((binding: IBindingElement) => {
+                    const hasCondition: boolean = binding.condition !== undefined && binding.condition !== "";
+
+                    return binding.issues.map((issue: IIssue) => {
+                        if (!definedProperties.has(issue.name)) {
+                            definedProperties.set(issue.name, hasCondition);
+
+                            var propertyType: ExprNode<t.IType> = getAllVariationsType(issue);
+                            if (hasCondition) {
+                                propertyType.props.name = `${issue.name}Base`;
+                                propertyType =
+                                    <TypeOptional name={`${issue.name}`}>
+                                        {propertyType}
+                                        <TypeOfOptional $refByName={propertyType.props.name} />;
+                                    </TypeOptional>;
+                            }
+                            return (
+                                <Property
+                                    name={issue.name}
+                                    description={issue.description}
+                                >
+                                    {propertyType}
+                                    <PropertyDomain $refByName={propertyType.props.name} />
+                                </Property>
+                            );
+
+
+                        } else {
+                            console.warn(`Property ${issue.name} is already defined for ${element.name}Type`);
+                        }
+                    });
+                })
+            }
+        </TypeObject>
+    </TypeModel >
+};
+
+function getAllVariationsType(issue: IIssue): ExprNode<t.IType> {
+    return <TypeUnion name={`${issue.name}Union`}>
+        {issue.possibleOptions.map((option: IOption) => {
+            return <UnionElement>
+                <PropertyDomain $refByName="false" />
+                <PropertyDomain $refByName="true" />
+                {/* <Type name="SomeType"></Type> */}
+                <PropertyDomain $refByName="SomeType" />
+            </UnionElement>
+        })}
+
+    </TypeUnion>;
+};

@@ -1,0 +1,36 @@
+{
+  "name": "@synthesis/examples",
+  "author": "Sinisa Neskovic",
+  "version": "0.1.0",
+  "license": "Apache-2.0",
+  "main": "lib/index.js",
+  "typings": "lib/index.d.ts",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "build": "heft build --clean",
+    "test": "heft test --clean"
+  },
+  "dependencies": {
+    "@aelastics/result": "workspace:*",
+    "@aelastics/types": "workspace:*",
+    "@synthesis/metamodel-core": "workspace:*",
+    "@synthesis/jsx-runtime": "workspace:*",
+    "@synthesis/standard-metamodels": "workspace:*",
+    "@synthesis/runner": "workspace:*",
+    "@synthesis/engine": "workspace:*",
+    "@synthesis/decision-framework": "workspace:*"
+  },
+  "devDependencies": {
+    "@rushstack/eslint-config": "~4.6.4",
+    "eslint": "~10.0.2",
+    "@rushstack/heft": "~1.2.6",
+    "@rushstack/heft-jest-plugin": "~1.2.6",
+    "@rushstack/heft-typescript-plugin": "~1.3.1",
+    "@types/node": "~25.3.3",
+    "@types/heft-jest": "~1.0.6",
+    "tslib": "^2.6.0",
+    "typescript": "~5.9.3"
+  }
+}

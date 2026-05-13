@@ -58,7 +58,9 @@
     "@oclif/plugin-help": "~6.2.48",
     "@oclif/plugin-plugins": "~5.4.67",
     "@oclif/plugin-not-found": "~3.2.85",
-    "@oclif/plugin-autocomplete": "~3.2.40"
+    "@oclif/plugin-autocomplete": "~3.2.40",
+    "@synthesis/runner": "workspace:*",
+    "@synthesis/examples": "workspace:*"
   },
   "devDependencies": {
     "@rushstack/eslint-config": "~4.6.4",
