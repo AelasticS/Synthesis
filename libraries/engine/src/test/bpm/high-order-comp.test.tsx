@@ -3,14 +3,14 @@
  * Copyright (c) AelasticS 2022.
  */
 
-import { createExprNode } from "../../jsx/handle"
+import { createExprNode } from "@synthesis/jsx-runtime"
 import * as t from "@aelastics/types"
 import { Process, Sequence, Task, Document, OutputDocument, InputDocument, Parallel } from "./BPM.components"
 import { IProcess, ISequence, ITask } from "./BPM.meta.model.type"
 import { dep1 } from "./example-department"
 import { IOrganization } from "./organization.model.type"
 import { ModelStore } from "../../index"
-import { ExprNode } from '../../jsx/element'
+import { ExprNode } from "@synthesis/jsx-runtime"
 
 // export const Approval_X_times_Par: (x: number) => ExprNode<IProcess> = (x) => {
 export const Approval_X_times_Par = (x: number) => () => {

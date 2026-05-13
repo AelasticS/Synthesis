@@ -1,6 +1,6 @@
 /** @jsx createExprNode */
 
-import { createExprNode } from "../../jsx/handle"
+import { createExprNode } from "@synthesis/jsx-runtime"
 import { ExprNode, ModelStore } from "../../index"
 import { EERSchema, Attribute, Domain, Relationship, Role, Entity } from "../../test/eer-model/EER-components"
 import * as t from "./../../test/eer-model/EER.meta.model.type"

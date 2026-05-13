@@ -1,7 +1,7 @@
 /** @jsx createExprNode */
 
-import { ExprNode, ElementInstance } from "../../jsx/element";
-import { createExprNode } from "../../jsx/handle";
+import { ExprNode, ElementInstance } from "@synthesis/jsx-runtime";
+import { createExprNode } from "@synthesis/jsx-runtime";
 import * as t from "../types-meta.model";
 import {
   TypeObject,
@@ -15,7 +15,7 @@ import {
   TypeArray,
   ArrayElementType,
 } from "../types-components";
-import { Context } from "../../jsx/context";
+import { Context } from "@synthesis/jsx-runtime";
 import { ModelStore } from "../../index";
 import { generate } from "../../m2t/text-generation/generate";
 import * as m2tmm from "../../m2t/m2t-model/m2t.meta.model";

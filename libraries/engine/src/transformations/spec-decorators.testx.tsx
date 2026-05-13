@@ -7,7 +7,7 @@
 
 
 
-import { createExprNode } from '../jsx/handle'
+import { createExprNode } from "@synthesis/jsx-runtime"
 import { M2M, E2E } from "./trace-decorators"
 import { SpecPoint, SpecOption} from "./spec-decorators"
 import * as et from '../test/eer-model/EER.meta.model.type'
@@ -15,8 +15,8 @@ import * as rt from '../test/relational-model/REL.meta.model.type'
 import * as e from '../test/eer-model/EER-components'
 import * as r from '../test/relational-model/REL-components'
 import { abstractM2M } from './abstractM2M';
-import { ExprNode } from '../jsx/element'
-import { Context } from '../jsx/context'
+import { ExprNode } from "@synthesis/jsx-runtime"
+import { Context } from "@synthesis/jsx-runtime"
 import { ModelStore } from '../index'
 
 const testStore = new ModelStore()

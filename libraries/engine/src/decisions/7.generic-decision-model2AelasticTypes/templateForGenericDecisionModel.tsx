@@ -1,7 +1,7 @@
 /** @jsx createExprNode */
 
-import { createExprNode } from "../../jsx/handle"
-import { ExprNode } from "../../jsx/element"
+import { createExprNode } from "@synthesis/jsx-runtime"
+import { ExprNode } from "@synthesis/jsx-runtime"
 import * as t from "../../types-metamodel/types-meta.model"
 import {
     TypeObject,

@@ -1,7 +1,7 @@
 /** @jsx createExprNode */
 
-import { createExprNode } from "../../jsx/handle"
-import { Context } from "../../jsx/context"
+import { createExprNode } from "@synthesis/jsx-runtime"
+import { Context } from "@synthesis/jsx-runtime"
 import { ModelStore } from "../../index"
 
 // Import our newly created models

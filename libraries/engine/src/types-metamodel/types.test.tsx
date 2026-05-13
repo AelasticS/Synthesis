@@ -1,7 +1,7 @@
 /** @jsx createExprNode */
 
-import { createExprNode } from "../jsx/handle"
-import { ExprNode } from "../jsx/element"
+import { createExprNode } from "@synthesis/jsx-runtime"
+import { ExprNode } from "@synthesis/jsx-runtime"
 import * as t from "./types-meta.model"
 import {
   TypeObject,
@@ -14,7 +14,7 @@ import {
   PropertyDomain, TypeObjectReference, TypeArray, ArrayElementType,
   TypeEntity,
 } from "./types-components"
-import { Context } from "../jsx/context"
+import { Context } from "@synthesis/jsx-runtime"
 import { ModelStore } from "../index"
 
 // let a = <Object name="name"></Object>;

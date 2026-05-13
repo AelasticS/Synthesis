@@ -1,4 +1,4 @@
-import { ExprNode, Template, WithRefProps } from '../jsx/element'
+import { ExprNode, Template, WithRefProps } from "@synthesis/jsx-runtime"
 import * as tr from './transformation.model.type'
 
 

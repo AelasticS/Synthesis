@@ -2,7 +2,7 @@
 
 import { Any } from "@aelastics/types";
 import { IModelElement } from "@synthesis/metamodel-core";
-import { ExprNode } from "../jsx/element";
+import { ExprNode } from "@synthesis/jsx-runtime";
 import { abstractM2M } from "./abstractM2M";
 import {
   __isSpecPoint,

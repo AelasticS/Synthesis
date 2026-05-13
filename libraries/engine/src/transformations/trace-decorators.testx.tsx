@@ -5,7 +5,7 @@
 
 // const EER = getEER({} as IModel, null)
 
-import { createExprNode } from "../jsx/handle";
+import { createExprNode } from "@synthesis/jsx-runtime";
 import { M2M, E2E } from "./trace-decorators";
 import * as e from "../test/eer-model/EER.meta.model.type";
 import * as r from "../test/relational-model/REL.meta.model.type";
@@ -18,8 +18,8 @@ import {
 import { Column } from "../test/relational-model/REL-components";
 import { Table, RelSchema } from "../test/relational-model/REL-components";
 import { abstractM2M } from "./abstractM2M";
-import { ExprNode, Template } from "../jsx/element";
-import { Context } from "../jsx/context";
+import { ExprNode, Template } from "@synthesis/jsx-runtime";
+import { Context } from "@synthesis/jsx-runtime";
 import { ModelStore } from "../index";
 
 const store = new ModelStore();

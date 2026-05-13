@@ -5,7 +5,7 @@ import {
   ExprNode,
   Template,
   WithRefProps,
-} from "../jsx/element"
+} from "@synthesis/jsx-runtime"
 
 export type IModelProps = WithRefProps<t.ITypeModel> & {
   store?: ModelStore;

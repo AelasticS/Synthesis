@@ -1,8 +1,8 @@
 
-export * from './jsx/handle';
-export * from './jsx/element';
+// Re-export the jsx-runtime public surface so existing engine consumers
+// that imported these symbols from "@synthesis/engine" keep working.
+export * from '@synthesis/jsx-runtime';
 export * from './model-store/ModelsStore';
-export * from './jsx/context';
 export * from './transformations/trace-decorators';
 export * from './transformations/spec-decorators';
 export * from './transformations/abstractM2M';

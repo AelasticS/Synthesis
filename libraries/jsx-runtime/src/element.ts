@@ -1,8 +1,9 @@
 import * as t from "@aelastics/types";
 import * as g from "@synthesis/metamodel-core";
 import { Context } from "./context";
-import { M2MContext, ModelStore } from "../index";
-import { doParseURL, PathType } from "../model-store/path";
+import { isM2MContext } from "./im2mcontext";
+import { IStore } from "./istore";
+import { doParseURL, PathType } from "./path";
 
 // export type RefProps = { $ref?:g.IModelElement} | {$refByID?:string} | {$refByName?:string}
 export type RefProps = {
@@ -44,7 +45,7 @@ export type InstanceCreation<P extends WithRefProps<g.IModelElement>> = (
 export type RenderPros = {
   children: ElementInstance<g.IModelElement>[];
   model: g.IModel;
-  store: ModelStore;
+  store: IStore;
 };
 
 // export type Template<P extends WithRefProps<g.IModelElement>,
@@ -121,8 +122,8 @@ export class ExprNode<P extends WithRefProps<g.IModelElement>, R = P> {
           if (v instanceof ExprNode) {
             const modelElement = v.render(ctx, isImport);
 
-            if (ctx instanceof M2MContext) {
-              (ctx as M2MContext).resolveTargetForJSX(v, modelElement);
+            if (isM2MContext(ctx)) {
+              ctx.resolveTargetForJSX(v, modelElement);
             }
 
             return modelElement;
@@ -133,8 +134,8 @@ export class ExprNode<P extends WithRefProps<g.IModelElement>, R = P> {
       } else if (value instanceof ExprNode) {
         tmp = value.render(ctx, isImport);
 
-        if (ctx instanceof M2MContext) {
-          (ctx as M2MContext).resolveTargetForJSX(value, tmp);
+        if (isM2MContext(ctx)) {
+          ctx.resolveTargetForJSX(value, tmp);
         }
       } else {
         tmp = value;
@@ -395,10 +396,14 @@ export class ExprNode<P extends WithRefProps<g.IModelElement>, R = P> {
           );
         }
 
-        const m2mctx: M2MContext = ctx as M2MContext;
+        if (!isM2MContext(ctx)) {
+          throw new Error(
+            "Resolve element can only be rendered inside an M2MContext"
+          );
+        }
 
         // find target ModelElement directly via sourceIndex — O(1)
-        const targetModelElement = m2mctx.resolveTarget(tempE.props.input as g.IModelElement, tempE.props.ruleName);
+        const targetModelElement = ctx.resolveTarget(tempE.props.input as g.IModelElement, tempE.props.ruleName);
 
         // TODO Should this be an Error or Null? The target JSXElement does not exist because of an error during the transformation or because the transformation rule is N/A
         if (!targetModelElement) {
@@ -430,8 +435,8 @@ export class ExprNode<P extends WithRefProps<g.IModelElement>, R = P> {
       function connectToParent(childElement: ExprNode<g.IModelElement>, ctx: Context, isImport: boolean | undefined) {
 
         const childModelElement = childElement.render(ctx, isImport);
-        if (ctx instanceof M2MContext) {
-          (ctx as M2MContext).resolveTargetForJSX(childElement, childModelElement);
+        if (isM2MContext(ctx)) {
+          ctx.resolveTargetForJSX(childElement, childModelElement);
         }
 
         if (childElement.connectionInfo) {

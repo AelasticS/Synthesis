@@ -1,6 +1,6 @@
 // /** @jsx createExprNode */
 //
-// import { Context } from "../../jsx/context"
+// import { Context } from "@synthesis/jsx-runtime"
 // import { ModelStore } from "../../index"
 //
 // import * as etT from "../../types-metamodel/types-meta.model"

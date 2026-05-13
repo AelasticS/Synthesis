@@ -1,8 +1,8 @@
 /** @jsx createExprNode */
 
 
-import { createExprNode } from "../../jsx/handle"
-import { ExprNode } from "../../jsx/element"
+import { createExprNode } from "@synthesis/jsx-runtime"
+import { ExprNode } from "@synthesis/jsx-runtime"
 import * as gdmT from "../1.decision-model/decision-meta.model"
 import {
   CompositeOption,
@@ -15,7 +15,7 @@ import {
 } from "../1.decision-model/decision-meta.model-components"
 
 
-import { Context } from "../../jsx/context"
+import { Context } from "@synthesis/jsx-runtime"
 import { ModelStore } from "../../index"
 import * as t from "@aelastics/types"
 import { TypeObject, Property, PropertyDomain } from "../../types-metamodel/types-components"

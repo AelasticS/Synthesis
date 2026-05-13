@@ -1,13 +1,13 @@
 /** @jsx createExprNode */
 
 
-import { createExprNode } from "../../jsx/handle";
-import { ExprNode } from "../../jsx/element";
+import { createExprNode } from "@synthesis/jsx-runtime";
+import { ExprNode } from "@synthesis/jsx-runtime";
 import * as et from "../../test/eer-model/EER.meta.model.type";
 import { EERSchema, Kernel, Attribute, Domain, Relationship, OrdinaryMapping, Weak, WeakMapping } from "../../test/eer-model/EER-components";
 
 
-import { Context } from "../../jsx/context";
+import { Context } from "@synthesis/jsx-runtime";
 import { ModelStore } from '../../index';
 
 const testStore = new ModelStore();

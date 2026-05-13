@@ -5,15 +5,19 @@
 
 import * as t from "@aelastics/types"
 import { IModel, IModelElement } from "@synthesis/metamodel-core"
-import { createExprNode } from "../jsx/handle"
-import { Context } from "../jsx/context"
+import {
+  createExprNode,
+  Context,
+  ExprNode,
+  ResolveElement,
+  IM2MContext,
+} from "@synthesis/jsx-runtime"
 import * as tm from "./transformation.model.type"
-import { ExprNode, ResolveElement } from "../jsx/element"
 import { ModelStore } from "./../index"
 import { IConfigurationModel, IChoice } from "../decisions/3.configuration-model/configuration-meta.model"
 import * as tmT from "../decisions/8.trace-model/trace-meta.model"
 import * as tmC from "../decisions/8.trace-model/trace-model-meta.model-components"
-import { Element as CModelElement, Model } from "../types-metamodel/models-component"
+import { Element as CModelElement, Model } from "@synthesis/jsx-runtime"
 import { TargetElement } from "../decisions/8.trace-model/trace-model-meta.model-components"
 
 type IODescr = { type?: t.Any; instance?: IModel; jsx?: string }
@@ -81,7 +85,7 @@ export class Stack<T> {
   }
 }
 
-export class M2MContext<P = undefined> extends Context {
+export class M2MContext<P = undefined> extends Context implements IM2MContext {
 
   public input: IODescr = {}
   public output: IODescr = {}

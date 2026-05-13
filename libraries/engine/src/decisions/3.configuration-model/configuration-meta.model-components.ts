@@ -1,6 +1,6 @@
 import * as dm from './configuration-meta.model';
 import { ModelStore } from '../../index';
-import { CpxTemplate, ExprNode, Template, WithRefProps } from "../../jsx/element";
+import { CpxTemplate, ExprNode, Template, WithRefProps } from "@synthesis/jsx-runtime";
 
 export type IModelProps = WithRefProps<dm.IConfigurationModel> & {
     store?: ModelStore;

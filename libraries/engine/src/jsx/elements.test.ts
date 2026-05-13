@@ -1,6 +1,5 @@
-import { Context } from "./context";
+import { Context, ExprNode } from "@synthesis/jsx-runtime";
 import * as g from "@synthesis/metamodel-core";
-import { ExprNode } from "./element";
 import { ModelStore } from '../index'
 
 describe("should correctly find fully qualified name of model elements from references", () => {

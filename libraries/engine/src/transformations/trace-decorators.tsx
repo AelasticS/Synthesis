@@ -5,7 +5,7 @@
 
 import { abstractM2M, IM2M } from "./abstractM2M"
 import { IModel } from "@synthesis/metamodel-core"
-import { ExprNode, ResolveElement } from "../jsx/element"
+import { ExprNode, ResolveElement } from "@synthesis/jsx-runtime"
 import { IConfigurationModel } from "../decisions/3.configuration-model/configuration-meta.model"
 import {
   __isVarPoint,

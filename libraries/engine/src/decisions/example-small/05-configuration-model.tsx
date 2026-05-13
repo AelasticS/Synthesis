@@ -1,8 +1,8 @@
 /** @jsx createExprNode */
 
-import { createExprNode } from "../../jsx/handle"
+import { createExprNode } from "@synthesis/jsx-runtime"
 import { ModelStore } from "../../index"
-import { Model, Element } from "../../types-metamodel/models-component"
+import { Model, Element } from "@synthesis/jsx-runtime"
 
 import { ElementIssue, GlobalIssue, Option } from "../1.decision-model/decision-meta.model-components"
 import { BindingModel } from "../2.binding-model/binding-meta.model-components"

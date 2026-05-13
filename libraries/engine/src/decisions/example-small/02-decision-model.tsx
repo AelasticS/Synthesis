@@ -1,6 +1,6 @@
 /** @jsx createExprNode */
 
-import { createExprNode } from "../../jsx/handle"
+import { createExprNode } from "@synthesis/jsx-runtime"
 import { ExprNode, ModelStore } from "../../index"
 import {
   DecisionModel,

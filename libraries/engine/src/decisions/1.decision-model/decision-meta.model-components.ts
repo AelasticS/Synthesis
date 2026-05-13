@@ -1,6 +1,6 @@
 import * as ddm from './decision-meta.model';
 import { ModelStore } from '../../index';
-import { CpxTemplate, ExprNode, Template, WithRefProps } from "../../jsx/element";
+import { CpxTemplate, ExprNode, Template, WithRefProps } from "@synthesis/jsx-runtime";
 
 export type IDecisionModelProps = WithRefProps<ddm.IDecisionModel> & {
     store?: ModelStore;

@@ -1,9 +1,9 @@
 /** @jsx createExprNode */
 
-import { createExprNode } from "../../jsx/handle"
+import { createExprNode } from "@synthesis/jsx-runtime"
 import { abstractM2M } from "../../transformations/abstractM2M"
-import { ExprNode, Resolve } from "../../jsx/element"
-import { Context } from "../../jsx/context"
+import { ExprNode, Resolve } from "@synthesis/jsx-runtime"
+import { Context } from "@synthesis/jsx-runtime"
 import { E2E, ModelStore, M2M, SpecPoint, SpecOption } from "../../index"
 import { IModel, IModelElement, Model, ModelElement } from "@synthesis/metamodel-core"
 import * as gdmT from "../1.decision-model/decision-meta.model"

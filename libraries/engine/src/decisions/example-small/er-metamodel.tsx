@@ -1,8 +1,8 @@
 /** @jsx createExprNode */
 
 import { Context, ModelStore } from "../../index"
-import { ExprNode } from "../../jsx/element"
-import { createExprNode } from "../../jsx/handle"
+import { ExprNode } from "@synthesis/jsx-runtime"
+import { createExprNode } from "@synthesis/jsx-runtime"
 import {
   InverseProperty,
   Property,

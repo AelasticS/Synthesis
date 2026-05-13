@@ -7,15 +7,15 @@
 
 
 
-import { createExprNode } from "../../jsx/handle";
+import { createExprNode } from "@synthesis/jsx-runtime";
 import { VarPoint, VarOption } from "../../variability/var-decorators";
 import * as et from "../../test/eer-model/EER.meta.model.type";
 import * as rt from "../../test/relational-model/REL.meta.model.type.v2";
 import * as e from "../../test/eer-model/EER-components";
 import * as r from "../../test/relational-model/REL-components.v2";
 import { abstractM2M } from "../../transformations/abstractM2M";
-import { ExprNode, Resolve } from "../../jsx/element";
-import { Context } from "../../jsx/context";
+import { ExprNode, Resolve } from "@synthesis/jsx-runtime";
+import { Context } from "@synthesis/jsx-runtime";
 import { E2E, ModelStore, M2M, SpecPoint, SpecOption, Option, Or, Not, And } from "../../index"
 import * as cmT from "../3.configuration-model/configuration-meta.model"; // import decision model types for decision model transformation
 

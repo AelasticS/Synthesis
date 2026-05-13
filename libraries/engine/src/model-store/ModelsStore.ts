@@ -10,9 +10,12 @@ import {
 } from "@synthesis/metamodel-core"
 import * as t from "@aelastics/types"
 import { ServerProxy } from "@aelastics/store"
-import { ExprNode } from "../index"
-import { doParseURL } from "./path"
-import { Context } from "../jsx/context"
+import {
+  Context,
+  ExprNode,
+  IStore,
+  doParseURL,
+} from "@synthesis/jsx-runtime"
 import { JSX_Export as je } from "../index"
 import { AnnotationTypes as a } from "@aelastics/types"
 import { Typed_JSX_Annotation } from "../jsx-export"
@@ -27,7 +30,7 @@ export enum AccessProtocol {
   "types-file",
 } // access typescript file with a  meta-model expressed using aelastics-types definition functions
 
-export class ModelStore {
+export class ModelStore implements IStore {
   private store: Store
   private mapOfNames: Map<string, IModelElement> = new Map()
 

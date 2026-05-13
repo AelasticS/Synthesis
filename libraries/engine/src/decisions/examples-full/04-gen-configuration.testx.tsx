@@ -1,7 +1,7 @@
 /** @jsx createExprNode */
 
-import { createExprNode } from "../../jsx/handle"
-import { Context } from "../../jsx/context"
+import { createExprNode } from "@synthesis/jsx-runtime"
+import { Context } from "@synthesis/jsx-runtime"
 import { ModelStore } from "../../index"
 import { IModel } from "@synthesis/metamodel-core"
 import * as dbmT from "../2.binding-model/binding-meta.model"

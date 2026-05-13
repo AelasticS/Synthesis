@@ -1,5 +1,5 @@
 /** @jsx createExprNode */
-import { createExprNode } from "./../../jsx/handle";
+import { createExprNode } from "@synthesis/jsx-runtime";
 import {
   M2T,
   Dir,

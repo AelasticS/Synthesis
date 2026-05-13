@@ -1,9 +1,9 @@
 /** @jsx createExprNode */
 
-import { createExprNode } from "../../jsx/handle";
-import { ExprNode } from "../../jsx/element";
+import { createExprNode } from "@synthesis/jsx-runtime";
+import { ExprNode } from "@synthesis/jsx-runtime";
 
-import { Context } from "../../jsx/context";
+import { Context } from "@synthesis/jsx-runtime";
 import { ModelStore } from '../../index';
 
 import * as gdmC from "../1.decision-model/decision-meta.model-components";

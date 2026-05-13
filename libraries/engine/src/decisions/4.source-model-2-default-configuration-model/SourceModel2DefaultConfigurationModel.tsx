@@ -1,8 +1,8 @@
 /** @jsx createExprNode */
 
-import { createExprNode } from "../../jsx/handle"
+import { createExprNode } from "@synthesis/jsx-runtime"
 import { abstractM2M } from "../../transformations/abstractM2M"
-import { ExprNode } from "../../jsx/element"
+import { ExprNode } from "@synthesis/jsx-runtime"
 import { E2E, ModelStore, M2M } from "../../index"
 import { IModel, IModelElement, Model, ModelElement } from "@synthesis/metamodel-core"
 

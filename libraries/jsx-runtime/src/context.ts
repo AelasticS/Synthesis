@@ -1,9 +1,14 @@
-import { truncate } from "fs"
 import * as g from "@synthesis/metamodel-core"
-import { ModelStore } from "../index"
+import { IStore } from "./istore"
 import { IStack, ArrayStack } from "./stack"
-import { Config } from "../config"
 import { INamespace } from "@synthesis/metamodel-core"
+
+/**
+ * Top-level namespace name used when no explicit namespace is pushed.
+ * Mirrors `Config.TOP_NAME_DOMAIN` in @synthesis/engine — kept local
+ * here so jsx-runtime carries no engine dependency.
+ */
+const TOP_NAME_DOMAIN = "www.aelastics.org"
 
 let maxlocalID: number = 0
 
@@ -11,7 +16,7 @@ let maxlocalID: number = 0
 
 export class Context {
   // TODO: remove multiple stores, add store in constructor
-  public readonly storeStack: IStack<ModelStore> = new ArrayStack()
+  public readonly storeStack: IStack<IStore> = new ArrayStack()
   public readonly modelStack: IStack<g.IModel> = new ArrayStack()
   public readonly namespaceStack: IStack<g.INamespace> = new ArrayStack() // used to resolve names
 
@@ -20,8 +25,8 @@ export class Context {
     // TODO : add initial nameaspace using store!
     const topNamespace: INamespace = {
       id: "1",
-      name: Config.TOP_NAME_DOMAIN,
-      label: Config.TOP_NAME_DOMAIN,
+      name: TOP_NAME_DOMAIN,
+      label: TOP_NAME_DOMAIN,
       elements: [],
       path: "",
     } as unknown as INamespace
@@ -34,7 +39,7 @@ export class Context {
     return (++maxlocalID).toString()
   }
 
-  public get store(): ModelStore {
+  public get store(): IStore {
     try {
       return this.storeStack.peek()
     } catch (e: any) {
@@ -42,7 +47,7 @@ export class Context {
     }
   }
 
-  public pushStore = (s: ModelStore) => {
+  public pushStore = (s: IStore) => {
     this.storeStack.push(s)
   }
 
