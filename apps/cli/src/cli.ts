@@ -1,5 +1,6 @@
 import { Command } from 'commander'
 import chalk from 'chalk'
+import { registerExampleCommand } from './commands/example'
 
 const program = new Command()
 
@@ -7,6 +8,8 @@ program
   .name('synth')
   .description('Synthesis model-driven engineering toolkit')
   .version('0.1.0')
+
+registerExampleCommand(program)
 
 program
   .command('validate <model>')

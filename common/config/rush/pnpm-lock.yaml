@@ -12,6 +12,12 @@ importers:
 
   ../../apps/cli:
     dependencies:
+      '@synthesis/examples':
+        specifier: workspace:*
+        version: link:../../libraries/examples
+      '@synthesis/runner':
+        specifier: workspace:*
+        version: link:../../libraries/runner
       chalk:
         specifier: ~4.1.2
         version: 4.1.2

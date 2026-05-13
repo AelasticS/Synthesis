@@ -17,7 +17,9 @@
   },
   "dependencies": {
     "chalk": "~4.1.2",
-    "commander": "~12.1.0"
+    "commander": "~12.1.0",
+    "@synthesis/runner": "workspace:*",
+    "@synthesis/examples": "workspace:*"
   },
   "devDependencies": {
     "@rushstack/eslint-config": "~4.6.4",
