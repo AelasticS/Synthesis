@@ -1,4 +1,4 @@
-import * as t from "aelastics-types"
+import * as t from "@aelastics/types"
 
 export const OrgSchema = t.schema("OrgSchema");
 

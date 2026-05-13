@@ -4,7 +4,7 @@
  */
 
 
-import * as t from "aelastics-types";
+import * as t from "@aelastics/types";
 import { IDType, NameType } from "./basic.type";
 
 export const keyType = t.number;

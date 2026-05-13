@@ -1,4 +1,4 @@
-import * as t from "aelastics-types";
+import * as t from "@aelastics/types";
 import * as g from "../generic-metamodel";
 import { Context } from "./context";
 import { M2MContext, ModelStore } from "../index";

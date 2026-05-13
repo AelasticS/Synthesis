@@ -1,7 +1,7 @@
 /**
  *
  */
-import * as t from "aelastics-types"
+import * as t from "@aelastics/types"
 import { Model, ModelElement } from "../generic-metamodel"
 
 export const TypesMM_TypeSchema = t.schema("TypesMM_TypeSchema")

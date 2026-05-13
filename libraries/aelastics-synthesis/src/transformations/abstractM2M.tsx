@@ -3,7 +3,7 @@
  * Copyright (c) AelasticS 2023.
  */
 
-import * as t from "aelastics-types"
+import * as t from "@aelastics/types"
 import { IModel, IModelElement } from "../generic-metamodel"
 import { createExprNode } from "../jsx/handle"
 import { Context } from "../jsx/context"

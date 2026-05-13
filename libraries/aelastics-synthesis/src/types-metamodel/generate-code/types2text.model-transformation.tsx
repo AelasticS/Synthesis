@@ -13,7 +13,7 @@ import * as tmm from "./../types-meta.model";
 import { ModelStore, Context, ExprNode, E2E, M2M } from "./../../index";
 import { abstractM2M } from "./../../transformations/abstractM2M";
 import { SpecPoint, SpecOption } from "./../../transformations/spec-decorators";
-import * as t from "aelastics-types"
+import * as t from "@aelastics/types"
 
 
 @M2M()
@@ -87,7 +87,7 @@ export class Types2TextModelTransformations extends abstractM2M<
   initialImpors(m: tmm.ITypeModel): Array<ExprNode<m2tmm.IParagraph>> {
     return [
       <P parentSection={<Sec $refByName="imports"></Sec>}>
-        import * as t from "aelastics-types";
+        import * as t from "@aelastics/types";
       </P>,
       <P parentSection={<Sec $refByName="imports"></Sec>}>
         {`import { Model, ModelElement } from "../../generic-metamodel";`}

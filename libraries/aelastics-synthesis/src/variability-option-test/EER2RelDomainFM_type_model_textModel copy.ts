@@ -1,4 +1,4 @@
-import * as t from "aelastics-types";
+import * as t from "@aelastics/types";
 import { Model, ModelElement } from "../generic-metamodel";
 export const EER2RelDomainFM_type_model_Schema = t.schema("EER2RelDomainFM_type_model_Schema");
 export const EER2RelDomainFM_type_model_Model = t.subtype(Model, {}, "EER2RelDomainFM_type_model_Model", EER2RelDomainFM_type_model_Schema);

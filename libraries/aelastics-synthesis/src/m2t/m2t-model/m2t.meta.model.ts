@@ -1,4 +1,4 @@
-import * as t from "aelastics-types"
+import * as t from "@aelastics/types"
 import { ModelElement, Model } from "../../generic-metamodel";
 
 //TODO: insted of model element name define another property for names of M2T_Item, DocElement

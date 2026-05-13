@@ -2,7 +2,7 @@
  *
  */
 
-import * as t from "aelastics-types";
+import * as t from "@aelastics/types";
 
 export const FMC_BodyFM_TypeSchema = t.schema("FMC_BodyFM_TypeSchema");
 

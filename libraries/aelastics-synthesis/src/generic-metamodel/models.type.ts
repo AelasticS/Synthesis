@@ -3,7 +3,7 @@
  *
  */
 
-import * as t from "aelastics-types";
+import * as t from "@aelastics/types";
 import { Diagram } from "./diagram.type";
 import { RepositoryObject } from "./repository.type";
 

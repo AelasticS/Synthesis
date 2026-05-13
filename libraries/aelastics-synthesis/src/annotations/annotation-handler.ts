@@ -5,7 +5,7 @@
  * Copyright (c) 2023 Aelastics
  */
 
-import {Any, transducer} from "aelastics-types"
+import {Any, transducer} from "@aelastics/types"
 import { IObject } from "../types-metamodel/types-meta.model"
 
 /**
@@ -15,7 +15,7 @@ import { IObject } from "../types-metamodel/types-meta.model"
  *  3. transformation context - annotations in the form of a Map, which is suitable for model transformations
  */
 
-import {} from "aelastics-types"
+import {} from "@aelastics/types"
 
 type AnnotationContextType = {
     mappings:Map<object, object>

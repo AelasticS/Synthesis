@@ -1,4 +1,4 @@
-import * as t from "aelastics-types"
+import * as t from "@aelastics/types"
 import { ModelElement, Model } from "../../generic-metamodel";
 
 export const BPM_Schema = t.schema("BPMN-Schema");

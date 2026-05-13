@@ -1,4 +1,4 @@
-import * as t from "aelastics-types";
+import * as t from "@aelastics/types";
 import { Model, ModelElement } from "../../generic-metamodel";
 import * as ddM from "../1.decision-model/decision-meta.model";
 

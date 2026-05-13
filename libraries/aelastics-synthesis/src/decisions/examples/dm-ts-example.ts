@@ -1,5 +1,5 @@
 
-import * as t from "aelastics-types";
+import * as t from "@aelastics/types";
 
 
 // ############     PRIMER SA UNION OBJEKTIMA    ##############

@@ -7,7 +7,7 @@ import { Context } from "../jsx/context";
 import { ExprNode, Template } from "../jsx/element";
 import { IModel, IModelElement } from "../generic-metamodel";
 import { ModelStore } from "../model-store/ModelsStore";
-import * as t from "aelastics-types";
+import * as t from "@aelastics/types";
 
 export class ModelM<M extends IModel> {
   context: Context = new Context();

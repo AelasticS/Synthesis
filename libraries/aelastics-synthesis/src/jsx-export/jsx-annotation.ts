@@ -1,5 +1,5 @@
-import * as t from "aelastics-types"
-import type { AnnotationTypes as a } from "aelastics-types"
+import * as t from "@aelastics/types"
+import type { AnnotationTypes as a } from "@aelastics/types"
 
 
 export const JSX_Types = t.schema("JSX_Types")

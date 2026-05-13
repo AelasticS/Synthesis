@@ -1,4 +1,4 @@
-import * as t from "aelastics-types"
+import * as t from "@aelastics/types"
 import { Model, ModelElement } from "../../generic-metamodel"
 import { Type } from "../../types-metamodel/types-meta.model"
 

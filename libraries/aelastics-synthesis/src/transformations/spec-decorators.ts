@@ -1,6 +1,6 @@
 // https://luckylibora.medium.com/typescript-method-decorators-in-depth-problems-and-solutions-74387d51e6a
 
-import { Any } from "aelastics-types";
+import { Any } from "@aelastics/types";
 import { IModelElement } from "../generic-metamodel";
 import { ExprNode } from "../jsx/element";
 import { abstractM2M } from "./abstractM2M";

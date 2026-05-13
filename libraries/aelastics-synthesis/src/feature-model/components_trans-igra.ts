@@ -3,7 +3,7 @@
 // // import { STX } from "../jsx/handle";
 
 // import * as g from "./Types_MetaModel/types-meta.model";
-// import * as t from "aelastics-types";
+// import * as t from "@aelastics/types";
 
 // export function hm<P extends WithRefProps<g.IModelElement>>(
 //   t: Template<P>,

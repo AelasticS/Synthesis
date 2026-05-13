@@ -1,4 +1,4 @@
-import * as t from "aelastics-types";
+import * as t from "@aelastics/types";
 import { DescriptionType, IDType, NameType } from "./basic.type";
 import { Model } from "./models.type";
 

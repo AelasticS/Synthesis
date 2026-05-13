@@ -3,7 +3,7 @@
  *
  */
 
-import * as t from "aelastics-types";
+import * as t from "@aelastics/types";
 import {
   FeatureDiagram as FM_FeatureDiagram,
   Feature as FM_Feature,

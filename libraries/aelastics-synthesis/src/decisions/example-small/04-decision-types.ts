@@ -1,6 +1,6 @@
 import { ElementIssue, IIssue, Issue, Option } from "./../1.decision-model/decision-meta.model"
-import * as t from "aelastics-types"
-import { string } from "aelastics-types"
+import * as t from "@aelastics/types"
+import { string } from "@aelastics/types"
 
 // #### Decision model types ####
 export const RelationSchemaDesignIssues_TypeSchema = t.schema("RelationSchemaDesignIssues_TypeSchema")

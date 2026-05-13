@@ -1,4 +1,4 @@
-import * as t from "aelastics-types"
+import * as t from "@aelastics/types"
 import {ModelElement, Model} from "generic-metamodel/src/models.type"
 
 export const AnnotationTypeSchema = t.schema("AnnotationTypeSchema");

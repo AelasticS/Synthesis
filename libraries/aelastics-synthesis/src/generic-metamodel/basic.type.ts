@@ -1,4 +1,4 @@
-import * as t from "aelastics-types"
+import * as t from "@aelastics/types"
 
 export const IDType = t.string.derive("uuid").length(36)
 export const NameType = t.string.derive('NameType').alphanumeric.maxLength(128)

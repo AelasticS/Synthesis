@@ -1,5 +1,5 @@
 import { IPropertyJSXAnnotType, IObjectJSXAnnotType } from "./jsx-annotation";
-import {Any} from "aelastics-types"
+import {Any} from "@aelastics/types"
 export abstract class JSX_Element {
   public typeName:string
   public fullPathName:string

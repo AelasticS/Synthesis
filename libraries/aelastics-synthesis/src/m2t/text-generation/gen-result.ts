@@ -1,4 +1,4 @@
-import { failure, Result, success } from "aelastics-result";
+import { failure, Result, success } from "@aelastics/result";
 
 export type ItemResult = {
   itemID: string;

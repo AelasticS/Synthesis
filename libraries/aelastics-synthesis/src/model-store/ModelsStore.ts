@@ -1,5 +1,5 @@
 import * as fs from "fs"
-import { Store } from "aelastics-store"
+import { Store } from "@aelastics/store"
 import {
   IModel,
   IModelElement,
@@ -8,13 +8,13 @@ import {
   ModelElement,
   Namespace,
 } from "../generic-metamodel"
-import * as t from "aelastics-types"
-import { ServerProxy } from "aelastics-store"
+import * as t from "@aelastics/types"
+import { ServerProxy } from "@aelastics/store"
 import { ExprNode } from "../index"
 import { doParseURL } from "./path"
 import { Context } from "../jsx/context"
 import { JSX_Export as je } from "../index"
-import { AnnotationTypes as a } from "aelastics-types"
+import { AnnotationTypes as a } from "@aelastics/types"
 import { Typed_JSX_Annotation } from "../jsx-export"
 
 // "^[\\$a-zA-Z0-9_\\.\\-]+$"
