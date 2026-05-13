@@ -341,6 +341,10 @@
       "projectFolder": "libraries/aelastics-store"
     },
     {
+      "packageName": "@aelastics/synthesis",
+      "projectFolder": "libraries/aelastics-synthesis"
+    },
+    {
       "packageName": "synthesis-docs",
       "projectFolder": "apps/docs"
     },
