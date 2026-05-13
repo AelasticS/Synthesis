@@ -5,7 +5,7 @@
 
 import { Context } from "../jsx/context";
 import { ExprNode, Template } from "../jsx/element";
-import { IModel, IModelElement } from "../generic-metamodel";
+import { IModel, IModelElement } from "@synthesis/metamodel-core";
 import { ModelStore } from "../model-store/ModelsStore";
 import * as t from "@aelastics/types";
 

@@ -5,7 +5,7 @@
 
 import * as t from "@aelastics/types"
 
-import { ModelElement, Model } from "../../generic-metamodel"
+import { ModelElement, Model } from "@synthesis/metamodel-core"
 
 // tslint:disable-next-line:variable-name
 export const RelModel_TypeSchema = t.schema("EERModelSchema");

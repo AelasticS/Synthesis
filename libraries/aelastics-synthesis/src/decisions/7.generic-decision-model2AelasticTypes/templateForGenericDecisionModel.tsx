@@ -16,7 +16,7 @@ import {
 
 import { ModelStore } from "../../index"
 import { IIssue, IOption } from "../1.decision-model/decision-meta.model"
-import { IModelElement } from "../../generic-metamodel"
+import { IModelElement } from "@synthesis/metamodel-core"
 import { IBindingElement } from "../2.binding-model/binding-meta.model"
 
 const store = new ModelStore();

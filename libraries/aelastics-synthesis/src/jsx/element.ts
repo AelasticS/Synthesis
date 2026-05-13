@@ -1,5 +1,5 @@
 import * as t from "@aelastics/types";
-import * as g from "../generic-metamodel";
+import * as g from "@synthesis/metamodel-core";
 import { Context } from "./context";
 import { M2MContext, ModelStore } from "../index";
 import { doParseURL, PathType } from "../model-store/path";

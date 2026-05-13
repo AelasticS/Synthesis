@@ -1,9 +1,9 @@
 import { truncate } from "fs"
-import * as g from "../generic-metamodel"
+import * as g from "@synthesis/metamodel-core"
 import { ModelStore } from "../index"
 import { IStack, ArrayStack } from "./stack"
 import { Config } from "../config"
-import { INamespace } from "../generic-metamodel"
+import { INamespace } from "@synthesis/metamodel-core"
 
 let maxlocalID: number = 0
 

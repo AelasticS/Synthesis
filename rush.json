@@ -341,6 +341,10 @@
       "projectFolder": "libraries/aelastics-store"
     },
     {
+      "packageName": "@synthesis/metamodel-core",
+      "projectFolder": "libraries/metamodel-core"
+    },
+    {
       "packageName": "@aelastics/synthesis",
       "projectFolder": "libraries/aelastics-synthesis"
     },

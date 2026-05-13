@@ -4,7 +4,7 @@
  */
 
 import { abstractM2M, IM2M } from "./abstractM2M"
-import { IModel } from "../generic-metamodel"
+import { IModel } from "@synthesis/metamodel-core"
 import { ExprNode, ResolveElement } from "../jsx/element"
 import { IConfigurationModel } from "../decisions/3.configuration-model/configuration-meta.model"
 import {

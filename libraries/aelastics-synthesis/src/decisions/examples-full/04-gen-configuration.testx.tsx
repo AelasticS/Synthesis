@@ -3,7 +3,7 @@
 import { createExprNode } from "../../jsx/handle"
 import { Context } from "../../jsx/context"
 import { ModelStore } from "../../index"
-import { IModel } from "../../generic-metamodel"
+import { IModel } from "@synthesis/metamodel-core"
 import * as dbmT from "../2.binding-model/binding-meta.model"
 import * as sm2ddm
   from "../4.source-model-2-default-configuration-model/SourceModel2DefaultConfigurationModel"

@@ -90,7 +90,7 @@ export class Types2TextModelTransformations extends abstractM2M<
         import * as t from "@aelastics/types";
       </P>,
       <P parentSection={<Sec $refByName="imports"></Sec>}>
-        {`import { Model, ModelElement } from "../../generic-metamodel";`}
+        {`import { Model, ModelElement } from "@synthesis/metamodel-core";`}
       </P>,
     ];
   }

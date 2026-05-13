@@ -1,5 +1,5 @@
 import * as t from "@aelastics/types"
-import { Model, ModelElement } from "../../generic-metamodel"
+import { Model, ModelElement } from "@synthesis/metamodel-core"
 import * as gdm from "../1.decision-model/decision-meta.model"
 import { BindingModel } from "../2.binding-model/binding-meta.model"
 

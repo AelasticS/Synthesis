@@ -5,7 +5,7 @@ import { abstractM2M } from "../../transformations/abstractM2M"
 import { ExprNode, Resolve } from "../../jsx/element"
 import { Context } from "../../jsx/context"
 import { E2E, ModelStore, M2M, SpecPoint, SpecOption } from "../../index"
-import { IModel, IModelElement, Model, ModelElement } from "../../generic-metamodel"
+import { IModel, IModelElement, Model, ModelElement } from "@synthesis/metamodel-core"
 import * as gdmT from "../1.decision-model/decision-meta.model"
 import * as gdmC from "../1.decision-model/decision-meta.model-components"
 

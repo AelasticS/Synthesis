@@ -7,7 +7,7 @@ import {
   Model,
   ModelElement,
   Namespace,
-} from "../generic-metamodel"
+} from "@synthesis/metamodel-core"
 import * as t from "@aelastics/types"
 import { ServerProxy } from "@aelastics/store"
 import { ExprNode } from "../index"

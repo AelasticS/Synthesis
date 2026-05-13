@@ -1,5 +1,5 @@
 import { Context } from "./context";
-import * as g from "../generic-metamodel";
+import * as g from "@synthesis/metamodel-core";
 import { ExprNode } from "./element";
 import { ModelStore } from '../index'
 

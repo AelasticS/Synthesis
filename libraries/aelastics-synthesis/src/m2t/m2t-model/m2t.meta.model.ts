@@ -1,5 +1,5 @@
 import * as t from "@aelastics/types"
-import { ModelElement, Model } from "../../generic-metamodel";
+import { ModelElement, Model } from "@synthesis/metamodel-core";
 
 //TODO: insted of model element name define another property for names of M2T_Item, DocElement
 //TODO: real solution is to designate folder and other containers as namespaces

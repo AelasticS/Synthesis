@@ -2,7 +2,7 @@
 import { createExprNode, render } from './handle'
 
 import { WithRefProps, Template, ElementInstance, ExprNode, CpxTemplate, ConnectionInfo, defaultConnectionInfo } from './element'
-import * as g from '../generic-metamodel'
+import * as g from '@synthesis/metamodel-core'
 import * as t from '@aelastics/types'
 import { ModelStore } from '../index'
 import { Context } from './context'
