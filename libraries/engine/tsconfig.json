@@ -19,7 +19,11 @@
     "module": "commonjs",
     "target": "es2022",
     "lib": ["es2022", "esnext.disposable", "esnext.collection"],
-    "jsx": "react"
+    "jsx": "react",
+    "baseUrl": ".",
+    "paths": {
+      "@synthesis/engine": ["src/index.ts"]
+    }
   },
   "include": ["src/**/*.ts", "src/**/*.tsx"],
   "exclude": ["node_modules", "lib"]

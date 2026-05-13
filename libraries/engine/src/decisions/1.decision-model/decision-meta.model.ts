@@ -1,6 +1,9 @@
 import * as t from "@aelastics/types"
 import { Model, ModelElement } from "@synthesis/metamodel-core"
-import { Type } from "../../types-metamodel/types-meta.model"
+// Imported via the model subpath (not the package barrel) so engine doesn't
+// pull standard-metamodels' JSX components — those depend back on engine,
+// which would create a CommonJS circular-import cycle.
+import { Type } from "@synthesis/standard-metamodels/types-metamodel/model"
 
 
 export const Decision_TypeSchema = t.schema("Decision_TypeSchema")

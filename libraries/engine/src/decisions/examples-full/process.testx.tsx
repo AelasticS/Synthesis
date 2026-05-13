@@ -16,8 +16,8 @@ import * as dbmT from "../2.binding-model/binding-meta.model"
 
 // Metamodel imports (needed for type assertions or store loading)
 import * as eerM from "../../types-metamodel/models/eer-metamodel-aelasticTypes"
-import * as etT from "../../types-metamodel/types-meta.model"
-import * as eerT from "../../test/eer-model/EER.meta.model.type"
+import { model as etT } from "@synthesis/standard-metamodels/types-metamodel"
+import { model as eerT } from "@synthesis/standard-metamodels/eer"
 
 describe("Decision Process Example", () => {
 

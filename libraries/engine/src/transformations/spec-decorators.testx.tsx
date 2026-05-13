@@ -10,10 +10,8 @@
 import { createExprNode } from '../jsx/handle'
 import { M2M, E2E } from "./trace-decorators"
 import { SpecPoint, SpecOption} from "./spec-decorators"
-import * as et from '../test/eer-model/EER.meta.model.type'
-import * as rt from '../test/relational-model/REL.meta.model.type'
-import * as e from '../test/eer-model/EER-components'
-import * as r from '../test/relational-model/REL-components'
+import { model as et, components as e } from '@synthesis/standard-metamodels/eer'
+import { model as rt, components as r } from '@synthesis/standard-metamodels/relational'
 import { abstractM2M } from './abstractM2M';
 import { ExprNode } from '../jsx/element'
 import { Context } from '../jsx/context'

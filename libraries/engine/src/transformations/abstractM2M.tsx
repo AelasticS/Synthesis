@@ -13,7 +13,7 @@ import { ModelStore } from "./../index"
 import { IConfigurationModel, IChoice } from "../decisions/3.configuration-model/configuration-meta.model"
 import * as tmT from "../decisions/8.trace-model/trace-meta.model"
 import * as tmC from "../decisions/8.trace-model/trace-model-meta.model-components"
-import { Element as CModelElement, Model } from "../types-metamodel/models-component"
+import { Element as CModelElement, Model } from "@synthesis/standard-metamodels/types-metamodel"
 import { TargetElement } from "../decisions/8.trace-model/trace-model-meta.model-components"
 
 type IODescr = { type?: t.Any; instance?: IModel; jsx?: string }

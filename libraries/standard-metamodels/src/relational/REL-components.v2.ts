@@ -1,6 +1,5 @@
-import * as r from './REL.meta.model.type'
-import { CpxTemplate, ExprNode, Template, WithRefProps } from '../../jsx/element'
-import { ModelStore } from '../../index'
+import * as r from './REL.meta.model.type.v2'
+import { CpxTemplate, ExprNode, Template, WithRefProps, ModelStore } from '@synthesis/engine'
 
 export type IModelProps = WithRefProps<r.IRelSchema> & { store?: ModelStore }
 
@@ -15,6 +14,11 @@ export const Domain: Template<r.IDomain> = (props) => {
 export const Column: Template<r.IColumn> = (props) => {
   return new ExprNode(r.Column, props, 'columns')
 }
+
+export const ForeignKeyColumn: Template<r.IForeignKeyColumn> = (props) => {
+  return new ExprNode(r.ForeignKeyColumn, props, 'fkColumns')
+}
+
 
 export const Index: Template<r.IIndex> = (props) => {
   return new ExprNode(r.Index, props, 'indexes')

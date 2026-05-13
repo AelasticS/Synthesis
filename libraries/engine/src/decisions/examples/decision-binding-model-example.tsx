@@ -10,8 +10,7 @@ import * as gdmC from "../1.decision-model/decision-meta.model-components";
 import * as gdmT from "../1.decision-model/decision-meta.model";
 import * as gdmM from "./generic-decision-model-example"
 
-import * as etC from "../../types-metamodel/types-components"
-import * as etT from "../../types-metamodel/types-meta.model";
+import { components as etC, model as etT } from "@synthesis/standard-metamodels/types-metamodel"
 import * as eerM from "../../types-metamodel/models/eer-metamodel-aelasticTypes";
 
 import * as dbmT from "../2.binding-model/binding-meta.model";

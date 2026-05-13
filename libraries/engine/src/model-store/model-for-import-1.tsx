@@ -6,8 +6,7 @@
 // const EER = getEER({} as IModel, null)
 
 import { createExprNode } from "../jsx/handle";
-import * as et from "../test/eer-model/EER.meta.model.type";
-import * as e from "../test/eer-model/EER-components";
+import { model as et, components as e } from "@synthesis/standard-metamodels/eer";
 import { ExprNode } from "../jsx/element";
 
 const eerSchema1: ExprNode<et.IEERSchema> = (

@@ -1,6 +1,5 @@
-import * as r from "./REL.meta.model.type"
-import { CpxTemplate, ExprNode, Template, WithRefProps } from "../../jsx/element"
-import { ModelStore } from "../../index"
+import * as r from "./REL.meta.model.type.legacy"
+import { CpxTemplate, ExprNode, Template, WithRefProps, ModelStore } from "@synthesis/engine"
 
 export type IModelProps = WithRefProps<r.IRelSchema> & { store?: ModelStore }
 

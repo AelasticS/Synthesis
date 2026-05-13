@@ -1,0 +1,123 @@
+{
+  "name": "@synthesis/standard-metamodels",
+  "author": "Sinisa Neskovic",
+  "version": "0.1.0",
+  "license": "Apache-2.0",
+  "main": "lib/index.js",
+  "typings": "lib/index.d.ts",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "build": "heft build --clean",
+    "test": "heft test --clean"
+  },
+  "exports": {
+    ".": {
+      "types": "./lib/index.d.ts",
+      "default": "./lib/index.js"
+    },
+    "./eer": {
+      "types": "./lib/eer/index.d.ts",
+      "default": "./lib/eer/index.js"
+    },
+    "./relational": {
+      "types": "./lib/relational/index.d.ts",
+      "default": "./lib/relational/index.js"
+    },
+    "./bpm": {
+      "types": "./lib/bpm/index.d.ts",
+      "default": "./lib/bpm/index.js"
+    },
+    "./types-metamodel": {
+      "types": "./lib/types-metamodel/index.d.ts",
+      "default": "./lib/types-metamodel/index.js"
+    },
+    "./eer/model": {
+      "types": "./lib/eer/EER.meta.model.type.d.ts",
+      "default": "./lib/eer/EER.meta.model.type.js"
+    },
+    "./relational/model": {
+      "types": "./lib/relational/REL.meta.model.type.d.ts",
+      "default": "./lib/relational/REL.meta.model.type.js"
+    },
+    "./relational/model-v2": {
+      "types": "./lib/relational/REL.meta.model.type.v2.d.ts",
+      "default": "./lib/relational/REL.meta.model.type.v2.js"
+    },
+    "./relational/components-v2": {
+      "types": "./lib/relational/REL-components.v2.d.ts",
+      "default": "./lib/relational/REL-components.v2.js"
+    },
+    "./relational/model-legacy": {
+      "types": "./lib/relational/REL.meta.model.type.legacy.d.ts",
+      "default": "./lib/relational/REL.meta.model.type.legacy.js"
+    },
+    "./relational/components-legacy": {
+      "types": "./lib/relational/REL-components.legacy.d.ts",
+      "default": "./lib/relational/REL-components.legacy.js"
+    },
+    "./bpm/model": {
+      "types": "./lib/bpm/BPM.meta.model.type.d.ts",
+      "default": "./lib/bpm/BPM.meta.model.type.js"
+    },
+    "./bpm/organization": {
+      "types": "./lib/bpm/organization.model.type.d.ts",
+      "default": "./lib/bpm/organization.model.type.js"
+    },
+    "./bpm/example-department": {
+      "types": "./lib/bpm/example-department.d.ts",
+      "default": "./lib/bpm/example-department.js"
+    },
+    "./types-metamodel/model": {
+      "types": "./lib/types-metamodel/types-meta.model.d.ts",
+      "default": "./lib/types-metamodel/types-meta.model.js"
+    },
+    "./types-metamodel/generic-model": {
+      "types": "./lib/types-metamodel/models-component.d.ts",
+      "default": "./lib/types-metamodel/models-component.js"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "eer": ["lib/eer/index.d.ts"],
+      "relational": ["lib/relational/index.d.ts"],
+      "bpm": ["lib/bpm/index.d.ts"],
+      "types-metamodel": ["lib/types-metamodel/index.d.ts"],
+      "eer/model": ["lib/eer/EER.meta.model.type.d.ts"],
+      "relational/model": ["lib/relational/REL.meta.model.type.d.ts"],
+      "relational/model-v2": ["lib/relational/REL.meta.model.type.v2.d.ts"],
+      "relational/components-v2": ["lib/relational/REL-components.v2.d.ts"],
+      "relational/model-legacy": ["lib/relational/REL.meta.model.type.legacy.d.ts"],
+      "relational/components-legacy": ["lib/relational/REL-components.legacy.d.ts"],
+      "bpm/model": ["lib/bpm/BPM.meta.model.type.d.ts"],
+      "bpm/organization": ["lib/bpm/organization.model.type.d.ts"],
+      "bpm/example-department": ["lib/bpm/example-department.d.ts"],
+      "types-metamodel/model": ["lib/types-metamodel/types-meta.model.d.ts"],
+      "types-metamodel/generic-model": ["lib/types-metamodel/models-component.d.ts"]
+    }
+  },
+  "dependencies": {
+    "@aelastics/types": "workspace:*",
+    "@synthesis/metamodel-core": "workspace:*"
+  },
+  "peerDependencies": {
+    "@synthesis/engine": "workspace:*"
+  },
+  "peerDependenciesMeta": {
+    "@synthesis/engine": {
+      "optional": false
+    }
+  },
+  "devDependencies": {
+    "@rushstack/eslint-config": "~4.6.4",
+    "eslint": "~10.0.2",
+    "@rushstack/heft": "~1.2.6",
+    "@rushstack/heft-jest-plugin": "~1.2.6",
+    "@rushstack/heft-typescript-plugin": "~1.3.1",
+    "@types/node": "~25.3.3",
+    "@types/heft-jest": "~1.0.6",
+    "tslib": "^2.6.0",
+    "typescript": "~5.9.3"
+  }
+}

@@ -12,9 +12,11 @@ import {
   TypeObject,
   TypeOptional,
   TypeSubtype,
-} from "../../types-metamodel/types-components"
-import * as t from "../../types-metamodel/types-meta.model"
-import { TypeBoolean, TypeNumber, TypeString } from "../../types-metamodel/predefined-types"
+  TypeBoolean,
+  TypeNumber,
+  TypeString,
+  model as t,
+} from "@synthesis/standard-metamodels/types-metamodel"
 
 const store = new ModelStore()
 

@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+
+  "compilerOptions": {
+    "outDir": "lib",
+    "rootDirs": ["src/"],
+
+    "forceConsistentCasingInFileNames": true,
+    "declaration": true,
+    "sourceMap": true,
+    "declarationMap": true,
+    "inlineSources": true,
+    "experimentalDecorators": true,
+    "strict": true,
+    "esModuleInterop": true,
+    "typeRoots": ["./node_modules/@types"],
+    "types": ["heft-jest", "node"],
+    "moduleResolution": "Node",
+    "module": "commonjs",
+    "target": "es2022",
+    "lib": ["es2022", "esnext.disposable", "esnext.collection"],
+    "jsx": "react",
+    "baseUrl": ".",
+    "paths": {
+      "@synthesis/engine": ["../engine/lib/index.d.ts"]
+    }
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx"],
+  "exclude": ["node_modules", "lib"]
+}

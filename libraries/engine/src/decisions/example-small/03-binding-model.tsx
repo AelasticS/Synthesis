@@ -6,7 +6,7 @@ import { ModelStore } from "../../index"
 
 import { BindingModel, Binding } from "../2.binding-model/binding-meta.model-components"
 import * as t from "./../2.binding-model/binding-meta.model"
-import { Model, Element as ModelElement } from "../../types-metamodel/models-component"
+import { Model, Element as ModelElement } from "@synthesis/standard-metamodels/types-metamodel"
 import { DecisionModel, ElementIssue } from "../1.decision-model/decision-meta.model-components"
 
 

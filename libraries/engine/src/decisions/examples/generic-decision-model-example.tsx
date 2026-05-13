@@ -18,9 +18,7 @@ import {
 import { Context } from "../../jsx/context"
 import { ModelStore } from "../../index"
 import * as t from "@aelastics/types"
-import { TypeObject, Property, PropertyDomain } from "../../types-metamodel/types-components"
-import { importPredefinedTypes } from "../../types-metamodel/predefined-model"
-import { TypeString } from "../../types-metamodel/predefined-types"
+import { TypeObject, Property, PropertyDomain, importPredefinedTypes, TypeString } from "@synthesis/standard-metamodels/types-metamodel"
 
 const testStore = new ModelStore()
 const context = new Context()

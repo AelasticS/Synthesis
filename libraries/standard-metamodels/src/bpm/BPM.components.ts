@@ -1,6 +1,5 @@
 import * as bpmn from './BPM.meta.model.type'
-import { CpxTemplate, ExprNode, Template, WithRefProps } from '../../jsx/element'
-import { ModelStore } from '../../index'
+import { CpxTemplate, ExprNode, Template, WithRefProps, ModelStore } from '@synthesis/engine'
 
 export type IModelProps = WithRefProps<bpmn.IProcess> & { store?: ModelStore }
 

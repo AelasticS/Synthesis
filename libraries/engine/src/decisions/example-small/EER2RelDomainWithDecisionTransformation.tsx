@@ -8,25 +8,26 @@
 import { createExprNode } from "../../jsx/handle"
 import { VarPoint, VarOption, Default } from "../../variability/var-decorators"
 import { Option, And, Not, Or } from "./../../variability/eval-operators"
-import {
-  IEntity,
-  IEERSchema,
+import { model as eerModel } from "@synthesis/standard-metamodels/eer"
+import * as rmT from "@synthesis/standard-metamodels/relational/model-legacy"
+const {
   EERSchema,
-  IAttribute,
-  IRelationship,
-  IOrdinaryMapping,
   Relationship,
   Entity,
-  IDomain,
   Attribute,
-} from "../../test/eer-model/EER.meta.model.type"
-import * as rmT from "./../09-relational-schema/REL.meta.model.type"
+} = eerModel
+type IEntity = eerModel.IEntity
+type IEERSchema = eerModel.IEERSchema
+type IAttribute = eerModel.IAttribute
+type IRelationship = eerModel.IRelationship
+type IOrdinaryMapping = eerModel.IOrdinaryMapping
+type IDomain = eerModel.IDomain
 import { abstractM2M } from "../../transformations/abstractM2M"
 import { ExprNode, Resolve } from "../../jsx/element"
 import { E2E, ModelStore, M2M, SpecPoint, SpecOption } from "../../index"
 import * as cm from "./../3.configuration-model/configuration-meta.model"
 
-import { RelSchema, Table, Column } from "./../09-relational-schema/REL-components"
+import { RelSchema, Table, Column } from "@synthesis/standard-metamodels/relational/components-legacy"
 
 @M2M()
 export class EER2RelDomainWithDecisionTransformation extends abstractM2M<
