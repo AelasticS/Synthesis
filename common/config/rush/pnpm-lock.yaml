@@ -154,20 +154,14 @@ importers:
         specifier: ~5.9.3
         version: 5.9.3
 
-  ../../libraries/aelastics-synthesis:
+  ../../libraries/aelastics-types:
     dependencies:
       '@aelastics/result':
         specifier: workspace:*
         version: link:../aelastics-result
-      '@aelastics/store':
-        specifier: workspace:*
-        version: link:../aelastics-store
-      '@aelastics/types':
-        specifier: workspace:*
-        version: link:../aelastics-types
-      '@synthesis/metamodel-core':
-        specifier: workspace:*
-        version: link:../metamodel-core
+      mobx:
+        specifier: ^6.13.7
+        version: 6.15.0
     devDependencies:
       '@rushstack/eslint-config':
         specifier: ~4.6.4
@@ -197,14 +191,20 @@ importers:
         specifier: ~5.9.3
         version: 5.9.3
 
-  ../../libraries/aelastics-types:
+  ../../libraries/engine:
     dependencies:
       '@aelastics/result':
         specifier: workspace:*
         version: link:../aelastics-result
-      mobx:
-        specifier: ^6.13.7
-        version: 6.15.0
+      '@aelastics/store':
+        specifier: workspace:*
+        version: link:../aelastics-store
+      '@aelastics/types':
+        specifier: workspace:*
+        version: link:../aelastics-types
+      '@synthesis/metamodel-core':
+        specifier: workspace:*
+        version: link:../metamodel-core
     devDependencies:
       '@rushstack/eslint-config':
         specifier: ~4.6.4

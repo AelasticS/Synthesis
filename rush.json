@@ -345,8 +345,8 @@
       "projectFolder": "libraries/metamodel-core"
     },
     {
-      "packageName": "@aelastics/synthesis",
-      "projectFolder": "libraries/aelastics-synthesis"
+      "packageName": "@synthesis/engine",
+      "projectFolder": "libraries/engine"
     },
     {
       "packageName": "synthesis-docs",
