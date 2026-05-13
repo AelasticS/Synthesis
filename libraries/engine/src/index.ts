@@ -6,10 +6,9 @@ export * from './model-store/ModelsStore';
 export * from './transformations/trace-decorators';
 export * from './transformations/spec-decorators';
 export * from './transformations/abstractM2M';
-export * from './variability/var-decorators';
-export * from './variability/eval-operators';
+export * from './transformations/decorator-guards';
+export * from './transformations/trace';
 export * as JSX_Export from "./jsx-export/index"
 export * from "./m2t/m2t-model/m2t.meta.model"
 export * from "./m2t/m2t-model/m2t.jsx"
 export * from "./m2t/text-generation/generate"
-

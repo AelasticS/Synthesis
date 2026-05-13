@@ -361,6 +361,10 @@
       "projectFolder": "libraries/engine"
     },
     {
+      "packageName": "@synthesis/decision-framework",
+      "projectFolder": "libraries/decision-framework"
+    },
+    {
       "packageName": "@synthesis/docs",
       "projectFolder": "apps/docs"
     },

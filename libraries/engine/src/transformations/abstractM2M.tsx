@@ -14,21 +14,15 @@ import {
 } from "@synthesis/jsx-runtime"
 import * as tm from "./transformation.model.type"
 import { ModelStore } from "./../index"
-import { IConfigurationModel, IChoice } from "../decisions/3.configuration-model/configuration-meta.model"
-import * as tmT from "../decisions/8.trace-model/trace-meta.model"
-import * as tmC from "../decisions/8.trace-model/trace-model-meta.model-components"
+import * as tmT from "./trace/trace-meta.model"
+import * as tmC from "./trace/trace-model-meta.model-components"
 import { Element as CModelElement, Model } from "@synthesis/jsx-runtime"
-import { TargetElement } from "../decisions/8.trace-model/trace-model-meta.model-components"
+import { TargetElement } from "./trace/trace-model-meta.model-components"
 
 type IODescr = { type?: t.Any; instance?: IModel; jsx?: string }
 type TransformationDescr = {
   type?: tm.IM2M_Transformation
   instance?: tm.IM2M_Trace
-}
-
-export interface IVarResolution {
-  optionName: string
-  choices: IChoice[]
 }
 
 export interface ISpecResolution {
@@ -37,7 +31,7 @@ export interface ISpecResolution {
 }
 
 // Lightweight runtime record for resolve lookups (sourceIndex, jsxIndex).
-// The full trace info (source, ruleType, variabilityOption, choices, timestamps)
+// The full trace info (source, ruleType, timestamps)
 // lives in rawTraceEntries and is rendered into a persistent TraceModel lazily.
 export interface TraceEntryRecord {
   rule: string // for lookup by ruleName
@@ -47,15 +41,15 @@ export interface TraceEntryRecord {
 
 // Raw data stored during template() execution; converted to trace JSX
 // in createTraceModel() when output.instance is available.
+//
+// Engine's base RawTraceEntryData carries only "RegularRule" entries.
+// Subclasses (e.g. DecisionAwareM2M in @synthesis/decision-framework) may
+// widen this to add variability/specialization metadata.
 export interface RawTraceEntryData {
   sourceModelElement: IModelElement
   jsxElements: ExprNode<IModelElement>[]
   ruleName: string
-  ruleType: "RegularRule" | "VariabilityPoint" | "SpecializationPoint"
-  variabilityOption?: string
-  choices?: IChoice[]
-  specializationOption?: string
-  sourceTypeName?: string
+  ruleType: string
 }
 
 export const _privatePop = Symbol("privatePop")
@@ -90,7 +84,6 @@ export class M2MContext<P = undefined> extends Context implements IM2MContext {
   public input: IODescr = {}
   public output: IODescr = {}
   public transformation: TransformationDescr = {}
-  public currentElementDecision: Stack<IChoice[]> = new Stack<IChoice[]>()
   public traceModel?: ExprNode<tmT.ITraceModel>
 
   // Fast O(1) lookup by source element
@@ -102,13 +95,8 @@ export class M2MContext<P = undefined> extends Context implements IM2MContext {
   // Raw trace data collected during template(); converted to JSX lazily in createTraceModel()
   public readonly rawTraceEntries: RawTraceEntryData[] = []
 
-  // Stack for nested VarPoint calls — VarPoint pushes/pops, E2E reads lastVarResolution
-  public readonly varResolutionStack: Stack<IVarResolution> = new Stack<IVarResolution>()
-
-  // Last VarResolution — set by VarPoint in finally, read and cleared by E2E
-  public lastVarResolution?: IVarResolution
-
-  // Last SpecResolution — set by SpecPoint wrapper, read and cleared by E2E
+  // Last SpecResolution — set by SpecPoint wrapper, read and cleared by E2E.
+  // SpecPoint lives in engine; its resolution is consumed here.
   public lastSpecResolution?: ISpecResolution
 
   // param is used to keep additional information during transformation
@@ -123,20 +111,9 @@ export class M2MContext<P = undefined> extends Context implements IM2MContext {
     sourceModelElement: IModelElement,
     jsxElements: ExprNode<IModelElement>[],
     ruleName: string,
-    ruleType: "RegularRule" | "VariabilityPoint" | "SpecializationPoint",
-    variabilityOption?: string,
-    choices?: IChoice[],
-    specializationOption?: string,
-    sourceTypeName?: string,
+    ruleType: string,
+    ..._extra: any[]
   ) {
-    if (ruleType === "VariabilityPoint" && (!variabilityOption || !choices)) {
-      throw new Error("VariabilityPoint trace entry requires variabilityOption and choices")
-    }
-
-    if (ruleType === "SpecializationPoint" && !specializationOption) {
-      throw new Error("SpecializationPoint trace entry requires specializationOption")
-    }
-
     // Store raw data — JSX entries will be created lazily in createTraceModel()
     // when output.instance is available and targetElementNamespace can be resolved.
     this.rawTraceEntries.push({
@@ -144,10 +121,6 @@ export class M2MContext<P = undefined> extends Context implements IM2MContext {
       jsxElements,
       ruleName,
       ruleType,
-      variabilityOption,
-      choices,
-      specializationOption,
-      sourceTypeName,
     })
 
     const entry: TraceEntryRecord = {
@@ -250,12 +223,10 @@ export interface IM2M<
   S extends IModel,
   D extends IModel,
   EM extends { [key: string]: IModel } = {},
-  CM extends IConfigurationModel = never,
   P = undefined
 > {
   context: M2MContext<P>
   extra?: EM
-  configModel?: CM
 
   template(props: S): ExprNode<S, D>
 
@@ -266,18 +237,15 @@ export abstract class abstractM2M<
   S extends IModel,
   D extends IModel,
   EM extends { [key: string]: IModel } = {},
-  CM extends IConfigurationModel = never,
   P = undefined
-> implements IM2M<S, D, EM, CM, P> {
+> implements IM2M<S, D, EM, P> {
   // transformation type
   public context: M2MContext<P> = new M2MContext<P>()
-  public configModel?: CM
   public extra?: EM
 
-  public constructor(store?: ModelStore, extra?: EM, configModel?: CM) {
+  public constructor(store?: ModelStore, extra?: EM) {
     if (store) this.context.pushStore(store)
     this.extra = extra
-    this.configModel = configModel
   }
 
   abstract template(props: S): ExprNode<S, D>
@@ -306,7 +274,7 @@ export abstract class abstractM2M<
 
     this.context.traceModel = this.createTraceModel()
     console.log("Generated Trace Model JSX:\n", this.renderToJsx(this.context.traceModel))
-    const traceModel = this.context.traceModel.render<tmT.ITraceModel>(this.context)
+    this.context.traceModel.render<tmT.ITraceModel>(this.context)
 
     // Serialize the target model to JSX notation
     this.context.output.jsx = this.renderToJsx(targetJSXTree)
@@ -319,7 +287,7 @@ export abstract class abstractM2M<
    * Serializes an ExprNode<> JSX tree into a human-readable JSX string.
    * Traverses the element tree directly — no annotations needed.
    */
-  private renderToJsx(element: ExprNode<any>, level: number = 0, indent: number = 2): string {
+  protected renderToJsx(element: ExprNode<any>, level: number = 0, indent: number = 2): string {
     if (!element) return ""
 
     const lines: string[] = []
@@ -376,7 +344,7 @@ export abstract class abstractM2M<
    * Skips internal infrastructure props (store) and handles
    * refs, primitives, nested Element values and arrays.
    */
-  private formatJsxProps(props: any, _level: number = 0, indent: number = 2): string {
+  protected formatJsxProps(props: any, _level: number = 0, indent: number = 2): string {
     if (!props) return ""
 
     const skipKeys = new Set(["store", "children"])
@@ -415,7 +383,15 @@ export abstract class abstractM2M<
     return parts.length > 0 ? " " + parts.join(" ") : ""
   }
 
-  private createTraceModel(): ExprNode<tmT.ITraceModel> {
+  /**
+   * Builds the trace JSX tree for the current transformation.
+   *
+   * Engine's base implementation handles only "RegularRule" entries. Subclasses
+   * (e.g. DecisionAwareM2M in @synthesis/decision-framework) override this to
+   * emit specialized entries (VariabilityPoint, SpecializationPoint) and a
+   * decision-aware trace model.
+   */
+  protected createTraceModel(): ExprNode<tmT.ITraceModel> {
     // Now output.instance is available — build trace JSX entries from raw data
     const targetElementNamespace = this.context.output.instance
       ? `${this.context.output.instance.path}/${this.context.output.instance.name}`
@@ -436,38 +412,17 @@ export abstract class abstractM2M<
         )
       })
 
-      if (raw.ruleType === "VariabilityPoint") {
-        return (
-          <tmC.VarPointTraceEntry
-            source={<CModelElement $refByName={`${sourceElementNamespace}/${raw.sourceModelElement.name}`} />}
-            rule={raw.ruleName}
-            ruleType={"VariabilityPoint"}
-            variabilityOption={raw.variabilityOption}
-            choices={raw.choices}
-            targets={targetElements}
-          />
-        )
-      } else if (raw.ruleType === "SpecializationPoint") {
-        return (
-          <tmC.SpecPointTraceEntry
-            source={<CModelElement $refByName={`${sourceElementNamespace}/${raw.sourceModelElement.name}`} />}
-            rule={raw.ruleName}
-            ruleType={"SpecializationPoint"}
-            specializationOption={raw.specializationOption}
-            sourceType={raw.sourceTypeName}
-            targets={targetElements}
-          />
-        )
-      } else {
-        return (
-          <tmC.TraceEntry
-            source={<CModelElement $refByName={`${sourceElementNamespace}/${raw.sourceModelElement.name}`} />}
-            rule={raw.ruleName}
-            ruleType={raw.ruleType}
-            targets={targetElements}
-          />
-        )
-      }
+      // Pure engine's TraceEntry supports only "RegularRule".
+      // Decision-aware subclasses override createTraceModel() to emit
+      // VariabilityPoint / SpecializationPoint entries from richer raw data.
+      return (
+        <tmC.TraceEntry
+          source={<CModelElement $refByName={`${sourceElementNamespace}/${raw.sourceModelElement.name}`} />}
+          rule={raw.ruleName}
+          ruleType={"RegularRule"}
+          targets={targetElements}
+        />
+      )
     })
 
     return (
@@ -476,7 +431,6 @@ export abstract class abstractM2M<
         store={this.context.store}
         timestamp={new Date().toISOString()}
         source={<Model $refByName={`${this.context.input.instance!.path}/${this.context.input.instance!.name}`} />}
-        config={this.configModel ? <Model $refByName={`${this.configModel.path}/${this.configModel.name}`} /> : null}
         targets={[<Model $refByName={`${this.context.output.instance!.path}/${this.context.output.instance!.name}`} />]}
       >
         {traceJSXEntries}

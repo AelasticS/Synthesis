@@ -6,7 +6,6 @@
 import { abstractM2M, IM2M } from "./abstractM2M"
 import { IModel } from "@synthesis/metamodel-core"
 import { ExprNode, ResolveElement } from "@synthesis/jsx-runtime"
-import { IConfigurationModel } from "../decisions/3.configuration-model/configuration-meta.model"
 import {
   __isVarPoint,
   __isSpecPoint,
@@ -23,7 +22,7 @@ type Class<T = any> = new (...args: any[]) => T;
 
 // Class decorator — parameter-free
 export const M2M = () => {
-  return function <T extends Class<IM2M<any, any, any, any, any>>>(target: T): T {
+  return function <T extends Class<IM2M<any, any, any, any>>>(target: T): T {
     const decorated = class extends target {
       constructor(...args: any[]) {
         super(...args)
@@ -45,8 +44,8 @@ export const M2M = () => {
  * Placing @SpecPoint or @VarPoint above @E2E will throw an error at decoration time.
  */
 export const E2E = function() {
-  return function <DM extends IConfigurationModel | never = never>(
-    target: abstractM2M<IModel, IModel, any, DM, any>,
+  return function (
+    target: abstractM2M<IModel, IModel, any, any>,
     propertyKey: string,
     descriptor: PropertyDescriptor,
   ) {
@@ -58,7 +57,7 @@ export const E2E = function() {
     // is present. Uses the registry — no hardcoded sentinel references.
     const pointReg = findPointRegistration(original)
 
-    const wrapped = function(this: abstractM2M<any, any, any, DM>, ...args: any[]) {
+    const wrapped = function(this: abstractM2M<any, any, any, any>, ...args: any[]) {
         let sourceModelElement = args[0]
 
         let result = original.apply(this, args) as ExprNode<any> | ExprNode<any>[] | null
