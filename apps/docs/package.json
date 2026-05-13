@@ -1,5 +1,5 @@
 {
-  "name": "synthesis-docs",
+  "name": "@synthesis/docs",
   "version": "0.0.1",
   "private": true,
   "scripts": {

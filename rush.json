@@ -349,7 +349,7 @@
       "projectFolder": "libraries/engine"
     },
     {
-      "packageName": "synthesis-docs",
+      "packageName": "@synthesis/docs",
       "projectFolder": "apps/docs"
     },
     {
