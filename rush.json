@@ -345,6 +345,10 @@
       "projectFolder": "libraries/metamodel-core"
     },
     {
+      "packageName": "@synthesis/runner",
+      "projectFolder": "libraries/runner"
+    },
+    {
       "packageName": "@synthesis/engine",
       "projectFolder": "libraries/engine"
     },
