@@ -67,6 +67,13 @@ const metas: ReadonlyArray<RunnableMeta> = [
       "A simple text-generation example: takes a typed model and renders a textual artifact. Useful as a minimal end-to-end smoke test of the runner contract.",
     load: () => require("./types-to-text/runnable").runnable as Runnable,
   },
+  {
+    id: "eer-to-rel-to-text",
+    name: "EER → Relational → SQL DDL (full showcase)",
+    description:
+      "End-to-end Synthesis showcase: authors a small EER schema in JSX, applies a decision-driven EER→Relational transformation with snake_case naming, then generates SQL DDL via the engine's M2T runtime. Demonstrates JSX authoring, decision/configuration models, decision-aware M2M, and model-to-text generation composed into a single pipeline.",
+    load: () => require("./eer-to-rel-to-text/runnable").runnable as Runnable,
+  },
 ];
 
 function makeLazyRunnable(meta: RunnableMeta): Runnable {

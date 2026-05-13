@@ -13,6 +13,7 @@
     "test": "heft test --clean"
   },
   "dependencies": {
+    "@aelastics/result": "workspace:*",
     "@aelastics/types": "workspace:*",
     "@synthesis/metamodel-core": "workspace:*",
     "@synthesis/jsx-runtime": "workspace:*",

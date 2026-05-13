@@ -297,6 +297,9 @@ importers:
 
   ../../libraries/examples:
     dependencies:
+      '@aelastics/result':
+        specifier: workspace:*
+        version: link:../aelastics-result
       '@aelastics/types':
         specifier: workspace:*
         version: link:../aelastics-types
