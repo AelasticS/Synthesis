@@ -2,7 +2,8 @@
 
 import { createExprNode } from "../../jsx/handle"
 import { ExprNode, ModelStore } from "../../index"
-import { EERSchema, Attribute, Domain, Relationship, Role, Entity, model as t } from "@synthesis/standard-metamodels/eer"
+import { EERSchema, Attribute, Domain, Relationship, Role, Entity } from "../../test/eer-model/EER-components"
+import * as t from "./../../test/eer-model/EER.meta.model.type"
 
 export const CompanySchema = (store: ModelStore): ExprNode<t.IEERSchema> => {
   return (

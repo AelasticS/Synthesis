@@ -1,6 +1,6 @@
 /** @jsx createExprNode */
 
-import { createExprNode } from "@synthesis/engine";
+import { createExprNode } from "../jsx/handle";
 
 import { TypeModel } from "./types-components";
 import { TypeBoolean, TypeNumber, TypeString } from "./predefined-types";

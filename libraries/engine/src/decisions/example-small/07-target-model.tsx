@@ -2,7 +2,11 @@
 
 import { createExprNode } from "../../jsx/handle"
 import { ModelStore } from "../../index"
-import { Column, RelSchema, Table } from "@synthesis/standard-metamodels/relational/components-legacy"
+import {
+  Column,
+  RelSchema,
+  Table,
+} from "./../09-relational-schema/REL-components"
 
 export const RelationalSchema_Company = (store: ModelStore) => (
   <RelSchema name="CompanyRelationalSchema" store={store}>

@@ -3,8 +3,8 @@
 import { Context, ModelStore } from "../../index"
 import { ExprNode } from "../../jsx/element"
 import { createExprNode } from "../../jsx/handle"
+import { TypeString } from "../predefined-types"
 import {
-  TypeString,
   InverseProperty,
   Property,
   PropertyDomain,
@@ -13,9 +13,9 @@ import {
   TypeObject,
   TypeOptional,
   TypeSubtype,
-  model as t,
-  importPredefinedTypes,
-} from "@synthesis/standard-metamodels/types-metamodel"
+} from "../types-components"
+import * as t from "../types-meta.model"
+import { importPredefinedTypes } from "../predefined-model"
 
 const store = new ModelStore()
 

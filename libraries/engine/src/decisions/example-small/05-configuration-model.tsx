@@ -2,7 +2,7 @@
 
 import { createExprNode } from "../../jsx/handle"
 import { ModelStore } from "../../index"
-import { Model, Element } from "@synthesis/standard-metamodels/types-metamodel"
+import { Model, Element } from "../../types-metamodel/models-component"
 
 import { ElementIssue, GlobalIssue, Option } from "../1.decision-model/decision-meta.model-components"
 import { BindingModel } from "../2.binding-model/binding-meta.model-components"

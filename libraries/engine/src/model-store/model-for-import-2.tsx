@@ -6,7 +6,8 @@
 // const EER = getEER({} as IModel, null)
 
 import { createExprNode } from '../index';
-import { model as et, components as e } from "@synthesis/standard-metamodels/eer";
+import * as et from "../test/eer-model/EER.meta.model.type";
+import * as e from "../test/eer-model/EER-components";
 import { ExprNode } from '../index'
 
 const eerSchema1 = (

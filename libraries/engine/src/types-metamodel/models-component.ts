@@ -1,5 +1,6 @@
+import { ModelStore } from "../index"
 import { Model as GenericModel, ModelElement, IModel, IModelElement } from "@synthesis/metamodel-core"
-import { CpxTemplate, ExprNode, Template, WithRefProps, ModelStore } from "@synthesis/engine"
+import { CpxTemplate, ExprNode, Template, WithRefProps } from "../jsx/element"
 
 export type IModelProps = WithRefProps<IModel> & {
   store?: ModelStore;

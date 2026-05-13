@@ -3,7 +3,7 @@ import * as t from "./types-meta.model";
 import {
   ExprNode,
   Template,
-} from "@synthesis/engine";
+} from "../jsx/element";
 
 export const TypeNumber: Template<t.INumber> = (props) => {
   return new ExprNode(t.Number, props, undefined);

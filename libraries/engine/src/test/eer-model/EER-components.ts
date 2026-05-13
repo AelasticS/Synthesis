@@ -4,8 +4,8 @@ import {
   ExprNode,
   Template,
   WithRefProps,
-  ModelStore,
-} from "@synthesis/engine"
+} from "../../jsx/element"
+import { ModelStore } from "../../index"
 
 export type IModelProps = WithRefProps<e.IEERSchema> & { store?: ModelStore };
 

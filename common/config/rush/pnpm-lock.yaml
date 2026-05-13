@@ -208,9 +208,6 @@ importers:
       '@synthesis/metamodel-core':
         specifier: workspace:*
         version: link:../metamodel-core
-      '@synthesis/standard-metamodels':
-        specifier: workspace:*
-        version: link:../standard-metamodels
     devDependencies:
       '@rushstack/eslint-config':
         specifier: ~4.6.4
@@ -301,43 +298,6 @@ importers:
       eslint:
         specifier: ~10.0.2
         version: 10.0.2(jiti@1.21.7)
-      typescript:
-        specifier: ~5.9.3
-        version: 5.9.3
-
-  ../../libraries/standard-metamodels:
-    dependencies:
-      '@aelastics/types':
-        specifier: workspace:*
-        version: link:../aelastics-types
-      '@synthesis/metamodel-core':
-        specifier: workspace:*
-        version: link:../metamodel-core
-    devDependencies:
-      '@rushstack/eslint-config':
-        specifier: ~4.6.4
-        version: 4.6.4(eslint@10.0.2(jiti@1.21.7))(typescript@5.9.3)
-      '@rushstack/heft':
-        specifier: ~1.2.6
-        version: 1.2.6(@types/node@25.3.3)
-      '@rushstack/heft-jest-plugin':
-        specifier: ~1.2.6
-        version: 1.2.6(@rushstack/heft@1.2.6(@types/node@25.3.3))(@types/node@25.3.3)(jest-environment-node@29.7.0)
-      '@rushstack/heft-typescript-plugin':
-        specifier: ~1.3.1
-        version: 1.3.1(@rushstack/heft@1.2.6(@types/node@25.3.3))(@types/node@25.3.3)
-      '@types/heft-jest':
-        specifier: ~1.0.6
-        version: 1.0.6
-      '@types/node':
-        specifier: ~25.3.3
-        version: 25.3.3
-      eslint:
-        specifier: ~10.0.2
-        version: 10.0.2(jiti@1.21.7)
-      tslib:
-        specifier: ^2.6.0
-        version: 2.8.1
       typescript:
         specifier: ~5.9.3
         version: 5.9.3
