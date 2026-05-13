@@ -1,0 +1,9 @@
+lib/
+dist/
+temp/
+.heft/
+.rush/
+node_modules/
+*.tsbuildinfo
+TXT_Output2/
+*.test.log
