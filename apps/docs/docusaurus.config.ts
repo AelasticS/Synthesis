@@ -23,7 +23,10 @@ const config: Config = {
 
   markdown: {
     format: 'detect',
+    mermaid: true,
   },
+
+  themes: ['@docusaurus/theme-mermaid'],
 
   i18n: {
     defaultLocale: 'en',
@@ -85,6 +88,7 @@ const config: Config = {
           position: 'left',
           type: 'dropdown',
           items: [
+            { type: 'docSidebar', sidebarId: 'architecture', label: 'Architecture' },
             { type: 'docSidebar', sidebarId: 'synthesis', label: 'Synthesis eDSL' },
             { type: 'docSidebar', sidebarId: 'cli', label: 'synth CLI' },
             { type: 'docSidebar', sidebarId: 'types', label: 'aelastics-types' },
