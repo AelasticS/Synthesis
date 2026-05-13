@@ -365,6 +365,10 @@
       "projectFolder": "libraries/decision-framework"
     },
     {
+      "packageName": "@synthesis/examples",
+      "projectFolder": "libraries/examples"
+    },
+    {
       "packageName": "@synthesis/docs",
       "projectFolder": "apps/docs"
     },
