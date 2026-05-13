@@ -1,4 +1,4 @@
-import * as g from 'generic-metamodel'
+import * as g from '../generic-metamodel'
 import { Context } from './context'
 import { CpxTemplate, ExprNode, Template, WithRefProps } from './element'
 

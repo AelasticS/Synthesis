@@ -1,5 +1,5 @@
 import * as t from "aelastics-types"
-import {Model, ModelElement } from "generic-metamodel";
+import {Model, ModelElement } from "../generic-metamodel";
 
 export const TrSchema = t.schema("TrSchema");
 

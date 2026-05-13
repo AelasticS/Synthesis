@@ -1,5 +1,5 @@
 import { ModelStore } from "../index"
-import { Model as GenericModel, ModelElement, IModel, IModelElement } from "generic-metamodel"
+import { Model as GenericModel, ModelElement, IModel, IModelElement } from "../generic-metamodel"
 import { CpxTemplate, ExprNode, Template, WithRefProps } from "../jsx/element"
 
 export type IModelProps = WithRefProps<IModel> & {

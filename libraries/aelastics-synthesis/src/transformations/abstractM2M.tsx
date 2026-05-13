@@ -4,7 +4,7 @@
  */
 
 import * as t from "aelastics-types"
-import { IModel, IModelElement } from "generic-metamodel"
+import { IModel, IModelElement } from "../generic-metamodel"
 import { createExprNode } from "../jsx/handle"
 import { Context } from "../jsx/context"
 import * as tm from "./transformation.model.type"

@@ -4,7 +4,7 @@ import { createExprNode } from "../../jsx/handle"
 import { abstractM2M } from "../../transformations/abstractM2M"
 import { ExprNode } from "../../jsx/element"
 import { E2E, ModelStore, M2M } from "../../index"
-import { IModel, IModelElement, Model, ModelElement } from "generic-metamodel"
+import { IModel, IModelElement, Model, ModelElement } from "../../generic-metamodel"
 
 import * as dmT from "../1.decision-model/decision-meta.model"
 import * as bmT from "../2.binding-model/binding-meta.model"
