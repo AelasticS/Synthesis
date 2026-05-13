@@ -2,7 +2,7 @@
 
 > **Class**\<`P`\>: (`init`, `ctx`, `ID`?) => `P`
 
-Defined in: [immutable/createClass.ts:39](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/immutable/createClass.ts#L39)
+Defined in: [immutable/createClass.ts:39](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/immutable/createClass.ts#L39)
 
 ## Type Parameters
 

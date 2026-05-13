@@ -1,6 +1,6 @@
 # Class: Filter
 
-Defined in: [transducers/Filter.ts:15](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/transducers/Filter.ts#L15)
+Defined in: [transducers/Filter.ts:15](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/transducers/Filter.ts#L15)
 
 Represents an interface for a processor.
 
@@ -14,7 +14,7 @@ Represents an interface for a processor.
 
 > **new Filter**(`xf`, `predicate`): [`Filter`](Filter.md)
 
-Defined in: [transducers/Filter.ts:19](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/transducers/Filter.ts#L19)
+Defined in: [transducers/Filter.ts:19](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/transducers/Filter.ts#L19)
 
 #### Parameters
 
@@ -36,7 +36,7 @@ Defined in: [transducers/Filter.ts:19](https://github.com/AelasticS/Synthesis/bl
 
 > **init**(`value`, `currNode`): \[`any`, [`WhatToDo`](../type-aliases/WhatToDo.md)\]
 
-Defined in: [transducers/Filter.ts:24](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/transducers/Filter.ts#L24)
+Defined in: [transducers/Filter.ts:24](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/transducers/Filter.ts#L24)
 
 Initializes the processor with a value.
 
@@ -70,7 +70,7 @@ A tuple containing the processed result and the next action.
 
 > **result**(`result`, `currNode`): \[`any`, [`WhatToDo`](../type-aliases/WhatToDo.md)\]
 
-Defined in: [transducers/Filter.ts:28](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/transducers/Filter.ts#L28)
+Defined in: [transducers/Filter.ts:28](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/transducers/Filter.ts#L28)
 
 Handles the result of a processing step.
 
@@ -104,7 +104,7 @@ A tuple containing the processed result and the next action.
 
 > **step**(`result`, `currNode`, `item`): \[`any`, [`WhatToDo`](../type-aliases/WhatToDo.md)\]
 
-Defined in: [transducers/Filter.ts:32](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/transducers/Filter.ts#L32)
+Defined in: [transducers/Filter.ts:32](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/transducers/Filter.ts#L32)
 
 Performs a processing step.
 

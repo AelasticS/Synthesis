@@ -1,6 +1,6 @@
 # Class: ProcessorBuilder
 
-Defined in: [transducers/ProcessorBuilder.ts:12](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/transducers/ProcessorBuilder.ts#L12)
+Defined in: [transducers/ProcessorBuilder.ts:12](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/transducers/ProcessorBuilder.ts#L12)
 
 ## Constructors
 
@@ -18,7 +18,7 @@ Defined in: [transducers/ProcessorBuilder.ts:12](https://github.com/AelasticS/Sy
 
 > **build**(): [`IProcessorConstructor`](../type-aliases/IProcessorConstructor.md)
 
-Defined in: [transducers/ProcessorBuilder.ts:88](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/transducers/ProcessorBuilder.ts#L88)
+Defined in: [transducers/ProcessorBuilder.ts:88](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/transducers/ProcessorBuilder.ts#L88)
 
 #### Returns
 
@@ -30,7 +30,7 @@ Defined in: [transducers/ProcessorBuilder.ts:88](https://github.com/AelasticS/Sy
 
 > **onInit**(`f`): [`ProcessorBuilder`](ProcessorBuilder.md)
 
-Defined in: [transducers/ProcessorBuilder.ts:17](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/transducers/ProcessorBuilder.ts#L17)
+Defined in: [transducers/ProcessorBuilder.ts:17](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/transducers/ProcessorBuilder.ts#L17)
 
 #### Parameters
 
@@ -50,7 +50,7 @@ Defined in: [transducers/ProcessorBuilder.ts:17](https://github.com/AelasticS/Sy
 
 > **onResult**(`f`): [`ProcessorBuilder`](ProcessorBuilder.md)
 
-Defined in: [transducers/ProcessorBuilder.ts:26](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/transducers/ProcessorBuilder.ts#L26)
+Defined in: [transducers/ProcessorBuilder.ts:26](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/transducers/ProcessorBuilder.ts#L26)
 
 #### Parameters
 
@@ -70,7 +70,7 @@ Defined in: [transducers/ProcessorBuilder.ts:26](https://github.com/AelasticS/Sy
 
 > **onStep**(`f`): [`ProcessorBuilder`](ProcessorBuilder.md)
 
-Defined in: [transducers/ProcessorBuilder.ts:22](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/transducers/ProcessorBuilder.ts#L22)
+Defined in: [transducers/ProcessorBuilder.ts:22](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/transducers/ProcessorBuilder.ts#L22)
 
 #### Parameters
 

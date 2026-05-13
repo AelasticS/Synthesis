@@ -1,6 +1,6 @@
 # Class: ServerResponse\<QueryResponseType\>
 
-Defined in: [server-proxy/ServerRequestResponse.ts:68](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/server-proxy/ServerRequestResponse.ts#L68)
+Defined in: [server-proxy/ServerRequestResponse.ts:68](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/server-proxy/ServerRequestResponse.ts#L68)
 
 ## Type Parameters
 
@@ -12,7 +12,7 @@ Defined in: [server-proxy/ServerRequestResponse.ts:68](https://github.com/Aelast
 
 > **new ServerResponse**\<`QueryResponseType`\>(): [`ServerResponse`](ServerResponse.md)\<`QueryResponseType`\>
 
-Defined in: [server-proxy/ServerRequestResponse.ts:74](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/server-proxy/ServerRequestResponse.ts#L74)
+Defined in: [server-proxy/ServerRequestResponse.ts:74](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/server-proxy/ServerRequestResponse.ts#L74)
 
 #### Returns
 
@@ -24,7 +24,7 @@ Defined in: [server-proxy/ServerRequestResponse.ts:74](https://github.com/Aelast
 
 > **cmdResponse**: `ServiceResult`\<`boolean`\>[] = `[]`
 
-Defined in: [server-proxy/ServerRequestResponse.ts:69](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/server-proxy/ServerRequestResponse.ts#L69)
+Defined in: [server-proxy/ServerRequestResponse.ts:69](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/server-proxy/ServerRequestResponse.ts#L69)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: [server-proxy/ServerRequestResponse.ts:69](https://github.com/Aelast
 
 > **isSuccess**: `boolean` = `false`
 
-Defined in: [server-proxy/ServerRequestResponse.ts:72](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/server-proxy/ServerRequestResponse.ts#L72)
+Defined in: [server-proxy/ServerRequestResponse.ts:72](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/server-proxy/ServerRequestResponse.ts#L72)
 
 ***
 
@@ -40,7 +40,7 @@ Defined in: [server-proxy/ServerRequestResponse.ts:72](https://github.com/Aelast
 
 > **queryResponse**: `ServiceResult`\<`QueryResponseType`\>[] = `[]`
 
-Defined in: [server-proxy/ServerRequestResponse.ts:70](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/server-proxy/ServerRequestResponse.ts#L70)
+Defined in: [server-proxy/ServerRequestResponse.ts:70](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/server-proxy/ServerRequestResponse.ts#L70)
 
 ## Accessors
 
@@ -50,7 +50,7 @@ Defined in: [server-proxy/ServerRequestResponse.ts:70](https://github.com/Aelast
 
 > **get** **errors**(): `ServiceError`[]
 
-Defined in: [server-proxy/ServerRequestResponse.ts:75](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/server-proxy/ServerRequestResponse.ts#L75)
+Defined in: [server-proxy/ServerRequestResponse.ts:75](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/server-proxy/ServerRequestResponse.ts#L75)
 
 ##### Returns
 
@@ -64,7 +64,7 @@ Defined in: [server-proxy/ServerRequestResponse.ts:75](https://github.com/Aelast
 
 > **get** **value**(): `QueryResponseType`[]
 
-Defined in: [server-proxy/ServerRequestResponse.ts:90](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/server-proxy/ServerRequestResponse.ts#L90)
+Defined in: [server-proxy/ServerRequestResponse.ts:90](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/server-proxy/ServerRequestResponse.ts#L90)
 
 ##### Returns
 

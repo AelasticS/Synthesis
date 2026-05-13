@@ -1,6 +1,6 @@
 # Class: ObjectObservable
 
-Defined in: [eventLog/ObservableTransformer.ts:18](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/eventLog/ObservableTransformer.ts#L18)
+Defined in: [eventLog/ObservableTransformer.ts:18](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/eventLog/ObservableTransformer.ts#L18)
 
 ## Implements
 
@@ -12,7 +12,7 @@ Defined in: [eventLog/ObservableTransformer.ts:18](https://github.com/AelasticS/
 
 > **new ObjectObservable**(`xf`): [`ObjectObservable`](ObjectObservable.md)
 
-Defined in: [eventLog/ObservableTransformer.ts:21](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/eventLog/ObservableTransformer.ts#L21)
+Defined in: [eventLog/ObservableTransformer.ts:21](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/eventLog/ObservableTransformer.ts#L21)
 
 #### Parameters
 
@@ -30,7 +30,7 @@ Defined in: [eventLog/ObservableTransformer.ts:21](https://github.com/AelasticS/
 
 > **init**(`value`, `currNode`): \[`any`, `WhatToDo`\]
 
-Defined in: [eventLog/ObservableTransformer.ts:25](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/eventLog/ObservableTransformer.ts#L25)
+Defined in: [eventLog/ObservableTransformer.ts:25](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/eventLog/ObservableTransformer.ts#L25)
 
 Initializes the processor with a value.
 
@@ -64,7 +64,7 @@ A tuple containing the processed result and the next action.
 
 > **result**(`result`, `currNode`): \[`any`, `WhatToDo`\]
 
-Defined in: [eventLog/ObservableTransformer.ts:45](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/eventLog/ObservableTransformer.ts#L45)
+Defined in: [eventLog/ObservableTransformer.ts:45](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/eventLog/ObservableTransformer.ts#L45)
 
 Handles the result of a processing step.
 
@@ -98,7 +98,7 @@ A tuple containing the processed result and the next action.
 
 > **step**(`result`, `currNode`, `item`): \[`any`, `WhatToDo`\]
 
-Defined in: [eventLog/ObservableTransformer.ts:54](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/eventLog/ObservableTransformer.ts#L54)
+Defined in: [eventLog/ObservableTransformer.ts:54](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/eventLog/ObservableTransformer.ts#L54)
 
 Performs a processing step.
 

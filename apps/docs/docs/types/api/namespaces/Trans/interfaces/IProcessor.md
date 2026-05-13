@@ -1,6 +1,6 @@
 # Interface: IProcessor
 
-Defined in: [transducers/Processor.ts:15](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/transducers/Processor.ts#L15)
+Defined in: [transducers/Processor.ts:15](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/transducers/Processor.ts#L15)
 
 Represents an interface for a processor.
 
@@ -10,7 +10,7 @@ Represents an interface for a processor.
 
 > **init**(`value`, `currNode`, ...`args`): \[`any`, [`WhatToDo`](../type-aliases/WhatToDo.md)\]
 
-Defined in: [transducers/Processor.ts:23](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/transducers/Processor.ts#L23)
+Defined in: [transducers/Processor.ts:23](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/transducers/Processor.ts#L23)
 
 Initializes the processor with a value.
 
@@ -46,7 +46,7 @@ A tuple containing the processed result and the next action.
 
 > **result**(`result`, `currNode`, ...`args`): \[`any`, [`WhatToDo`](../type-aliases/WhatToDo.md)\]
 
-Defined in: [transducers/Processor.ts:33](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/transducers/Processor.ts#L33)
+Defined in: [transducers/Processor.ts:33](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/transducers/Processor.ts#L33)
 
 Handles the result of a processing step.
 
@@ -82,7 +82,7 @@ A tuple containing the processed result and the next action.
 
 > **step**(`result`, `currNode`, `item`, ...`args`): \[`any`, [`WhatToDo`](../type-aliases/WhatToDo.md)\]
 
-Defined in: [transducers/Processor.ts:43](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/transducers/Processor.ts#L43)
+Defined in: [transducers/Processor.ts:43](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/transducers/Processor.ts#L43)
 
 Performs a processing step.
 

@@ -1,6 +1,6 @@
 # Class: ServerRequest\<CmdType, QueryType\>
 
-Defined in: [server-proxy/ServerRequestResponse.ts:34](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/server-proxy/ServerRequestResponse.ts#L34)
+Defined in: [server-proxy/ServerRequestResponse.ts:34](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/server-proxy/ServerRequestResponse.ts#L34)
 
 ## Type Parameters
 
@@ -14,7 +14,7 @@ Defined in: [server-proxy/ServerRequestResponse.ts:34](https://github.com/Aelast
 
 > **new ServerRequest**\<`CmdType`, `QueryType`\>(`options`, `queries`?, `cmds`?): [`ServerRequest`](ServerRequest.md)\<`CmdType`, `QueryType`\>
 
-Defined in: [server-proxy/ServerRequestResponse.ts:40](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/server-proxy/ServerRequestResponse.ts#L40)
+Defined in: [server-proxy/ServerRequestResponse.ts:40](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/server-proxy/ServerRequestResponse.ts#L40)
 
 #### Parameters
 
@@ -40,7 +40,7 @@ Defined in: [server-proxy/ServerRequestResponse.ts:40](https://github.com/Aelast
 
 > `readonly` **request**: `IRequestType`\<`CmdType`, `QueryType`\>
 
-Defined in: [server-proxy/ServerRequestResponse.ts:35](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/server-proxy/ServerRequestResponse.ts#L35)
+Defined in: [server-proxy/ServerRequestResponse.ts:35](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/server-proxy/ServerRequestResponse.ts#L35)
 
 ## Methods
 
@@ -48,7 +48,7 @@ Defined in: [server-proxy/ServerRequestResponse.ts:35](https://github.com/Aelast
 
 > **addCommand**(`cmd`): `this`
 
-Defined in: [server-proxy/ServerRequestResponse.ts:52](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/server-proxy/ServerRequestResponse.ts#L52)
+Defined in: [server-proxy/ServerRequestResponse.ts:52](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/server-proxy/ServerRequestResponse.ts#L52)
 
 #### Parameters
 
@@ -66,7 +66,7 @@ Defined in: [server-proxy/ServerRequestResponse.ts:52](https://github.com/Aelast
 
 > **addQuery**(`q`): `this`
 
-Defined in: [server-proxy/ServerRequestResponse.ts:59](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/server-proxy/ServerRequestResponse.ts#L59)
+Defined in: [server-proxy/ServerRequestResponse.ts:59](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/server-proxy/ServerRequestResponse.ts#L59)
 
 #### Parameters
 
@@ -84,7 +84,7 @@ Defined in: [server-proxy/ServerRequestResponse.ts:59](https://github.com/Aelast
 
 > **isValid**(): `ServiceResult`\<`boolean`\>
 
-Defined in: [server-proxy/ServerRequestResponse.ts:36](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/server-proxy/ServerRequestResponse.ts#L36)
+Defined in: [server-proxy/ServerRequestResponse.ts:36](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/server-proxy/ServerRequestResponse.ts#L36)
 
 #### Returns
 

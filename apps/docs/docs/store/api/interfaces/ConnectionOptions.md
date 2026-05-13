@@ -1,6 +1,6 @@
 # Interface: ConnectionOptions
 
-Defined in: [server-proxy/ConnectionOptions.ts:19](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/server-proxy/ConnectionOptions.ts#L19)
+Defined in: [server-proxy/ConnectionOptions.ts:19](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/server-proxy/ConnectionOptions.ts#L19)
 
 IConnectionOptions is set of serverProxy options shared by all database types.
 
@@ -10,7 +10,7 @@ IConnectionOptions is set of serverProxy options shared by all database types.
 
 > `readonly` **password**: `string`
 
-Defined in: [server-proxy/ConnectionOptions.ts:50](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/server-proxy/ConnectionOptions.ts#L50)
+Defined in: [server-proxy/ConnectionOptions.ts:50](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/server-proxy/ConnectionOptions.ts#L50)
 
 api-server-proxy password.
 
@@ -20,7 +20,7 @@ api-server-proxy password.
 
 > `readonly` **port**: `string`
 
-Defined in: [server-proxy/ConnectionOptions.ts:40](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/server-proxy/ConnectionOptions.ts#L40)
+Defined in: [server-proxy/ConnectionOptions.ts:40](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/server-proxy/ConnectionOptions.ts#L40)
 
 api-server-proxy host port.
 
@@ -30,7 +30,7 @@ api-server-proxy host port.
 
 > `readonly` **serverName**: `string`
 
-Defined in: [server-proxy/ConnectionOptions.ts:30](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/server-proxy/ConnectionOptions.ts#L30)
+Defined in: [server-proxy/ConnectionOptions.ts:30](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/server-proxy/ConnectionOptions.ts#L30)
 
 Connection publicAttr. If serverProxy publicAttr is not given then it will be called "default".
 Different serverProxies must have different names.
@@ -41,7 +41,7 @@ Different serverProxies must have different names.
 
 > `readonly` **serverType**: `string`
 
-Defined in: [server-proxy/ConnectionOptions.ts:24](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/server-proxy/ConnectionOptions.ts#L24)
+Defined in: [server-proxy/ConnectionOptions.ts:24](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/server-proxy/ConnectionOptions.ts#L24)
 
 Database serverType. This value is required.
 
@@ -51,7 +51,7 @@ Database serverType. This value is required.
 
 > `readonly` **serverUrl**: `string`
 
-Defined in: [server-proxy/ConnectionOptions.ts:35](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/server-proxy/ConnectionOptions.ts#L35)
+Defined in: [server-proxy/ConnectionOptions.ts:35](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/server-proxy/ConnectionOptions.ts#L35)
 
 Connection serverUrl to api-server-proxy.
 
@@ -61,6 +61,6 @@ Connection serverUrl to api-server-proxy.
 
 > `readonly` **username**: `string`
 
-Defined in: [server-proxy/ConnectionOptions.ts:45](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/server-proxy/ConnectionOptions.ts#L45)
+Defined in: [server-proxy/ConnectionOptions.ts:45](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/server-proxy/ConnectionOptions.ts#L45)
 
 api-server-proxy username.

@@ -1,6 +1,6 @@
 # Interface: Success\<T\>
 
-Defined in: [Result.ts:22](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-result/src/Result.ts#L22)
+Defined in: [Result.ts:22](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-result/src/Result.ts#L22)
 
 Success has some value as result
 
@@ -14,7 +14,7 @@ Success has some value as result
 
 > **type**: `"success"`
 
-Defined in: [Result.ts:23](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-result/src/Result.ts#L23)
+Defined in: [Result.ts:23](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-result/src/Result.ts#L23)
 
 ***
 
@@ -22,4 +22,4 @@ Defined in: [Result.ts:23](https://github.com/AelasticS/Synthesis/blob/ba994ad76
 
 > **value**: `T`
 
-Defined in: [Result.ts:24](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-result/src/Result.ts#L24)
+Defined in: [Result.ts:24](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-result/src/Result.ts#L24)

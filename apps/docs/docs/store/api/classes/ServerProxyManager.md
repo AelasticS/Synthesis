@@ -1,6 +1,6 @@
 # Class: ServerProxyManager
 
-Defined in: [server-proxy/ServerProxyManager.ts:20](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/server-proxy/ServerProxyManager.ts#L20)
+Defined in: [server-proxy/ServerProxyManager.ts:20](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/server-proxy/ServerProxyManager.ts#L20)
 
 ServerProxyManager is used to manager and manage multiple api-server-proxy serverProxies.
 It also provides useful factory methods to simplify api-server-proxy serverProxy creation.
@@ -21,7 +21,7 @@ It also provides useful factory methods to simplify api-server-proxy serverProxy
 
 > `protected` `readonly` **serverProxies**: [`ServerProxy`](ServerProxy.md)[] = `[]`
 
-Defined in: [server-proxy/ServerProxyManager.ts:28](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/server-proxy/ServerProxyManager.ts#L28)
+Defined in: [server-proxy/ServerProxyManager.ts:28](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/server-proxy/ServerProxyManager.ts#L28)
 
 ListOf of serverProxies registered in this serverProxy manager.
 
@@ -36,7 +36,7 @@ ServerProxy won't be connected automatically, you'll need to manually call conne
 
 > **create**(): [`ServerProxy`](ServerProxy.md)
 
-Defined in: [server-proxy/ServerProxyManager.ts:57](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/server-proxy/ServerProxyManager.ts#L57)
+Defined in: [server-proxy/ServerProxyManager.ts:57](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/server-proxy/ServerProxyManager.ts#L57)
 
 create server based on default options from environment varaiables
 
@@ -48,7 +48,7 @@ create server based on default options from environment varaiables
 
 > **create**(`options`): [`ServerProxy`](ServerProxy.md)
 
-Defined in: [server-proxy/ServerProxyManager.ts:62](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/server-proxy/ServerProxyManager.ts#L62)
+Defined in: [server-proxy/ServerProxyManager.ts:62](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/server-proxy/ServerProxyManager.ts#L62)
 
 create server based on given options
 
@@ -68,7 +68,7 @@ create server based on given options
 
 > **get**(`name`): [`ServerProxy`](ServerProxy.md)
 
-Defined in: [server-proxy/ServerProxyManager.ts:46](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/server-proxy/ServerProxyManager.ts#L46)
+Defined in: [server-proxy/ServerProxyManager.ts:46](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/server-proxy/ServerProxyManager.ts#L46)
 
 Gets registered serverProxy with the given publicAttr.
 If serverProxy publicAttr is not given then it will get a default serverProxy.
@@ -90,7 +90,7 @@ Throws error if serverProxy with the given publicAttr was not found.
 
 > **getDefaultConnectionOptions**(): [`ConnectionOptions`](../interfaces/ConnectionOptions.md)
 
-Defined in: [server-proxy/ServerProxyManager.ts:96](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/server-proxy/ServerProxyManager.ts#L96)
+Defined in: [server-proxy/ServerProxyManager.ts:96](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/server-proxy/ServerProxyManager.ts#L96)
 
 #### Returns
 
@@ -102,7 +102,7 @@ Defined in: [server-proxy/ServerProxyManager.ts:96](https://github.com/AelasticS
 
 > **has**(`name`): `boolean`
 
-Defined in: [server-proxy/ServerProxyManager.ts:37](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/server-proxy/ServerProxyManager.ts#L37)
+Defined in: [server-proxy/ServerProxyManager.ts:37](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/server-proxy/ServerProxyManager.ts#L37)
 
 Checks if serverProxy with the given publicAttr exist in the manager.
 

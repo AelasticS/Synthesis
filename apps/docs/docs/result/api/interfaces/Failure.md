@@ -1,6 +1,6 @@
 # Interface: Failure
 
-Defined in: [Result.ts:13](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-result/src/Result.ts#L13)
+Defined in: [Result.ts:13](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-result/src/Result.ts#L13)
 
 Failure has one or more errors
 
@@ -10,7 +10,7 @@ Failure has one or more errors
 
 > **errors**: [`ServiceError`](../classes/ServiceError.md)[]
 
-Defined in: [Result.ts:15](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-result/src/Result.ts#L15)
+Defined in: [Result.ts:15](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-result/src/Result.ts#L15)
 
 ***
 
@@ -18,4 +18,4 @@ Defined in: [Result.ts:15](https://github.com/AelasticS/Synthesis/blob/ba994ad76
 
 > **type**: `"failure"`
 
-Defined in: [Result.ts:14](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-result/src/Result.ts#L14)
+Defined in: [Result.ts:14](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-result/src/Result.ts#L14)

@@ -1,6 +1,6 @@
 # Class: ServerProxy
 
-Defined in: [server-proxy/ServerProxy.ts:28](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/server-proxy/ServerProxy.ts#L28)
+Defined in: [server-proxy/ServerProxy.ts:28](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/server-proxy/ServerProxy.ts#L28)
 
 ServerProxy is an abstract class which represent a proxy to a specific api server.
 You can have multiple serverProxies to multiple servers in your application.
@@ -13,7 +13,7 @@ You can have multiple serverProxies to multiple servers in your application.
 
 > **new ServerProxy**(`options`): [`ServerProxy`](ServerProxy.md)
 
-Defined in: [server-proxy/ServerProxy.ts:66](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/server-proxy/ServerProxy.ts#L66)
+Defined in: [server-proxy/ServerProxy.ts:66](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/server-proxy/ServerProxy.ts#L66)
 
 EntitySchema subscriber instances that are registered for this serverProxy.
 
@@ -33,7 +33,7 @@ EntitySchema subscriber instances that are registered for this serverProxy.
 
 > `readonly` **isConnected**: `false` = `false`
 
-Defined in: [server-proxy/ServerProxy.ts:46](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/server-proxy/ServerProxy.ts#L46)
+Defined in: [server-proxy/ServerProxy.ts:46](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/server-proxy/ServerProxy.ts#L46)
 
 Indicates if serverProxy is initialized or not.
 
@@ -43,7 +43,7 @@ Indicates if serverProxy is initialized or not.
 
 > `readonly` **name**: `string`
 
-Defined in: [server-proxy/ServerProxy.ts:36](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/server-proxy/ServerProxy.ts#L36)
+Defined in: [server-proxy/ServerProxy.ts:36](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/server-proxy/ServerProxy.ts#L36)
 
 ServerProxy publicAttr.
 
@@ -53,7 +53,7 @@ ServerProxy publicAttr.
 
 > `readonly` **options**: [`ConnectionOptions`](../interfaces/ConnectionOptions.md)
 
-Defined in: [server-proxy/ServerProxy.ts:41](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/server-proxy/ServerProxy.ts#L41)
+Defined in: [server-proxy/ServerProxy.ts:41](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/server-proxy/ServerProxy.ts#L41)
 
 ServerProxy options.
 
@@ -63,7 +63,7 @@ ServerProxy options.
 
 > **afterConnect**(): `Promise`\<`void`\>
 
-Defined in: [server-proxy/ServerProxy.ts:100](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/server-proxy/ServerProxy.ts#L100)
+Defined in: [server-proxy/ServerProxy.ts:100](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/server-proxy/ServerProxy.ts#L100)
 
 #### Returns
 
@@ -75,7 +75,7 @@ Defined in: [server-proxy/ServerProxy.ts:100](https://github.com/AelasticS/Synth
 
 > **close**(): `Promise`\<`void`\>
 
-Defined in: [server-proxy/ServerProxy.ts:108](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/server-proxy/ServerProxy.ts#L108)
+Defined in: [server-proxy/ServerProxy.ts:108](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/server-proxy/ServerProxy.ts#L108)
 
 Closes serverProxy with the database.
 Once serverProxy is closed, you cannot use manager and repositories or perform any operations except opening serverProxy again.
@@ -90,7 +90,7 @@ Once serverProxy is closed, you cannot use manager and repositories or perform a
 
 > **connect**(): `Promise`\<[`ServerProxy`](ServerProxy.md)\>
 
-Defined in: [server-proxy/ServerProxy.ts:76](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/server-proxy/ServerProxy.ts#L76)
+Defined in: [server-proxy/ServerProxy.ts:76](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/server-proxy/ServerProxy.ts#L76)
 
 Performs serverProxy to the server-proxy.
 
@@ -104,7 +104,7 @@ Performs serverProxy to the server-proxy.
 
 > **execute**(`request`): `Promise`\<[`ServerResponse`](ServerResponse.md)\<`unknown`\>\>
 
-Defined in: [server-proxy/ServerProxy.ts:122](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/server-proxy/ServerProxy.ts#L122)
+Defined in: [server-proxy/ServerProxy.ts:122](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/server-proxy/ServerProxy.ts#L122)
 
 Executes request
 
@@ -124,7 +124,7 @@ Executes request
 
 > **getCommandMaker**(): `CommandMaker`
 
-Defined in: [server-proxy/ServerProxy.ts:128](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/server-proxy/ServerProxy.ts#L128)
+Defined in: [server-proxy/ServerProxy.ts:128](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/server-proxy/ServerProxy.ts#L128)
 
 #### Returns
 
@@ -136,7 +136,7 @@ Defined in: [server-proxy/ServerProxy.ts:128](https://github.com/AelasticS/Synth
 
 > **getServerRequest**\<`C`, `R`\>(`cmd`): [`ServerRequest`](ServerRequest.md)\<`C`, `R`\>
 
-Defined in: [server-proxy/ServerProxy.ts:132](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/server-proxy/ServerProxy.ts#L132)
+Defined in: [server-proxy/ServerProxy.ts:132](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/server-proxy/ServerProxy.ts#L132)
 
 #### Type Parameters
 

@@ -1,6 +1,6 @@
 # Class: Store
 
-Defined in: [store/Store.ts:28](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/store/Store.ts#L28)
+Defined in: [store/Store.ts:28](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/store/Store.ts#L28)
 
 ## Extends
 
@@ -12,7 +12,7 @@ Defined in: [store/Store.ts:28](https://github.com/AelasticS/Synthesis/blob/ba99
 
 > **new Store**(`server`?): [`Store`](Store.md)
 
-Defined in: [store/Store.ts:36](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/store/Store.ts#L36)
+Defined in: [store/Store.ts:36](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/store/Store.ts#L36)
 
 #### Parameters
 
@@ -34,7 +34,7 @@ Defined in: [store/Store.ts:36](https://github.com/AelasticS/Synthesis/blob/ba99
 
 > **eventLog**: `EventLog`
 
-Defined in: [store/Store.ts:30](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/store/Store.ts#L30)
+Defined in: [store/Store.ts:30](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/store/Store.ts#L30)
 
 ***
 
@@ -42,7 +42,7 @@ Defined in: [store/Store.ts:30](https://github.com/AelasticS/Synthesis/blob/ba99
 
 > `protected` `readonly` **instances**: `Map`\<`string`, `IStoreObject`\<`ObjectLiteral`\>\>
 
-Defined in: [store/Store.ts:33](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/store/Store.ts#L33)
+Defined in: [store/Store.ts:33](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/store/Store.ts#L33)
 
 ***
 
@@ -50,7 +50,7 @@ Defined in: [store/Store.ts:33](https://github.com/AelasticS/Synthesis/blob/ba99
 
 > `protected` **repo**: [`Repository`](Repository.md)\<`any`\>
 
-Defined in: [store/Store.ts:31](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/store/Store.ts#L31)
+Defined in: [store/Store.ts:31](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/store/Store.ts#L31)
 
 ***
 
@@ -58,7 +58,7 @@ Defined in: [store/Store.ts:31](https://github.com/AelasticS/Synthesis/blob/ba99
 
 > `readonly` **schemas**: `Map`\<`string`, `TypeSchema`\>
 
-Defined in: [store/Store.ts:29](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/store/Store.ts#L29)
+Defined in: [store/Store.ts:29](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/store/Store.ts#L29)
 
 #### Overrides
 
@@ -70,7 +70,7 @@ Defined in: [store/Store.ts:29](https://github.com/AelasticS/Synthesis/blob/ba99
 
 > `protected` `optional` **server**: [`ServerProxy`](ServerProxy.md)
 
-Defined in: [store/Store.ts:32](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/store/Store.ts#L32)
+Defined in: [store/Store.ts:32](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/store/Store.ts#L32)
 
 ## Methods
 
@@ -78,7 +78,7 @@ Defined in: [store/Store.ts:32](https://github.com/AelasticS/Synthesis/blob/ba99
 
 > **add**\<`T`\>(`obj`): `void`
 
-Defined in: [store/Store.ts:86](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/store/Store.ts#L86)
+Defined in: [store/Store.ts:86](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/store/Store.ts#L86)
 
 #### Type Parameters
 
@@ -100,7 +100,7 @@ Defined in: [store/Store.ts:86](https://github.com/AelasticS/Synthesis/blob/ba99
 
 > **clear**(`clearSchema`): `void`
 
-Defined in: [store/Store.ts:44](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/store/Store.ts#L44)
+Defined in: [store/Store.ts:44](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/store/Store.ts#L44)
 
 clear all instances and event log
 
@@ -124,7 +124,7 @@ clear all instances and event log
 
 > **create**\<`P`\>(`type`, `initValue`?): `IStoreObject`\<`P`\>
 
-Defined in: [store/Store.ts:68](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/store/Store.ts#L68)
+Defined in: [store/Store.ts:68](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/store/Store.ts#L68)
 
 #### Type Parameters
 
@@ -150,7 +150,7 @@ Defined in: [store/Store.ts:68](https://github.com/AelasticS/Synthesis/blob/ba99
 
 > **deepCreate**\<`T`\>(`type`, `initValue`): `IStoreObject`\<`T`\>
 
-Defined in: [store/Store.ts:76](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/store/Store.ts#L76)
+Defined in: [store/Store.ts:76](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/store/Store.ts#L76)
 
 #### Type Parameters
 
@@ -176,7 +176,7 @@ Defined in: [store/Store.ts:76](https://github.com/AelasticS/Synthesis/blob/ba99
 
 > **delete**\<`T`\>(`object`): `void`
 
-Defined in: [store/Store.ts:102](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/store/Store.ts#L102)
+Defined in: [store/Store.ts:102](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/store/Store.ts#L102)
 
 #### Type Parameters
 
@@ -198,7 +198,7 @@ Defined in: [store/Store.ts:102](https://github.com/AelasticS/Synthesis/blob/ba9
 
 > **fetchObjectByID**(`type`, `id`): `Promise`\<`undefined` \| `IStoreObject`\<`ObjectLiteral`\>\>
 
-Defined in: [store/Store.ts:56](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/store/Store.ts#L56)
+Defined in: [store/Store.ts:56](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/store/Store.ts#L56)
 
 #### Parameters
 
@@ -220,7 +220,7 @@ Defined in: [store/Store.ts:56](https://github.com/AelasticS/Synthesis/blob/ba99
 
 > **getObjectByID**\<`T`\>(`id`): `undefined` \| `T`
 
-Defined in: [store/Store.ts:52](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/store/Store.ts#L52)
+Defined in: [store/Store.ts:52](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/store/Store.ts#L52)
 
 #### Type Parameters
 
@@ -246,7 +246,7 @@ Defined in: [store/Store.ts:52](https://github.com/AelasticS/Synthesis/blob/ba99
 
 > **getType**\<`T`\>(`obj`): `ObjectType`\<`any`, `any`\>
 
-Defined in: [common/abstract-store.ts:44](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/common/abstract-store.ts#L44)
+Defined in: [common/abstract-store.ts:44](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/common/abstract-store.ts#L44)
 
 #### Type Parameters
 
@@ -272,7 +272,7 @@ Defined in: [common/abstract-store.ts:44](https://github.com/AelasticS/Synthesis
 
 > `protected` **getTypeSchemaName**\<`T`\>(`obj`): `string`
 
-Defined in: [common/abstract-store.ts:29](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/common/abstract-store.ts#L29)
+Defined in: [common/abstract-store.ts:29](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/common/abstract-store.ts#L29)
 
 #### Type Parameters
 
@@ -298,7 +298,7 @@ Defined in: [common/abstract-store.ts:29](https://github.com/AelasticS/Synthesis
 
 > `protected` **getTypeSchemaOfObject**\<`T`\>(`obj`): `TypeSchema`
 
-Defined in: [common/abstract-store.ts:35](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/common/abstract-store.ts#L35)
+Defined in: [common/abstract-store.ts:35](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/common/abstract-store.ts#L35)
 
 #### Type Parameters
 
@@ -324,7 +324,7 @@ Defined in: [common/abstract-store.ts:35](https://github.com/AelasticS/Synthesis
 
 > **persist**(): `Promise`\<`void`\>
 
-Defined in: [store/Store.ts:66](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/store/Store.ts#L66)
+Defined in: [store/Store.ts:66](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/store/Store.ts#L66)
 
 #### Returns
 
@@ -336,7 +336,7 @@ Defined in: [store/Store.ts:66](https://github.com/AelasticS/Synthesis/blob/ba99
 
 > **registerTypeSchema**(`schema`): `void`
 
-Defined in: [common/abstract-store.ts:24](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/common/abstract-store.ts#L24)
+Defined in: [common/abstract-store.ts:24](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/common/abstract-store.ts#L24)
 
 #### Parameters
 
@@ -358,7 +358,7 @@ Defined in: [common/abstract-store.ts:24](https://github.com/AelasticS/Synthesis
 
 > **remove**\<`T`\>(`obj`): `void`
 
-Defined in: [store/Store.ts:97](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/store/Store.ts#L97)
+Defined in: [store/Store.ts:97](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/store/Store.ts#L97)
 
 #### Type Parameters
 

@@ -1,6 +1,6 @@
 # Interface: TypedAnnotation
 
-Defined in: [annotations/Annotation.ts:64](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/annotations/Annotation.ts#L64)
+Defined in: [annotations/Annotation.ts:64](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/annotations/Annotation.ts#L64)
 
 ## Properties
 
@@ -8,7 +8,7 @@ Defined in: [annotations/Annotation.ts:64](https://github.com/AelasticS/Synthesi
 
 > **type**: [`Any`](../../../type-aliases/Any.md)
 
-Defined in: [annotations/Annotation.ts:65](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/annotations/Annotation.ts#L65)
+Defined in: [annotations/Annotation.ts:65](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/annotations/Annotation.ts#L65)
 
 ***
 
@@ -16,4 +16,4 @@ Defined in: [annotations/Annotation.ts:65](https://github.com/AelasticS/Synthesi
 
 > **value**: `any`
 
-Defined in: [annotations/Annotation.ts:66](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/annotations/Annotation.ts#L66)
+Defined in: [annotations/Annotation.ts:66](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/annotations/Annotation.ts#L66)

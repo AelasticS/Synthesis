@@ -1,6 +1,6 @@
 # Class: ImmutableStore\<S\>
 
-Defined in: [immutable/immutable-store.ts:35](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/immutable/immutable-store.ts#L35)
+Defined in: [immutable/immutable-store.ts:35](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/immutable/immutable-store.ts#L35)
 
 Implements an immutable state management store using Immer library to handle state updates immutably.
 The store supports objects that are identifiable by unique IDs ("@@aelastics/ID").
@@ -15,7 +15,7 @@ The store supports objects that are identifiable by unique IDs ("@@aelastics/ID"
 
 > **new ImmutableStore**\<`S`\>(`rootType`): [`ImmutableStore`](ImmutableStore.md)\<`S`\>
 
-Defined in: [immutable/immutable-store.ts:69](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/immutable/immutable-store.ts#L69)
+Defined in: [immutable/immutable-store.ts:69](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/immutable/immutable-store.ts#L69)
 
 Creates an instance of ImmutableStore.
 
@@ -35,7 +35,7 @@ Creates an instance of ImmutableStore.
 
 > `readonly` **rootType**: `AnyObjectType`
 
-Defined in: [immutable/immutable-store.ts:69](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/immutable/immutable-store.ts#L69)
+Defined in: [immutable/immutable-store.ts:69](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/immutable/immutable-store.ts#L69)
 
 ## Methods
 
@@ -43,7 +43,7 @@ Defined in: [immutable/immutable-store.ts:69](https://github.com/AelasticS/Synth
 
 > **cloneOperationContext**(): `void`
 
-Defined in: [immutable/immutable-store.ts:44](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/immutable/immutable-store.ts#L44)
+Defined in: [immutable/immutable-store.ts:44](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/immutable/immutable-store.ts#L44)
 
 #### Returns
 
@@ -55,7 +55,7 @@ Defined in: [immutable/immutable-store.ts:44](https://github.com/AelasticS/Synth
 
 > **createRoot**(`initialState`, `ID`?): `S`
 
-Defined in: [immutable/immutable-store.ts:71](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/immutable/immutable-store.ts#L71)
+Defined in: [immutable/immutable-store.ts:71](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/immutable/immutable-store.ts#L71)
 
 #### Parameters
 
@@ -77,7 +77,7 @@ Defined in: [immutable/immutable-store.ts:71](https://github.com/AelasticS/Synth
 
 > **getContext**(): `OperationContext`\<`S`\>
 
-Defined in: [immutable/immutable-store.ts:48](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/immutable/immutable-store.ts#L48)
+Defined in: [immutable/immutable-store.ts:48](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/immutable/immutable-store.ts#L48)
 
 #### Returns
 
@@ -89,7 +89,7 @@ Defined in: [immutable/immutable-store.ts:48](https://github.com/AelasticS/Synth
 
 > **getIdMap**(): `Map`\<`string`, `any`\>
 
-Defined in: [immutable/immutable-store.ts:56](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/immutable/immutable-store.ts#L56)
+Defined in: [immutable/immutable-store.ts:56](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/immutable/immutable-store.ts#L56)
 
 #### Returns
 
@@ -101,7 +101,7 @@ Defined in: [immutable/immutable-store.ts:56](https://github.com/AelasticS/Synth
 
 > **getIdMapWithDeleted**(): `Map`\<`string`, `any`\>
 
-Defined in: [immutable/immutable-store.ts:60](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/immutable/immutable-store.ts#L60)
+Defined in: [immutable/immutable-store.ts:60](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/immutable/immutable-store.ts#L60)
 
 #### Returns
 
@@ -113,7 +113,7 @@ Defined in: [immutable/immutable-store.ts:60](https://github.com/AelasticS/Synth
 
 > **getState**(): `S`
 
-Defined in: [immutable/immutable-store.ts:52](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/immutable/immutable-store.ts#L52)
+Defined in: [immutable/immutable-store.ts:52](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/immutable/immutable-store.ts#L52)
 
 #### Returns
 
@@ -125,7 +125,7 @@ Defined in: [immutable/immutable-store.ts:52](https://github.com/AelasticS/Synth
 
 > **makeNewOperationContext**(`state`?): `void`
 
-Defined in: [immutable/immutable-store.ts:41](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/immutable/immutable-store.ts#L41)
+Defined in: [immutable/immutable-store.ts:41](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/immutable/immutable-store.ts#L41)
 
 #### Parameters
 
@@ -143,7 +143,7 @@ Defined in: [immutable/immutable-store.ts:41](https://github.com/AelasticS/Synth
 
 > **newObject**\<`P`\>(`objectType`, `initProps`, `ID`?): `P`
 
-Defined in: [immutable/immutable-store.ts:83](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/immutable/immutable-store.ts#L83)
+Defined in: [immutable/immutable-store.ts:83](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/immutable/immutable-store.ts#L83)
 
 Creates a new object of the specified type and initializes it with provided properties.
 
@@ -181,7 +181,7 @@ The newly created object.
 
 > **produce**(`f`): `S`
 
-Defined in: [immutable/immutable-store.ts:98](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/immutable/immutable-store.ts#L98)
+Defined in: [immutable/immutable-store.ts:98](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/immutable/immutable-store.ts#L98)
 
 Applies a function to modify the store's state immutably.
 

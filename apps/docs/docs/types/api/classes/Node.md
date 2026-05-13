@@ -1,6 +1,6 @@
 # Class: Node
 
-Defined in: [common/Node.ts:14](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/common/Node.ts#L14)
+Defined in: [common/Node.ts:14](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/common/Node.ts#L14)
 
 Represents a node in a data structure that is aware of its type and annotations.
 
@@ -10,7 +10,7 @@ Represents a node in a data structure that is aware of its type and annotations.
 
 > **new Node**(`i`, `t`, `acc`?, `e`?, `parent`?, `typeLevel`?): [`Node`](Node.md)
 
-Defined in: [common/Node.ts:35](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/common/Node.ts#L35)
+Defined in: [common/Node.ts:35](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/common/Node.ts#L35)
 
 Constructs a new Node.
 
@@ -62,7 +62,7 @@ Indicates if the node processing is at type level.
 
 > `optional` **acc**: `any`
 
-Defined in: [common/Node.ts:17](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/common/Node.ts#L17)
+Defined in: [common/Node.ts:17](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/common/Node.ts#L17)
 
 ***
 
@@ -70,7 +70,7 @@ Defined in: [common/Node.ts:17](https://github.com/AelasticS/Synthesis/blob/ba99
 
 > **annotationProcessor**: `Map`\<[`TypedAnnotation`](../namespaces/AnnotationTypes/interfaces/TypedAnnotation.md), `AnnotationProcessor`\>
 
-Defined in: [common/Node.ts:22](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/common/Node.ts#L22)
+Defined in: [common/Node.ts:22](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/common/Node.ts#L22)
 
 ***
 
@@ -78,7 +78,7 @@ Defined in: [common/Node.ts:22](https://github.com/AelasticS/Synthesis/blob/ba99
 
 > **extra**: `Partial`
 
-Defined in: [common/Node.ts:19](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/common/Node.ts#L19)
+Defined in: [common/Node.ts:19](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/common/Node.ts#L19)
 
 ***
 
@@ -86,7 +86,7 @@ Defined in: [common/Node.ts:19](https://github.com/AelasticS/Synthesis/blob/ba99
 
 > **instance**: `any`
 
-Defined in: [common/Node.ts:15](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/common/Node.ts#L15)
+Defined in: [common/Node.ts:15](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/common/Node.ts#L15)
 
 ***
 
@@ -94,7 +94,7 @@ Defined in: [common/Node.ts:15](https://github.com/AelasticS/Synthesis/blob/ba99
 
 > `optional` **parent**: [`Node`](Node.md)
 
-Defined in: [common/Node.ts:20](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/common/Node.ts#L20)
+Defined in: [common/Node.ts:20](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/common/Node.ts#L20)
 
 ***
 
@@ -102,7 +102,7 @@ Defined in: [common/Node.ts:20](https://github.com/AelasticS/Synthesis/blob/ba99
 
 > **type**: [`Any`](../type-aliases/Any.md)
 
-Defined in: [common/Node.ts:16](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/common/Node.ts#L16)
+Defined in: [common/Node.ts:16](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/common/Node.ts#L16)
 
 ***
 
@@ -110,7 +110,7 @@ Defined in: [common/Node.ts:16](https://github.com/AelasticS/Synthesis/blob/ba99
 
 > **typeLevel**: `boolean`
 
-Defined in: [common/Node.ts:18](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/common/Node.ts#L18)
+Defined in: [common/Node.ts:18](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/common/Node.ts#L18)
 
 ***
 
@@ -118,7 +118,7 @@ Defined in: [common/Node.ts:18](https://github.com/AelasticS/Synthesis/blob/ba99
 
 > **visited**: `VisitedNodes`
 
-Defined in: [common/Node.ts:21](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/common/Node.ts#L21)
+Defined in: [common/Node.ts:21](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/common/Node.ts#L21)
 
 ## Accessors
 
@@ -128,7 +128,7 @@ Defined in: [common/Node.ts:21](https://github.com/AelasticS/Synthesis/blob/ba99
 
 > **get** **isRevisited**(): `boolean`
 
-Defined in: [common/Node.ts:56](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/common/Node.ts#L56)
+Defined in: [common/Node.ts:56](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/common/Node.ts#L56)
 
 Returns whether the node has been revisited.
 
@@ -140,7 +140,7 @@ Returns whether the node has been revisited.
 
 > **set** **isRevisited**(`b`): `void`
 
-Defined in: [common/Node.ts:63](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/common/Node.ts#L63)
+Defined in: [common/Node.ts:63](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/common/Node.ts#L63)
 
 Sets the revisited status of the node.
 
@@ -160,7 +160,7 @@ Sets the revisited status of the node.
 
 > **getAnnotationProcessor**(`a`): `undefined` \| `AnnotationProcessor`
 
-Defined in: [common/Node.ts:83](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/common/Node.ts#L83)
+Defined in: [common/Node.ts:83](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/common/Node.ts#L83)
 
 Retrieves the AnnotationProcessor for a given annotation type.
 
@@ -184,7 +184,7 @@ The corresponding AnnotationProcessor, if present.
 
 > **getCurrentAnnotationElement**(`a`): `any`
 
-Defined in: [common/Node.ts:73](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/common/Node.ts#L73)
+Defined in: [common/Node.ts:73](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/common/Node.ts#L73)
 
 Retrieves the current annotation element for a given annotation type.
 
@@ -208,7 +208,7 @@ The current annotation element, if any.
 
 > `static` **makeNode**(`input`, `type`, `acc`, `e`?, `parent`?, `typeLevel`?): [`Node`](Node.md)
 
-Defined in: [common/Node.ts:99](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/common/Node.ts#L99)
+Defined in: [common/Node.ts:99](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/common/Node.ts#L99)
 
 Factory method to create a Node. Reuses existing Node if input is already a Node,
 otherwise creates a new Node based on provided parameters.

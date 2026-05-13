@@ -1,6 +1,6 @@
 # Class: Transducer
 
-Defined in: [transducers/Transducer.ts:23](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/transducers/Transducer.ts#L23)
+Defined in: [transducers/Transducer.ts:23](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/transducers/Transducer.ts#L23)
 
 ## Constructors
 
@@ -18,7 +18,7 @@ Defined in: [transducers/Transducer.ts:23](https://github.com/AelasticS/Synthesi
 
 > **processors**: (`t`) => [`IProcessor`](../interfaces/IProcessor.md)[] = `[]`
 
-Defined in: [transducers/Transducer.ts:24](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/transducers/Transducer.ts#L24)
+Defined in: [transducers/Transducer.ts:24](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/transducers/Transducer.ts#L24)
 
 #### Parameters
 
@@ -36,7 +36,7 @@ Defined in: [transducers/Transducer.ts:24](https://github.com/AelasticS/Synthesi
 
 > **reducer**: `undefined` \| [`IProcessor`](../interfaces/IProcessor.md)
 
-Defined in: [transducers/Transducer.ts:25](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/transducers/Transducer.ts#L25)
+Defined in: [transducers/Transducer.ts:25](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/transducers/Transducer.ts#L25)
 
 ## Accessors
 
@@ -46,7 +46,7 @@ Defined in: [transducers/Transducer.ts:25](https://github.com/AelasticS/Synthesi
 
 > **get** **composed**(): (`xf`) => [`IProcessor`](../interfaces/IProcessor.md)
 
-Defined in: [transducers/Transducer.ts:27](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/transducers/Transducer.ts#L27)
+Defined in: [transducers/Transducer.ts:27](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/transducers/Transducer.ts#L27)
 
 ##### Returns
 
@@ -68,7 +68,7 @@ Defined in: [transducers/Transducer.ts:27](https://github.com/AelasticS/Synthesi
 
 > **count**(): [`IProcessor`](../interfaces/IProcessor.md)
 
-Defined in: [transducers/Transducer.ts:120](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/transducers/Transducer.ts#L120)
+Defined in: [transducers/Transducer.ts:120](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/transducers/Transducer.ts#L120)
 
 #### Returns
 
@@ -80,7 +80,7 @@ Defined in: [transducers/Transducer.ts:120](https://github.com/AelasticS/Synthes
 
 > **do**(`Ctor`, ...`args`): `this`
 
-Defined in: [transducers/Transducer.ts:36](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/transducers/Transducer.ts#L36)
+Defined in: [transducers/Transducer.ts:36](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/transducers/Transducer.ts#L36)
 
 #### Parameters
 
@@ -102,7 +102,7 @@ Defined in: [transducers/Transducer.ts:36](https://github.com/AelasticS/Synthesi
 
 > **doFinally**(`processor`): [`IProcessor`](../interfaces/IProcessor.md)
 
-Defined in: [transducers/Transducer.ts:31](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/transducers/Transducer.ts#L31)
+Defined in: [transducers/Transducer.ts:31](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/transducers/Transducer.ts#L31)
 
 #### Parameters
 
@@ -120,7 +120,7 @@ Defined in: [transducers/Transducer.ts:31](https://github.com/AelasticS/Synthesi
 
 > **doIf**(`condition`, `Ctor`, ...`args`): `this`
 
-Defined in: [transducers/Transducer.ts:46](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/transducers/Transducer.ts#L46)
+Defined in: [transducers/Transducer.ts:46](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/transducers/Transducer.ts#L46)
 
 #### Parameters
 
@@ -146,7 +146,7 @@ Defined in: [transducers/Transducer.ts:46](https://github.com/AelasticS/Synthesi
 
 > **doWithAnnotations**(`Ctor`, ...`na`): `this`
 
-Defined in: [transducers/Transducer.ts:96](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/transducers/Transducer.ts#L96)
+Defined in: [transducers/Transducer.ts:96](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/transducers/Transducer.ts#L96)
 
 #### Parameters
 
@@ -168,7 +168,7 @@ Defined in: [transducers/Transducer.ts:96](https://github.com/AelasticS/Synthesi
 
 > **filter**(`f`): `this`
 
-Defined in: [transducers/Transducer.ts:64](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/transducers/Transducer.ts#L64)
+Defined in: [transducers/Transducer.ts:64](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/transducers/Transducer.ts#L64)
 
 #### Parameters
 
@@ -186,7 +186,7 @@ Defined in: [transducers/Transducer.ts:64](https://github.com/AelasticS/Synthesi
 
 > **fromDtoGraph**(): `this`
 
-Defined in: [transducers/Transducer.ts:109](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/transducers/Transducer.ts#L109)
+Defined in: [transducers/Transducer.ts:109](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/transducers/Transducer.ts#L109)
 
 #### Returns
 
@@ -198,7 +198,7 @@ Defined in: [transducers/Transducer.ts:109](https://github.com/AelasticS/Synthes
 
 > **map**(`f`): `this`
 
-Defined in: [transducers/Transducer.ts:56](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/transducers/Transducer.ts#L56)
+Defined in: [transducers/Transducer.ts:56](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/transducers/Transducer.ts#L56)
 
 #### Parameters
 
@@ -216,7 +216,7 @@ Defined in: [transducers/Transducer.ts:56](https://github.com/AelasticS/Synthesi
 
 > **newInstance**(`initValues`?, `generateID`?): `this`
 
-Defined in: [transducers/Transducer.ts:88](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/transducers/Transducer.ts#L88)
+Defined in: [transducers/Transducer.ts:88](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/transducers/Transducer.ts#L88)
 
 create a new instance based on initValues as instance template
 
@@ -247,7 +247,7 @@ example:
 
 > **processAnnotations**(`annot`): `this`
 
-Defined in: [transducers/Transducer.ts:92](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/transducers/Transducer.ts#L92)
+Defined in: [transducers/Transducer.ts:92](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/transducers/Transducer.ts#L92)
 
 #### Parameters
 
@@ -265,7 +265,7 @@ Defined in: [transducers/Transducer.ts:92](https://github.com/AelasticS/Synthesi
 
 > **recurse**(`mode`): `this`
 
-Defined in: [transducers/Transducer.ts:60](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/transducers/Transducer.ts#L60)
+Defined in: [transducers/Transducer.ts:60](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/transducers/Transducer.ts#L60)
 
 #### Parameters
 
@@ -283,7 +283,7 @@ Defined in: [transducers/Transducer.ts:60](https://github.com/AelasticS/Synthesi
 
 > **reduce**\<`A`\>(`stepFn`, `initValue`): [`IProcessor`](../interfaces/IProcessor.md)
 
-Defined in: [transducers/Transducer.ts:113](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/transducers/Transducer.ts#L113)
+Defined in: [transducers/Transducer.ts:113](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/transducers/Transducer.ts#L113)
 
 #### Type Parameters
 
@@ -309,7 +309,7 @@ Defined in: [transducers/Transducer.ts:113](https://github.com/AelasticS/Synthes
 
 > **sum**(): [`IProcessor`](../interfaces/IProcessor.md)
 
-Defined in: [transducers/Transducer.ts:124](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/transducers/Transducer.ts#L124)
+Defined in: [transducers/Transducer.ts:124](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/transducers/Transducer.ts#L124)
 
 #### Returns
 
@@ -321,7 +321,7 @@ Defined in: [transducers/Transducer.ts:124](https://github.com/AelasticS/Synthes
 
 > **toDtoGraph**(): `this`
 
-Defined in: [transducers/Transducer.ts:105](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/transducers/Transducer.ts#L105)
+Defined in: [transducers/Transducer.ts:105](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/transducers/Transducer.ts#L105)
 
 #### Returns
 
@@ -333,7 +333,7 @@ Defined in: [transducers/Transducer.ts:105](https://github.com/AelasticS/Synthes
 
 > **validate**(): `this`
 
-Defined in: [transducers/Transducer.ts:72](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/transducers/Transducer.ts#L72)
+Defined in: [transducers/Transducer.ts:72](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/transducers/Transducer.ts#L72)
 
 validate some value
 returns hierarchy of errors

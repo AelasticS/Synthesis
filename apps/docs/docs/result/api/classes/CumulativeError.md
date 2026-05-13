@@ -1,6 +1,6 @@
 # Class: CumulativeError
 
-Defined in: [Result.ts:158](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-result/src/Result.ts#L158)
+Defined in: [Result.ts:158](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-result/src/Result.ts#L158)
 
 Cumulative error class
 
@@ -14,7 +14,7 @@ Cumulative error class
 
 > **new CumulativeError**(`code`, `message`, `errors`): [`CumulativeError`](CumulativeError.md)
 
-Defined in: [Result.ts:161](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-result/src/Result.ts#L161)
+Defined in: [Result.ts:161](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-result/src/Result.ts#L161)
 
 #### Parameters
 
@@ -44,7 +44,7 @@ Defined in: [Result.ts:161](https://github.com/AelasticS/Synthesis/blob/ba994ad7
 
 > `readonly` **code**: [`ErrorCode`](../type-aliases/ErrorCode.md)
 
-Defined in: [Result.ts:127](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-result/src/Result.ts#L127)
+Defined in: [Result.ts:127](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-result/src/Result.ts#L127)
 
 #### Inherited from
 
@@ -56,7 +56,7 @@ Defined in: [Result.ts:127](https://github.com/AelasticS/Synthesis/blob/ba994ad7
 
 > `readonly` **errors**: [`ServiceError`](ServiceError.md)[] = `[]`
 
-Defined in: [Result.ts:159](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-result/src/Result.ts#L159)
+Defined in: [Result.ts:159](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-result/src/Result.ts#L159)
 
 ***
 
@@ -64,7 +64,7 @@ Defined in: [Result.ts:159](https://github.com/AelasticS/Synthesis/blob/ba994ad7
 
 > `readonly` **message**: `string`
 
-Defined in: [Result.ts:126](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-result/src/Result.ts#L126)
+Defined in: [Result.ts:126](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-result/src/Result.ts#L126)
 
 #### Inherited from
 
@@ -76,7 +76,7 @@ Defined in: [Result.ts:126](https://github.com/AelasticS/Synthesis/blob/ba994ad7
 
 > `readonly` **name**: `string`
 
-Defined in: [Result.ts:125](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-result/src/Result.ts#L125)
+Defined in: [Result.ts:125](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-result/src/Result.ts#L125)
 
 custom error code
 
@@ -90,7 +90,7 @@ custom error code
 
 > `static` **toServiceError**(`error`): [`ServiceError`](ServiceError.md)
 
-Defined in: [Result.ts:145](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-result/src/Result.ts#L145)
+Defined in: [Result.ts:145](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-result/src/Result.ts#L145)
 
 Capture standard Javascript/Typescript error in the framework
 - subclass of Error is treated as an error code of created ServiceError

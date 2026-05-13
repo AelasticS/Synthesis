@@ -1,6 +1,6 @@
 # Class: Repository\<T\>
 
-Defined in: [store/Repository.ts:28](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/store/Repository.ts#L28)
+Defined in: [store/Repository.ts:28](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/store/Repository.ts#L28)
 
 ## Type Parameters
 
@@ -12,7 +12,7 @@ Defined in: [store/Repository.ts:28](https://github.com/AelasticS/Synthesis/blob
 
 > **new Repository**\<`T`\>(`eventLog`?): [`Repository`](Repository.md)\<`T`\>
 
-Defined in: [store/Repository.ts:30](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/store/Repository.ts#L30)
+Defined in: [store/Repository.ts:30](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/store/Repository.ts#L30)
 
 #### Parameters
 
@@ -30,7 +30,7 @@ Defined in: [store/Repository.ts:30](https://github.com/AelasticS/Synthesis/blob
 
 > `readonly` **eventLog**: `undefined` \| `EventLog`
 
-Defined in: [store/Repository.ts:29](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/store/Repository.ts#L29)
+Defined in: [store/Repository.ts:29](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/store/Repository.ts#L29)
 
 ## Methods
 
@@ -38,7 +38,7 @@ Defined in: [store/Repository.ts:29](https://github.com/AelasticS/Synthesis/blob
 
 > **create**\<`P`\>(`baseType`, `init`?): `IStoreObject`\<`P`\>
 
-Defined in: [store/Repository.ts:56](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/store/Repository.ts#L56)
+Defined in: [store/Repository.ts:56](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/store/Repository.ts#L56)
 
 #### Type Parameters
 
@@ -64,7 +64,7 @@ Defined in: [store/Repository.ts:56](https://github.com/AelasticS/Synthesis/blob
 
 > **deepCreate**\<`P`\>(`baseType`, `init`?): `IStoreObject`\<`P`\>
 
-Defined in: [store/Repository.ts:34](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/store/Repository.ts#L34)
+Defined in: [store/Repository.ts:34](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/store/Repository.ts#L34)
 
 #### Type Parameters
 
@@ -90,7 +90,7 @@ Defined in: [store/Repository.ts:34](https://github.com/AelasticS/Synthesis/blob
 
 > **delete**(`objectType`, `obj`): `void`
 
-Defined in: [store/Repository.ts:93](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/store/Repository.ts#L93)
+Defined in: [store/Repository.ts:93](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/store/Repository.ts#L93)
 
 #### Parameters
 
@@ -112,7 +112,7 @@ Defined in: [store/Repository.ts:93](https://github.com/AelasticS/Synthesis/blob
 
 > **exportToDTO**(`objType`, `obj`): `ObjectLiteral`
 
-Defined in: [store/Repository.ts:75](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/store/Repository.ts#L75)
+Defined in: [store/Repository.ts:75](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/store/Repository.ts#L75)
 
 #### Parameters
 
@@ -134,7 +134,7 @@ Defined in: [store/Repository.ts:75](https://github.com/AelasticS/Synthesis/blob
 
 > **importFromDTO**\<`P`\>(`baseType`, `inputDTO`): `IStoreObject`\<`P`\>
 
-Defined in: [store/Repository.ts:84](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/store/Repository.ts#L84)
+Defined in: [store/Repository.ts:84](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/store/Repository.ts#L84)
 
 #### Type Parameters
 

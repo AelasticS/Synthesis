@@ -1,6 +1,6 @@
 # Class: `abstract` Command
 
-Defined in: [server-proxy/CommandMaker.ts:38](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/server-proxy/CommandMaker.ts#L38)
+Defined in: [server-proxy/CommandMaker.ts:38](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/server-proxy/CommandMaker.ts#L38)
 
 ## Constructors
 
@@ -8,7 +8,7 @@ Defined in: [server-proxy/CommandMaker.ts:38](https://github.com/AelasticS/Synth
 
 > **new Command**(`objType`, `versioning`): [`Command`](Command.md)
 
-Defined in: [server-proxy/CommandMaker.ts:46](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/server-proxy/CommandMaker.ts#L46)
+Defined in: [server-proxy/CommandMaker.ts:46](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/server-proxy/CommandMaker.ts#L46)
 
 #### Parameters
 
@@ -30,7 +30,7 @@ Defined in: [server-proxy/CommandMaker.ts:46](https://github.com/AelasticS/Synth
 
 > **firstObjID**: `ObjectProps`
 
-Defined in: [server-proxy/CommandMaker.ts:42](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/server-proxy/CommandMaker.ts#L42)
+Defined in: [server-proxy/CommandMaker.ts:42](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/server-proxy/CommandMaker.ts#L42)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [server-proxy/CommandMaker.ts:42](https://github.com/AelasticS/Synth
 
 > `readonly` **firstObjType**: `string`
 
-Defined in: [server-proxy/CommandMaker.ts:43](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/server-proxy/CommandMaker.ts#L43)
+Defined in: [server-proxy/CommandMaker.ts:43](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/server-proxy/CommandMaker.ts#L43)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [server-proxy/CommandMaker.ts:43](https://github.com/AelasticS/Synth
 
 > `readonly` **operationType**: `Operation`
 
-Defined in: [server-proxy/CommandMaker.ts:40](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/server-proxy/CommandMaker.ts#L40)
+Defined in: [server-proxy/CommandMaker.ts:40](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/server-proxy/CommandMaker.ts#L40)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: [server-proxy/CommandMaker.ts:40](https://github.com/AelasticS/Synth
 
 > `readonly` **versioning**: `boolean`
 
-Defined in: [server-proxy/CommandMaker.ts:44](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/server-proxy/CommandMaker.ts#L44)
+Defined in: [server-proxy/CommandMaker.ts:44](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/server-proxy/CommandMaker.ts#L44)
 
 ## Accessors
 
@@ -64,7 +64,7 @@ Defined in: [server-proxy/CommandMaker.ts:44](https://github.com/AelasticS/Synth
 
 > **get** **secondObjID**(): `undefined` \| `ObjectProps`
 
-Defined in: [server-proxy/CommandMaker.ts:51](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/server-proxy/CommandMaker.ts#L51)
+Defined in: [server-proxy/CommandMaker.ts:51](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/server-proxy/CommandMaker.ts#L51)
 
 ##### Returns
 
@@ -76,7 +76,7 @@ Defined in: [server-proxy/CommandMaker.ts:51](https://github.com/AelasticS/Synth
 
 > `abstract` **mergeWith**(`c`): `MergeResult`
 
-Defined in: [server-proxy/CommandMaker.ts:55](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/server-proxy/CommandMaker.ts#L55)
+Defined in: [server-proxy/CommandMaker.ts:55](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/server-proxy/CommandMaker.ts#L55)
 
 #### Parameters
 

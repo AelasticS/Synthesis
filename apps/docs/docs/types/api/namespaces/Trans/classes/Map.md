@@ -1,6 +1,6 @@
 # Class: Map
 
-Defined in: [transducers/Map.ts:8](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/transducers/Map.ts#L8)
+Defined in: [transducers/Map.ts:8](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/transducers/Map.ts#L8)
 
 Represents an interface for a processor.
 
@@ -14,7 +14,7 @@ Represents an interface for a processor.
 
 > **new Map**(`xf`, `f`): [`Map`](Map.md)
 
-Defined in: [transducers/Map.ts:12](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/transducers/Map.ts#L12)
+Defined in: [transducers/Map.ts:12](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/transducers/Map.ts#L12)
 
 #### Parameters
 
@@ -36,7 +36,7 @@ Defined in: [transducers/Map.ts:12](https://github.com/AelasticS/Synthesis/blob/
 
 > **init**(`value`, `currNode`): \[`any`, [`WhatToDo`](../type-aliases/WhatToDo.md)\]
 
-Defined in: [transducers/Map.ts:17](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/transducers/Map.ts#L17)
+Defined in: [transducers/Map.ts:17](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/transducers/Map.ts#L17)
 
 Initializes the processor with a value.
 
@@ -70,7 +70,7 @@ A tuple containing the processed result and the next action.
 
 > **result**(`result`, `currNode`): \[`any`, [`WhatToDo`](../type-aliases/WhatToDo.md)\]
 
-Defined in: [transducers/Map.ts:21](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/transducers/Map.ts#L21)
+Defined in: [transducers/Map.ts:21](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/transducers/Map.ts#L21)
 
 Handles the result of a processing step.
 
@@ -104,7 +104,7 @@ A tuple containing the processed result and the next action.
 
 > **step**(`result`, `currNode`, `item`): \[`any`, [`WhatToDo`](../type-aliases/WhatToDo.md)\]
 
-Defined in: [transducers/Map.ts:25](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/transducers/Map.ts#L25)
+Defined in: [transducers/Map.ts:25](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/transducers/Map.ts#L25)
 
 Performs a processing step.
 

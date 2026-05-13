@@ -1,6 +1,6 @@
 # Class: AddEventListeners
 
-Defined in: [eventLog/AddEventListenersTransformer.ts:21](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/eventLog/AddEventListenersTransformer.ts#L21)
+Defined in: [eventLog/AddEventListenersTransformer.ts:21](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/eventLog/AddEventListenersTransformer.ts#L21)
 
 ## Implements
 
@@ -12,7 +12,7 @@ Defined in: [eventLog/AddEventListenersTransformer.ts:21](https://github.com/Ael
 
 > **new AddEventListeners**(`xf`, `eventLog`): [`AddEventListeners`](AddEventListeners.md)
 
-Defined in: [eventLog/AddEventListenersTransformer.ts:25](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/eventLog/AddEventListenersTransformer.ts#L25)
+Defined in: [eventLog/AddEventListenersTransformer.ts:25](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/eventLog/AddEventListenersTransformer.ts#L25)
 
 #### Parameters
 
@@ -34,7 +34,7 @@ Defined in: [eventLog/AddEventListenersTransformer.ts:25](https://github.com/Ael
 
 > **init**(`value`, `currNode`): \[`any`, `WhatToDo`\]
 
-Defined in: [eventLog/AddEventListenersTransformer.ts:38](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/eventLog/AddEventListenersTransformer.ts#L38)
+Defined in: [eventLog/AddEventListenersTransformer.ts:38](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/eventLog/AddEventListenersTransformer.ts#L38)
 
 Initializes the processor with a value.
 
@@ -68,7 +68,7 @@ A tuple containing the processed result and the next action.
 
 > **result**(`result`, `currNode`): \[`any`, `WhatToDo`\]
 
-Defined in: [eventLog/AddEventListenersTransformer.ts:42](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/eventLog/AddEventListenersTransformer.ts#L42)
+Defined in: [eventLog/AddEventListenersTransformer.ts:42](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/eventLog/AddEventListenersTransformer.ts#L42)
 
 Handles the result of a processing step.
 
@@ -102,7 +102,7 @@ A tuple containing the processed result and the next action.
 
 > **step**(`result`, `currNode`, `item`): \[`any`, `WhatToDo`\]
 
-Defined in: [eventLog/AddEventListenersTransformer.ts:56](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/eventLog/AddEventListenersTransformer.ts#L56)
+Defined in: [eventLog/AddEventListenersTransformer.ts:56](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/eventLog/AddEventListenersTransformer.ts#L56)
 
 Performs a processing step.
 

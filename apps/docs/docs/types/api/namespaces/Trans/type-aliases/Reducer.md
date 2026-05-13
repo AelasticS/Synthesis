@@ -2,7 +2,7 @@
 
 > **Reducer**\<`A`\>: (`result`, `currNode`, `item`) => `A`
 
-Defined in: [transducers/Processor.ts:68](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/transducers/Processor.ts#L68)
+Defined in: [transducers/Processor.ts:68](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/transducers/Processor.ts#L68)
 
 Represents a reducer function type used to aggregate or accumulate values.
 

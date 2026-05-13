@@ -1,6 +1,6 @@
 # Class: TypeSchema
 
-Defined in: [type/TypeSchema.ts:18](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/type/TypeSchema.ts#L18)
+Defined in: [type/TypeSchema.ts:18](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/type/TypeSchema.ts#L18)
 
 Schema is a a container of types and other (sub)schemas
  Types and subschemas can be shared among schemas!
@@ -11,7 +11,7 @@ Schema is a a container of types and other (sub)schemas
 
 > **new TypeSchema**(`name`, `superSchema`?): [`TypeSchema`](TypeSchema.md)
 
-Defined in: [type/TypeSchema.ts:28](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/type/TypeSchema.ts#L28)
+Defined in: [type/TypeSchema.ts:28](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/type/TypeSchema.ts#L28)
 
 #### Parameters
 
@@ -33,7 +33,7 @@ Defined in: [type/TypeSchema.ts:28](https://github.com/AelasticS/Synthesis/blob/
 
 > **\_subSchemas**: `Map`\<`string`, [`TypeSchema`](TypeSchema.md)\>
 
-Defined in: [type/TypeSchema.ts:21](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/type/TypeSchema.ts#L21)
+Defined in: [type/TypeSchema.ts:21](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/type/TypeSchema.ts#L21)
 
 ***
 
@@ -41,7 +41,7 @@ Defined in: [type/TypeSchema.ts:21](https://github.com/AelasticS/Synthesis/blob/
 
 > **\_superSchema**: `undefined` \| [`TypeSchema`](TypeSchema.md)
 
-Defined in: [type/TypeSchema.ts:22](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/type/TypeSchema.ts#L22)
+Defined in: [type/TypeSchema.ts:22](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/type/TypeSchema.ts#L22)
 
 ***
 
@@ -49,7 +49,7 @@ Defined in: [type/TypeSchema.ts:22](https://github.com/AelasticS/Synthesis/blob/
 
 > **\_types**: `Map`\<`string`, [`Any`](../type-aliases/Any.md)\>
 
-Defined in: [type/TypeSchema.ts:20](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/type/TypeSchema.ts#L20)
+Defined in: [type/TypeSchema.ts:20](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/type/TypeSchema.ts#L20)
 
 ***
 
@@ -57,7 +57,7 @@ Defined in: [type/TypeSchema.ts:20](https://github.com/AelasticS/Synthesis/blob/
 
 > `readonly` **name**: `string`
 
-Defined in: [type/TypeSchema.ts:19](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/type/TypeSchema.ts#L19)
+Defined in: [type/TypeSchema.ts:19](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/type/TypeSchema.ts#L19)
 
 ## Accessors
 
@@ -67,7 +67,7 @@ Defined in: [type/TypeSchema.ts:19](https://github.com/AelasticS/Synthesis/blob/
 
 > **get** **absolutePathName**(): `string`
 
-Defined in: [type/TypeSchema.ts:57](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/type/TypeSchema.ts#L57)
+Defined in: [type/TypeSchema.ts:57](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/type/TypeSchema.ts#L57)
 
 ##### Returns
 
@@ -81,7 +81,7 @@ Defined in: [type/TypeSchema.ts:57](https://github.com/AelasticS/Synthesis/blob/
 
 > **get** **isValid**(): `boolean`
 
-Defined in: [type/TypeSchema.ts:61](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/type/TypeSchema.ts#L61)
+Defined in: [type/TypeSchema.ts:61](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/type/TypeSchema.ts#L61)
 
 ##### Returns
 
@@ -95,7 +95,7 @@ Defined in: [type/TypeSchema.ts:61](https://github.com/AelasticS/Synthesis/blob/
 
 > **get** **path**(): `string`
 
-Defined in: [type/TypeSchema.ts:44](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/type/TypeSchema.ts#L44)
+Defined in: [type/TypeSchema.ts:44](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/type/TypeSchema.ts#L44)
 
 ##### Returns
 
@@ -109,7 +109,7 @@ Defined in: [type/TypeSchema.ts:44](https://github.com/AelasticS/Synthesis/blob/
 
 > **get** **validateStatus**(): `ValidateStatusEnum`
 
-Defined in: [type/TypeSchema.ts:65](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/type/TypeSchema.ts#L65)
+Defined in: [type/TypeSchema.ts:65](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/type/TypeSchema.ts#L65)
 
 ##### Returns
 
@@ -121,7 +121,7 @@ Defined in: [type/TypeSchema.ts:65](https://github.com/AelasticS/Synthesis/blob/
 
 > **addLink**(`l`): `void`
 
-Defined in: [type/TypeSchema.ts:40](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/type/TypeSchema.ts#L40)
+Defined in: [type/TypeSchema.ts:40](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/type/TypeSchema.ts#L40)
 
 #### Parameters
 
@@ -139,7 +139,7 @@ Defined in: [type/TypeSchema.ts:40](https://github.com/AelasticS/Synthesis/blob/
 
 > **addType**(`t`): `void`
 
-Defined in: [type/TypeSchema.ts:69](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/type/TypeSchema.ts#L69)
+Defined in: [type/TypeSchema.ts:69](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/type/TypeSchema.ts#L69)
 
 #### Parameters
 
@@ -157,7 +157,7 @@ Defined in: [type/TypeSchema.ts:69](https://github.com/AelasticS/Synthesis/blob/
 
 > **generateName**(`base`): `string`
 
-Defined in: [type/TypeSchema.ts:36](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/type/TypeSchema.ts#L36)
+Defined in: [type/TypeSchema.ts:36](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/type/TypeSchema.ts#L36)
 
 #### Parameters
 
@@ -175,7 +175,7 @@ Defined in: [type/TypeSchema.ts:36](https://github.com/AelasticS/Synthesis/blob/
 
 > **getType**(`path`): `undefined` \| [`Any`](../type-aliases/Any.md)
 
-Defined in: [type/TypeSchema.ts:98](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/type/TypeSchema.ts#L98)
+Defined in: [type/TypeSchema.ts:98](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/type/TypeSchema.ts#L98)
 
 #### Parameters
 
@@ -193,7 +193,7 @@ Defined in: [type/TypeSchema.ts:98](https://github.com/AelasticS/Synthesis/blob/
 
 > **validate**(): `ServiceResult`\<`boolean`\>
 
-Defined in: [type/TypeSchema.ts:121](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/type/TypeSchema.ts#L121)
+Defined in: [type/TypeSchema.ts:121](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/type/TypeSchema.ts#L121)
 
 #### Returns
 

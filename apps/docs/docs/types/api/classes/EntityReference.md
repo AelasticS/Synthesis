@@ -1,6 +1,6 @@
 # Class: EntityReference\<T\>
 
-Defined in: [special-types/ObjectReference.ts:26](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/special-types/ObjectReference.ts#L26)
+Defined in: [special-types/ObjectReference.ts:26](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/special-types/ObjectReference.ts#L26)
 
 Abstract class representing a generic data type with validation and transformation capabilities.
 It supports operations across three types of data representations: natural, graph, and tree DTOs.
@@ -19,7 +19,7 @@ It supports operations across three types of data representations: natural, grap
 
 > **new EntityReference**\<`T`\>(`name`, `obj`, `schema`): [`EntityReference`](EntityReference.md)\<`T`\>
 
-Defined in: [special-types/ObjectReference.ts:34](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/special-types/ObjectReference.ts#L34)
+Defined in: [special-types/ObjectReference.ts:34](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/special-types/ObjectReference.ts#L34)
 
 #### Parameters
 
@@ -49,7 +49,7 @@ Defined in: [special-types/ObjectReference.ts:34](https://github.com/AelasticS/S
 
 > `readonly` **\_G**: `DtoObjectReference`
 
-Defined in: [type/Type.ts:56](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/type/Type.ts#L56)
+Defined in: [type/Type.ts:56](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/type/Type.ts#L56)
 
 #### Inherited from
 
@@ -61,7 +61,7 @@ Defined in: [type/Type.ts:56](https://github.com/AelasticS/Synthesis/blob/ba994a
 
 > `readonly` **\_T**: `DtoTypeOfKey`
 
-Defined in: [type/Type.ts:58](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/type/Type.ts#L58)
+Defined in: [type/Type.ts:58](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/type/Type.ts#L58)
 
 #### Inherited from
 
@@ -73,7 +73,7 @@ Defined in: [type/Type.ts:58](https://github.com/AelasticS/Synthesis/blob/ba994a
 
 > `readonly` **\_tag**: `"Reference"` = `"Reference"`
 
-Defined in: [special-types/ObjectReference.ts:32](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/special-types/ObjectReference.ts#L32)
+Defined in: [special-types/ObjectReference.ts:32](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/special-types/ObjectReference.ts#L32)
 
 ***
 
@@ -81,7 +81,7 @@ Defined in: [special-types/ObjectReference.ts:32](https://github.com/AelasticS/S
 
 > `readonly` **\_V**: `TypeOfKey`
 
-Defined in: [type/Type.ts:54](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/type/Type.ts#L54)
+Defined in: [type/Type.ts:54](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/type/Type.ts#L54)
 
 #### Inherited from
 
@@ -93,7 +93,7 @@ Defined in: [type/Type.ts:54](https://github.com/AelasticS/Synthesis/blob/ba994a
 
 > `optional` **derivedFrom**: [`Type`](Type.md)\<`any`, `any`, `any`\>
 
-Defined in: [type/Type.ts:68](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/type/Type.ts#L68)
+Defined in: [type/Type.ts:68](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/type/Type.ts#L68)
 
 #### Inherited from
 
@@ -105,7 +105,7 @@ Defined in: [type/Type.ts:68](https://github.com/AelasticS/Synthesis/blob/ba994a
 
 > `readonly` **isSystemType**: `boolean` = `false`
 
-Defined in: [type/Type.ts:64](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/type/Type.ts#L64)
+Defined in: [type/Type.ts:64](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/type/Type.ts#L64)
 
 #### Inherited from
 
@@ -117,7 +117,7 @@ Defined in: [type/Type.ts:64](https://github.com/AelasticS/Synthesis/blob/ba994a
 
 > `readonly` **name**: `string`
 
-Defined in: [type/Type.ts:60](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/type/Type.ts#L60)
+Defined in: [type/Type.ts:60](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/type/Type.ts#L60)
 
 #### Inherited from
 
@@ -129,7 +129,7 @@ Defined in: [type/Type.ts:60](https://github.com/AelasticS/Synthesis/blob/ba994a
 
 > **ownerSchema**: [`TypeSchema`](TypeSchema.md)
 
-Defined in: [type/Type.ts:66](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/type/Type.ts#L66)
+Defined in: [type/Type.ts:66](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/type/Type.ts#L66)
 
 #### Inherited from
 
@@ -141,7 +141,7 @@ Defined in: [type/Type.ts:66](https://github.com/AelasticS/Synthesis/blob/ba994a
 
 > `readonly` **referencedType**: `T`
 
-Defined in: [special-types/ObjectReference.ts:31](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/special-types/ObjectReference.ts#L31)
+Defined in: [special-types/ObjectReference.ts:31](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/special-types/ObjectReference.ts#L31)
 
 ***
 
@@ -149,7 +149,7 @@ Defined in: [special-types/ObjectReference.ts:31](https://github.com/AelasticS/S
 
 > `readonly` **typeCategory**: [`TypeCategory`](../type-aliases/TypeCategory.md)
 
-Defined in: [type/Type.ts:62](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/type/Type.ts#L62)
+Defined in: [type/Type.ts:62](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/type/Type.ts#L62)
 
 #### Inherited from
 
@@ -163,7 +163,7 @@ Defined in: [type/Type.ts:62](https://github.com/AelasticS/Synthesis/blob/ba994a
 
 > **get** **fullPathName**(): `string`
 
-Defined in: [type/Type.ts:136](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/type/Type.ts#L136)
+Defined in: [type/Type.ts:136](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/type/Type.ts#L136)
 
 Returns the full path name of the type, including its path from the root schema.
 
@@ -181,7 +181,7 @@ Returns the full path name of the type, including its path from the root schema.
 
 > **addChild**(`parent`, `child`, `n`): `void`
 
-Defined in: [special-types/ObjectReference.ts:39](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/special-types/ObjectReference.ts#L39)
+Defined in: [special-types/ObjectReference.ts:39](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/special-types/ObjectReference.ts#L39)
 
 Abstract method to add a child to a parent object within the context of a node.
 Must be implemented by subclasses to define how children are added to parent instances.
@@ -220,7 +220,7 @@ The node context for adding the child.
 
 > **addValidator**(`validator`): `this`
 
-Defined in: [type/Type.ts:173](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/type/Type.ts#L173)
+Defined in: [type/Type.ts:173](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/type/Type.ts#L173)
 
 Adds a validator to this type.
 
@@ -248,7 +248,7 @@ this instance for chaining.
 
 > **checkValidators**(`value`): `ServiceResult`\<`boolean`\>
 
-Defined in: [type/Type.ts:189](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/type/Type.ts#L189)
+Defined in: [type/Type.ts:189](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/type/Type.ts#L189)
 
 Checks the validators for the given value, accumulating errors.
 
@@ -276,7 +276,7 @@ A ServiceResult indicating success or failure with detailed errors.
 
 > **children**(`value`, `n`): `Generator`\<\[`TypeOfKey`\<`T`\>, [`Any`](../type-aliases/Any.md), `Partial`\<\{ `childExtra`: \{\}; `index`: `number`; `optional`: `boolean`; `parentInstance`: `any`; `parentResult`: `any`; `parentType`: [`Any`](../type-aliases/Any.md); `propName`: `string`; `role`: `RoleType`; \}\>\]\>
 
-Defined in: [special-types/ObjectReference.ts:43](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/special-types/ObjectReference.ts#L43)
+Defined in: [special-types/ObjectReference.ts:43](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/special-types/ObjectReference.ts#L43)
 
 Abstract method to iterate over children of a given value within a node.
 Must be implemented by subclasses to handle specific child iteration logic.
@@ -309,7 +309,7 @@ A generator yielding tuples of child values, their types, and extra information.
 
 > **createInstance**(`input`?): `unknown`
 
-Defined in: [type/Type.ts:339](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/type/Type.ts#L339)
+Defined in: [type/Type.ts:339](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/type/Type.ts#L339)
 
 Creates a new instance of the type, potentially using a provided input as the basis.
 
@@ -337,7 +337,7 @@ The newly created instance.
 
 > **derive**(`name`?, `schema`?): `this`
 
-Defined in: [type/Type.ts:151](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/type/Type.ts#L151)
+Defined in: [type/Type.ts:151](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/type/Type.ts#L151)
 
 Derives a new type from this type.
 
@@ -371,7 +371,7 @@ A new instance of the derived type.
 
 > **doTransformation**\<`A`\>(`t`, `input`, `initObj`?, `resetAcc`?, `typeLevel`?): \[`A`, [`WhatToDo`](../namespaces/Trans/type-aliases/WhatToDo.md)\]
 
-Defined in: [complex-types/ComplexType.ts:10](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/complex-types/ComplexType.ts#L10)
+Defined in: [complex-types/ComplexType.ts:10](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/complex-types/ComplexType.ts#L10)
 
 Abstract method to handle the transformation process.
 Must be implemented by subclasses to define specific transformation behaviors.
@@ -428,7 +428,7 @@ A tuple containing the transformed data and the next action.
 
 > **fromDtoGraph**(`input`): `TypeOfKey`
 
-Defined in: [type/Type.ts:329](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/type/Type.ts#L329)
+Defined in: [type/Type.ts:329](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/type/Type.ts#L329)
 
 Converts an input graph-formatted Data Transfer Object back into the natural value type.
 
@@ -456,7 +456,7 @@ The converted natural value type.
 
 > **init**(`n`): `TypeOfKey`\<`T`\>
 
-Defined in: [special-types/ObjectReference.ts:54](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/special-types/ObjectReference.ts#L54)
+Defined in: [special-types/ObjectReference.ts:54](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/special-types/ObjectReference.ts#L54)
 
 Abstract method to initialize and create an empty instance of the type.
 Must be implemented by subclasses to define how new instances are created.
@@ -485,7 +485,7 @@ An initialized, empty instance of the type.
 
 > **isOfType**(`t`): `boolean`
 
-Defined in: [type/Type.ts:164](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/type/Type.ts#L164)
+Defined in: [type/Type.ts:164](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/type/Type.ts#L164)
 
 Checks if this type is of or derived from another type.
 
@@ -513,7 +513,7 @@ true if this type is or derives from the given type.
 
 > **isSimple**(): `boolean`
 
-Defined in: [complex-types/ComplexType.ts:6](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/complex-types/ComplexType.ts#L6)
+Defined in: [complex-types/ComplexType.ts:6](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/complex-types/ComplexType.ts#L6)
 
 Abstract method to determine if the type is simple.
 
@@ -531,7 +531,7 @@ Abstract method to determine if the type is simple.
 
 > **toDtoGraph**(`input`): `DtoObjectReference`
 
-Defined in: [type/Type.ts:319](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/type/Type.ts#L319)
+Defined in: [type/Type.ts:319](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/type/Type.ts#L319)
 
 Converts an input object of natural value type into a graph-formatted Data Transfer Object.
 
@@ -559,7 +559,7 @@ The converted graph DTO.
 
 > **transduce**\<`A`\>(`t`, `input`, `initObj`?, `resetAcc`?, `typeLevel`?): `A`
 
-Defined in: [type/Type.ts:227](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/type/Type.ts#L227)
+Defined in: [type/Type.ts:227](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/type/Type.ts#L227)
 
 Transforms the input data using the specified processor.
 
@@ -615,7 +615,7 @@ The transformed data.
 
 > **validate**(`input`): `ServiceResult`\<`boolean`\>
 
-Defined in: [type/Type.ts:307](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/type/Type.ts#L307)
+Defined in: [type/Type.ts:307](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/type/Type.ts#L307)
 
 Simplifies the process of validating a value, directly returning a service result indicating success or failure.
 
@@ -643,7 +643,7 @@ A ServiceResult indicating whether the input is valid, along with detailed error
 
 > **validateAndReport**(`input`): \[`boolean`, `any`\]
 
-Defined in: [type/Type.ts:281](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/type/Type.ts#L281)
+Defined in: [type/Type.ts:281](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/type/Type.ts#L281)
 
 Validates the input value and reports any errors encountered.
 
@@ -671,7 +671,7 @@ A tuple indicating whether validation passed and any error object associated wit
 
 > `static` **sanitizeName**(`name`): `string`
 
-Defined in: [type/Type.ts:119](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/type/Type.ts#L119)
+Defined in: [type/Type.ts:119](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/type/Type.ts#L119)
 
 #### Parameters
 

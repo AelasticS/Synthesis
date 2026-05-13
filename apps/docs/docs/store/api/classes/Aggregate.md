@@ -1,6 +1,6 @@
 # Class: Aggregate\<R, ID\>
 
-Defined in: [store/Aggregate.ts:49](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/store/Aggregate.ts#L49)
+Defined in: [store/Aggregate.ts:49](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/store/Aggregate.ts#L49)
 
 Aggreagate - DDD aggregate is a cluster of domain objects that can be treated as a single unit.
 
@@ -20,7 +20,7 @@ Aggreagate - DDD aggregate is a cluster of domain objects that can be treated as
 
 > **new Aggregate**\<`R`, `ID`\>(`rootType`, `root`?, `server`?): [`Aggregate`](Aggregate.md)\<`R`, `ID`\>
 
-Defined in: [store/Aggregate.ts:56](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/store/Aggregate.ts#L56)
+Defined in: [store/Aggregate.ts:56](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/store/Aggregate.ts#L56)
 
 #### Parameters
 
@@ -50,7 +50,7 @@ Defined in: [store/Aggregate.ts:56](https://github.com/AelasticS/Synthesis/blob/
 
 > **eventLog**: `EventLog`
 
-Defined in: [store/Base.ts:20](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/store/Base.ts#L20)
+Defined in: [store/Base.ts:20](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/store/Base.ts#L20)
 
 #### Inherited from
 
@@ -62,7 +62,7 @@ Defined in: [store/Base.ts:20](https://github.com/AelasticS/Synthesis/blob/ba994
 
 > `protected` **repo**: [`Repository`](Repository.md)\<`Any`\>
 
-Defined in: [store/Base.ts:21](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/store/Base.ts#L21)
+Defined in: [store/Base.ts:21](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/store/Base.ts#L21)
 
 #### Inherited from
 
@@ -74,7 +74,7 @@ Defined in: [store/Base.ts:21](https://github.com/AelasticS/Synthesis/blob/ba994
 
 > **root**: `undefined` \| `IStoreObject`\<`R`\>
 
-Defined in: [store/Aggregate.ts:54](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/store/Aggregate.ts#L54)
+Defined in: [store/Aggregate.ts:54](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/store/Aggregate.ts#L54)
 
 ***
 
@@ -82,7 +82,7 @@ Defined in: [store/Aggregate.ts:54](https://github.com/AelasticS/Synthesis/blob/
 
 > `readonly` **rootType**: `ObjectType`\<`any`, `any`\>
 
-Defined in: [store/Aggregate.ts:51](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/store/Aggregate.ts#L51)
+Defined in: [store/Aggregate.ts:51](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/store/Aggregate.ts#L51)
 
 ***
 
@@ -90,7 +90,7 @@ Defined in: [store/Aggregate.ts:51](https://github.com/AelasticS/Synthesis/blob/
 
 > `protected` `optional` **server**: [`ServerProxy`](ServerProxy.md)
 
-Defined in: [store/Base.ts:19](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/store/Base.ts#L19)
+Defined in: [store/Base.ts:19](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/store/Base.ts#L19)
 
 #### Inherited from
 
@@ -102,7 +102,7 @@ Defined in: [store/Base.ts:19](https://github.com/AelasticS/Synthesis/blob/ba994
 
 > **create**\<`P`\>(`type`, `initValue`?): `IStoreObject`\<`P`\>
 
-Defined in: [store/Base.ts:51](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/store/Base.ts#L51)
+Defined in: [store/Base.ts:51](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/store/Base.ts#L51)
 
 #### Type Parameters
 
@@ -132,7 +132,7 @@ Defined in: [store/Base.ts:51](https://github.com/AelasticS/Synthesis/blob/ba994
 
 > **createRoot**(`initValue`?): `IStoreObject`\<`R`\>
 
-Defined in: [store/Aggregate.ts:67](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/store/Aggregate.ts#L67)
+Defined in: [store/Aggregate.ts:67](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/store/Aggregate.ts#L67)
 
 #### Parameters
 
@@ -150,7 +150,7 @@ Defined in: [store/Aggregate.ts:67](https://github.com/AelasticS/Synthesis/blob/
 
 > **deepCreate**\<`P`\>(`type`, `initValue`?): `IStoreObject`\<`P`\>
 
-Defined in: [store/Base.ts:43](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/store/Base.ts#L43)
+Defined in: [store/Base.ts:43](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/store/Base.ts#L43)
 
 #### Type Parameters
 
@@ -180,7 +180,7 @@ Defined in: [store/Base.ts:43](https://github.com/AelasticS/Synthesis/blob/ba994
 
 > **delete**\<`T`\>(`object`): `void`
 
-Defined in: [store/Base.ts:59](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/store/Base.ts#L59)
+Defined in: [store/Base.ts:59](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/store/Base.ts#L59)
 
 #### Type Parameters
 
@@ -206,7 +206,7 @@ Defined in: [store/Base.ts:59](https://github.com/AelasticS/Synthesis/blob/ba994
 
 > **exportDTO**(): `undefined` \| `ObjectLiteral`
 
-Defined in: [store/Aggregate.ts:101](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/store/Aggregate.ts#L101)
+Defined in: [store/Aggregate.ts:101](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/store/Aggregate.ts#L101)
 
 #### Returns
 
@@ -218,7 +218,7 @@ Defined in: [store/Aggregate.ts:101](https://github.com/AelasticS/Synthesis/blob
 
 > `protected` **exportToDTO**(`baseType`, `inputDTO`): `ObjectLiteral`
 
-Defined in: [store/Base.ts:74](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/store/Base.ts#L74)
+Defined in: [store/Base.ts:74](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/store/Base.ts#L74)
 
 #### Parameters
 
@@ -244,7 +244,7 @@ Defined in: [store/Base.ts:74](https://github.com/AelasticS/Synthesis/blob/ba994
 
 > **getTypeOfObject**\<`T`\>(`obj`): `Any`
 
-Defined in: [store/Aggregate.ts:83](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/store/Aggregate.ts#L83)
+Defined in: [store/Aggregate.ts:83](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/store/Aggregate.ts#L83)
 
 #### Type Parameters
 
@@ -270,7 +270,7 @@ Defined in: [store/Aggregate.ts:83](https://github.com/AelasticS/Synthesis/blob/
 
 > **getTypeSchemaByFullName**(`schemaPath`): `undefined` \| `TypeSchema`
 
-Defined in: [store/Aggregate.ts:77](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/store/Aggregate.ts#L77)
+Defined in: [store/Aggregate.ts:77](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/store/Aggregate.ts#L77)
 
 #### Parameters
 
@@ -292,7 +292,7 @@ Defined in: [store/Aggregate.ts:77](https://github.com/AelasticS/Synthesis/blob/
 
 > `protected` **getTypeSchemaFullName**\<`T`\>(`obj`): `string`
 
-Defined in: [store/Base.ts:27](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/store/Base.ts#L27)
+Defined in: [store/Base.ts:27](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/store/Base.ts#L27)
 
 #### Type Parameters
 
@@ -318,7 +318,7 @@ Defined in: [store/Base.ts:27](https://github.com/AelasticS/Synthesis/blob/ba994
 
 > **getTypeSchemaOfObject**\<`T`\>(`obj`): `TypeSchema`
 
-Defined in: [store/Aggregate.ts:71](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/store/Aggregate.ts#L71)
+Defined in: [store/Aggregate.ts:71](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/store/Aggregate.ts#L71)
 
 #### Type Parameters
 
@@ -344,7 +344,7 @@ Defined in: [store/Aggregate.ts:71](https://github.com/AelasticS/Synthesis/blob/
 
 > **importDTO**(`initValue`): `IStoreObject`\<`ObjectLiteral`\>
 
-Defined in: [store/Aggregate.ts:94](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/store/Aggregate.ts#L94)
+Defined in: [store/Aggregate.ts:94](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/store/Aggregate.ts#L94)
 
 #### Parameters
 
@@ -362,7 +362,7 @@ Defined in: [store/Aggregate.ts:94](https://github.com/AelasticS/Synthesis/blob/
 
 > `protected` **importFromDTO**(`baseType`, `inputDTO`): `IStoreObject`\<`ObjectLiteral`\>
 
-Defined in: [store/Base.ts:66](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/store/Base.ts#L66)
+Defined in: [store/Base.ts:66](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/store/Base.ts#L66)
 
 #### Parameters
 
@@ -388,7 +388,7 @@ Defined in: [store/Base.ts:66](https://github.com/AelasticS/Synthesis/blob/ba994
 
 > **save**(): `void`
 
-Defined in: [store/Aggregate.ts:113](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-store/src/store/Aggregate.ts#L113)
+Defined in: [store/Aggregate.ts:113](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-store/src/store/Aggregate.ts#L113)
 
 Strategies:
  1. subtypes collapsed into supertype/expanded into separte

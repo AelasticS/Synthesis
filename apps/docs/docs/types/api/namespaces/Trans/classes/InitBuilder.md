@@ -1,6 +1,6 @@
 # Class: InitBuilder
 
-Defined in: [transducers/ProcessorBuilder.ts:132](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/transducers/ProcessorBuilder.ts#L132)
+Defined in: [transducers/ProcessorBuilder.ts:132](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/transducers/ProcessorBuilder.ts#L132)
 
 ## Extends
 
@@ -26,7 +26,7 @@ Defined in: [transducers/ProcessorBuilder.ts:132](https://github.com/AelasticS/S
 
 > **build**(): (`value`, `currNode`, ...`args`) => \[`any`, [`WhatToDo`](../type-aliases/WhatToDo.md)\][]
 
-Defined in: [transducers/ProcessorBuilder.ts:127](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/transducers/ProcessorBuilder.ts#L127)
+Defined in: [transducers/ProcessorBuilder.ts:127](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/transducers/ProcessorBuilder.ts#L127)
 
 #### Returns
 
@@ -42,7 +42,7 @@ Defined in: [transducers/ProcessorBuilder.ts:127](https://github.com/AelasticS/S
 
 > **onPredicate**(`predicate`, `fun`): `this`
 
-Defined in: [transducers/ProcessorBuilder.ts:101](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/transducers/ProcessorBuilder.ts#L101)
+Defined in: [transducers/ProcessorBuilder.ts:101](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/transducers/ProcessorBuilder.ts#L101)
 
 #### Parameters
 
@@ -68,7 +68,7 @@ Defined in: [transducers/ProcessorBuilder.ts:101](https://github.com/AelasticS/S
 
 > **onType**(`type`, `f`): `this`
 
-Defined in: [transducers/ProcessorBuilder.ts:110](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/transducers/ProcessorBuilder.ts#L110)
+Defined in: [transducers/ProcessorBuilder.ts:110](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/transducers/ProcessorBuilder.ts#L110)
 
 #### Parameters
 
@@ -94,7 +94,7 @@ Defined in: [transducers/ProcessorBuilder.ts:110](https://github.com/AelasticS/S
 
 > **onTypeCategory**(`cat`, `f`): `this`
 
-Defined in: [transducers/ProcessorBuilder.ts:118](https://github.com/AelasticS/Synthesis/blob/ba994ad7657b3e24dbf58012ff4677a4f0722af3/libraries/aelastics-types/src/transducers/ProcessorBuilder.ts#L118)
+Defined in: [transducers/ProcessorBuilder.ts:118](https://github.com/AelasticS/Synthesis/blob/6c6b3794f59388098fda2e026d162eaf05abcfcb/libraries/aelastics-types/src/transducers/ProcessorBuilder.ts#L118)
 
 #### Parameters
 
