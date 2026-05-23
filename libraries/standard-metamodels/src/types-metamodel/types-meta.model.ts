@@ -18,6 +18,7 @@ export const TypeModel = t.subtype(
   Model,
   {
     types: t.arrayOf(Type),
+    inverses: t.arrayOf(t.link(TypesMM_TypeSchema, "InverseProperty")),
   },
   "TypeModel",
   TypesMM_TypeSchema,

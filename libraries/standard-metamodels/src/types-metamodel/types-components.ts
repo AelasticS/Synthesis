@@ -72,7 +72,7 @@ export const TypeLink: Template<t.ILink> = (props) => {
 }
 
 export const InverseProperty: Template<t.IInverseProperty> = (props) => {
-  return new ExprNode(t.InverseProperty, props, "types")
+  return new ExprNode(t.InverseProperty, props, "inverses")
 }
 
 export const TypeLiteral: Template<t.ILiteral> = (props) => {
