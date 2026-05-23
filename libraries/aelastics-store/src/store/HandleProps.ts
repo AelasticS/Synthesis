@@ -12,11 +12,12 @@
 
 import { ServiceError } from '@aelastics/result';
 import * as t from '@aelastics/types';
-import { computed, extendObservable, IObservableArray, observe } from 'mobx';
+import { computed, extendObservable, intercept, IObservableArray, observe } from 'mobx';
 import * as types from '@aelastics/types';
 import { StatusValue } from '../common/Status';
 import { ITransformer, Node, WhatToDo } from '@aelastics/types';
 import { prefixValue, objectStatus, objectSync, getUnderlyingType } from '../common/CommonConstants';
+import { getEntityElementType, validateConformance } from '../common/TypeConformance';
 
 export class HandleProps implements ITransformer {
   private xf: ITransformer;
@@ -58,28 +59,32 @@ function handleProps(input: types.ObjectLiteral, type: t.Any): types.ObjectLiter
         'ReferenceError',
         `Error in function handleInverseProps: Property ${propName} in object type ${type.name} has no correctly defined type`
       );
+    // Expected entity type each value assigned to this prop must conform to;
+    // undefined for non-entity props (simple types, maps, etc.) — no runtime check.
+    const expectedElementType = getEntityElementType(prop);
+    const propertyPath = `${objectType.name}.${propName}`;
     let inverse = allInverse.get(propName);
     if (inverse === undefined) {
-      makePropertyWithNoInverse(output, propName);
+      makePropertyWithNoInverse(output, propName, expectedElementType, propertyPath, currentPropType.typeCategory);
     } else {
       switch (currentPropType.typeCategory) {
         case 'Object':
           switch (inverse.propType) {
             case 'Array':
-              makeObjectPropInverseToArrayProp(output, propName, inverse.propName);
+              makeObjectPropInverseToArrayProp(output, propName, inverse.propName, expectedElementType, propertyPath);
               break;
             case 'Map':
               makeObjectPropInverseToMapProp(output, propName, inverse.propName);
               break;
             case 'Object':
-              makeObjectPropInverseToObjectProp(output, propName, inverse.propName);
+              makeObjectPropInverseToObjectProp(output, propName, inverse.propName, expectedElementType, propertyPath);
               break;
           }
           break;
         case 'Array':
           switch (inverse.propType) {
             case 'Array':
-              makeArrayPropInverseToArrayProp(output, propName, inverse.propName);
+              makeArrayPropInverseToArrayProp(output, propName, inverse.propName, expectedElementType, propertyPath);
               break;
             case 'Map':
               throw new ServiceError(
@@ -87,9 +92,9 @@ function handleProps(input: types.ObjectLiteral, type: t.Any): types.ObjectLiter
                 `Many-to-many bidirectional relationships not supported:${currentPropType.name}.${propName} and ${inverse.type.name}.${inverse.propName} `
               );
             // makePropertyInverseToMap(input, prop, inverse.prop)
-                
+
             case 'Object':
-              makeArrayPropInverseToObjectProp(output, propName, inverse.propName);
+              makeArrayPropInverseToObjectProp(output, propName, inverse.propName, expectedElementType, propertyPath);
               break;
           }
           break;
@@ -120,7 +125,13 @@ function handleProps(input: types.ObjectLiteral, type: t.Any): types.ObjectLiter
   return output;
 }
 
-export function makePropertyWithNoInverse(obj: types.ObjectLiteral, propName: string) {
+export function makePropertyWithNoInverse(
+  obj: types.ObjectLiteral,
+  propName: string,
+  expectedElementType?: t.ObjectType<any, any>,
+  propertyPath: string = propName,
+  typeCategory?: t.TypeCategory,
+) {
   extendObservable(obj, {
     [`${prefixValue}${propName}`]: obj[propName],
     get [propName]() {
@@ -133,16 +144,57 @@ export function makePropertyWithNoInverse(obj: types.ObjectLiteral, propName: st
       if (obj[objectStatus] === StatusValue.Deleted) {
         throw new Error(`Access to deleted object via property '${propName}'`);
       }
+      if (expectedElementType) {
+        if (typeCategory === 'Array' && Array.isArray(newValue)) {
+          for (let i = 0; i < newValue.length; i++) {
+            validateConformance(newValue[i], expectedElementType, `${propertyPath}[${i}]`);
+          }
+        } else if (typeCategory === 'Object') {
+          validateConformance(newValue, expectedElementType, propertyPath);
+        }
+      }
       obj[`${prefixValue}${propName}`] = newValue;
       if (obj[objectStatus] === StatusValue.Unmodified) obj[objectStatus] = StatusValue.Updated;
     }
+  });
+  // For array-of-entity properties without an inverse, also validate push/splice.
+  if (expectedElementType && typeCategory === 'Array') {
+    installArrayElementValidation(obj, propName, expectedElementType, propertyPath);
+  }
+}
+
+/**
+ * Installs a MobX intercept on an observable array property so that any
+ * push/splice/index-update of a wrong-typed element throws BEFORE the
+ * mutation is applied (and before any observe-based inverse maintenance
+ * runs). Idempotent across schemas thanks to validateConformance.
+ */
+function installArrayElementValidation(
+  owner: types.ObjectLiteral,
+  arrayName: string,
+  expectedElementType: t.ObjectType<any, any>,
+  propertyPath: string,
+) {
+  const arr = owner[`${prefixValue}${arrayName}`] as IObservableArray<any>;
+  if (!arr) return;
+  intercept(arr, (change) => {
+    if (change.type === 'update') {
+      validateConformance(change.newValue, expectedElementType, `${propertyPath}[${change.index}]`);
+    } else if (change.type === 'splice') {
+      for (let i = 0; i < change.added.length; i++) {
+        validateConformance(change.added[i], expectedElementType, `${propertyPath}[+${i}]`);
+      }
+    }
+    return change;
   });
 }
 
 export function makeArrayPropInverseToObjectProp(
   input: types.ObjectLiteral,
   arrayName: string,
-  inversePropName: string
+  inversePropName: string,
+  expectedElementType?: t.ObjectType<any, any>,
+  propertyPath: string = arrayName,
 ) {
   extendObservable(
     input,
@@ -157,6 +209,9 @@ export function makeArrayPropInverseToObjectProp(
     //   [`${arrayName}`]: computed
     // }
   );
+  if (expectedElementType) {
+    installArrayElementValidation(input, arrayName, expectedElementType, propertyPath);
+  }
   observe(input[`${prefixValue}${arrayName}`] as IObservableArray<any>, (change) => {
     // TODO: what about duplicates?
 
@@ -215,7 +270,9 @@ export function makeArrayPropInverseToObjectProp(
 export function makeArrayPropInverseToArrayProp(
   input: types.ObjectLiteral,
   arrayName: string,
-  inversePropName: string
+  inversePropName: string,
+  expectedElementType?: t.ObjectType<any, any>,
+  propertyPath: string = arrayName,
 ) {
   extendObservable(
     input,
@@ -230,6 +287,9 @@ export function makeArrayPropInverseToArrayProp(
     //   [`${arrayName}`]: computed
     // }
   );
+  if (expectedElementType) {
+    installArrayElementValidation(input, arrayName, expectedElementType, propertyPath);
+  }
   observe(input[`${prefixValue}${arrayName}`] as IObservableArray<any>, (change) => {
     if (input[objectSync] === true) return;
     input[objectSync] = true;
@@ -289,7 +349,9 @@ export function makeInverseMapReadOnly(input: types.ObjectLiteral, arrayName: st
 export function makeObjectPropInverseToObjectProp(
   obj: types.ObjectLiteral,
   propName: string,
-  inversePropName: string
+  inversePropName: string,
+  expectedElementType?: t.ObjectType<any, any>,
+  propertyPath: string = propName,
 ) {
   extendObservable(obj, {
     [`${prefixValue}${propName}`]: obj[propName],
@@ -308,6 +370,10 @@ export function makeObjectPropInverseToObjectProp(
       if (obj[objectSync] === true) return;
      // obj[objectSync] = true;
       if (this[`${prefixValue}${propName}`] === newValue) return;
+
+      if (expectedElementType) {
+        validateConformance(newValue, expectedElementType, propertyPath);
+      }
 
       let oldValue = this[`${prefixValue}${propName}`];
       if (this[objectStatus] === StatusValue.Unmodified) this[objectStatus] = StatusValue.Updated;
@@ -339,7 +405,9 @@ export function makeObjectPropInverseToObjectProp(
 export function makeObjectPropInverseToArrayProp(
   obj: types.ObjectLiteral,
   propName: string,
-  inverseArrayName: string
+  inverseArrayName: string,
+  expectedElementType?: t.ObjectType<any, any>,
+  propertyPath: string = propName,
 ) {
   extendObservable(obj, {
     [`${prefixValue}${propName}`]: obj[propName],
@@ -350,6 +418,9 @@ export function makeObjectPropInverseToArrayProp(
       if (obj[objectSync] === true) return;
      // obj[objectSync] = true;
       if (obj[`${prefixValue}${propName}`] === newValue) return;
+      if (expectedElementType) {
+        validateConformance(newValue, expectedElementType, propertyPath);
+      }
       let oldValue = obj[`${prefixValue}${propName}`];
       obj[`${prefixValue}${propName}`] = newValue;
       if (newValue && !newValue[`${prefixValue}${inverseArrayName}`].includes(obj)) {

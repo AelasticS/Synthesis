@@ -174,4 +174,53 @@ describe("example abstract model", () => {
     expect(project1.projectTeam.length === 0).toBeTruthy()
     expect(project2.projectTeam[0] === peter).toBeTruthy()
   })
+
+  describe("type-conformance on connection", () => {
+    it("rejects wrong-type assignment to a single-valued entity property (parent)", () => {
+      let place = store.deepCreate<any>(PlaceType, { placeID: 1, name: "Earth" })
+      // peter.parent is optional(link("PersonType")), expects a PersonType
+      expect(() => {
+        peter.parent = place as any
+      }).toThrow(/expected .*PersonType.* got .*PlaceType/)
+    })
+
+    it("rejects wrong-type push into an entity-typed array property (children)", () => {
+      let place = store.deepCreate<any>(PlaceType, { placeID: 2, name: "Mars" })
+      // peter.children is arrayOf(link("PersonType")), each element expected to be PersonType
+      expect(() => {
+        peter.children.push(place as any)
+      }).toThrow(/expected .*PersonType.* got .*PlaceType/)
+    })
+
+    it("rejects wrong-type push into a many-to-many array property (projects)", () => {
+      let place = store.deepCreate<any>(PlaceType, { placeID: 3, name: "Venus" })
+      // peter.projects is arrayOf(ProjectType)
+      expect(() => {
+        peter.projects.push(place as any)
+      }).toThrow(/expected .*ProjectType.* got .*PlaceType/)
+    })
+
+    it("rejects wrong-type assignment to single-valued entity property (birthPlace)", () => {
+      let project = store.deepCreate<IProjectType>(ProjectType, { name: "stray" })
+      // peter.birthPlace is PlaceType (no inverse)
+      expect(() => {
+        peter.birthPlace = project as any
+      }).toThrow(/expected .*PlaceType.* got .*ProjectType/)
+    })
+
+    it("rejects a plain JS object lacking the @@aelastics/type tag", () => {
+      const stranger = { name: "ghost" }
+      expect(() => {
+        peter.children.push(stranger as any)
+      }).toThrow(/missing '@@aelastics\/type' tag/)
+    })
+
+    it("accepts correct-type assignment unchanged", () => {
+      let alice = store.deepCreate<IPersonType>(PersonType, { name: "Alice" })
+      expect(() => {
+        peter.children.push(alice)
+      }).not.toThrow()
+      expect(alice.parent).toBe(peter)
+    })
+  })
 })

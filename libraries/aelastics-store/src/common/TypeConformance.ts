@@ -5,7 +5,36 @@
 
 import * as t from "@aelastics/types"
 import { ServiceError } from "@aelastics/result"
-import { objectType } from "./CommonConstants"
+import { getUnderlyingType, objectType } from "./CommonConstants"
+
+/**
+ * Derives the expected entity type that each value assigned/pushed to a
+ * property must conform to. Returns `undefined` for non-entity-typed
+ * properties (string, number, Map, intersection/union, etc.) — those
+ * are not validated at runtime by this module.
+ *
+ * - For a single-valued Object/Entity property, returns the ObjectType
+ *   itself (with Optional/Link wrappers stripped).
+ * - For an array-of-Object property, returns the array element's
+ *   ObjectType (with Optional/Link wrappers stripped on the element).
+ */
+export function getEntityElementType(
+  prop: t.Any,
+): t.ObjectType<any, any> | undefined {
+  const u = getUnderlyingType(prop)
+  if (u === undefined) return undefined
+  if (u.typeCategory === "Array") {
+    const elt = getUnderlyingType((u as t.ArrayType<any>).element)
+    if (elt && elt.typeCategory === "Object") {
+      return elt as t.ObjectType<any, any>
+    }
+    return undefined
+  }
+  if (u.typeCategory === "Object") {
+    return u as t.ObjectType<any, any>
+  }
+  return undefined
+}
 
 /**
  * Validates that `value` is a store-managed object whose declared type
