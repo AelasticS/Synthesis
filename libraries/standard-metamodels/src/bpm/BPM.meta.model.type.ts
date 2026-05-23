@@ -5,7 +5,7 @@ export const BPM_Schema = t.schema("BPMN-Schema");
 
 export const Node = t.subtype(ModelElement, {
     children:t.arrayOf(t.link(BPM_Schema, "Node")),
-    parent:t.link(BPM_Schema, "Node")
+    parent:t.optional(t.link(BPM_Schema, "Node"))
 
 }, "Node", BPM_Schema);
 export const Role = t.subtype(ModelElement, {}, "Role", BPM_Schema);
@@ -34,6 +34,8 @@ export const Document = t.subtype(Node, {
     inputIn:t.arrayOf(Task),
     outpuIn:t.arrayOf(Task)
 }, "Document", BPM_Schema);
+
+t.inverseProps(Node, "children", Node, "parent")
 
 export type INode = t.TypeOf<typeof Node>
 export type IProcess = t.TypeOf<typeof Process>
