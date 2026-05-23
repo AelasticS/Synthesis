@@ -36,22 +36,26 @@ describe('test create function', () => {
       expect.objectContaining({ name: "approve", parent: a })]))
   });
 
-  it('reveals: Role inside Sequence via non-existent "roles" property is silently dropped', () => {
+  it('should throw when child is attached via a property not declared on parent type', () => {
     let e: ExprNode<IProcess> = <Process name='Approval2' store={new ModelStore()}>
       <Sequence name='seq2'>
         <Role name='admin' />
       </Sequence>
     </Process>
 
-    let p: IProcess = e.render(new Context())
-    let seq: ISequence = p.elements[0] as ISequence
+    expect(() => e.render(new Context())).toThrow(
+      /property "roles" is not declared in the parent's type schema/
+    )
+  });
 
-    expect(seq).toHaveProperty("name", "seq2");
-    // Sequence has no "roles" property in the type schema
-    expect((seq as any).roles).toBeUndefined()
-    // The Role wasn't connected via children either (children is for Node subtypes only,
-    // but Role doesn't extend Node — yet the JSX child connector uses propName "roles" anyway)
-    expect(seq.children.length).toEqual(0)
+  it('should allow Role inside Process via declared "roles" property', () => {
+    let e: ExprNode<IProcess> = <Process name='Approval4' store={new ModelStore()}>
+      <Role name='admin' />
+    </Process>
+
+    let p: IProcess = e.render(new Context())
+    expect(p.roles.length).toEqual(1)
+    expect(p.roles[0]).toHaveProperty('name', 'admin')
   });
 
 });

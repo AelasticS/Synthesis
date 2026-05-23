@@ -1,5 +1,5 @@
 import * as bpmn from './BPM.meta.model.type'
-import { CpxTemplate, ExprNode, IStore, Template, WithRefProps } from "@synthesis/jsx-runtime"
+import { allowedAsTopLevelElement, CpxTemplate, ExprNode, IStore, Template, WithRefProps } from "@synthesis/jsx-runtime"
 
 export type IModelProps = WithRefProps<bpmn.IProcess> & { store?: IStore }
 
@@ -35,8 +35,11 @@ export const Parallel: Template<bpmn.IParallel> = (props) => {
     return new ExprNode(bpmn.Parallel, props, 'children')
 }
 
+// Sequence can be nested inside another Node (connects via 'children')
+// or appear at the top level of a Process/Model (then lives in model.elements
+// via newModelElement). The opt-in helper enables both.
 export const Sequence: Template<bpmn.ISequence> = (props) => {
-    return new ExprNode(bpmn.Sequence, props, 'children')
+    return new ExprNode(bpmn.Sequence, props, allowedAsTopLevelElement('children'))
 }
 
 export const Switch: Template<bpmn.ISwitch> = (props) => {

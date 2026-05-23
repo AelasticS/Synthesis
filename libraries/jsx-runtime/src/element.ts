@@ -73,6 +73,12 @@ export type ConnectionInfo = {
   isReconnectAllowed: boolean; // is connection allowed if object is already connected
   textContentAllowed: boolean; // are textual sub-elements allowed
   textPropName: string; // the name of property receiving text content, if the text content allowed
+  // When true, the runtime accepts a missing propName on the parent's type schema
+  // as valid IF the parent is a Namespace and the child is a ModelElement (the child
+  // is then stored only in parent.elements via store.newModelElement). This lets the
+  // same JSX tag work both nested in a structural container (via propName) and at the
+  // top level of a Model/Namespace (via elements). Must be opted in per JSX tag.
+  allowedAsTopLevelElement?: boolean;
 };
 
 export function defaultConnectionInfo(propName?: string): ConnectionInfo {
@@ -83,6 +89,10 @@ export function defaultConnectionInfo(propName?: string): ConnectionInfo {
     textContentAllowed: false,
     textPropName: "undefined",
   };
+}
+
+export function allowedAsTopLevelElement(propName: string): ConnectionInfo {
+  return { ...defaultConnectionInfo(propName), allowedAsTopLevelElement: true };
 }
 
 export class ExprNode<P extends WithRefProps<g.IModelElement>, R = P> {
@@ -440,16 +450,30 @@ export class ExprNode<P extends WithRefProps<g.IModelElement>, R = P> {
         }
 
         if (childElement.connectionInfo) {
+          const propName = childElement.connectionInfo.propName;
           // connect parent and child if propName exit
-          let propType = mapPropTypes.get(childElement.connectionInfo.propName!);
+          let propType = propName !== undefined ? mapPropTypes.get(propName) : undefined;
           if (propType)
             cnParentChild(
-              childElement.connectionInfo.propName,
+              propName,
               t.findTypeCategory(propType),
               parent.instance,
               childModelElement,
               childElement.connectionInfo.isReconnectAllowed
             );
+          else if (propName !== undefined) {
+            // Opt-in: the JSX tag may declare allowedAsTopLevelElement to accept
+            // missing propName on a Namespace parent when the child is a ModelElement
+            // (already pushed into parent.elements by store.newModelElement).
+            const opted = childElement.connectionInfo.allowedAsTopLevelElement === true;
+            const parentIsNamespace = parent.type.isOfType(g.Namespace);
+            const childIsModelElement = childElement.type.isOfType(g.ModelElement);
+            if (!(opted && parentIsNamespace && childIsModelElement)) {
+              throw new Error(
+                `Cannot connect child element of type "${childElement.type.fullPathName}" to parent "${parent.instance.name}" of type "${parent.type.fullPathName}": property "${propName}" is not declared in the parent's type schema. Fix the metamodel (add the property to the parent type) or the JSX tag declaration (use allowedAsTopLevelElement helper if the element is allowed at top level of a Namespace).`
+              );
+            }
+          }
         }
       }
 
