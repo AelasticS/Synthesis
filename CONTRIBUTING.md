@@ -152,6 +152,78 @@ describe('ServiceResult', () => {
 })
 ```
 
+#### CLI tests must use an isolated workspace
+
+Any test in `apps/cli/` that invokes the `synth` binary via `runCli`
+**must** override `HOME` to a unique temp directory and run `synth init`
+against it in `beforeAll`. Otherwise the test reads/writes the
+developer's real `~/.synth/` workspace, fails on machines where the
+workspace has not been initialized (e.g. CI), and corrupts state for
+parallel test suites sharing the same `HOME`.
+
+Pattern (see `apps/cli/src/commands/ns/__tests__/ns.test.ts`):
+
+```ts
+import { mkdtempSync, rmSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
+import { runCli } from '../../../test-utils/run-cli.js'
+
+let testHome: string
+
+beforeAll(async () => {
+  testHome = mkdtempSync(join(tmpdir(), 'synth-<suite>-test-'))
+  await runCli(['init'], { home: testHome })
+})
+
+afterAll(() => {
+  rmSync(testHome, { recursive: true, force: true })
+})
+
+it('does something', async () => {
+  await runCli(['ns', 'mk', 'com.example'], { home: testHome })
+})
+```
+
+## Releasing the CLI
+
+The `synth` CLI is distributed as platform tarballs attached to a
+GitHub Release. The repository is **not** published to npm. The release
+workflow lives at `.github/workflows/release-cli.yml` and is triggered
+manually (`workflow_dispatch`) or by pushing a tag of the form `cli-vX.Y.Z`.
+
+Maintainer workflow:
+
+1. **Bump the version** in `apps/cli/package.json` (semantic versioning).
+2. **Update `CHANGELOG.md`** at the repo root with the new version's
+   entry under the conventional headings (Added / Changed / Fixed /
+   Removed). Use the conventional-commits log between the previous tag
+   and `HEAD` as input.
+3. **Commit** the version bump and changelog:
+   ```bash
+   git commit -am "chore(cli): release v0.2.0"
+   ```
+4. **Tag** the commit and push:
+   ```bash
+   git tag cli-v0.2.0
+   git push && git push --tags
+   ```
+   The tag push triggers the release workflow.
+5. **Watch the workflow** in the GitHub Actions tab. It runs
+   `rush build`, then `oclif pack tarballs`, then `gh release create`
+   with the produced tarballs attached. Typical run is 5–10 minutes.
+6. **Smoke test** the release by downloading the tarball for your
+   platform from the new GitHub Release, extracting it, adding
+   `synth/bin` to `PATH`, and running:
+   ```bash
+   synth --version
+   synth doctor
+   ```
+7. **Rollback** if anything is wrong: delete the GitHub Release and the
+   tag. Users on the previous tag are unaffected. Fix the issue and
+   bump to the next patch version — do not re-publish under the same
+   tag.
+
 ## Submitting Changes
 
 ### Pull Request Process
