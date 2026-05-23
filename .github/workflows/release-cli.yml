@@ -1,0 +1,79 @@
+name: Release CLI
+
+# Triggered either manually (workflow_dispatch) or by pushing a tag of the
+# form `cli-vX.Y.Z`. Builds the CLI, packs platform tarballs with oclif,
+# and attaches them to a GitHub Release named after the tag.
+#
+# The release workflow does NOT publish anything to npm. It produces
+# self-contained tarballs (each bundling Node.js + the CLI + all
+# transitive workspace deps) for users to download from GitHub Releases.
+#
+# Prerequisites:
+#   - Repository must allow Actions to create releases (Settings →
+#     Actions → General → Workflow permissions = Read and write).
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to release (e.g. cli-v0.2.0). Must already exist.'
+        required: true
+  push:
+    tags:
+      - 'cli-v*'
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Resolve tag
+        id: tag
+        run: |
+          if [ -n "${{ github.event.inputs.tag }}" ]; then
+            echo "name=${{ github.event.inputs.tag }}" >> "$GITHUB_OUTPUT"
+            echo "ref=refs/tags/${{ github.event.inputs.tag }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "name=${GITHUB_REF#refs/tags/}" >> "$GITHUB_OUTPUT"
+            echo "ref=$GITHUB_REF" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Checkout (at tag)
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.tag.outputs.ref }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install Rush
+        run: node common/scripts/install-run-rush.js install
+
+      - name: Build CLI and its dependencies
+        run: node common/scripts/install-run-rush.js build --to @synthesis/cli
+
+      - name: Pack platform tarballs
+        working-directory: apps/cli
+        run: node ../../common/scripts/install-run-rushx.js pack:tarballs
+
+      - name: List produced tarballs
+        working-directory: apps/cli/dist
+        run: ls -lh
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.tag.outputs.name }}
+          name: ${{ steps.tag.outputs.name }}
+          generate_release_notes: true
+          fail_on_unmatched_files: true
+          files: |
+            apps/cli/dist/synth-v*-linux-x64.tar.gz
+            apps/cli/dist/synth-v*-linux-arm64.tar.gz
+            apps/cli/dist/synth-v*-darwin-x64.tar.gz
+            apps/cli/dist/synth-v*-darwin-arm64.tar.gz
+            apps/cli/dist/synth-v*-win32-x64.tar.gz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
