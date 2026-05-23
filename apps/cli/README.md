@@ -4,9 +4,11 @@ Synthesis model-driven engineering CLI.
 
 ## Installation
 
-```bash
-npm install -g @synthesis/cli
-```
+`synth` is distributed as a self-contained tarball from
+[GitHub Releases](https://github.com/AelasticS/Synthesis/releases). See
+the [Installation guide](https://AelasticS.github.io/aelastics/docs/cli/installation)
+for download links and step-by-step instructions for Linux, macOS, Windows,
+and building from source.
 
 ## Usage
 
