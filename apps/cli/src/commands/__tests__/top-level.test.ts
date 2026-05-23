@@ -1,8 +1,25 @@
+import { mkdtempSync, rmSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
+
 import { runCli } from '../../test-utils/run-cli.js'
+
+// Isolated HOME for the cd suite so namespace setup does not depend on
+// the developer's ~/.synth workspace.
+let cdTestHome: string
+
+beforeAll(async () => {
+  cdTestHome = mkdtempSync(join(tmpdir(), 'synth-cd-test-'))
+  await runCli(['init'], { home: cdTestHome })
+})
+
+afterAll(() => {
+  rmSync(cdTestHome, { recursive: true, force: true })
+})
 
 describe('cd', () => {
   it('shows current namespace when no arg given', async () => {
-    const { stdout, error } = await runCli(['cd'])
+    const { stdout, error } = await runCli(['cd'], { home: cdTestHome })
     expect(error).toBeUndefined()
     // Either shows current namespace or "No namespace set"
     expect(stdout).toBeTruthy()
@@ -10,14 +27,14 @@ describe('cd', () => {
 
   it('switches to existing namespace', async () => {
     // First ensure namespace exists
-    await runCli(['ns', 'mk', 'com.example.cdtest'])
-    const { stdout, error } = await runCli(['cd', 'com.example.cdtest'])
+    await runCli(['ns', 'mk', 'com.example.cdtest'], { home: cdTestHome })
+    const { stdout, error } = await runCli(['cd', 'com.example.cdtest'], { home: cdTestHome })
     expect(error).toBeUndefined()
     expect(stdout).toContain('com.example.cdtest')
   })
 
   it('errors on non-existent namespace', async () => {
-    const { error } = await runCli(['cd', 'nonexistent.namespace.12345'])
+    const { error } = await runCli(['cd', 'nonexistent.namespace.12345'], { home: cdTestHome })
     expect(error).toBeDefined()
   })
 })
