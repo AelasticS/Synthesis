@@ -82,7 +82,7 @@ The new `TraceModel` is also versioned and shares structure with the previous tr
 ## Non-Functional Requirements
 
 | ID | Requirement |
-|---|---|
+| --- | --- |
 | NFR-1 | For a delta touching `k` source elements out of `n` total, work performed scales with `O(k + d)` where `d` is the number of transitively-dirty invocations, not with `n`. |
 | NFR-2 | Memory overhead per retained version is proportional to changed nodes only (structural sharing). Keeping the last `V` versions costs `O(V × Δ̄)`, not `O(V × n)`. |
 | NFR-3 | Incremental code path is **opt-in**. Existing examples and consumers using `transform()` are unaffected. |

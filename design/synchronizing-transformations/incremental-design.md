@@ -6,7 +6,7 @@
 
 ## 1. Architectural Layering
 
-```
+```text
 ┌───────────────────────────────────────────────────────────┐
 │  Source layer (existing)                                  │
 │  • aelastics-store: mutable, MobX-observable              │
@@ -90,7 +90,7 @@ Causality ordering: creates come before any updates that reference them; deletes
 
 ## 4. The Incremental Algorithm
 
-```
+```text
 function transformIncremental(prev, delta):
     // 1. Build the dirty set
     dirty := ∅
@@ -148,7 +148,7 @@ This is the approach MST (mobx-state-tree) and Datomic use. Immer-style direct r
 ### 5.4 Implementation options
 
 | Option | Pros | Cons |
-|---|---|---|
+| --- | --- | --- |
 | Use [Immer](https://immerjs.github.io/immer/) | Mature, ergonomic, integrates with TS | Optimized for trees, not reference graphs |
 | Use [mobx-state-tree](https://mobx-state-tree.js.org/) snapshots | Models + snapshots + structural sharing in one library | Heavy; opinionated; duplicates aelastics-store concerns |
 | Hand-rolled persistent store with HAMT/RRB-tree | Tailored to Synthesis metamodel; smallest dependency surface | Implementation cost |
@@ -160,7 +160,7 @@ Recommendation: **prototype with Immer** for the first vertical slice, refactor 
 
 The current `render<D>(context)` ([abstractM2M.tsx](../../libraries/engine/src/transformations/abstractM2M.tsx)) creates target instances on the fly. For incremental, rendering must consult the previous trace:
 
-```
+```text
 function renderFindOrCreate(exprNode, prevContext, priorEntry):
     if priorEntry exists and exprNode structurally matches priorEntry.targets:
         return (priorTargets, priorEntry)              // reuse — structural share

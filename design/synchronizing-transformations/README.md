@@ -14,9 +14,9 @@ Both share the same underlying machinery: a queryable trace, change detection on
 ## Phases
 
 | Phase | Status | Documents |
-|---|---|---|
+| --- | --- | --- |
 | 1. Incremental forward | Design | [incremental-requirements.md](incremental-requirements.md), [incremental-design.md](incremental-design.md) |
-| 2. Bidirectional | Not started | TBD |
+| 2. Bidirectional | Design | [bidirectional-requirements.md](bidirectional-requirements.md), [bidirectional-design.md](bidirectional-design.md) |
 
 ## Motivation
 
