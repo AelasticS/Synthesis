@@ -1,6 +1,6 @@
 # Synthesis
 
-[![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://github.com/AelasticS/Synthesis/blob/main/LICENSE)
 
 Synthesis is a TypeScript monorepo for **model-driven software engineering**. It
 provides an embedded domain-specific language for defining metamodels, building
@@ -56,8 +56,9 @@ Synthesis/
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup, branch strategy,
-commit conventions, testing rules, and the CLI release workflow.
+See [CONTRIBUTING.md](https://github.com/AelasticS/Synthesis/blob/main/CONTRIBUTING.md)
+for development setup, branch strategy, commit conventions, testing rules, and
+the CLI release workflow.
 
 ## History
 
@@ -73,4 +74,4 @@ libraries were extracted into this public
 
 ## License
 
-[Apache License 2.0](LICENSE).
+[Apache License 2.0](https://github.com/AelasticS/Synthesis/blob/main/LICENSE).
