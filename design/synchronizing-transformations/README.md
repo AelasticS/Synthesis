@@ -17,6 +17,7 @@ Both share the same underlying machinery: a queryable trace, change detection on
 | --- | --- | --- |
 | 1. Incremental forward | Design | [incremental-requirements.md](incremental-requirements.md), [incremental-design.md](incremental-design.md) |
 | 2. Bidirectional | Design | [bidirectional-requirements.md](bidirectional-requirements.md), [bidirectional-design.md](bidirectional-design.md) |
+| 2a. Bidirectional inverse codegen | Design | [bidirectional-codegen.md](bidirectional-codegen.md) |
 
 ## Motivation
 
