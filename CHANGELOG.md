@@ -72,6 +72,26 @@ overall version history.
   namespace`) when run as part of the full suite. Cause was shared
   workspace state across parallel suites and dependence on a pre-initialized
   `~/.synth/`. All 106 CLI tests now pass in any order.
+- **`tx.test.ts` and `top-level.test.ts` now isolate `HOME` too.** Both
+  suites still ran against the developer's real `~/.synth/`, so `synth init
+  --path` and `tx install` rewrote the real workspace config and leaked
+  state between runs (first `tx install` failed with "already installed"
+  on every second run). They now follow the same isolated-HOME convention
+  as the other suites.
+- **`oclif pack tarballs` actually works now.** The script previously died
+  looking for `npm-shrinkwrap.json`: oclif's npm install step cannot
+  resolve Rush `workspace:*` dependencies. `pack:tarballs` now runs
+  `apps/cli/config/pack-tarballs.mjs`, which packs the CLI's transitive
+  workspace dependencies into `vendor/*.tgz`, rewrites `package.json` to
+  `file:` specifiers, generates the lockfile oclif needs, and restores
+  everything afterwards. Verified end-to-end: the linux-x64 tarball runs
+  `synth init`, `synth doctor`, and the `eer-to-rel-to-text` example in a
+  clean environment with its bundled Node.
+- **`@aelastics/store` imported `ServiceError` via a relative path escaping
+  the package** (`'../../../aelastics-result'` in the server-proxy module).
+  This only resolved inside the monorepo because pnpm symlinks point back
+  into `libraries/`; in any packaged installation the import crashed at
+  require time. Now imports `@aelastics/result` like the rest of the code.
 
 ### Removed
 
