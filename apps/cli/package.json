@@ -22,8 +22,8 @@
     "build": "heft build --clean",
     "test": "NODE_OPTIONS='--experimental-vm-modules' heft test --clean",
     "start": "node bin/run.js",
-    "pack:tarballs": "oclif pack tarballs --targets linux-x64,linux-arm64,darwin-x64,darwin-arm64,win32-x64",
-    "pack:clean": "rm -rf dist tmp"
+    "pack:tarballs": "node config/pack-tarballs.mjs",
+    "pack:clean": "rm -rf dist tmp vendor"
   },
   "oclif": {
     "bin": "synth",
