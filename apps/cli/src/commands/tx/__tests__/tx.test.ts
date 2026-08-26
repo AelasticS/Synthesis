@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, rmSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
 
@@ -17,29 +17,36 @@ const testTxPkgJson = {
   }
 }
 
-beforeAll(() => {
+// Isolated HOME so tests do not depend on the developer's ~/.synth state
+// and parallel test suites do not collide on shared workspace files.
+let testHome: string
+
+beforeAll(async () => {
+  testHome = mkdtempSync(join(tmpdir(), 'synth-tx-home-'))
+  await runCli(['init'], { home: testHome })
   // Create test transformation directory
   mkdirSync(testTxDir, { recursive: true })
   writeFileSync(join(testTxDir, 'package.json'), JSON.stringify(testTxPkgJson, null, 2))
 })
 
 afterAll(() => {
-  // Clean up test directory
+  // Clean up test directories
   if (existsSync(testTmpDir)) {
     rmSync(testTmpDir, { recursive: true, force: true })
   }
+  rmSync(testHome, { recursive: true, force: true })
 })
 
 describe('tx ls', () => {
   it('runs successfully', async () => {
-    const { stdout, error } = await runCli(['tx', 'ls'])
+    const { stdout, error } = await runCli(['tx', 'ls'], { home: testHome })
     expect(error).toBeUndefined()
     // Should show "No transformations installed." or list transformations
     expect(stdout).toBeTruthy()
   })
 
   it('outputs JSON with --json flag', async () => {
-    const { stdout, error } = await runCli(['tx', 'ls', '--json'])
+    const { stdout, error } = await runCli(['tx', 'ls', '--json'], { home: testHome })
     expect(error).toBeUndefined()
     const parsed = JSON.parse(stdout)
     expect(parsed).toHaveProperty('transformations')
@@ -49,17 +56,17 @@ describe('tx ls', () => {
 
 describe('tx install', () => {
   it('requires package arg', async () => {
-    const { error } = await runCli(['tx', 'install'])
+    const { error } = await runCli(['tx', 'install'], { home: testHome })
     expect(error).toBeDefined()
   })
 
   it('errors on non-existent path', async () => {
-    const { error } = await runCli(['tx', 'install', '/non/existent/path'])
+    const { error } = await runCli(['tx', 'install', '/non/existent/path'], { home: testHome })
     expect(error).toBeDefined()
   })
 
   it('installs local directory transformation', async () => {
-    const { stdout, error } = await runCli(['tx', 'install', testTxDir])
+    const { stdout, error } = await runCli(['tx', 'install', testTxDir], { home: testHome })
     expect(error).toBeUndefined()
     expect(stdout).toContain('Installed transformation')
     expect(stdout).toContain('test-tx')
@@ -67,9 +74,9 @@ describe('tx install', () => {
 
   it('outputs JSON with --json flag on install', async () => {
     // First uninstall if exists
-    await runCli(['tx', 'uninstall', 'test-tx'])
+    await runCli(['tx', 'uninstall', 'test-tx'], { home: testHome })
 
-    const { stdout, error } = await runCli(['tx', 'install', testTxDir, '--json'])
+    const { stdout, error } = await runCli(['tx', 'install', testTxDir, '--json'], { home: testHome })
     expect(error).toBeUndefined()
     const parsed = JSON.parse(stdout)
     expect(parsed.installed).toBe(true)
@@ -80,20 +87,20 @@ describe('tx install', () => {
 
 describe('tx uninstall', () => {
   it('requires name arg', async () => {
-    const { error } = await runCli(['tx', 'uninstall'])
+    const { error } = await runCli(['tx', 'uninstall'], { home: testHome })
     expect(error).toBeDefined()
   })
 
   it('errors on non-existent transformation', async () => {
-    const { error } = await runCli(['tx', 'uninstall', 'non-existent-tx'])
+    const { error } = await runCli(['tx', 'uninstall', 'non-existent-tx'], { home: testHome })
     expect(error).toBeDefined()
   })
 
   it('uninstalls installed transformation', async () => {
     // First ensure it's installed
-    await runCli(['tx', 'install', testTxDir])
+    await runCli(['tx', 'install', testTxDir], { home: testHome })
 
-    const { stdout, error } = await runCli(['tx', 'uninstall', 'test-tx'])
+    const { stdout, error } = await runCli(['tx', 'uninstall', 'test-tx'], { home: testHome })
     expect(error).toBeUndefined()
     expect(stdout).toContain('Uninstalled transformation')
     expect(stdout).toContain('test-tx')
@@ -101,9 +108,9 @@ describe('tx uninstall', () => {
 
   it('outputs JSON with --json flag on uninstall', async () => {
     // First ensure it's installed
-    await runCli(['tx', 'install', testTxDir])
+    await runCli(['tx', 'install', testTxDir], { home: testHome })
 
-    const { stdout, error } = await runCli(['tx', 'uninstall', 'test-tx', '--json'])
+    const { stdout, error } = await runCli(['tx', 'uninstall', 'test-tx', '--json'], { home: testHome })
     expect(error).toBeUndefined()
     const parsed = JSON.parse(stdout)
     expect(parsed.uninstalled).toBe(true)
@@ -114,29 +121,29 @@ describe('tx uninstall', () => {
 describe('tx show', () => {
   beforeEach(async () => {
     // Ensure transformation is installed before each show test
-    await runCli(['tx', 'uninstall', 'test-tx'])
-    await runCli(['tx', 'install', testTxDir])
+    await runCli(['tx', 'uninstall', 'test-tx'], { home: testHome })
+    await runCli(['tx', 'install', testTxDir], { home: testHome })
   })
 
   it('requires name arg', async () => {
-    const { error } = await runCli(['tx', 'show'])
+    const { error } = await runCli(['tx', 'show'], { home: testHome })
     expect(error).toBeDefined()
   })
 
   it('errors on non-existent transformation', async () => {
-    const { error } = await runCli(['tx', 'show', 'non-existent-tx'])
+    const { error } = await runCli(['tx', 'show', 'non-existent-tx'], { home: testHome })
     expect(error).toBeDefined()
   })
 
   it('shows transformation metadata', async () => {
-    const { stdout, error } = await runCli(['tx', 'show', 'test-tx'])
+    const { stdout, error } = await runCli(['tx', 'show', 'test-tx'], { home: testHome })
     expect(error).toBeUndefined()
     expect(stdout).toContain('test-tx')
     expect(stdout).toContain('1.0.0')
   })
 
   it('outputs JSON with --json flag', async () => {
-    const { stdout, error } = await runCli(['tx', 'show', 'test-tx', '--json'])
+    const { stdout, error } = await runCli(['tx', 'show', 'test-tx', '--json'], { home: testHome })
     expect(error).toBeUndefined()
     const parsed = JSON.parse(stdout)
     expect(parsed.name).toBe('test-tx')
@@ -166,7 +173,7 @@ describe('tx init', () => {
   })
 
   it('requires name arg', async () => {
-    const { error } = await runCli(['tx', 'init'])
+    const { error } = await runCli(['tx', 'init'], { home: testHome })
     expect(error).toBeDefined()
   })
 
@@ -175,7 +182,7 @@ describe('tx init', () => {
     const projectDir = join(testDir, projectName)
 
     // Run from test directory
-    const { stdout, error } = await runCli(['tx', 'init', projectName], { cwd: testDir })
+    const { stdout, error } = await runCli(['tx', 'init', projectName], { cwd: testDir, home: testHome })
     expect(error).toBeUndefined()
     expect(stdout).toContain('Creating transformation project')
 
@@ -192,7 +199,7 @@ describe('tx init', () => {
     // Create the directory first
     mkdirSync(projectDir, { recursive: true })
 
-    const { error } = await runCli(['tx', 'init', projectName], { cwd: testDir })
+    const { error } = await runCli(['tx', 'init', projectName], { cwd: testDir, home: testHome })
     expect(error).toBeDefined()
   })
 })
@@ -206,7 +213,7 @@ describe('tx build', () => {
     mkdirSync(testDir, { recursive: true })
 
     try {
-      const { error, stderr } = await runCli(['tx', 'build'], { cwd: testDir })
+      const { error, stderr } = await runCli(['tx', 'build'], { cwd: testDir, home: testHome })
       expect(error).toBeDefined()
       expect(stderr).toContain('No package.json found')
     } finally {
@@ -224,7 +231,7 @@ describe('tx test', () => {
     mkdirSync(testDir, { recursive: true })
 
     try {
-      const { error, stderr } = await runCli(['tx', 'test'], { cwd: testDir })
+      const { error, stderr } = await runCli(['tx', 'test'], { cwd: testDir, home: testHome })
       expect(error).toBeDefined()
       expect(stderr).toContain('No package.json found')
     } finally {
@@ -243,7 +250,7 @@ describe('tx test', () => {
       // Create minimal package.json without test script
       writeFileSync(join(testDir, 'package.json'), JSON.stringify({ name: 'test', scripts: {} }))
 
-      const { stdout, error } = await runCli(['tx', 'test'], { cwd: testDir })
+      const { stdout, error } = await runCli(['tx', 'test'], { cwd: testDir, home: testHome })
       expect(error).toBeUndefined()
       expect(stdout).toContain('No test script')
     } finally {
@@ -261,7 +268,7 @@ describe('tx pack', () => {
     mkdirSync(testDir, { recursive: true })
 
     try {
-      const { error, stderr } = await runCli(['tx', 'pack'], { cwd: testDir })
+      const { error, stderr } = await runCli(['tx', 'pack'], { cwd: testDir, home: testHome })
       expect(error).toBeDefined()
       expect(stderr).toContain('No package.json found')
     } finally {
@@ -279,7 +286,7 @@ describe('tx publish', () => {
     mkdirSync(testDir, { recursive: true })
 
     try {
-      const { error, stderr } = await runCli(['tx', 'publish'], { cwd: testDir })
+      const { error, stderr } = await runCli(['tx', 'publish'], { cwd: testDir, home: testHome })
       expect(error).toBeDefined()
       expect(stderr).toContain('No package.json found')
     } finally {
@@ -289,7 +296,7 @@ describe('tx publish', () => {
 
   it('supports --dry-run flag', async () => {
     // This will still fail because there's no package.json, but it should accept the flag
-    const { error } = await runCli(['tx', 'publish', '--dry-run', '--help'])
+    const { error } = await runCli(['tx', 'publish', '--dry-run', '--help'], { home: testHome })
     // --help should work with the flag present
     expect(error).toBeUndefined()
   })
