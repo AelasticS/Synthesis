@@ -13,7 +13,7 @@
 
 import { ConnectionOptions } from './ConnectionOptions';
 import { ServerCommand, ServerRequest, ServerResponse } from './ServerRequestResponse';
-import { ServiceError } from '../../../aelastics-result';
+import { ServiceError } from '@aelastics/result';
 import { Command, CommandMaker } from './CommandMaker';
 import { TypeSchema } from '@aelastics/types';
 import { Base } from '../store/Base';

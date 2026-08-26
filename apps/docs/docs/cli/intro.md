@@ -53,14 +53,10 @@ The CLI serves two audiences in one tool:
 
 ## Installation
 
-```bash
-npm install -g @synthesis/cli
-synth init
-```
-
-`synth init` creates the workspace (default `~/.synth/`) and writes a
-`config.json` that records where it lives. The location can be moved later
-with `synth workspace --set <path>`.
+See [Installation](./installation) for tarball download and source-build
+instructions. After installing, run `synth init` to create the workspace
+(default `~/.synth/`); its location can be moved later with
+`synth workspace --set <path>`.
 
 ## The workspace
 

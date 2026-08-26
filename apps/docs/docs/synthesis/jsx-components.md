@@ -76,7 +76,7 @@ The connection info string must match a property name in the parent's metamodel 
 
 ### When to use `undefined`
 
-Pass `undefined` as connection info for elements that are top-level in the model and do not attach to a specific parent property. These elements are added to the model's general `elements` collection instead.
+Pass `undefined` as connection info for elements that are top-level in the model and do not attach to a specific parent property. These elements are added to the model's general `elements` collection instead (via `store.newModelElement`).
 
 Root model/schema components and top-level entity types typically use `undefined`:
 
@@ -92,6 +92,26 @@ export const Kernel: Template<e.IKernel> = (props) => {
 }
 ```
 
+### When the element can appear in BOTH contexts: `allowedAsTopLevelElement`
+
+Some components are used both **nested** inside a structural parent (where a connector propName is required) and **at top level** of a Model/Namespace (where the element should land in the model's `elements` collection automatically, with no parent property to connect through). A static JSX tag cannot statically know which context it's in.
+
+For these cases, declare the connector propName **and** opt the component in to top-level placement using the `allowedAsTopLevelElement` helper:
+
+```typescript
+import { allowedAsTopLevelElement, Element, Template } from '@synthesis/jsx-runtime'
+
+// Sequence can be nested in another Node (connects via 'children')
+// OR appear at the top of a Process/Model (no 'children' on Process; goes to model.elements)
+export const Sequence: Template<bpmn.ISequence> = (props) => {
+  return new Element(bpmn.Sequence, props, allowedAsTopLevelElement('children'))
+}
+```
+
+When the parent's type schema has the declared propName (nested case), the runtime connects via that property. When it does not, the runtime accepts the missing propName as valid **only because** the JSX tag explicitly opted in AND the parent is a Namespace AND the child is a ModelElement — the child is then stored in `parent.elements` by `store.newModelElement`.
+
+Without the opt-in, a missing propName on the parent throws (see below).
+
 ### The connection info determines the model graph
 
 The relationship between your metamodel, your components, and the resulting model graph is direct:
@@ -103,7 +123,11 @@ The relationship between your metamodel, your components, and the resulting mode
 | `RelSchema { ... }` | `Table` with `undefined` | `<RelSchema><Table/></RelSchema>` | Table added to schema's elements collection |
 | `Table { columns: t.arrayOf(Column) }` | `Column` with `'columns'` | `<Table><Column/></Table>` | Column pushed into table's `columns` array |
 
-If the connection info string does not match any property in the parent's type, the child will not be connected. Getting this right is essential for correct model construction.
+### Runtime validation: missing or wrong propName throws
+
+If the connection info string does not match any property in the parent's type, and the JSX tag has not opted in via `allowedAsTopLevelElement`, the runtime throws at render time with an informative error pointing to both the parent type and the missing property. Fix the metamodel (add the property), or change the connector propName, or (for tags that legitimately appear at top level too) use the opt-in helper.
+
+Additionally, when a child is connected through a declared property, the underlying `@aelastics/store` verifies that the child element's runtime type is a subtype of the property's declared element type. Assigning the wrong type — e.g. a `Role` into a property declared as `arrayOf(Task)` — throws a `ValidationError` from the store. See [Runtime type conformance](../store/intro#runtime-type-conformance) in the store documentation.
 
 ## References: From Trees to Graphs
 
