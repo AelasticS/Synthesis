@@ -11,7 +11,7 @@
 
 import { ConnectionOptions } from './ConnectionOptions';
 import { ServerProxy } from './ServerProxy';
-import { ServiceError } from '../../../aelastics-result';
+import { ServiceError } from '@aelastics/result';
 
 /**
  * ServerProxyManager is used to manager and manage multiple api-server-proxy serverProxies.
