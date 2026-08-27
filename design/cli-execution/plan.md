@@ -45,6 +45,12 @@ Acceptance: install the fixture package into a fresh workspace, import the
 source model, `tx run eer-to-relational --in ... --config ... --out ...`
 produces a relational model file with provenance header.
 
+> Scope shift during execution (2026-08-27): implicit default-config
+> generation proved to be the easy, spike-verified path and shipped WITH
+> Phase 2's tx run; explicit --config (loading, validation, config init,
+> --save-config, and importing config models — which requires tx-package
+> context in the import gate) is all of Phase 3.
+
 ## Phase 3 — Default configuration flow
 
 1. Implicit `SourceModelToDefaultConfigurationModel` when `--config`

@@ -6,20 +6,27 @@ import { Args } from '@oclif/core'
 
 import { BaseCommand } from '../../base/base-command.js'
 import { getTransformationsPath } from '../../config/index.js'
+import { loadTxManifest, TxKind, TxManifest, TxManifestParts } from '../../tx/manifest.js'
 
 interface TransformationMetadata {
   name: string
   version: string
   description?: string
-  sourceMetamodel?: string
-  targetMetamodel?: string
+  kind: TxKind
+  entry: string
+  exportName: string
+  sourceMetamodel: string
+  targetMetamodel: string
+  targetComponents?: string
+  variability: boolean
+  parts?: TxManifestParts
   author?: string
   license?: string
   path: string
 }
 
 export default class TxShow extends BaseCommand {
-  static override description = "Print the transformation's source metamodel, target metamodel, and variability points."
+  static override description = "Print the transformation's kind, source/target metamodels, and variability points."
 
   static override examples = ['<%= config.bin %> <%= command.id %> eer-to-relational']
 
@@ -36,10 +43,6 @@ export default class TxShow extends BaseCommand {
 
     const metadata = await this.getTransformationMetadata(txName)
 
-    if (!metadata) {
-      this.error(`Transformation '${txName}' not found.`)
-    }
-
     if (flags.json) {
       this.log(JSON.stringify(metadata, null, 2))
       return
@@ -50,12 +53,15 @@ export default class TxShow extends BaseCommand {
     if (metadata.description) {
       this.log(`  description: ${metadata.description}`)
     }
-    if (metadata.sourceMetamodel) {
-      this.log(`  source metamodel: ${metadata.sourceMetamodel}`)
+    this.log(`  kind: ${metadata.kind}`)
+    this.log(`  source metamodel: ${metadata.sourceMetamodel}`)
+    this.log(`  target metamodel: ${metadata.targetMetamodel}`)
+    if (metadata.targetComponents) {
+      this.log(`  target components: ${metadata.targetComponents}`)
     }
-    if (metadata.targetMetamodel) {
-      this.log(`  target metamodel: ${metadata.targetMetamodel}`)
-    }
+    this.log(`  variability: ${metadata.variability ? 'yes' : 'no'}`)
+    this.log(`  entry: ${metadata.entry} (export: ${metadata.exportName})`)
+    this.printParts(metadata.parts)
     if (metadata.author) {
       this.log(`  author: ${metadata.author}`)
     }
@@ -65,64 +71,71 @@ export default class TxShow extends BaseCommand {
     this.log(`  path: ${metadata.path}`)
   }
 
-  private async getTransformationMetadata(name: string): Promise<TransformationMetadata | null> {
+  private printParts(parts: TxManifestParts | undefined): void {
+    if (!parts || (!parts.metamodels?.length && !parts.decisionModel && !parts.bindingModel)) {
+      return
+    }
+    this.log('  parts:')
+    for (const metamodel of parts.metamodels ?? []) {
+      this.log(`    metamodel: ${metamodel.module} (export: ${metamodel.exportName})`)
+    }
+    if (parts.decisionModel) {
+      this.log(`    decision model: ${parts.decisionModel.module} (export: ${parts.decisionModel.exportName})`)
+    }
+    if (parts.bindingModel) {
+      this.log(`    binding model: ${parts.bindingModel.module} (export: ${parts.bindingModel.exportName})`)
+    }
+  }
+
+  private async getTransformationMetadata(name: string): Promise<TransformationMetadata> {
     // First, check if it's in config.transformations
     const configEntry = this.workspaceConfig.transformations[name]
-    let txPath: string
-
-    if (configEntry) {
-      txPath = configEntry.path
-    } else {
-      // Check in transformations directory
-      txPath = join(getTransformationsPath(this.workspaceConfig), name)
-    }
+    const txPath = configEntry ? configEntry.path : join(getTransformationsPath(this.workspaceConfig), name)
 
     if (!existsSync(txPath)) {
-      return null
+      this.error(`Transformation '${name}' not found.`)
     }
 
-    // Read package.json
-    const pkgJsonPath = join(txPath, 'package.json')
-    if (!existsSync(pkgJsonPath)) {
-      // Return minimal metadata if no package.json
-      return {
-        name,
-        version: configEntry?.version ?? 'unknown',
-        path: txPath
-      }
-    }
-
+    let manifest: TxManifest
     try {
-      const pkgContent = await readFile(pkgJsonPath, 'utf-8')
+      manifest = await loadTxManifest(txPath)
+    } catch (err) {
+      this.error(err instanceof Error ? err.message : String(err))
+    }
+
+    // description/author/license are npm metadata, not manifest fields.
+    let description: string | undefined
+    let author: string | undefined
+    let license: string | undefined
+    try {
+      const pkgContent = await readFile(join(txPath, 'package.json'), 'utf-8')
       const pkg = JSON.parse(pkgContent) as {
-        name?: string
-        version?: string
         description?: string
         author?: string | { name: string }
         license?: string
-        synth?: {
-          sourceMetamodel?: string
-          targetMetamodel?: string
-        }
       }
-
-      return {
-        name: pkg.name ?? name,
-        version: pkg.version ?? 'unknown',
-        description: pkg.description,
-        sourceMetamodel: pkg.synth?.sourceMetamodel,
-        targetMetamodel: pkg.synth?.targetMetamodel,
-        author: typeof pkg.author === 'string' ? pkg.author : pkg.author?.name,
-        license: pkg.license,
-        path: txPath
-      }
+      description = pkg.description
+      author = typeof pkg.author === 'string' ? pkg.author : pkg.author?.name
+      license = pkg.license
     } catch {
-      // Return minimal metadata on parse error
-      return {
-        name,
-        version: configEntry?.version ?? 'unknown',
-        path: txPath
-      }
+      // loadTxManifest already validated package.json; nothing extra to show.
+    }
+
+    return {
+      name: manifest.name,
+      version: manifest.version,
+      description,
+      kind: manifest.kind,
+      entry: manifest.entry,
+      exportName: manifest.exportName,
+      sourceMetamodel: manifest.source.metamodel,
+      targetMetamodel: manifest.target.metamodel,
+      targetComponents: manifest.target.components,
+      variability: manifest.variability,
+      parts: manifest.parts,
+      author,
+      license,
+      path: txPath
     }
   }
 }

@@ -1,0 +1,11 @@
+{
+  "kind": "m2t",
+  "entry": "./lib/transformation.js",
+  "exportName": "Rel2DdlTransformation",
+  "source": {
+    "metamodel": "@synthesis/standard-metamodels/relational"
+  },
+  "target": {
+    "metamodel": "text"
+  }
+}

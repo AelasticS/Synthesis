@@ -2,10 +2,16 @@
  * Workspace configuration schema.
  */
 
+import type { TxKind } from '../tx/manifest.js'
+
 export interface TransformationEntry {
   version: string
   path: string
   installedAt: string
+  /** Manifest kind, recorded at install time. */
+  kind?: TxKind
+  /** Whether the transformation is decision-based, recorded at install time. */
+  variability?: boolean
 }
 
 export interface WorkspaceConfig {

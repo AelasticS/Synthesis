@@ -1,11 +1,12 @@
 import { existsSync, statSync } from 'node:fs'
-import { cp, mkdir, readFile } from 'node:fs/promises'
-import { basename, join, resolve } from 'node:path'
+import { cp, mkdir } from 'node:fs/promises'
+import { join, resolve } from 'node:path'
 
 import { Args } from '@oclif/core'
 
 import { BaseCommand } from '../../base/base-command.js'
 import { getTransformationsPath, saveConfig } from '../../config/index.js'
+import { loadTxManifest, TxManifest } from '../../tx/manifest.js'
 
 export default class TxInstall extends BaseCommand {
   static override description = 'Install a transformation from npm, git, or local path.'
@@ -40,23 +41,17 @@ export default class TxInstall extends BaseCommand {
       this.error(`Currently only local directory install is supported. '${packageSpec}' is not a directory.`)
     }
 
-    // Read package.json to get name and version
-    const pkgJsonPath = join(sourcePath, 'package.json')
-    if (!existsSync(pkgJsonPath)) {
-      this.error(`No package.json found in '${sourcePath}'. Cannot determine transformation name.`)
-    }
-
-    let name: string
-    let version: string
-
+    // Load and validate the transformation manifest (synth.json or the
+    // `synth` block in package.json). A package without a valid manifest
+    // is not installable.
+    let manifest: TxManifest
     try {
-      const pkgContent = await readFile(pkgJsonPath, 'utf-8')
-      const pkg = JSON.parse(pkgContent) as { name?: string; version?: string }
-      name = pkg.name ?? basename(sourcePath)
-      version = pkg.version ?? '0.0.0'
-    } catch {
-      this.error(`Failed to parse package.json in '${sourcePath}'.`)
+      manifest = await loadTxManifest(sourcePath)
+    } catch (err) {
+      this.error(err instanceof Error ? err.message : String(err))
     }
+
+    const { name, version } = manifest
 
     // Create transformations directory if needed
     const txBasePath = getTransformationsPath(this.workspaceConfig)
@@ -77,7 +72,9 @@ export default class TxInstall extends BaseCommand {
     this.workspaceConfig.transformations[name] = {
       version,
       path: destPath,
-      installedAt: new Date().toISOString()
+      installedAt: new Date().toISOString(),
+      kind: manifest.kind,
+      variability: manifest.variability
     }
 
     await saveConfig(this.workspaceConfig)
@@ -89,6 +86,8 @@ export default class TxInstall extends BaseCommand {
             installed: true,
             name,
             version,
+            kind: manifest.kind,
+            variability: manifest.variability,
             path: destPath
           },
           null,
@@ -98,6 +97,6 @@ export default class TxInstall extends BaseCommand {
       return
     }
 
-    this.log(`Installed transformation '${name}@${version}' to ${destPath}`)
+    this.log(`Installed transformation '${name}@${version}' (${manifest.kind}) to ${destPath}`)
   }
 }

@@ -42,6 +42,7 @@ This document is auto-generated from the oclif command definitions.
 * [`synth tx ls`](#synth-tx-ls)
 * [`synth tx pack`](#synth-tx-pack)
 * [`synth tx publish`](#synth-tx-publish)
+* [`synth tx run TX`](#synth-tx-run-tx)
 * [`synth tx show NAME`](#synth-tx-show-name)
 * [`synth tx test`](#synth-tx-test)
 * [`synth tx uninstall NAME`](#synth-tx-uninstall-name)
@@ -1156,9 +1157,50 @@ EXAMPLES
   $ synth tx publish --tag beta
 ```
 
+## `synth tx run TX`
+
+Run an installed transformation on a workspace model.
+
+```
+USAGE
+  $ synth tx run TX --in <value> [--workspace <value>] [--ns <value>] [--json] [-q] [-v] [--out <value>]
+    [--out-dir <value>] [--overwrite]
+
+ARGUMENTS
+  TX  Name of the installed transformation to run.
+
+FLAGS
+  --in=<value>       (required) Source model ref to transform.
+  --out=<value>      Destination ref for the result model (m2m only; default: '<namespace>/<name>-<tx>' derived from
+                     --in).
+  --out-dir=<value>  Output directory for generated files (m2t only).
+  --overwrite        Replace the target model if it already exists.
+
+GLOBAL FLAGS
+  -q, --quiet              Suppress informational output.
+  -v, --verbose            Print debug-level logs.
+      --json               Emit machine-readable JSON.
+      --ns=<value>         Namespace context override (otherwise resolved from config).
+      --workspace=<value>  Override active workspace for this invocation.
+
+DESCRIPTION
+  Run an installed transformation on a workspace model.
+
+  An M2M result is written back into the workspace as a model file; an M2T result generates files under --out-dir.
+  Without --out, an M2M result goes to '<namespace>/<name>-<tx>' derived from --in (tx name sanitized to ref-safe
+  characters); an existing target is only replaced with --overwrite (exit 1 otherwise). A decision-based transformation
+  runs on its generated default configuration and announces every decision. Exit codes: 2 for a source-metamodel
+  mismatch or a result that fails the import gate, 3 for an unknown transformation or missing model.
+
+EXAMPLES
+  $ synth tx run eer-to-relational --in com.example/persons --out com.example/persons-rel
+
+  $ synth tx run rel-to-sql-ddl --in com.example/persons-rel --out-dir ./generated
+```
+
 ## `synth tx show NAME`
 
-Print the transformation's source metamodel, target metamodel, and variability points.
+Print the transformation's kind, source/target metamodels, and variability points.
 
 ```
 USAGE
@@ -1175,7 +1217,7 @@ GLOBAL FLAGS
       --workspace=<value>  Override active workspace for this invocation.
 
 DESCRIPTION
-  Print the transformation's source metamodel, target metamodel, and variability points.
+  Print the transformation's kind, source/target metamodels, and variability points.
 
 EXAMPLES
   $ synth tx show eer-to-relational

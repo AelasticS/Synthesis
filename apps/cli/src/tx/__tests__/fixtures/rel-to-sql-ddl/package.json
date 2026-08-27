@@ -1,0 +1,9 @@
+{
+  "name": "rel-to-sql-ddl",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Relational schema to SQL DDL text transformation (installable fixture)",
+  "author": "Sinisa Neskovic",
+  "license": "Apache-2.0",
+  "type": "module"
+}

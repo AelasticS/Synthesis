@@ -1,0 +1,9 @@
+{
+  "name": "eer-to-relational",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Decision-based EER to relational schema transformation (installable fixture)",
+  "author": "Sinisa Neskovic",
+  "license": "Apache-2.0",
+  "type": "module"
+}

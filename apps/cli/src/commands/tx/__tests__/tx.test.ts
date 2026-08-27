@@ -1,8 +1,14 @@
 import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
-import { join } from 'node:path'
+import { dirname, join, resolve } from 'node:path'
 import { tmpdir } from 'node:os'
+import { fileURLToPath } from 'node:url'
 
 import { runCli } from '../../../test-utils/run-cli.js'
+
+// Tests execute from lib/commands/tx/__tests__; the fixture transformation
+// packages are plain directories referenced at their source location.
+const packageRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../../../..')
+const fixturesDir = join(packageRoot, 'src/tx/__tests__/fixtures')
 
 // Create a unique temp directory for each test run
 const testTmpDir = join(tmpdir(), `synth-tx-test-${Date.now()}`)
@@ -12,8 +18,11 @@ const testTxPkgJson = {
   version: '1.0.0',
   description: 'Test transformation',
   synth: {
-    sourceMetamodel: 'source-meta',
-    targetMetamodel: 'target-meta'
+    kind: 'm2m',
+    entry: './lib/transformation.js',
+    exportName: 'TestTransformation',
+    source: { metamodel: 'source-meta' },
+    target: { metamodel: 'target-meta' }
   }
 }
 
@@ -82,6 +91,31 @@ describe('tx install', () => {
     expect(parsed.installed).toBe(true)
     expect(parsed.name).toBe('test-tx')
     expect(parsed.version).toBe('1.0.0')
+    expect(parsed.kind).toBe('m2m')
+    expect(parsed.variability).toBe(false)
+  })
+
+  it('rejects a package without a transformation manifest', async () => {
+    const noManifestDir = join(testTmpDir, 'no-manifest-tx')
+    mkdirSync(noManifestDir, { recursive: true })
+    writeFileSync(join(noManifestDir, 'package.json'), JSON.stringify({ name: 'no-manifest-tx', version: '1.0.0' }))
+
+    const { error, stderr } = await runCli(['tx', 'install', noManifestDir], { home: testHome })
+    expect(error).toBeDefined()
+    expect(stderr).toContain('No transformation manifest found')
+  })
+
+  it('rejects a package whose manifest is missing required fields', async () => {
+    const invalidDir = join(testTmpDir, 'invalid-manifest-tx')
+    mkdirSync(invalidDir, { recursive: true })
+    writeFileSync(
+      join(invalidDir, 'package.json'),
+      JSON.stringify({ name: 'invalid-manifest-tx', version: '1.0.0', synth: { kind: 'm2m' } })
+    )
+
+    const { error, stderr } = await runCli(['tx', 'install', invalidDir], { home: testHome })
+    expect(error).toBeDefined()
+    expect(stderr).toContain(`field 'entry'`)
   })
 })
 
@@ -140,6 +174,10 @@ describe('tx show', () => {
     expect(error).toBeUndefined()
     expect(stdout).toContain('test-tx')
     expect(stdout).toContain('1.0.0')
+    expect(stdout).toContain('kind: m2m')
+    expect(stdout).toContain('source metamodel: source-meta')
+    expect(stdout).toContain('target metamodel: target-meta')
+    expect(stdout).toContain('variability: no')
   })
 
   it('outputs JSON with --json flag', async () => {
@@ -149,8 +187,67 @@ describe('tx show', () => {
     expect(parsed.name).toBe('test-tx')
     expect(parsed.version).toBe('1.0.0')
     expect(parsed.description).toBe('Test transformation')
+    expect(parsed.kind).toBe('m2m')
+    expect(parsed.entry).toBe('./lib/transformation.js')
+    expect(parsed.exportName).toBe('TestTransformation')
     expect(parsed.sourceMetamodel).toBe('source-meta')
     expect(parsed.targetMetamodel).toBe('target-meta')
+    expect(parsed.variability).toBe(false)
+  })
+})
+
+describe('fixture transformation packages', () => {
+  const m2mFixture = join(fixturesDir, 'eer-to-relational')
+  const m2tFixture = join(fixturesDir, 'rel-to-sql-ddl')
+
+  afterAll(async () => {
+    await runCli(['tx', 'uninstall', 'eer-to-relational'], { home: testHome })
+    await runCli(['tx', 'uninstall', 'rel-to-sql-ddl'], { home: testHome })
+  })
+
+  it('installs the eer-to-relational (m2m) fixture and shows its manifest', async () => {
+    const install = await runCli(['tx', 'install', m2mFixture, '--json'], { home: testHome })
+    expect(install.error).toBeUndefined()
+    const installed = JSON.parse(install.stdout)
+    expect(installed.installed).toBe(true)
+    expect(installed.name).toBe('eer-to-relational')
+    expect(installed.kind).toBe('m2m')
+    expect(installed.variability).toBe(true)
+
+    const { stdout, error } = await runCli(['tx', 'show', 'eer-to-relational'], { home: testHome })
+    expect(error).toBeUndefined()
+    expect(stdout).toContain('kind: m2m')
+    expect(stdout).toContain('source metamodel: @synthesis/standard-metamodels/eer')
+    expect(stdout).toContain('target metamodel: @synthesis/standard-metamodels/relational')
+    expect(stdout).toContain('target components: @synthesis/standard-metamodels/relational/components-legacy')
+    expect(stdout).toContain('variability: yes')
+    expect(stdout).toContain('entry: ./lib/transformation.js (export: EER2RelDomainWithDecisionTransformation)')
+    expect(stdout).toContain(
+      'metamodel: @synthesis/examples/lib/eer-to-rel-small/er-metamodel.js (export: EERModel)'
+    )
+    expect(stdout).toContain(
+      'decision model: @synthesis/examples/lib/eer-to-rel-small/02-decision-model.js (export: RelationSchemaDesignIssues)'
+    )
+    expect(stdout).toContain(
+      'binding model: @synthesis/examples/lib/eer-to-rel-small/03-binding-model.js (export: ER_Bindings)'
+    )
+  })
+
+  it('installs the rel-to-sql-ddl (m2t) fixture and shows its manifest', async () => {
+    const install = await runCli(['tx', 'install', m2tFixture], { home: testHome })
+    expect(install.error).toBeUndefined()
+    expect(install.stdout).toContain(`Installed transformation 'rel-to-sql-ddl@0.1.0' (m2t)`)
+
+    const { stdout, error } = await runCli(['tx', 'show', 'rel-to-sql-ddl', '--json'], { home: testHome })
+    expect(error).toBeUndefined()
+    const parsed = JSON.parse(stdout)
+    expect(parsed.name).toBe('rel-to-sql-ddl')
+    expect(parsed.kind).toBe('m2t')
+    expect(parsed.exportName).toBe('Rel2DdlTransformation')
+    expect(parsed.sourceMetamodel).toBe('@synthesis/standard-metamodels/relational')
+    expect(parsed.targetMetamodel).toBe('text')
+    expect(parsed.variability).toBe(false)
+    expect(parsed.parts).toBeUndefined()
   })
 })
 
