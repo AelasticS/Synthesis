@@ -28,11 +28,10 @@ synth --help
 * [`synth config show REF`](#synth-config-show-ref)
 * [`synth doctor`](#synth-doctor)
 * [`synth example describe ID`](#synth-example-describe-id)
-* [`synth example list`](#synth-example-list)
+* [`synth example ls`](#synth-example-ls)
 * [`synth example run ID`](#synth-example-run-id)
 * [`synth help [COMMAND]`](#synth-help-command)
 * [`synth init`](#synth-init)
-* [`synth m2t MODEL`](#synth-m2t-model)
 * [`synth model export REF`](#synth-model-export-ref)
 * [`synth model import FILE`](#synth-model-import-file)
 * [`synth model ls`](#synth-model-ls)
@@ -180,9 +179,9 @@ DESCRIPTION
 
   Runs the transformation's default-configuration generation (one default choice per issue its binding model attaches,
   global and per-element) against the model named with --for and saves the result as an editable configuration model in
-  the workspace — the same generation 'tx run' performs implicitly when --config is omitted. Edit the saved file to
-  steer the transformation, then pass it to 'tx run --config'. Exit codes: 2 for a source-metamodel mismatch or a result
-  that fails the import gate, 3 for an unknown transformation or missing model.
+  the workspace — the same generation 'tx run --default-configs' accepts in memory. Edit the saved file to steer the
+  transformation, then pass it to 'tx run --config'. Exit codes: 2 for a source-metamodel mismatch or a result that
+  fails the import gate, 3 for an unknown transformation or missing model.
 
 EXAMPLES
   $ synth config init eer-to-relational --for com.example/persons
@@ -318,7 +317,7 @@ USAGE
   $ synth example describe ID [--workspace <value>] [--ns <value>] [--json] [-q] [-v]
 
 ARGUMENTS
-  ID  Example identifier (use `synth example list` to see available ids).
+  ID  Example identifier (use `synth example ls` to see available ids).
 
 GLOBAL FLAGS
   -q, --quiet              Suppress informational output.
@@ -336,13 +335,13 @@ EXAMPLES
   $ synth example describe eer-to-rel-to-text --json
 ```
 
-## `synth example list`
+## `synth example ls`
 
 List all available bundled examples.
 
 ```
 USAGE
-  $ synth example list [--workspace <value>] [--ns <value>] [--json] [-q] [-v]
+  $ synth example ls [--workspace <value>] [--ns <value>] [--json] [-q] [-v]
 
 GLOBAL FLAGS
   -q, --quiet              Suppress informational output.
@@ -355,9 +354,9 @@ DESCRIPTION
   List all available bundled examples.
 
 EXAMPLES
-  $ synth example list
+  $ synth example ls
 
-  $ synth example list --json
+  $ synth example ls --json
 ```
 
 ## `synth example run ID`
@@ -369,7 +368,7 @@ USAGE
   $ synth example run ID [--workspace <value>] [--ns <value>] [--json] [-q] [-v] [--out <value>]
 
 ARGUMENTS
-  ID  Example identifier (use `synth example list` to see available ids).
+  ID  Example identifier (use `synth example ls` to see available ids).
 
 FLAGS
   --out=<value>  [default: out] Output directory for artifacts. The example id is appended to it.
@@ -435,37 +434,6 @@ EXAMPLES
   $ synth init
 
   $ synth init --path ~/my-workspace
-```
-
-## `synth m2t MODEL`
-
-Run a model-to-text transformation.
-
-```
-USAGE
-  $ synth m2t MODEL --template <value> --out <value> [--workspace <value>] [--ns <value>] [--json] [-q]
-    [-v] [--dry-run]
-
-ARGUMENTS
-  MODEL  Model ref to transform.
-
-FLAGS
-  --dry-run           Print the files that would be written, without writing them.
-  --out=<value>       (required) Output directory on disk.
-  --template=<value>  (required) Path or installed name of the M2T template.
-
-GLOBAL FLAGS
-  -q, --quiet              Suppress informational output.
-  -v, --verbose            Print debug-level logs.
-      --json               Emit machine-readable JSON.
-      --ns=<value>         Namespace context override (otherwise resolved from config).
-      --workspace=<value>  Override active workspace for this invocation.
-
-DESCRIPTION
-  Run a model-to-text transformation.
-
-EXAMPLES
-  $ synth m2t com.example/library --template eer-java --out ./src-gen
 ```
 
 ## `synth model export REF`
@@ -1031,21 +999,30 @@ _See code: [@oclif/plugin-plugins](https://github.com/oclif/plugin-plugins/blob/
 
 ## `synth run TX`
 
-Run a model-to-model transformation.
+Run one transformation or a chain of transformations on a workspace model.
 
 ```
 USAGE
-  $ synth run TX --in <value> [--workspace <value>] [--ns <value>] [--json] [-q] [-v] [--config <value>]
-    [--out <value>] [--overwrite]
+  $ synth run TX... --in <value> [--workspace <value>] [--ns <value>] [--json] [-q] [-v] [--out <value>]
+    [--out-dir <value>] [--default-configs] [--save-config <value> | --config <value>] [--keep-intermediates]
+    [--overwrite]
 
 ARGUMENTS
-  TX  Name of the installed transformation to run.
+  TX...  Installed transformation(s) to run, in order.
 
 FLAGS
-  --config=<value>  Configuration ref for variability resolution.
-  --in=<value>      (required) Source model ref to transform.
-  --out=<value>     Destination ref for the result model.
-  --overwrite       Replace the target model if it already exists.
+  --config=<value>       Configuration model ref for step 1 (decision-based only; later steps take --default-configs).
+  --default-configs      Explicitly accept generated default configurations for every decision-based step not covered by
+                         --config.
+  --in=<value>           (required) Source model ref the first step transforms.
+  --keep-intermediates   Also write every intermediate step result as a workspace model
+                         ('<namespace>/<name>-<step-tx>').
+  --out=<value>          Destination ref for the final result model (last step m2m only; default:
+                         '<namespace>/<name>-<last-tx>' derived from --in).
+  --out-dir=<value>      Output directory for generated files (last step m2t only).
+  --overwrite            Replace existing target models (final, intermediates, and --save-config target).
+  --save-config=<value>  Persist the generated default configuration as a workspace model at this ref (single step with
+                         --default-configs only).
 
 GLOBAL FLAGS
   -q, --quiet              Suppress informational output.
@@ -1055,12 +1032,25 @@ GLOBAL FLAGS
       --workspace=<value>  Override active workspace for this invocation.
 
 DESCRIPTION
-  Run a model-to-model transformation.
+  Run one transformation or a chain of transformations on a workspace model.
+
+  With one transformation this behaves exactly like 'tx run'. With several, the steps form a chain: step N's output
+  model feeds step N+1 in memory (one shared model store), the chain is type-checked from the manifests before execution
+  (step N's target metamodel must equal step N+1's source metamodel), and only the last step may be m2t (text is
+  terminal; it requires --out-dir). An m2m chain writes only the final result (--out, default
+  '<namespace>/<name>-<last-tx>' derived from --in); pass --keep-intermediates to also persist every intermediate result
+  as a workspace model at '<namespace>/<name>-<step-tx>'. Configuration consent is explicit everywhere: --config binds
+  to step 1 only, and every other decision-based step (and step 1 without --config) requires --default-configs — without
+  it the run aborts before any engine work. --save-config is single-step only; for chains, run stepwise with 'tx run'
+  and 'config init'. Exit codes: 2 for a missing configuration consent, a chain or source metamodel mismatch, an invalid
+  configuration, or a result that fails the import gate, 3 for an unknown transformation or missing model.
 
 EXAMPLES
-  $ synth run eer-to-relational --in com.example/library
+  $ synth run eer-to-relational --in com.example/persons --config com.example/persons-cfg
 
-  $ synth run eer-to-relational --in com.example/library --config com.example/library.cfg --out com.example/library.rel
+  $ synth run eer-to-relational rel-to-sql-ddl --in com.example/persons --default-configs --out-dir ./generated
+
+  $ synth run eer-to-relational rel-to-sql-ddl --in com.example/persons --config com.example/persons-cfg --default-configs --out-dir ./generated --keep-intermediates
 ```
 
 ## `synth tx build`
@@ -1225,19 +1215,21 @@ Run an installed transformation on a workspace model.
 ```
 USAGE
   $ synth tx run TX --in <value> [--workspace <value>] [--ns <value>] [--json] [-q] [-v] [--out <value>]
-    [--out-dir <value>] [--save-config <value> | --config <value>] [--overwrite]
+    [--out-dir <value>] [--default-configs | --config <value>] [--save-config <value> | ] [--overwrite]
 
 ARGUMENTS
   TX  Name of the installed transformation to run.
 
 FLAGS
   --config=<value>       Configuration model ref to run with (decision-based transformations only).
+  --default-configs      Explicitly accept the generated default configuration for a decision-based transformation.
   --in=<value>           (required) Source model ref to transform.
   --out=<value>          Destination ref for the result model (m2m only; default: '<namespace>/<name>-<tx>' derived from
                          --in).
   --out-dir=<value>      Output directory for generated files (m2t only).
   --overwrite            Replace the target model (and --save-config target) if it already exists.
-  --save-config=<value>  Persist the generated default configuration as a workspace model at this ref.
+  --save-config=<value>  Persist the generated default configuration as a workspace model at this ref (only together
+                         with --default-configs).
 
 GLOBAL FLAGS
   -q, --quiet              Suppress informational output.
@@ -1252,16 +1244,19 @@ DESCRIPTION
   An M2M result is written back into the workspace as a model file; an M2T result generates files under --out-dir.
   Without --out, an M2M result goes to '<namespace>/<name>-<tx>' derived from --in (tx name sanitized to ref-safe
   characters); an existing target is only replaced with --overwrite (exit 1 otherwise). A decision-based transformation
-  runs on the configuration model named with --config, or on its generated default configuration (--save-config persists
-  that as a workspace model), and announces every effective decision. Exit codes: 2 for a source-metamodel mismatch, an
-  invalid configuration, or a result that fails the import gate, 3 for an unknown transformation or missing model.
+  never applies decisions without explicit consent: run it either on the configuration model named with --config (create
+  one with 'synth config init'), or on its generated default configuration by passing --default-configs — with neither,
+  the run aborts before any engine work. Every effective decision is announced. --save-config persists the generated
+  default configuration as a workspace model and is only valid together with --default-configs. Exit codes: 2 for a
+  missing configuration consent, a source-metamodel mismatch, an invalid configuration, or a result that fails the
+  import gate, 3 for an unknown transformation or missing model.
 
 EXAMPLES
-  $ synth tx run eer-to-relational --in com.example/persons --out com.example/persons-rel
-
   $ synth tx run eer-to-relational --in com.example/persons --config com.example/persons-cfg
 
-  $ synth tx run rel-to-sql-ddl --in com.example/persons-rel --out-dir ./generated
+  $ synth tx run eer-to-relational --in com.example/persons --default-configs --out com.example/persons-rel
+
+  $ synth tx run rel-to-sql-ddl --in com.example/persons-rel --default-configs --out-dir ./generated
 ```
 
 ## `synth tx show NAME`

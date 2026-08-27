@@ -42,7 +42,6 @@ export default class Init extends BaseCommand {
     await mkdir(workspacePath, { recursive: true })
     await mkdir(join(workspacePath, WORKSPACE_DIRS.models), { recursive: true })
     await mkdir(join(workspacePath, WORKSPACE_DIRS.transformations), { recursive: true })
-    await mkdir(join(workspacePath, WORKSPACE_DIRS.configs), { recursive: true })
 
     // Save config
     const config = {
@@ -55,8 +54,7 @@ export default class Init extends BaseCommand {
     this.log(`  ${workspacePath}/`)
     this.log(`  ├── config.json`)
     this.log(`  ├── ${WORKSPACE_DIRS.models}/`)
-    this.log(`  ├── ${WORKSPACE_DIRS.transformations}/`)
-    this.log(`  └── ${WORKSPACE_DIRS.configs}/`)
+    this.log(`  └── ${WORKSPACE_DIRS.transformations}/`)
     this.log('')
     this.log('Workspace initialized successfully.')
   }

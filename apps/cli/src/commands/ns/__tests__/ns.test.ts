@@ -135,12 +135,23 @@ describe('ns rm', () => {
     expect(existsSync(join(modelsDir, 'com', 'example', 'notes'))).toBe(false)
   })
 
-  it('reports refusal as JSON with --json flag', async () => {
-    const { stdout, error } = await runCli(['ns', 'rm', 'com.example.busy', '--json'], { home: testHome })
-    expect(error).toBeUndefined()
+  it('reports refusal as JSON with --json flag AND a non-zero exit', async () => {
+    // Uniform JSON exit-code contract: machine-readable error object on
+    // stdout, same exit code as the text mode refusal
+    const { stdout, code } = await runCli(['ns', 'rm', 'com.example.busy', '--json'], { home: testHome })
+    expect(code).toBe(2)
     const parsed = JSON.parse(stdout)
-    expect(parsed.removed).toBe(false)
-    expect(parsed.error).toBe('not empty')
+    expect(parsed.error).toContain('not empty')
+  })
+
+  it('fails with NOT_FOUND for a namespace that does not exist, in both modes', async () => {
+    const text = await runCli(['ns', 'rm', 'no.such.namespace'], { home: testHome })
+    expect(text.code).toBe(3)
+    expect(text.stderr).toContain('does not exist')
+
+    const json = await runCli(['ns', 'rm', 'no.such.namespace', '--json'], { home: testHome })
+    expect(json.code).toBe(3)
+    expect(JSON.parse(json.stdout).error).toContain('does not exist')
   })
 
   it('accepts --force flag', async () => {

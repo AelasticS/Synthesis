@@ -1,15 +1,19 @@
 import { runCli } from '../../../test-utils/run-cli.js'
 
-describe('example list', () => {
+describe('example ls', () => {
   it('lists registered runnables', async () => {
-    const { stdout, error } = await runCli(['example', 'list'])
+    // The verb was renamed from 'list' in Phase 4 (resource -> verb
+    // consistency); the old name must not resolve
+    const legacy = await runCli(['example', 'list'])
+    expect(legacy.error).toBeDefined()
+    const { stdout, error } = await runCli(['example', 'ls'])
     expect(error).toBeUndefined()
     // At least one of the bundled example ids should appear
     expect(stdout).toMatch(/eer-to-rel-small/)
   })
 
   it('outputs JSON with --json flag', async () => {
-    const { stdout, error } = await runCli(['example', 'list', '--json'])
+    const { stdout, error } = await runCli(['example', 'ls', '--json'])
     expect(error).toBeUndefined()
     const parsed = JSON.parse(stdout)
     expect(parsed).toHaveProperty('examples')

@@ -77,21 +77,23 @@ run "round-tripped model validates"       0 "is valid"             model validat
 
 # =============================================================================
 # Phase 2 — transformation execution (tx install / show / run)
-# Manifest-driven install, M2M execution with announced default decisions and
-# a provenance-stamped output model that passes the import gate, then M2T
-# generating SQL from the produced relational model.
+# Manifest-driven install; decisions are never applied without explicit
+# consent (--default-configs), then M2M execution with announced default
+# decisions and a provenance-stamped output model that passes the import
+# gate, then M2T generating SQL from the produced relational model.
 # =============================================================================
 say "Phase 2: transformation execution"
 
 run "tx install m2m fixture"              0 "eer-to-relational"    tx install "$TX_M2M"
 run "tx install m2t fixture"              0 "rel-to-sql-ddl"       tx install "$TX_M2T"
 run "tx show is manifest-driven"          0 "m2m"                  tx show eer-to-relational
-run "tx run m2m announces defaults"       0 "SnakeCase (default)"  tx run eer-to-relational --in com.example/persons --out com.example/persons-rel
+run "decision-based run aborts without consent" 2 "decision-based" tx run eer-to-relational --in com.example/persons --out com.example/persons-rel
+run "tx run m2m announces defaults"       0 "SnakeCase (default)"  tx run eer-to-relational --in com.example/persons --default-configs --out com.example/persons-rel
 run "output model records provenance"     0 "eer-to-relational"    model show com.example/persons-rel --json
 run "generated model passes validate"     0 "is valid"             model validate com.example/persons-rel
-run "tx run m2t generates SQL"            0 "Wrote"                tx run rel-to-sql-ddl --in com.example/persons-rel --out-dir "$WORK/gen"
+run "tx run m2t generates SQL"            0 "Wrote"                tx run rel-to-sql-ddl --in com.example/persons-rel --default-configs --out-dir "$WORK/gen"
 grep -q "CREATE TABLE person" "$WORK/gen"/*.sql && ok "SQL contains snake_case DDL" || bad "SQL contains snake_case DDL"
-run "metamodel mismatch is rejected"      2 "mismatch"             tx run rel-to-sql-ddl --in com.example/persons --out-dir "$WORK/gen2"
+run "metamodel mismatch is rejected"      2 "mismatch"             tx run rel-to-sql-ddl --in com.example/persons --default-configs --out-dir "$WORK/gen2"
 run "unknown transformation exits 3"      3 -                      tx run no-such-tx --in com.example/persons
 
 # =============================================================================
@@ -124,8 +126,39 @@ EOF
 run "partial config announces the default" 0 "SnakeCase (default)" tx run eer-to-relational --in com.example/persons --config com.example/cfg-partial --out com.example/rel-partial
 grep -q 'name="person_id"' "$MODELS/com/example/rel-partial.tsx" && ok "default was actually applied" || bad "default was actually applied"
 
-run "save-config cannot clobber the input" 1 "overwrite the input model" tx run eer-to-relational --in com.example/persons --save-config com.example/persons --overwrite --out com.example/never
+run "save-config requires default-configs" 1 "only valid together"  tx run eer-to-relational --in com.example/persons --save-config com.example/cfg-solo --out com.example/never
+run "save-config cannot clobber the input" 1 "overwrite the input model" tx run eer-to-relational --in com.example/persons --default-configs --save-config com.example/persons --overwrite --out com.example/never
 run "doctor clean at the end"             0 "0 errors"             doctor
+
+# =============================================================================
+# Phase 4 — chaining `run`
+# One execution core behind tx run and run: chains hand the result model to
+# the next step in memory, are type-checked from manifests up front, apply
+# the uniform explicit-consent policy (--config binds to step 1 only, all
+# other decision-based steps take --default-configs), and only the last
+# step may be m2t. --keep-intermediates persists mid-chain results as
+# workspace models; the stepwise path (config init against a kept
+# intermediate) configures later steps explicitly.
+# =============================================================================
+say "Phase 4: chaining"
+
+run "chain generates SQL with default configs" 0 "IdentifierQuoting -> Unquoted (default)" run eer-to-relational rel-to-sql-ddl --in com.example/persons --default-configs --out-dir "$WORK/chain-gen"
+grep -q "CREATE TABLE person" "$WORK/chain-gen"/*.sql && ok "chained SQL contains CREATE TABLE" || bad "chained SQL contains CREATE TABLE"
+run "chain aborts without consent"        2 "decision-based"       run eer-to-relational rel-to-sql-ddl --in com.example/persons --out-dir "$WORK/chain-never"
+run "config steers step 1, defaults cover step 2" 0 "CamelCase"    run eer-to-relational rel-to-sql-ddl --in com.example/persons --config com.example/persons-cfg --default-configs --out-dir "$WORK/chain-camel"
+grep -q "personId" "$WORK/chain-camel"/*.sql && ok "step-1 config visible in chained SQL" || bad "step-1 config visible in chained SQL"
+run "m2t mid-chain is rejected"           1 "last step"            run rel-to-sql-ddl rel-to-sql-ddl --in com.example/persons --default-configs --out-dir "$WORK/chain-never"
+run "metamodel-mismatched chain is rejected" 2 "Chain type mismatch" run eer-to-relational eer-to-relational --in com.example/persons --default-configs --out com.example/never-chain
+run "keep-intermediates writes the intermediate" 0 "persons-eer-to-relational" run eer-to-relational rel-to-sql-ddl --in com.example/persons --default-configs --keep-intermediates --out-dir "$WORK/chain-keep"
+test -f "$MODELS/com/example/persons-eer-to-relational.tsx" && ok "intermediate model file exists" || bad "intermediate model file exists"
+run "intermediate passes validate"        0 "is valid"             model validate com.example/persons-eer-to-relational
+
+# Stepwise configuration of step 2: config init against the kept
+# intermediate, select DoubleQuoted, and the emitted DDL quotes identifiers
+run "config init against the intermediate" 0 "IdentifierQuoting -> Unquoted (default)" config init rel-to-sql-ddl --for com.example/persons-eer-to-relational
+sed -i "s/Unquoted/DoubleQuoted/g" "$MODELS/com/example/persons-eer-to-relational-cfg.tsx"
+run "tx run applies the DoubleQuoted config" 0 "IdentifierQuoting -> DoubleQuoted" tx run rel-to-sql-ddl --in com.example/persons-eer-to-relational --config com.example/persons-eer-to-relational-cfg --out-dir "$WORK/chain-quoted"
+grep -q 'CREATE TABLE "person"' "$WORK/chain-quoted"/*.sql && ok "DDL identifiers are double-quoted" || bad "DDL identifiers are double-quoted"
 
 # =============================================================================
 say "Summary"

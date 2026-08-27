@@ -9,7 +9,6 @@ import {
   getWorkspacePath,
   getModelsPath,
   getTransformationsPath,
-  getConfigsPath,
   getGlobalConfigPath
 } from '../config/index.js'
 import { parseSynthHeader } from '../models/header.js'
@@ -109,23 +108,7 @@ export default class Doctor extends BaseCommand {
       })
     }
 
-    // Check 5: configs/ directory
-    const configsPath = getConfigsPath(this.workspaceConfig)
-    if (existsSync(configsPath)) {
-      checks.push({
-        name: 'Configs directory',
-        status: 'ok',
-        message: `Found at ${configsPath}`
-      })
-    } else {
-      checks.push({
-        name: 'Configs directory',
-        status: 'error',
-        message: `Not found at ${configsPath}`
-      })
-    }
-
-    // Check 6: Workspace config.json
+    // Check 5: Workspace config.json
     const workspaceConfigPath = join(workspacePath, 'config.json')
     if (existsSync(workspaceConfigPath)) {
       checks.push({
@@ -143,7 +126,7 @@ export default class Doctor extends BaseCommand {
 
     const { models, skipped } = await scanModelsTree(modelsPath)
 
-    // Check 7: every entry under models/ is addressable by a ref. Legacy
+    // Check 6: every entry under models/ is addressable by a ref. Legacy
     // layouts (dot-named flat directories, .tsx files at the models root)
     // are skipped by every command, so surface them instead of silently
     // ignoring old workspaces.
@@ -163,7 +146,7 @@ export default class Doctor extends BaseCommand {
       }
     }
 
-    // Check 8: every model file's $synth header parses (static fast path).
+    // Check 7: every model file's $synth header parses (static fast path).
     // Header/content drift (header.metamodel vs what the module actually
     // instantiates) is NOT checked here: detecting it needs a transpile and
     // render per model, which is too slow for doctor. `model validate <ref>`
@@ -227,7 +210,7 @@ export default class Doctor extends BaseCommand {
       })
     }
 
-    // Check 9: every ref in a header's references map exists in the workspace
+    // Check 8: every ref in a header's references map exists in the workspace
     let referenceProblems = 0
     for (const [ref, header] of headers) {
       for (const { key, target } of findMissingReferences(modelsPath, header.references)) {
@@ -247,7 +230,7 @@ export default class Doctor extends BaseCommand {
       })
     }
 
-    // Check 10: the configured current namespace has a directory
+    // Check 9: the configured current namespace has a directory
     const currentNamespace = this.workspaceConfig.currentNamespace
     if (currentNamespace) {
       let currentNamespaceExists = false
@@ -272,7 +255,8 @@ export default class Doctor extends BaseCommand {
       }
     }
 
-    // Output results
+    // Output results; both modes exit WORKSPACE_ERROR when any check errored
+    const errorCount = checks.filter((c) => c.status === 'error').length
     if (flags.json) {
       this.log(
         JSON.stringify(
@@ -284,6 +268,9 @@ export default class Doctor extends BaseCommand {
           2
         )
       )
+      if (errorCount > 0) {
+        this.exit(EXIT_CODES.WORKSPACE_ERROR)
+      }
     } else {
       this.log('Workspace Health Check')
       this.log('======================')
@@ -297,14 +284,13 @@ export default class Doctor extends BaseCommand {
       }
 
       // Summary
-      const errors = checks.filter((c) => c.status === 'error').length
       const warnings = checks.filter((c) => c.status === 'warning').length
       const okCount = checks.filter((c) => c.status === 'ok').length
 
       this.log('')
-      this.log(`Summary: ${okCount} ok, ${warnings} warnings, ${errors} errors`)
+      this.log(`Summary: ${okCount} ok, ${warnings} warnings, ${errorCount} errors`)
 
-      if (errors > 0) {
+      if (errorCount > 0) {
         this.log('')
         this.log('Run "synth init" to initialize the workspace.')
         this.exit(EXIT_CODES.WORKSPACE_ERROR)

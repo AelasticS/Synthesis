@@ -7,5 +7,21 @@
   },
   "target": {
     "metamodel": "text"
+  },
+  "parts": {
+    "metamodels": [
+      {
+        "module": "@synthesis/examples/lib/eer-to-rel-to-text/rel-metamodel.js",
+        "exportName": "RELModel"
+      }
+    ],
+    "decisionModel": {
+      "module": "@synthesis/examples/lib/eer-to-rel-to-text/02-decision-model.js",
+      "exportName": "DdlGenerationIssues"
+    },
+    "bindingModel": {
+      "module": "@synthesis/examples/lib/eer-to-rel-to-text/03-binding-model.js",
+      "exportName": "Rel_Bindings"
+    }
   }
 }

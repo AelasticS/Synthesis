@@ -1,7 +1,7 @@
 import { BaseCommand } from '../../base/base-command.js'
 import { examplesRegistry } from '@synthesis/examples'
 
-export default class ExampleList extends BaseCommand {
+export default class ExampleLs extends BaseCommand {
   static override description = 'List all available bundled examples.'
 
   static override examples = [
@@ -10,7 +10,7 @@ export default class ExampleList extends BaseCommand {
   ]
 
   public async execute(): Promise<void> {
-    const { flags } = await this.parse(ExampleList)
+    const { flags } = await this.parse(ExampleLs)
     const runnables = examplesRegistry.list()
 
     if (flags.json) {

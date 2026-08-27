@@ -127,13 +127,107 @@ describe('tx run errors', () => {
       'tx', 'run', 'rel-to-sql-ddl', '--in', 'com.example/persons', '--out', 'com.example/x'
     ])
     expect(outOnM2t.code).toBe(1)
-    expect(outOnM2t.stderr).toContain('--out is only valid for m2m')
+    expect(flatten(outOnM2t.stderr)).toContain('--out is only valid when the transformation is m2m')
 
     const outDirOnM2m = await run([
       'tx', 'run', 'eer-to-relational', '--in', 'com.example/persons', '--out-dir', tempDir
     ])
     expect(outDirOnM2m.code).toBe(1)
-    expect(outDirOnM2m.stderr).toContain('--out-dir is only valid for m2t')
+    expect(flatten(outDirOnM2m.stderr)).toContain('--out-dir is only valid when the transformation is m2t')
+  })
+})
+
+describe('tx run configuration consent (uniform policy)', () => {
+  // Decisions are NEVER applied without explicit consent: a decision-based
+  // transformation runs on --config or on --default-configs, and with
+  // neither it aborts (exit 2) before any engine work.
+  it('aborts a decision-based run without --config or --default-configs, teaching both', async () => {
+    const { code, stderr } = await run([
+      'tx', 'run', 'eer-to-relational', '--in', 'com.example/persons', '--out', 'com.example/never-consent'
+    ])
+    expect(code).toBe(2)
+    const message = flatten(stderr)
+    expect(message).toContain(`Transformation 'eer-to-relational' is decision-based`)
+    expect(message).toContain('synth config init eer-to-relational --for com.example/persons')
+    expect(message).toContain('--default-configs')
+    expect(existsSync(join(modelsDir, 'com', 'example', 'never-consent.tsx'))).toBe(false)
+  })
+
+  it('rejects --config combined with --default-configs', async () => {
+    const { code, stderr } = await run([
+      'tx', 'run', 'eer-to-relational', '--in', 'com.example/persons',
+      '--config', 'com.example/whatever', '--default-configs', '--out', 'com.example/never-consent'
+    ])
+    expect(code).not.toBe(0)
+    expect(flatten(stderr)).toContain('--default-configs')
+  })
+
+  it('rejects --save-config without --default-configs (exit 1, before any engine work)', async () => {
+    const { code, stderr } = await run([
+      'tx', 'run', 'eer-to-relational', '--in', 'com.example/persons',
+      '--save-config', 'com.example/never-saved', '--out', 'com.example/never-consent'
+    ])
+    expect(code).toBe(1)
+    const message = flatten(stderr)
+    expect(message).toContain('--save-config')
+    expect(message).toContain('--default-configs')
+    expect(existsSync(join(modelsDir, 'com', 'example', 'never-saved.tsx'))).toBe(false)
+  })
+
+  describe('on a transformation without decisions', () => {
+    // A manifest-only fixture: the config-policy checks run before any
+    // module of the package is loaded.
+    beforeAll(async () => {
+      const plainDir = join(tempDir, 'plain-tx')
+      mkdirSync(plainDir, { recursive: true })
+      writeFileSync(
+        join(plainDir, 'package.json'),
+        JSON.stringify({
+          name: 'plain-tx',
+          version: '1.0.0',
+          synth: {
+            kind: 'm2m',
+            entry: './lib/transformation.js',
+            exportName: 'PlainTransformation',
+            source: { metamodel: '@synthesis/standard-metamodels/eer' },
+            target: { metamodel: '@synthesis/standard-metamodels/relational' }
+          }
+        })
+      )
+      const install = await run(['tx', 'install', plainDir])
+      expect(install.error).toBeUndefined()
+    })
+
+    afterAll(async () => {
+      await run(['tx', 'uninstall', 'plain-tx'])
+    })
+
+    it('rejects --config', async () => {
+      const { code, stderr } = await run([
+        'tx', 'run', 'plain-tx', '--in', 'com.example/persons',
+        '--config', 'com.example/tx-cfg', '--out', 'com.example/never-plain'
+      ])
+      expect(code).toBe(1)
+      expect(flatten(stderr)).toContain('--config is only valid for decision-based transformations')
+    })
+
+    it('rejects --default-configs', async () => {
+      const { code, stderr } = await run([
+        'tx', 'run', 'plain-tx', '--in', 'com.example/persons',
+        '--default-configs', '--out', 'com.example/never-plain'
+      ])
+      expect(code).toBe(1)
+      expect(flatten(stderr)).toContain('--default-configs is only valid for decision-based transformations')
+    })
+
+    it('rejects --save-config', async () => {
+      const { code, stderr } = await run([
+        'tx', 'run', 'plain-tx', '--in', 'com.example/persons',
+        '--save-config', 'com.example/never-plain-cfg', '--out', 'com.example/never-plain'
+      ])
+      expect(code).toBe(1)
+      expect(flatten(stderr)).toContain('--save-config is only valid for decision-based transformations')
+    })
   })
 })
 
@@ -143,7 +237,7 @@ describe('tx run m2m', () => {
 
   it('runs the decision-based m2m fixture end to end', async () => {
     const { stdout, error } = await run([
-      'tx', 'run', 'eer-to-relational', '--in', 'com.example/persons', '--out', outRef
+      'tx', 'run', 'eer-to-relational', '--in', 'com.example/persons', '--default-configs', '--out', outRef
     ])
     expect(error).toBeUndefined()
     // Default configuration decisions are announced, one line each
@@ -177,7 +271,7 @@ describe('tx run m2m', () => {
 
   it('refuses an existing target without --overwrite (exit 1)', async () => {
     const { code, stderr } = await run([
-      'tx', 'run', 'eer-to-relational', '--in', 'com.example/persons', '--out', outRef
+      'tx', 'run', 'eer-to-relational', '--in', 'com.example/persons', '--default-configs', '--out', outRef
     ])
     expect(code).toBe(1)
     expect(stderr).toContain('--overwrite')
@@ -188,7 +282,7 @@ describe('tx run m2m', () => {
   it('replaces an existing target with --overwrite via temp-file rename, leaving no temp behind', async () => {
     const before = readFileSync(outPath(), 'utf-8')
     const { stdout, error } = await run([
-      'tx', 'run', 'eer-to-relational', '--in', 'com.example/persons', '--out', outRef, '--overwrite'
+      'tx', 'run', 'eer-to-relational', '--in', 'com.example/persons', '--default-configs', '--out', outRef, '--overwrite'
     ])
     expect(error).toBeUndefined()
     expect(stdout).toContain(`Wrote ${outRef}`)
@@ -206,7 +300,7 @@ describe('tx run m2m', () => {
 
   it('emits a machine-readable result with --json', async () => {
     const { stdout, error } = await run([
-      'tx', 'run', 'eer-to-relational', '--in', 'com.example/persons',
+      'tx', 'run', 'eer-to-relational', '--in', 'com.example/persons', '--default-configs',
       '--out', 'com.example/persons-rel-json', '--json'
     ])
     expect(error).toBeUndefined()
@@ -278,15 +372,6 @@ describe('tx run --config', () => {
     }
   })
 
-  it('rejects --config on a transformation without decisions', async () => {
-    const { code, stderr } = await run([
-      'tx', 'run', 'rel-to-sql-ddl', '--in', 'com.example/persons-rel',
-      '--config', 'com.example/tx-cfg', '--out-dir', join(tempDir, 'never-cfg')
-    ])
-    expect(code).toBe(1)
-    expect(flatten(stderr)).toContain('--config is only valid for decision-based transformations')
-  })
-
   it('rejects --save-config combined with --config', async () => {
     const { code, stderr } = await run([
       'tx', 'run', 'eer-to-relational', '--in', 'com.example/persons',
@@ -316,7 +401,7 @@ describe('tx run --config', () => {
 describe('tx run --save-config collision guards', () => {
   it('rejects a --save-config target equal to --in even with --overwrite', async () => {
     const { code, stderr } = await run([
-      'tx', 'run', 'eer-to-relational', '--in', 'com.example/persons',
+      'tx', 'run', 'eer-to-relational', '--in', 'com.example/persons', '--default-configs',
       '--save-config', 'com.example/persons', '--overwrite', '--out', 'com.example/never-collide'
     ])
     expect(code).toBe(1)
@@ -329,7 +414,7 @@ describe('tx run --save-config collision guards', () => {
 
   it('detects the collision through ref normalization (slash namespace form)', async () => {
     const { code, stderr } = await run([
-      'tx', 'run', 'eer-to-relational', '--in', 'com.example/persons',
+      'tx', 'run', 'eer-to-relational', '--in', 'com.example/persons', '--default-configs',
       '--save-config', 'com/example/persons', '--overwrite', '--out', 'com.example/never-collide'
     ])
     expect(code).toBe(1)
@@ -338,7 +423,7 @@ describe('tx run --save-config collision guards', () => {
 
   it('rejects a --save-config target equal to the explicit --out ref', async () => {
     const { code, stderr } = await run([
-      'tx', 'run', 'eer-to-relational', '--in', 'com.example/persons',
+      'tx', 'run', 'eer-to-relational', '--in', 'com.example/persons', '--default-configs',
       '--save-config', 'com.example/never-collide', '--out', 'com.example/never-collide'
     ])
     expect(code).toBe(1)
@@ -348,7 +433,7 @@ describe('tx run --save-config collision guards', () => {
 
   it('rejects a --save-config target equal to the derived default --out ref', async () => {
     const { code, stderr } = await run([
-      'tx', 'run', 'eer-to-relational', '--in', 'com.example/persons',
+      'tx', 'run', 'eer-to-relational', '--in', 'com.example/persons', '--default-configs',
       '--save-config', 'com.example/persons-eer-to-relational'
     ])
     expect(code).toBe(1)
@@ -490,9 +575,10 @@ describe('tx run m2t', () => {
   it('chains the generated relational model into SQL DDL generation', async () => {
     const genDir = join(tempDir, 'gen')
     const { stdout, error } = await run([
-      'tx', 'run', 'rel-to-sql-ddl', '--in', 'com.example/persons-rel', '--out-dir', genDir
+      'tx', 'run', 'rel-to-sql-ddl', '--in', 'com.example/persons-rel', '--default-configs', '--out-dir', genDir
     ])
     expect(error).toBeUndefined()
+    expect(stdout).toContain('decision IdentifierQuoting -> Unquoted (default)')
     expect(stdout).toContain('Wrote ')
 
     const sqlFiles = readdirSync(genDir).filter((name) => name.endsWith('.sql'))
@@ -500,5 +586,32 @@ describe('tx run m2t', () => {
     const sql = readFileSync(join(genDir, sqlFiles[0]), 'utf-8')
     expect(sql).toContain('CREATE TABLE person')
     expect(sql).toContain('person_id INTEGER PRIMARY KEY')
+  })
+
+  it('honors an explicit DoubleQuoted configuration for the m2t step', async () => {
+    // The m2t fixture is decision-based too: config init against the
+    // relational model, select DoubleQuoted, and the emitted DDL wraps
+    // every identifier in double quotes.
+    const init = await run([
+      'config', 'init', 'rel-to-sql-ddl', '--for', 'com.example/persons-rel', '--out', 'com.example/ddl-cfg'
+    ])
+    expect(init.error).toBeUndefined()
+    expect(init.stdout).toContain('decision IdentifierQuoting -> Unquoted (default)')
+
+    const cfgPath = join(modelsDir, 'com', 'example', 'ddl-cfg.tsx')
+    writeFileSync(cfgPath, readFileSync(cfgPath, 'utf-8').replaceAll('Unquoted', 'DoubleQuoted'))
+
+    const genDir = join(tempDir, 'gen-quoted')
+    const { stdout, error } = await run([
+      'tx', 'run', 'rel-to-sql-ddl', '--in', 'com.example/persons-rel',
+      '--config', 'com.example/ddl-cfg', '--out-dir', genDir
+    ])
+    expect(error).toBeUndefined()
+    expect(stdout).toContain('decision IdentifierQuoting -> DoubleQuoted')
+    expect(stdout).not.toContain('DoubleQuoted (default)')
+    const sqlFiles = readdirSync(genDir).filter((name) => name.endsWith('.sql'))
+    const sql = readFileSync(join(genDir, sqlFiles[0]), 'utf-8')
+    expect(sql).toContain('CREATE TABLE "person"')
+    expect(sql).toContain('"person_id" INTEGER PRIMARY KEY')
   })
 })

@@ -11,10 +11,11 @@ import {
   ModelStore,
   E2E,
   M2M,
-  abstractM2M,
 } from "@synthesis/engine"
 import * as m2tmm from "@synthesis/engine"
 import * as rmT from "@synthesis/standard-metamodels/relational/model-legacy"
+import { VarPoint, VarOption, Option, DecisionAwareM2M } from "@synthesis/decision-framework"
+import * as cm from "@synthesis/decision-framework/decisions/3.configuration-model/configuration-meta.model"
 
 /**
  * Model-to-text transformation that turns a relational schema into a
@@ -24,14 +25,21 @@ import * as rmT from "@synthesis/standard-metamodels/relational/model-legacy"
  * decision-driven naming convention chosen upstream (snake_case vs
  * camelCase), so this template emits identifiers verbatim. Empty tables
  * (no columns) are skipped.
+ *
+ * The transformation is decision-aware: the IdentifierQuoting issue of
+ * its decision model (02-decision-model.tsx) selects how table/column
+ * identifiers are emitted — verbatim (Unquoted, the default) or wrapped
+ * in double quotes (DoubleQuoted).
  */
 @M2M()
-export class Rel2DdlTransformation extends abstractM2M<
+export class Rel2DdlTransformation extends DecisionAwareM2M<
   rmT.IRelSchema,
-  m2tmm.M2T_Model
+  m2tmm.M2T_Model,
+  {},
+  cm.IConfigurationModel
 > {
-  constructor(store: ModelStore) {
-    super(store)
+  constructor(store: ModelStore, extra?: {}, configModel?: cm.IConfigurationModel) {
+    super(store, extra ?? {}, configModel)
   }
 
   template(s: rmT.IRelSchema) {
@@ -57,7 +65,7 @@ export class Rel2DdlTransformation extends abstractM2M<
     return (
       <Sec name={`table_${tab.name}`}>
         <SecParent $refByName="tables"></SecParent>
-        <P>{`CREATE TABLE ${tab.name} (`}</P>
+        <P>{`CREATE TABLE ${this.quoteIdentifier(tab.name)} (`}</P>
         {cols.map((c, i) => (
           <P>{`  ${this.columnLine(c)}${i < cols.length - 1 ? "," : ""}`}</P>
         ))}
@@ -68,11 +76,30 @@ export class Rel2DdlTransformation extends abstractM2M<
   }
 
   private columnLine(c: rmT.IColumn): string {
-    const parts: string[] = [c.name, c.type]
+    const parts: string[] = [this.quoteIdentifier(c.name), c.type]
     if (c.isKey) parts.push("PRIMARY KEY")
     if (c.isAutoincrement) parts.push("AUTOINCREMENT")
-    if (c.isForeignKey && c.references) parts.push(`REFERENCES ${c.references}`)
+    if (c.isForeignKey && c.references) parts.push(`REFERENCES ${this.quoteIdentifier(c.references)}`)
     if (c.isNullable === false && !c.isKey) parts.push("NOT NULL")
     return parts.join(" ")
   }
+
+  // ######### START IdentifierQuoting variations #############
+
+  @VarPoint("IdentifierQuoting")
+  quoteIdentifier(name: string): string {
+    throw new Error("Not implemented VarOptions for VarPoint IdentifierQuoting")
+  }
+
+  @VarOption("quoteIdentifier", Option("Unquoted"))
+  unquotedIdentifier(name: string): string {
+    return name
+  }
+
+  @VarOption("quoteIdentifier", Option("DoubleQuoted"))
+  doubleQuotedIdentifier(name: string): string {
+    return `"${name}"`
+  }
+
+  // ######### END IdentifierQuoting variations #############
 }

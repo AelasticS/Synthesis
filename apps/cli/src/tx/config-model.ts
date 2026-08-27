@@ -480,11 +480,12 @@ export interface DefaultConfigResult {
 }
 
 /**
- * The default-configuration flow shared by `config init` and
- * `tx run --save-config` (and tx run's implicit generation): generate the
- * default configuration in the caller's store, announce every decision it
- * records, and — when a target is given — persist it through the gated
- * writer. Failures carry the exit code the caller must use.
+ * The default-configuration flow shared by `config init` and the
+ * execution core's `--default-configs` path (with `--save-config`
+ * persisting what was generated): generate the default configuration in
+ * the caller's store, announce every decision it records, and — when a
+ * target is given — persist it through the gated writer. Failures carry
+ * the exit code the caller must use.
  */
 export async function generateAndPersistDefaultConfig(
   request: DefaultConfigRequest

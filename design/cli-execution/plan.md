@@ -55,7 +55,9 @@ produces a relational model file with provenance header.
 
 1. Implicit `SourceModelToDefaultConfigurationModel` when `--config`
    omitted on a decision-based tx; print the generated choices;
-   `--save-config`.
+   `--save-config`. (Superseded in Phase 4: the generation machinery
+   stays, but running on it now requires the explicit `--default-configs`
+   consent flag.)
 2. Real `config init` (same generation, saved); `config show` renders
    choices from the model.
 
@@ -63,15 +65,33 @@ Acceptance: run the fixture tx without `--config`; defaults announced;
 result identical to explicit default config; `config init` + edit + run
 with edited config changes the output (e.g. naming convention).
 
-## Phase 4 — Chaining `run` + surface cleanup
+## Phase 4 — Chaining `run` + surface cleanup — DELIVERED (2026-08-27)
 
 1. Multi-step `run` with manifest type-checking, in-memory hand-off,
-   `--keep-intermediates`, positional `--config` matching, M2T-last rule.
-2. Remove `m2t`; rename `example list` → `ls`; `run` resolves
-   pipelines → transformations.
+   `--keep-intermediates`, M2T-last rule. `tx run` and `run` are thin
+   shells over one shared execution core (`src/tx/execute.ts`).
+2. Removed `m2t` (unknown command now); renamed `example list` → `ls`;
+   uniform `--json` exit-code contract completed (ns mk/ls/rm, example
+   describe/run, doctor); vestigial `configs/` workspace dir dropped
+   from init/doctor along with the stub-command machinery.
 
-Acceptance: `synth run eer-to-relational rel-to-sql-ddl --in ... --out-dir
-./gen` reproduces the example showcase output from workspace content.
+> Scope shift during execution (2026-08-27): positional/per-step
+> `--config` matching was DROPPED as illogical for chains — an explicit
+> configuration cannot exist for a model that is only produced mid-run.
+> Instead a uniform explicit-consent policy shipped (BREAKING, applies
+> to `tx run` and `run` alike): decisions are never applied implicitly;
+> a decision-based step runs on `--config` (step 1 only) or on
+> `--default-configs`, otherwise the run aborts (exit 2) before any
+> engine work with a teaching message. `--save-config` is now only
+> valid together with `--default-configs` (and never in chains). To
+> test the policy honestly, the rel-to-sql-ddl example/fixture gained a
+> decision model (GlobalIssue IdentifierQuoting: Unquoted default,
+> DoubleQuoted quoting the emitted identifiers). Pipeline resolution
+> (`run <pipeline>`) moves wholly to Phase 5.
+
+Acceptance (met): `synth run eer-to-relational rel-to-sql-ddl --in ...
+--default-configs --out-dir ./gen` reproduces the example showcase
+output from workspace content.
 
 ## Phase 5 — Pipelines
 
@@ -127,9 +147,10 @@ Consciously postponed, with the phase where each becomes relevant:
   models per invocation).
 - **Concurrent file reads** in doctor and model ls; subtree-rooted walk for
   `model ls --ns`; both matter only for large workspaces.
-- **Uniform --json exit-code contract** — model commands now exit non-zero on
-  JSON errors; ns/config/tx commands still use the old exit-0 convention.
-  Unify in one sweep (Phase 4 surface cleanup).
+- **Uniform --json exit-code contract** — DONE in Phase 4: ns mk/ls/rm,
+  example describe/run, and doctor now fail with a machine-readable
+  `{ error }` object AND a non-zero exit in `--json` mode; no command
+  prints `{ error }` with exit 0 anymore.
 
 ## Engine-side follow-ups surfaced by the Phase 2 review
 

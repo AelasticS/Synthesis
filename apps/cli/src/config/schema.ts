@@ -30,8 +30,7 @@ export const DEFAULT_CONFIG: WorkspaceConfig = {
  */
 export const WORKSPACE_DIRS = {
   models: 'models',
-  transformations: 'transformations',
-  configs: 'configs'
+  transformations: 'transformations'
 } as const
 
 export const CONFIG_FILENAME = 'config.json'

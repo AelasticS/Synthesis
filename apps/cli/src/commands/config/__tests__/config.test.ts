@@ -1,4 +1,4 @@
-import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -58,9 +58,31 @@ describe('config init', () => {
   })
 
   it('rejects a transformation that is not decision-based', async () => {
-    const { code, stderr } = await run(['config', 'init', 'rel-to-sql-ddl', '--for', 'com.example/persons'])
-    expect(code).toBe(1)
-    expect(flatten(stderr)).toContain('not decision-based')
+    // Manifest-only fixture: the check runs before any package code loads
+    const plainDir = join(tempDir, 'plain-tx')
+    mkdirSync(plainDir, { recursive: true })
+    writeFileSync(
+      join(plainDir, 'package.json'),
+      JSON.stringify({
+        name: 'plain-tx',
+        version: '1.0.0',
+        synth: {
+          kind: 'm2m',
+          entry: './lib/transformation.js',
+          exportName: 'PlainTransformation',
+          source: { metamodel: '@synthesis/standard-metamodels/eer' },
+          target: { metamodel: '@synthesis/standard-metamodels/relational' }
+        }
+      })
+    )
+    await run(['tx', 'install', plainDir])
+    try {
+      const { code, stderr } = await run(['config', 'init', 'plain-tx', '--for', 'com.example/persons'])
+      expect(code).toBe(1)
+      expect(flatten(stderr)).toContain('not decision-based')
+    } finally {
+      await run(['tx', 'uninstall', 'plain-tx'])
+    }
   })
 
   it('fails with NOT_FOUND when the model is missing', async () => {
@@ -71,7 +93,7 @@ describe('config init', () => {
 
   it('rejects a model whose metamodel does not match the transformation (exit 2)', async () => {
     // The relational result of the fixture tx is not an EER model
-    await run(['tx', 'run', 'eer-to-relational', '--in', 'com.example/persons', '--out', 'com.example/persons-rel-mm'])
+    await run(['tx', 'run', 'eer-to-relational', '--in', 'com.example/persons', '--default-configs', '--out', 'com.example/persons-rel-mm'])
     const { code, stderr } = await run(['config', 'init', 'eer-to-relational', '--for', 'com.example/persons-rel-mm'])
     expect(code).toBe(2)
     expect(flatten(stderr)).toContain('Type mismatch')
@@ -241,7 +263,8 @@ describe('edited configuration steers the transformation', () => {
     writeFileSync(editedPath, readFileSync(editedPath, 'utf-8').replaceAll('SnakeCase', 'CamelCase'))
 
     const defaults = await run([
-      'tx', 'run', 'eer-to-relational', '--in', 'com.example/persons', '--out', 'com.example/persons-rel-defaults'
+      'tx', 'run', 'eer-to-relational', '--in', 'com.example/persons', '--default-configs',
+      '--out', 'com.example/persons-rel-defaults'
     ])
     expect(defaults.error).toBeUndefined()
     const explicit = await run([
@@ -365,7 +388,7 @@ describe('model validate --tx with a reference cycle', () => {
 describe('tx run --save-config', () => {
   it('persists a configuration identical in decisions to config init output', async () => {
     const saved = await run([
-      'tx', 'run', 'eer-to-relational', '--in', 'com.example/persons',
+      'tx', 'run', 'eer-to-relational', '--in', 'com.example/persons', '--default-configs',
       '--save-config', 'com.example/persons-cfg-saved', '--out', 'com.example/persons-rel-saved'
     ])
     expect(saved.error).toBeUndefined()
@@ -378,7 +401,7 @@ describe('tx run --save-config', () => {
 
   it('refuses an existing --save-config target without --overwrite', async () => {
     const { code, stderr } = await run([
-      'tx', 'run', 'eer-to-relational', '--in', 'com.example/persons',
+      'tx', 'run', 'eer-to-relational', '--in', 'com.example/persons', '--default-configs',
       '--save-config', 'com.example/persons-cfg-saved', '--out', 'com.example/persons-rel-saved2'
     ])
     expect(code).toBe(1)

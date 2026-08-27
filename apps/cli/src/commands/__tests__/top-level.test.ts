@@ -166,6 +166,14 @@ describe('doctor model checks', () => {
     expect(error).toBeDefined()
     expect(stdout).toContain('[error] Model reference (demo/refbad)')
     expect(stdout).toContain('nope/missing')
+
+    // Uniform JSON exit-code contract: --json reports the same failure
+    // as machine-readable checks AND a non-zero exit
+    const jsonRun = await run(['doctor', '--json'])
+    expect(jsonRun.code).toBe(4)
+    const parsed = JSON.parse(jsonRun.stdout)
+    const failing = parsed.checks.filter((check: { status: string }) => check.status === 'error')
+    expect(failing.length).toBeGreaterThan(0)
     rmSync(refFile)
   })
 
@@ -246,22 +254,10 @@ describe('run', () => {
   })
 })
 
-describe('m2t', () => {
-  it('requires model arg and --template and --out flags', async () => {
-    const { error } = await runCli(['m2t'], { home: testHome })
+describe('m2t (removed)', () => {
+  it('is no longer a synth command', async () => {
+    const { error, stderr } = await runCli(['m2t', 'ns/model', '--template', 'tpl', '--out', './out'], { home: testHome })
     expect(error).toBeDefined()
-  })
-
-  it('errors when model not found', async () => {
-    const { error, stderr } = await runCli(['m2t', 'ns/model', '--template', 'my-template', '--out', './output'], { home: testHome })
-    expect(error).toBeDefined()
-    // Should report model not found (verifies real file check)
-    expect(stderr).toContain('Model not found')
-  })
-
-  it('validates model exists before running', async () => {
-    const { error, stderr } = await runCli(['m2t', 'nonexistent/model', '--template', 'tpl', '--out', './out'], { home: testHome })
-    expect(error).toBeDefined()
-    expect(stderr).toContain('Model not found: nonexistent/model')
+    expect(stderr).toContain('is not a synth command')
   })
 })

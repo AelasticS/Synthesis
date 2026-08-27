@@ -27,7 +27,7 @@ import type { TxManifest } from '../../tx/manifest.js'
 export default class ConfigInit extends BaseCommand {
   static override description = `Generate the default configuration model for a transformation on a model.
 
-Runs the transformation's default-configuration generation (one default choice per issue its binding model attaches, global and per-element) against the model named with --for and saves the result as an editable configuration model in the workspace — the same generation 'tx run' performs implicitly when --config is omitted. Edit the saved file to steer the transformation, then pass it to 'tx run --config'. Exit codes: 2 for a source-metamodel mismatch or a result that fails the import gate, 3 for an unknown transformation or missing model.`
+Runs the transformation's default-configuration generation (one default choice per issue its binding model attaches, global and per-element) against the model named with --for and saves the result as an editable configuration model in the workspace — the same generation 'tx run --default-configs' accepts in memory. Edit the saved file to steer the transformation, then pass it to 'tx run --config'. Exit codes: 2 for a source-metamodel mismatch or a result that fails the import gate, 3 for an unknown transformation or missing model.`
 
   static override examples = [
     '<%= config.bin %> <%= command.id %> eer-to-relational --for com.example/persons',

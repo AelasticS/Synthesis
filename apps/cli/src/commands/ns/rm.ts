@@ -6,6 +6,7 @@ import { join } from 'node:path'
 import { BaseCommand } from '../../base/base-command.js'
 import { getModelsPath, saveConfig } from '../../config/index.js'
 import { errorMessage } from '../../support/errors.js'
+import { EXIT_CODES } from '../../support/exit-codes.js'
 import {
   findTransitiveDependents,
   formatDependencyTree,
@@ -66,10 +67,11 @@ export default class NsRm extends BaseCommand {
 
   public async execute(): Promise<void> {
     const { args, flags } = await this.parse(NsRm)
+    const json = Boolean(flags.json)
     const modelsPath = getModelsPath(this.workspaceConfig)
 
     if (!existsSync(modelsPath)) {
-      this.error('Workspace not initialized. Run `synth init` first.')
+      this.jsonAwareFail(json, 'Workspace not initialized. Run `synth init` first.', EXIT_CODES.WORKSPACE_ERROR)
     }
 
     let nsPath: string
@@ -77,16 +79,11 @@ export default class NsRm extends BaseCommand {
       // com.example -> <models>/com/example
       nsPath = namespaceToDir(modelsPath, args.namespace)
     } catch (err) {
-      this.error(errorMessage(err))
+      this.jsonAwareFail(json, errorMessage(err), EXIT_CODES.FAILURE)
     }
 
     if (!existsSync(nsPath)) {
-      if (flags.json) {
-        this.log(JSON.stringify({ removed: false, namespace: args.namespace, error: 'not found' }))
-      } else {
-        this.log(`Namespace '${args.namespace}' does not exist.`)
-      }
-      return
+      this.jsonAwareFail(json, `Namespace '${args.namespace}' does not exist.`, EXIT_CODES.NOT_FOUND)
     }
 
     // Deletion mirror of the import gate, one level up: models OUTSIDE the
@@ -99,45 +96,24 @@ export default class NsRm extends BaseCommand {
 
     if (closure.length > 0 && !flags.cascade) {
       const tree = formatDependencyTree(insideRefs, edges).join('\n')
-      const message =
+      this.jsonAwareFail(
+        json,
         `Cannot remove namespace '${args.namespace}' — ${closure.length} model(s) outside it ` +
-        `reference models inside it:\n${tree}\n` +
-        'Remove or update them first, or pass --cascade to delete all of the above together.'
-      if (flags.json) {
-        this.log(
-          JSON.stringify({
-            removed: false,
-            namespace: args.namespace,
-            error: 'would leave dangling references',
-            dependents: closure,
-            hint: 'use --cascade to delete the dependent models as well'
-          })
-        )
-      } else {
-        this.error(message)
-      }
-      return
+          `reference models inside it:\n${tree}\n` +
+          'Remove or update them first, or pass --cascade to delete all of the above together.',
+        EXIT_CODES.VALIDATION_FAILURE
+      )
     }
 
     // Refuse when the directory contains any file at any depth (models,
     // notes, hidden files, ...); only a tree of empty directories is
     // removable without --force. --cascade implies --force.
     if (!flags.force && !flags.cascade && (await hasAnyFile(nsPath))) {
-      if (flags.json) {
-        this.log(
-          JSON.stringify({
-            removed: false,
-            namespace: args.namespace,
-            error: 'not empty',
-            hint: 'use --force to remove non-empty namespace'
-          })
-        )
-      } else {
-        this.error(
-          `Namespace '${args.namespace}' is not empty. Use --force to remove it anyway.`
-        )
-      }
-      return
+      this.jsonAwareFail(
+        json,
+        `Namespace '${args.namespace}' is not empty. Use --force to remove it anyway.`,
+        EXIT_CODES.VALIDATION_FAILURE
+      )
     }
 
     // Cascade: delete the external dependent models first, then the tree

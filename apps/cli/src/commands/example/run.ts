@@ -16,7 +16,7 @@ export default class ExampleRun extends BaseCommand {
 
   static override args = {
     id: Args.string({
-      description: 'Example identifier (use `synth example list` to see available ids).',
+      description: 'Example identifier (use `synth example ls` to see available ids).',
       required: true
     })
   }
@@ -30,16 +30,18 @@ export default class ExampleRun extends BaseCommand {
 
   public async execute(): Promise<void> {
     const { args, flags } = await this.parse(ExampleRun)
+    const json = Boolean(flags.json)
     const r = examplesRegistry.get(args.id)
 
     if (!r) {
-      this.error(
-        `No example with id "${args.id}". Run \`synth example list\` to see available ids.`,
-        { exit: EXIT_CODES.NOT_FOUND }
+      this.jsonAwareFail(
+        json,
+        `No example with id "${args.id}". Run \`synth example ls\` to see available ids.`,
+        EXIT_CODES.NOT_FOUND
       )
     }
 
-    if (!flags.quiet) {
+    if (!flags.quiet && !json) {
       this.log(`Running example: ${r.name}`)
     }
 
@@ -47,7 +49,7 @@ export default class ExampleRun extends BaseCommand {
     try {
       result = await r.run()
     } catch (err) {
-      this.error(`Example failed: ${(err as Error).message}`, { exit: EXIT_CODES.FAILURE })
+      this.jsonAwareFail(json, `Example failed: ${(err as Error).message}`, EXIT_CODES.FAILURE)
     }
 
     const targetDir = path.join(flags.out, args.id)
@@ -55,7 +57,7 @@ export default class ExampleRun extends BaseCommand {
     for (const a of result.artifacts) {
       const filePath = path.join(targetDir, a.name)
       await fs.writeFile(filePath, a.content, 'utf8')
-      if (!flags.quiet) {
+      if (!flags.quiet && !json) {
         this.log(`  wrote ${path.relative(process.cwd(), filePath)}`)
       }
     }

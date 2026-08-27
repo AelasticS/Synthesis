@@ -32,17 +32,31 @@ Resource → verb everywhere. Execution:
   (stored under `pipelines/` in the workspace; created via
   `synth run ... --save-as <name>`; invocation flags override saved values).
 
-### Chaining rules
+### Chaining rules (as delivered in Phase 4)
 
-- Step N's output model feeds step N+1 in memory (same `ModelStore`);
-  intermediates are not persisted unless `--keep-intermediates`.
+- Step N's output model feeds step N+1 in memory (same `ModelStore`,
+  `transform(root)` hand-off); intermediates are not persisted unless
+  `--keep-intermediates`, which writes each one through the same gated
+  writer as a final M2M result, at `<in-ns>/<in-name>-<step-tx>`
+  (provenance header, `--overwrite` rules).
 - The chain is type-checked from manifests before execution: step N's
-  target metamodel must equal step N+1's source metamodel.
-- Only the last step may be M2T (text is terminal). Last step M2T →
-  `--out-dir` required; otherwise `--out <ref>` (default `<in>.<last-tx>`).
-- `--config` is repeatable and matches decision-based steps positionally.
-- Config structural validation for step N runs just-in-time (its input
-  model exists only then); nominal validation for all steps runs up front.
+  target metamodel must equal step N+1's source metamodel; the error
+  names the incompatible pair.
+- Only the last step may be M2T (text is terminal; an M2T step
+  mid-chain is rejected). Last step M2T → `--out-dir` required (`--out`
+  is an error); otherwise `--out <ref>` (default `<in>-<last-tx>`, tx
+  name sanitized to ref-safe characters).
+- Configuration consent is uniform and explicit (§7): `--config` binds
+  to step 1 ONLY (step 1 not decision-based + `--config` → error).
+  Every other decision-based step — and step 1 without `--config` —
+  requires `--default-configs`; otherwise the run aborts (exit 2)
+  BEFORE any engine work with a teaching message. Per-step/positional
+  `--config` was dropped as illogical: an explicit configuration cannot
+  exist for a model that is only produced mid-run — the configured path
+  is stepwise (`tx run` + `config init` against a kept intermediate).
+  `--save-config` is single-step only.
+- `synth m2t` is gone (removed in Phase 4, no alias); `example list`
+  is now `example ls`.
 
 ## 3. Workspace model format: TSX
 
@@ -144,19 +158,29 @@ made. `tx install` verifies manifest claims against the loaded class.
    decision + binding models (if decision-based).
 2. Read input model header → topологically load its reference closure from
    the workspace → render input model.
-3. Configuration:
+3. Configuration — **uniform explicit-consent policy** (Phase 4,
+   BREAKING; replaces the earlier "implicit defaults" behavior):
+   decisions are NEVER applied without explicit user consent. A
+   decision-based tx requires either `--config <ref>` or the
+   `--default-configs` flag; with neither, the run aborts (exit 2)
+   BEFORE any engine work, pointing at `config init` and
+   `--default-configs`.
    - `--config <ref>`: load; **nominal check** (stamped tx/version,
      binding model, source model match) then **structural check** (binding
      model identity; every Choice's issue exists; every selectedOption
      belongs to its issue; ElementChoice elements resolve in the input
-     model; uncovered issues fall back to `isDefault`).
-   - no `--config` on a decision-based tx: implicitly run
-     `SourceModelToDefaultConfigurationModel` (source + binding → default
-     ConfigurationModel), print every choice it contains, proceed. Fail
-     only if an issue has no default. `--save-config <ref>` persists the
-     generated config. The engine transformation ALWAYS receives a real
-     ConfigurationModel — no special no-config path.
-   - `--config` on a non-decision tx: error.
+     model; uncovered issues fall back to `isDefault` — those defaults
+     stay announced `(default)` and are materialized as real Choices;
+     the consent flag governs only the WHOLLY-implicit case).
+   - `--default-configs`: run `SourceModelToDefaultConfigurationModel`
+     (source + binding → default ConfigurationModel), print every choice
+     it contains, proceed. Fail only if an issue has no default.
+     `--save-config <ref>` persists the generated config and is only
+     valid together with `--default-configs` (`--config` +
+     `--save-config` stays an error). The engine transformation ALWAYS
+     receives a real ConfigurationModel — no special no-config path.
+   - `--config`, `--default-configs`, or `--save-config` on a
+     non-decision tx: error.
 4. Execute. M2M → `exportToJSX` result to `--out` ref with provenance
    header. M2T → engine `generate` writes files under `--out-dir`.
 

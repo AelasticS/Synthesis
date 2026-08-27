@@ -14,7 +14,7 @@ export default class ExampleDescribe extends BaseCommand {
 
   static override args = {
     id: Args.string({
-      description: 'Example identifier (use `synth example list` to see available ids).',
+      description: 'Example identifier (use `synth example ls` to see available ids).',
       required: true
     })
   }
@@ -24,13 +24,10 @@ export default class ExampleDescribe extends BaseCommand {
     const r = examplesRegistry.get(args.id)
 
     if (!r) {
-      if (flags.json) {
-        this.log(JSON.stringify({ error: `No example with id "${args.id}"` }))
-        this.exit(EXIT_CODES.NOT_FOUND)
-      }
-      this.error(
-        `No example with id "${args.id}". Run \`synth example list\` to see available ids.`,
-        { exit: EXIT_CODES.NOT_FOUND }
+      this.jsonAwareFail(
+        Boolean(flags.json),
+        `No example with id "${args.id}". Run \`synth example ls\` to see available ids.`,
+        EXIT_CODES.NOT_FOUND
       )
     }
 

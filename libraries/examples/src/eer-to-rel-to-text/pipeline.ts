@@ -17,6 +17,9 @@ import { EER2RelDomainWithDecisionTransformation } from "../eer-to-rel-small/EER
 
 import { PersonsSchema } from "./source-model"
 import { Rel2DdlTransformation } from "./ddl-template"
+import { RELModel } from "./rel-metamodel"
+import { DdlGenerationIssues } from "./02-decision-model"
+import { Rel_Bindings } from "./03-binding-model"
 
 /**
  * End-to-end Synthesis showcase:
@@ -33,7 +36,9 @@ export async function runEerToRelToText(): Promise<{ sql: string }> {
   const store = new ModelStore()
   const ctx = new Context()
 
-  // Phase 1 — render foundational models into the store.
+  // Phase 1 — render foundational models into the store: the EER->Rel
+  // pieces and the Rel->DDL decision/binding pieces (both transformations
+  // are decision-aware).
   const eerMM = EERModel(store)
   const decisionModel = RelationSchemaDesignIssues(store)
   const bindingModel = ER_Bindings(store)
@@ -43,6 +48,10 @@ export async function runEerToRelToText(): Promise<{ sql: string }> {
   decisionModel.render(ctx)
   const renderedBinding: bmT.IBindingModel = bindingModel.render(ctx)
   const renderedSource = sourceModel.render(ctx) as eerT.IEERSchema
+
+  RELModel(store).render(ctx)
+  DdlGenerationIssues(store).render(ctx)
+  const renderedDdlBinding: bmT.IBindingModel = Rel_Bindings(store).render(ctx)
 
   // Phase 2 — derive a default configuration from source + binding.
   // The decision model defaults NamingConvention to SnakeCase, so the
@@ -56,8 +65,15 @@ export async function runEerToRelToText(): Promise<{ sql: string }> {
   const eer2rel = new EER2RelDomainWithDecisionTransformation(store, {}, configModel)
   const relSchema = eer2rel.transform(renderedSource) as rmT.IRelSchema
 
-  // Phase 4 — Relational -> M2T model.
-  const rel2ddl = new Rel2DdlTransformation(store)
+  // Phase 4 — Relational -> M2T model. The DDL transformation is
+  // decision-aware too: derive its default configuration (IdentifierQuoting
+  // defaults to Unquoted) from the relational schema + DDL binding model,
+  // exactly as phase 2 did for the EER->Rel step.
+  const rel2ddlCfg = new SourceModelToDefaultConfigurationModel(store, {
+    bindingModel: renderedDdlBinding,
+  })
+  const ddlConfigModel = rel2ddlCfg.transform(relSchema)
+  const rel2ddl = new Rel2DdlTransformation(store, {}, ddlConfigModel)
   const m2tModel = rel2ddl.transform(relSchema)
 
   // Phase 5 — M2T model -> SQL string. mock mode never touches the FS.

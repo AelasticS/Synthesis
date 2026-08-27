@@ -282,7 +282,7 @@ describe('loadTxManifest — fixture packages', () => {
     })
   })
 
-  it('loads the rel-to-sql-ddl (m2t) fixture', async () => {
+  it('loads the rel-to-sql-ddl (m2t, decision-based) fixture', async () => {
     const manifest = await loadTxManifest(m2tFixture)
     expect(manifest).toEqual({
       name: 'rel-to-sql-ddl',
@@ -292,7 +292,20 @@ describe('loadTxManifest — fixture packages', () => {
       exportName: 'Rel2DdlTransformation',
       source: { metamodel: '@synthesis/standard-metamodels/relational' },
       target: { metamodel: 'text' },
-      variability: false
+      parts: {
+        metamodels: [
+          { module: '@synthesis/examples/lib/eer-to-rel-to-text/rel-metamodel.js', exportName: 'RELModel' }
+        ],
+        decisionModel: {
+          module: '@synthesis/examples/lib/eer-to-rel-to-text/02-decision-model.js',
+          exportName: 'DdlGenerationIssues'
+        },
+        bindingModel: {
+          module: '@synthesis/examples/lib/eer-to-rel-to-text/03-binding-model.js',
+          exportName: 'Rel_Bindings'
+        }
+      },
+      variability: true
     })
   })
 
