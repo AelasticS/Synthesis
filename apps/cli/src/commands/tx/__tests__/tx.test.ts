@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { tmpdir } from 'node:os'
 import { fileURLToPath } from 'node:url'
@@ -117,6 +117,32 @@ describe('tx install', () => {
     expect(error).toBeDefined()
     expect(stderr).toContain(`field 'entry'`)
   })
+
+  it('rejects a manifest name that would escape the transformations directory', async () => {
+    // The name becomes a directory segment; separators and '..' must not
+    // let an install write outside transformations/ or clobber siblings.
+    for (const [badName, reason] of [
+      ['../evil', 'path separator'],
+      ['a/b', 'path separator'],
+      ['a\\\\b', 'path separator'],
+      ['..', `contains '..'`]
+    ] as const) {
+      const dir = join(testTmpDir, `bad-name-tx-${Buffer.from(badName).toString('hex')}`)
+      mkdirSync(dir, { recursive: true })
+      writeFileSync(
+        join(dir, 'package.json'),
+        JSON.stringify({ name: 'bad-name-tx', version: '1.0.0', synth: { ...testTxPkgJson.synth } })
+      )
+      writeFileSync(join(dir, 'synth.json'), JSON.stringify({ ...testTxPkgJson.synth, name: badName }))
+
+      const { error, stderr } = await runCli(['tx', 'install', dir], { home: testHome })
+      expect(error).toBeDefined()
+      // oclif wraps stderr at terminal width; flatten before asserting
+      const flat = stderr.replace(/·?\s*\n\s*›?\s*/g, ' ')
+      expect(flat).toContain('is not usable as an install directory name')
+      expect(flat).toContain(reason)
+    }
+  })
 })
 
 describe('tx uninstall', () => {
@@ -193,6 +219,32 @@ describe('tx show', () => {
     expect(parsed.sourceMetamodel).toBe('source-meta')
     expect(parsed.targetMetamodel).toBe('target-meta')
     expect(parsed.variability).toBe(false)
+  })
+
+  it('degrades to config data with a warning when the installed manifest is broken', async () => {
+    // A synth.json at the package root takes precedence — a broken one
+    // makes every manifest load fail for this installed entry.
+    const installedDir = join(testHome, '.synth', 'transformations', 'test-tx')
+    writeFileSync(join(installedDir, 'synth.json'), '{ broken json')
+
+    const human = await runCli(['tx', 'show', 'test-tx'], { home: testHome })
+    expect(human.error).toBeUndefined()
+    expect(human.code).toBe(0)
+    expect(human.stdout).toContain('Transformation: test-tx')
+    expect(human.stdout).toContain('version: 1.0.0')
+    expect(human.stdout).toContain(installedDir)
+    expect(human.stderr).toContain('manifest could not be loaded')
+    expect(human.stderr).toContain('Failed to parse')
+
+    const jsonRun = await runCli(['tx', 'show', 'test-tx', '--json'], { home: testHome })
+    expect(jsonRun.error).toBeUndefined()
+    expect(jsonRun.code).toBe(0)
+    const parsed = JSON.parse(jsonRun.stdout)
+    expect(parsed.name).toBe('test-tx')
+    expect(parsed.version).toBe('1.0.0')
+    expect(parsed.path).toBe(installedDir)
+    expect(parsed.manifestError).toContain('Failed to parse')
+    expect(parsed.kind).toBeUndefined()
   })
 })
 
@@ -285,8 +337,33 @@ describe('tx init', () => {
 
     // Verify files were created
     expect(existsSync(join(projectDir, 'package.json'))).toBe(true)
+    expect(existsSync(join(projectDir, 'synth.json'))).toBe(true)
     expect(existsSync(join(projectDir, 'tsconfig.json'))).toBe(true)
     expect(existsSync(join(projectDir, 'src', 'index.ts'))).toBe(true)
+  })
+
+  it('scaffolds a package that tx install accepts as-is', async () => {
+    const projectName = 'installable-scaffold'
+    const projectDir = join(testDir, projectName)
+
+    const init = await runCli(['tx', 'init', projectName], { cwd: testDir, home: testHome })
+    expect(init.error).toBeUndefined()
+
+    // The manifest's exportName must name the scaffolded class
+    const indexTs = readFileSync(join(projectDir, 'src', 'index.ts'), 'utf-8')
+    const synth = JSON.parse(readFileSync(join(projectDir, 'synth.json'), 'utf-8'))
+    expect(indexTs).toContain(`export class ${synth.exportName}`)
+
+    try {
+      const install = await runCli(['tx', 'install', projectDir, '--json'], { cwd: testDir, home: testHome })
+      expect(install.error).toBeUndefined()
+      const parsed = JSON.parse(install.stdout)
+      expect(parsed.installed).toBe(true)
+      expect(parsed.name).toBe(projectName)
+      expect(parsed.kind).toBe('m2m')
+    } finally {
+      await runCli(['tx', 'uninstall', projectName], { home: testHome })
+    }
   })
 
   it('fails if directory already exists', async () => {

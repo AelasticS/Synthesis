@@ -1,4 +1,4 @@
-import { existsSync, mkdtempSync, readFileSync, readdirSync, rmSync } from 'node:fs'
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -18,6 +18,10 @@ let tempDir: string
 let modelsDir: string
 
 const run = (args: string[]) => runCli(args, { home: testHome })
+
+// oclif wraps stderr at terminal width, inserting '·\n ›' inside messages;
+// flatten the wrapping so substring assertions can span line breaks.
+const flatten = (text: string): string => text.replace(/·?\s*\n\s*›?\s*/g, ' ')
 
 beforeAll(async () => {
   testHome = mkdtempSync(join(tmpdir(), 'synth-tx-run-home-'))
@@ -49,6 +53,58 @@ describe('tx run errors', () => {
     ])
     expect(code).toBe(3)
     expect(stderr).toContain('Input model not found')
+  })
+
+  it('fails with NOT_FOUND and a reinstall hint when the installed package is gone', async () => {
+    // Register a valid transformation, then rip its package directory out
+    // from under the workspace config.
+    const ghostDir = join(tempDir, 'ghost-tx')
+    mkdirSync(ghostDir, { recursive: true })
+    writeFileSync(
+      join(ghostDir, 'package.json'),
+      JSON.stringify({
+        name: 'ghost-tx',
+        version: '1.0.0',
+        synth: {
+          kind: 'm2m',
+          entry: './lib/transformation.js',
+          exportName: 'GhostTransformation',
+          source: { metamodel: 'mm/source' },
+          target: { metamodel: 'mm/target' }
+        }
+      })
+    )
+    const install = await run(['tx', 'install', ghostDir])
+    expect(install.error).toBeUndefined()
+    rmSync(join(testHome, '.synth', 'transformations', 'ghost-tx'), { recursive: true, force: true })
+
+    try {
+      const { code, stderr } = await run(['tx', 'run', 'ghost-tx', '--in', 'com.example/persons'])
+      expect(code).toBe(3)
+      expect(flatten(stderr)).toContain('installed package is missing')
+      expect(flatten(stderr)).toContain('tx install')
+    } finally {
+      await run(['tx', 'uninstall', 'ghost-tx'])
+    }
+  })
+
+  it('rejects an input model with a malformed $synth header (exit 2)', async () => {
+    // Placed directly in the models tree: `model import` would refuse to
+    // stamp this, but tx run must not silently skip the metamodel gate.
+    const brokenPath = join(modelsDir, 'com', 'example', 'broken-header.tsx')
+    writeFileSync(
+      brokenPath,
+      `export const $synth = { kind: 'model', metamodel: undefined }\nexport default () => ({ render: () => 'x' })\n`
+    )
+    try {
+      const { code, stderr } = await run([
+        'tx', 'run', 'eer-to-relational', '--in', 'com.example/broken-header', '--out', 'com.example/never'
+      ])
+      expect(code).toBe(2)
+      expect(flatten(stderr)).toContain('malformed $synth header')
+    } finally {
+      rmSync(brokenPath, { force: true })
+    }
   })
 
   it('rejects an input model whose metamodel does not match the manifest (exit 2)', async () => {
@@ -127,6 +183,25 @@ describe('tx run m2m', () => {
     expect(stderr).toContain('--overwrite')
     // The refused run must not have clobbered the model
     expect(existsSync(outPath())).toBe(true)
+  })
+
+  it('replaces an existing target with --overwrite via temp-file rename, leaving no temp behind', async () => {
+    const before = readFileSync(outPath(), 'utf-8')
+    const { stdout, error } = await run([
+      'tx', 'run', 'eer-to-relational', '--in', 'com.example/persons', '--out', outRef, '--overwrite'
+    ])
+    expect(error).toBeUndefined()
+    expect(stdout).toContain(`Wrote ${outRef}`)
+    // The result was renamed over the target (same model, fresh header dates)
+    const after = readFileSync(outPath(), 'utf-8')
+    expect(after).toContain('export default')
+    expect(after).not.toBe(before)
+    // No `<name>.<pid>.tmp.tsx` intermediate may survive the rename
+    const siblings = readdirSync(dirname(outPath()))
+    expect(siblings.filter((name) => name.includes('.tmp'))).toEqual([])
+    // And the replacement still passes the workspace's own gate
+    const validate = await run(['model', 'validate', outRef])
+    expect(validate.error).toBeUndefined()
   })
 
   it('emits a machine-readable result with --json', async () => {

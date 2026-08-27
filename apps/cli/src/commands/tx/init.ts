@@ -33,7 +33,8 @@ export default class TxInit extends BaseCommand {
     await mkdir(projectDir, { recursive: true })
     await mkdir(join(projectDir, 'src'), { recursive: true })
 
-    // Create package.json
+    // Create package.json. The transformation manifest lives in synth.json;
+    // package.json carries only npm metadata.
     const packageJson = {
       name: projectName,
       version: '0.1.0',
@@ -49,13 +50,21 @@ export default class TxInit extends BaseCommand {
       files: ['dist', 'synth.json'],
       devDependencies: {
         typescript: '^5.0.0'
-      },
-      synth: {
-        type: 'transformation',
-        entry: 'dist/index.js'
       }
     }
     await writeFile(join(projectDir, 'package.json'), JSON.stringify(packageJson, null, 2) + '\n')
+
+    // Create synth.json — the manifest 'tx install' validates. The scaffold
+    // is installable as-is; the metamodel placeholders are for the author
+    // to replace.
+    const synthJson = {
+      kind: 'm2m',
+      entry: './dist/index.js',
+      exportName: 'MyTransformation',
+      source: { metamodel: '@synthesis/standard-metamodels/source' },
+      target: { metamodel: '@synthesis/standard-metamodels/target' }
+    }
+    await writeFile(join(projectDir, 'synth.json'), JSON.stringify(synthJson, null, 2) + '\n')
 
     // Create tsconfig.json
     const tsconfig = {
@@ -78,36 +87,34 @@ export default class TxInit extends BaseCommand {
     }
     await writeFile(join(projectDir, 'tsconfig.json'), JSON.stringify(tsconfig, null, 2) + '\n')
 
-    // Create src/index.ts template
+    // Create src/index.ts template. The exported class name must match
+    // synth.json's exportName — 'tx run' loads exactly that export.
     const indexTs = `/**
  * Synthesis transformation: ${projectName}
  *
- * This is the entry point for your transformation.
+ * This is the entry point for your transformation. The class name matches
+ * the 'exportName' declared in synth.json.
  */
 
-export interface TransformationInput {
-  // Define your input model type here
-}
+export class MyTransformation {
+  // The store holding the source model, provided by the runner.
+  public constructor(private readonly store: unknown) {}
 
-export interface TransformationOutput {
-  // Define your output model type here
+  /**
+   * Transform the input model root into the output model root.
+   */
+  public transform(input: unknown): unknown {
+    // Implement your transformation logic here
+    throw new Error('Not implemented')
+  }
 }
-
-/**
- * Transform the input model to the output model.
- */
-export function transform(input: TransformationInput): TransformationOutput {
-  // Implement your transformation logic here
-  throw new Error('Not implemented')
-}
-
-export default transform
 `
     await writeFile(join(projectDir, 'src', 'index.ts'), indexTs)
 
     this.log('Created:')
     this.log(`  ${projectName}/`)
     this.log(`  ├── package.json`)
+    this.log(`  ├── synth.json`)
     this.log(`  ├── tsconfig.json`)
     this.log(`  └── src/`)
     this.log(`      └── index.ts`)

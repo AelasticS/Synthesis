@@ -10,14 +10,18 @@
  *
  * `entry` and every `parts` module specifier may be either a
  * package-relative path (`./lib/transformation.js`) or a bare package
- * specifier (`@synthesis/examples/lib/...`). The manifest reader only
- * records them — resolution against the installed package happens at
- * execution time (`tx run`), when the modules are actually imported.
+ * specifier (`@synthesis/examples/lib/...`). A path-looking specifier
+ * without the `./` prefix (`lib/transformation.js`) is normalized to the
+ * package-relative form at load time when it names an existing file under
+ * the package directory. Resolution against the installed package happens
+ * at execution time (`tx run`), when the modules are actually imported.
  */
 
 import { existsSync } from 'node:fs'
 import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
+
+import { errorMessage } from '../support/errors.js'
 
 export type TxKind = 'm2m' | 'm2t'
 
@@ -66,6 +70,13 @@ export interface TxManifest {
   variability: boolean
 }
 
+/** npm metadata of the package the manifest was read from. */
+export interface TxPackageMeta {
+  description?: string
+  author?: string
+  license?: string
+}
+
 export const SYNTH_MANIFEST_FILENAME = 'synth.json'
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -83,8 +94,7 @@ async function readJsonFile(path: string): Promise<Record<string, unknown>> {
   try {
     parsed = JSON.parse(await readFile(path, 'utf-8'))
   } catch (err) {
-    const reason = err instanceof Error ? err.message : String(err)
-    throw new ManifestError(`Failed to parse '${path}': ${reason}`)
+    throw new ManifestError(`Failed to parse '${path}': ${errorMessage(err)}`)
   }
   if (!isRecord(parsed)) {
     throw new ManifestError(`Failed to parse '${path}': expected a JSON object at the top level.`)
@@ -93,16 +103,35 @@ async function readJsonFile(path: string): Promise<Record<string, unknown>> {
 }
 
 /**
- * Load and validate the transformation manifest of a package directory.
+ * A specifier like `lib/transformation.js` is neither package-relative
+ * (`./lib/...`) nor a scoped package; when it names an existing file under
+ * the package directory, the author meant the package-relative form —
+ * normalize it so execution-time resolution imports the packaged file
+ * instead of attempting a bare-package lookup.
+ */
+function normalizeModuleSpecifier(spec: string, packageDir: string): string {
+  if (spec.startsWith('./') || spec.startsWith('../') || spec.startsWith('/') || spec.startsWith('@')) {
+    return spec
+  }
+  if (spec.includes('/') && existsSync(join(packageDir, spec))) {
+    return `./${spec}`
+  }
+  return spec
+}
+
+/**
+ * Load and validate the transformation manifest of a package directory,
+ * together with the npm metadata (description/author/license) of its
+ * package.json — one read serves both.
  *
  * Reads `synth.json` at the package root when present, otherwise the
  * `synth` object in `package.json`. Throws with a precise message (which
  * file, which field) when neither source exists or a required field is
- * missing or malformed. The legacy field names `sourceMetamodel` /
- * `targetMetamodel` are accepted as aliases for `source.metamodel` /
- * `target.metamodel` — only inside the package.json `synth` block.
+ * missing or malformed.
  */
-export async function loadTxManifest(packageDir: string): Promise<TxManifest> {
+export async function loadTxManifestWithMeta(
+  packageDir: string
+): Promise<{ manifest: TxManifest; meta: TxPackageMeta }> {
   const pkgJsonPath = join(packageDir, 'package.json')
   if (!existsSync(pkgJsonPath)) {
     throw new ManifestError(
@@ -114,16 +143,16 @@ export async function loadTxManifest(packageDir: string): Promise<TxManifest> {
   const synthJsonPath = join(packageDir, SYNTH_MANIFEST_FILENAME)
   let raw: Record<string, unknown>
   let manifestFile: string
-  let allowLegacyAliases: boolean
+  let fromSynthJson: boolean
 
   if (existsSync(synthJsonPath)) {
     raw = await readJsonFile(synthJsonPath)
     manifestFile = synthJsonPath
-    allowLegacyAliases = false
+    fromSynthJson = true
   } else if (isRecord(pkg.synth)) {
     raw = pkg.synth
     manifestFile = `${pkgJsonPath} ("synth" block)`
-    allowLegacyAliases = true
+    fromSynthJson = false
   } else {
     throw new ManifestError(
       `No transformation manifest found in '${packageDir}': expected a '${SYNTH_MANIFEST_FILENAME}' file at the package root or a "synth" object in package.json.`
@@ -139,7 +168,7 @@ export async function loadTxManifest(packageDir: string): Promise<TxManifest> {
   if (!isNonEmptyString(name)) {
     throw new ManifestError(
       `Invalid transformation manifest in '${pkgJsonPath}': field 'name' is required (set "name" in package.json${
-        allowLegacyAliases ? '' : ` or override it in ${SYNTH_MANIFEST_FILENAME}`
+        fromSynthJson ? ` or override it in ${SYNTH_MANIFEST_FILENAME}` : ''
       }).`
     )
   }
@@ -163,45 +192,59 @@ export async function loadTxManifest(packageDir: string): Promise<TxManifest> {
     fail('exportName', 'is required (named export of the transformation class)')
   }
 
-  const source = normalizeEndpoint(raw, 'source', allowLegacyAliases, fail)
-  const target = normalizeEndpoint(raw, 'target', allowLegacyAliases, fail)
+  const source = normalizeEndpoint(raw, 'source', fail)
+  const target = normalizeEndpoint(raw, 'target', fail)
 
   let components: string | undefined
   if (isRecord(raw.target) && raw.target.components !== undefined) {
     if (!isNonEmptyString(raw.target.components)) {
       fail('target.components', 'must be an import specifier string when present')
     }
-    components = raw.target.components as string
+    components = normalizeModuleSpecifier(raw.target.components as string, packageDir)
   }
 
-  const parts = normalizeParts(raw, fail)
+  const parts = normalizeParts(raw, packageDir, fail)
 
-  return {
+  const manifest: TxManifest = {
     name,
     version: version as string,
     kind: kind as TxKind,
-    entry: raw.entry as string,
+    entry: normalizeModuleSpecifier(raw.entry as string, packageDir),
     exportName: raw.exportName as string,
     source: { metamodel: source },
     target: components === undefined ? { metamodel: target } : { metamodel: target, components },
     ...(parts === undefined ? {} : { parts }),
     variability: parts?.decisionModel !== undefined && parts?.bindingModel !== undefined
   }
+
+  const meta: TxPackageMeta = {}
+  if (isNonEmptyString(pkg.description)) {
+    meta.description = pkg.description
+  }
+  const author = isRecord(pkg.author) ? pkg.author.name : pkg.author
+  if (isNonEmptyString(author)) {
+    meta.author = author
+  }
+  if (isNonEmptyString(pkg.license)) {
+    meta.license = pkg.license
+  }
+
+  return { manifest, meta }
 }
 
-/** Resolve `source.metamodel` / `target.metamodel`, honouring the legacy aliases. */
+/** Load and validate the transformation manifest of a package directory. */
+export async function loadTxManifest(packageDir: string): Promise<TxManifest> {
+  return (await loadTxManifestWithMeta(packageDir)).manifest
+}
+
+/** Resolve `source.metamodel` / `target.metamodel`. */
 function normalizeEndpoint(
   raw: Record<string, unknown>,
   side: 'source' | 'target',
-  allowLegacyAliases: boolean,
   fail: (field: string, problem: string) => never
 ): string {
   const value = raw[side]
   if (value === undefined) {
-    const alias = raw[`${side}Metamodel`]
-    if (allowLegacyAliases && isNonEmptyString(alias)) {
-      return alias
-    }
     fail(side, `is required (an object with a 'metamodel' string)`)
   }
   if (!isRecord(value)) {
@@ -216,6 +259,7 @@ function normalizeEndpoint(
 
 function normalizeParts(
   raw: Record<string, unknown>,
+  packageDir: string,
   fail: (field: string, problem: string) => never
 ): TxManifestParts | undefined {
   if (raw.parts === undefined) {
@@ -232,14 +276,14 @@ function normalizeParts(
       fail('parts.metamodels', 'must be an array of { module, exportName } entries')
     }
     parts.metamodels = (rawParts.metamodels as unknown[]).map((entry, i) =>
-      validatePartRef(entry, `parts.metamodels[${i}]`, fail)
+      validatePartRef(entry, `parts.metamodels[${i}]`, packageDir, fail)
     )
   }
   if (rawParts.decisionModel !== undefined) {
-    parts.decisionModel = validatePartRef(rawParts.decisionModel, 'parts.decisionModel', fail)
+    parts.decisionModel = validatePartRef(rawParts.decisionModel, 'parts.decisionModel', packageDir, fail)
   }
   if (rawParts.bindingModel !== undefined) {
-    parts.bindingModel = validatePartRef(rawParts.bindingModel, 'parts.bindingModel', fail)
+    parts.bindingModel = validatePartRef(rawParts.bindingModel, 'parts.bindingModel', packageDir, fail)
   }
   if ((parts.decisionModel === undefined) !== (parts.bindingModel === undefined)) {
     fail(
@@ -253,6 +297,7 @@ function normalizeParts(
 function validatePartRef(
   value: unknown,
   field: string,
+  packageDir: string,
   fail: (field: string, problem: string) => never
 ): TxPartRef {
   if (!isRecord(value)) {
@@ -265,5 +310,8 @@ function validatePartRef(
   if (!isNonEmptyString(ref.exportName)) {
     fail(`${field}.exportName`, 'is required (named export of the module)')
   }
-  return { module: ref.module as string, exportName: ref.exportName as string }
+  return {
+    module: normalizeModuleSpecifier(ref.module as string, packageDir),
+    exportName: ref.exportName as string
+  }
 }

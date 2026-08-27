@@ -106,6 +106,38 @@ export function resolveGitAuthor(): Promise<string | null> {
   return gitAuthorPromise
 }
 
+export interface GeneratedHeaderOptions {
+  metamodel: string
+  generatedBy: Omit<SynthGeneratedBy, 'date'>
+  description?: string
+  references?: Record<string, string>
+}
+
+/**
+ * Header for a model file the CLI generates itself (e.g. a `tx run` m2m
+ * result). Owns the same defaults stampModelText applies to imported
+ * files — author from git config falling back to 'unknown', version
+ * '0.1.0', fresh dates, empty tags/custom, null license — so generated
+ * and imported headers cannot derive differently.
+ */
+export async function makeGeneratedHeader(options: GeneratedHeaderOptions): Promise<SynthHeader> {
+  const now = new Date().toISOString()
+  return {
+    kind: 'model',
+    metamodel: options.metamodel,
+    references: options.references ?? {},
+    generatedBy: { ...options.generatedBy, date: now },
+    createdAt: now,
+    modifiedAt: now,
+    author: (await resolveGitAuthor()) ?? 'unknown',
+    version: '0.1.0',
+    description: options.description ?? '',
+    tags: [],
+    license: null,
+    custom: {}
+  }
+}
+
 interface ExistingFields {
   kind?: SynthHeaderKind
   metamodel?: string

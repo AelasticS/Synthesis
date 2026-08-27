@@ -6,7 +6,24 @@ import { Args } from '@oclif/core'
 
 import { BaseCommand } from '../../base/base-command.js'
 import { getTransformationsPath, saveConfig } from '../../config/index.js'
+import { errorMessage } from '../../support/errors.js'
 import { loadTxManifest, TxManifest } from '../../tx/manifest.js'
+
+// The manifest name becomes a single directory segment under the workspace's
+// transformations directory; a name with path separators or '..' could
+// escape it or clobber sibling installs.
+function invalidNameReason(name: string): string | undefined {
+  if (name.trim() === '') {
+    return 'it is empty'
+  }
+  if (name.includes('/') || name.includes('\\')) {
+    return 'it contains a path separator'
+  }
+  if (name.includes('..')) {
+    return `it contains '..'`
+  }
+  return undefined
+}
 
 export default class TxInstall extends BaseCommand {
   static override description = 'Install a transformation from npm, git, or local path.'
@@ -48,10 +65,17 @@ export default class TxInstall extends BaseCommand {
     try {
       manifest = await loadTxManifest(sourcePath)
     } catch (err) {
-      this.error(err instanceof Error ? err.message : String(err))
+      this.error(errorMessage(err))
     }
 
     const { name, version } = manifest
+
+    const nameProblem = invalidNameReason(name)
+    if (nameProblem !== undefined) {
+      this.error(
+        `Cannot install transformation: manifest name '${name}' is not usable as an install directory name (${nameProblem}).`
+      )
+    }
 
     // Create transformations directory if needed
     const txBasePath = getTransformationsPath(this.workspaceConfig)
@@ -68,13 +92,12 @@ export default class TxInstall extends BaseCommand {
 
     await cp(sourcePath, destPath, { recursive: true })
 
-    // Update config
+    // Update config. Kind and variability are manifest facts, re-read from
+    // the manifest whenever needed — the config records only install state.
     this.workspaceConfig.transformations[name] = {
       version,
       path: destPath,
-      installedAt: new Date().toISOString(),
-      kind: manifest.kind,
-      variability: manifest.variability
+      installedAt: new Date().toISOString()
     }
 
     await saveConfig(this.workspaceConfig)

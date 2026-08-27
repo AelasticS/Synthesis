@@ -126,6 +126,28 @@ Consciously postponed, with the phase where each becomes relevant:
   JSON errors; ns/config/tx commands still use the old exit-0 convention.
   Unify in one sweep (Phase 4 surface cleanup).
 
+## Engine-side follow-ups surfaced by the Phase 2 review
+
+These are defects/gaps in the libraries that the CLI currently works around;
+each workaround is protected by the tx-run import-gate round-trip, but the
+real fix belongs in the engine:
+
+- **`ModelStore.exportToJSX` output does not round-trip** (inverse links as
+  broken sub-elements, stringified booleans, flattened element refs). tx run
+  prefers the transformation's own `context.output.jsx` — an undocumented
+  field. The engine should offer a supported `serializeModel(root)` API
+  returning `{ jsx, usedComponents }` so the CLI stops regex-scanning JSX
+  text for tags.
+- **Option→Issue containment is not materialized** in the rendered decision
+  model (`issue.options` empty, option's parent unset). tx run reconstructs
+  ownership from `elements[]` document order — fragile. The store's
+  inverse-property machinery should materialize the link; then delete
+  `mapOptionsToIssues` in run.ts.
+- **M2T `generate` flattens directory nesting**: `ItemResult.itemPath` is
+  only the bare doc name, so `<Dir>` structure is lost and same-named docs
+  collide (the CLI now detects collisions and fails instead of silently
+  overwriting). `generate` should report the accumulated path.
+
 ## Open items carried alongside
 
 - Transformation manifest location (`synth.json` vs `package.json#synth`)

@@ -1,6 +1,6 @@
 import { existsSync } from 'node:fs'
-import { mkdir, readFile, rm, writeFile } from 'node:fs/promises'
-import { dirname, isAbsolute, join, resolve, sep } from 'node:path'
+import { mkdir, readFile, writeFile } from 'node:fs/promises'
+import { dirname, isAbsolute, join, resolve } from 'node:path'
 import { format } from 'node:util'
 
 import { Args, Flags } from '@oclif/core'
@@ -13,20 +13,24 @@ import { BaseCommand } from '../../base/base-command.js'
 import { getModelsPath } from '../../config/index.js'
 import { parseSynthHeader, serializeSynthHeader } from '../../models/header.js'
 import type { SynthHeader } from '../../models/header.js'
-import { renderModel } from '../../models/loader.js'
-import { resolveGitAuthor } from '../../models/stamp.js'
+import {
+  ModelClosureError,
+  renderFactory,
+  renderModel,
+  renderModelClosure,
+  writeGatedModelFile
+} from '../../models/loader.js'
+import type { ModelClosureErrorKind } from '../../models/loader.js'
+import { makeGeneratedHeader } from '../../models/stamp.js'
 import { errorMessage } from '../../support/errors.js'
-import { parseRef, refToModelPath } from '../../support/refs.js'
+import { normalizeRef, refToModelPath } from '../../support/refs.js'
 import { EXIT_CODES } from '../../support/exit-codes.js'
 import { loadTxManifest } from '../../tx/manifest.js'
 import type { TxManifest, TxPartRef } from '../../tx/manifest.js'
 import { importTxModule, moduleExport, requireExport } from '../../tx/modules.js'
+import { resolveDocDest, uniqueJsxTags } from '../../tx/output.js'
 
 type StoreElement = Parameters<ModelStore['getTypeOf']>[0]
-
-interface JsxNode {
-  render(ctx: Context): unknown
-}
 
 interface TransformationInstance {
   transform(input: unknown): unknown
@@ -52,6 +56,16 @@ interface DecisionAnnouncement {
   option: string
   element?: string
   isDefault: boolean
+}
+
+// A broken reference closure maps to the same exit codes the equivalent
+// direct failure would produce: missing model -> NOT_FOUND, malformed
+// header -> VALIDATION_FAILURE, everything else -> FAILURE.
+const CLOSURE_EXIT_CODES: Record<ModelClosureErrorKind, number> = {
+  'invalid-ref': EXIT_CODES.FAILURE,
+  'missing-ref': EXIT_CODES.NOT_FOUND,
+  'header-parse-failure': EXIT_CODES.VALIDATION_FAILURE,
+  'render-failure': EXIT_CODES.FAILURE
 }
 
 /**
@@ -93,12 +107,6 @@ class EngineOutputBuffer {
 function sanitizeTxName(name: string): string {
   const sanitized = name.replace(/[^A-Za-z0-9_-]+/g, '-').replace(/^-+|-+$/g, '')
   return sanitized === '' ? 'out' : sanitized
-}
-
-const JSX_TAG_RE = /<([A-Z][A-Za-z0-9_$]*)/g
-
-function uniqueJsxTags(jsx: string): string[] {
-  return [...new Set([...jsx.matchAll(JSX_TAG_RE)].map((match) => match[1]))].sort()
 }
 
 /**
@@ -251,6 +259,15 @@ An M2M result is written back into the workspace as a model file; an M2T result 
           : `No transformations installed. Use 'synth tx install' to install one.`
       this.jsonAwareFail(json, `Transformation not found: ${args.tx}. ${hint}`, EXIT_CODES.NOT_FOUND)
     }
+    // A config entry whose package directory has vanished is a missing
+    // resource, not a generic failure: name what is gone and how to fix it.
+    if (!existsSync(entry.path) || !existsSync(join(entry.path, 'package.json'))) {
+      this.jsonAwareFail(
+        json,
+        `Transformation '${args.tx}' is registered in the workspace config but its installed package is missing (expected ${entry.path} with a package.json). Reinstall it with 'synth tx install'.`,
+        EXIT_CODES.NOT_FOUND
+      )
+    }
     let manifest: TxManifest
     try {
       manifest = await loadTxManifest(entry.path)
@@ -285,8 +302,7 @@ An M2M result is written back into the workspace as a model file; an M2T result 
     // 2. Resolve the input model and gate on its declared metamodel
     let inRef: string
     try {
-      const parsed = parseRef(flags.in)
-      inRef = `${parsed.namespace}/${parsed.name}`
+      inRef = normalizeRef(flags.in)
     } catch (err) {
       this.jsonAwareFail(json, errorMessage(err), EXIT_CODES.FAILURE)
     }
@@ -295,7 +311,17 @@ An M2M result is written back into the workspace as a model file; an M2T result 
     if (!existsSync(inPath)) {
       this.jsonAwareFail(json, `Input model not found: ${inRef} (looked for ${inPath})`, EXIT_CODES.NOT_FOUND)
     }
-    const inHeader = parseSynthHeader(await readFile(inPath, 'utf-8')).header
+    const inParsed = parseSynthHeader(await readFile(inPath, 'utf-8'))
+    // A malformed header is a broken declaration, not a missing one: the
+    // metamodel gate cannot be silently skipped.
+    if (inParsed.error !== undefined) {
+      this.jsonAwareFail(
+        json,
+        `Input model ${inRef} has a malformed $synth header: ${inParsed.error}`,
+        EXIT_CODES.VALIDATION_FAILURE
+      )
+    }
+    const inHeader = inParsed.header
     if (inHeader !== null && inHeader.metamodel !== '' && inHeader.metamodel !== manifest.source.metamodel) {
       this.jsonAwareFail(
         json,
@@ -316,8 +342,7 @@ An M2M result is written back into the workspace as a model file; an M2T result 
       }
       let outRef: string
       try {
-        const parsed = parseRef(flags.out ?? `${inRef}-${sanitizeTxName(args.tx)}`)
-        outRef = `${parsed.namespace}/${parsed.name}`
+        outRef = normalizeRef(flags.out ?? `${inRef}-${sanitizeTxName(args.tx)}`)
       } catch (err) {
         this.jsonAwareFail(json, errorMessage(err), EXIT_CODES.FAILURE)
       }
@@ -335,50 +360,24 @@ An M2M result is written back into the workspace as a model file; an M2T result 
     info(`Running ${manifest.name}@${manifest.version} (${manifest.kind}) on ${inRef}`)
 
     const buffer = new EngineOutputBuffer(!flags.verbose)
-    const step = async <T>(
-      label: string,
-      fn: () => T | Promise<T>,
-      exitCode: number = EXIT_CODES.FAILURE
-    ): Promise<T> => {
+    const step = async <T>(label: string, fn: () => T | Promise<T>): Promise<T> => {
       try {
         return await buffer.run(fn)
       } catch (err) {
         buffer.flushToStderr()
-        this.jsonAwareFail(json, `${label}: ${errorMessage(err)}`, exitCode)
+        this.jsonAwareFail(json, `${label}: ${errorMessage(err)}`, EXIT_CODES.FAILURE)
       }
     }
 
     // 3. Load the input model's reference closure, then the model, into ONE store
     const store = new ModelStore()
-    const visited = new Set<string>([inRef])
-    const renderReferences = async (references: Record<string, string>): Promise<void> => {
-      for (const target of Object.values(references)) {
-        let targetRef: string
-        try {
-          const parsed = parseRef(target)
-          targetRef = `${parsed.namespace}/${parsed.name}`
-        } catch (err) {
-          this.jsonAwareFail(json, `Invalid model reference '${target}': ${errorMessage(err)}`, EXIT_CODES.FAILURE)
-        }
-        if (visited.has(targetRef)) {
-          continue
-        }
-        visited.add(targetRef)
-        const targetPath = refToModelPath(modelsDir, targetRef)
-        if (!existsSync(targetPath)) {
-          this.jsonAwareFail(
-            json,
-            `Referenced model not found: ${targetRef} (required by ${inRef} or its references)`,
-            EXIT_CODES.NOT_FOUND
-          )
-        }
-        const targetHeader = parseSynthHeader(await readFile(targetPath, 'utf-8')).header
-        // Depth-first: a model's own references render before the model itself
-        await renderReferences(targetHeader?.references ?? {})
-        await step(`Failed to load referenced model ${targetRef}`, () => renderModel(targetPath, store))
-      }
+    try {
+      await buffer.run(() => renderModelClosure(modelsDir, inRef, store))
+    } catch (err) {
+      buffer.flushToStderr()
+      const exit = err instanceof ModelClosureError ? CLOSURE_EXIT_CODES[err.kind] : EXIT_CODES.FAILURE
+      this.jsonAwareFail(json, errorMessage(err), exit)
     }
-    await renderReferences(inHeader?.references ?? {})
     const { root: inputRoot } = await step(`Failed to load input model ${inRef}`, () =>
       renderModel(inPath, store)
     )
@@ -389,14 +388,7 @@ An M2M result is written back into the workspace as a model file; an M2T result 
       await step(`Failed to render ${label} (${part.module} export ${part.exportName})`, async () => {
         const mod = await importTxModule(entry.path, part.module)
         const factory = requireExport(mod, part.module, part.exportName)
-        if (typeof factory !== 'function') {
-          throw new Error(`export '${part.exportName}' is not a function`)
-        }
-        const node = (factory as (s: ModelStore) => JsxNode)(store)
-        if (node === null || typeof node !== 'object' || typeof node.render !== 'function') {
-          throw new Error(`export '${part.exportName}' did not return a JSX expression node`)
-        }
-        return node.render(partsContext)
+        return renderFactory(factory, store, partsContext, `export '${part.exportName}'`)
       })
     for (const [index, metamodel] of (manifest.parts?.metamodels ?? []).entries()) {
       await renderPart(metamodel, `parts.metamodels[${index}]`)
@@ -440,195 +432,159 @@ An M2M result is written back into the workspace as a model file; an M2T result 
       txInstance.transform(inputRoot)
     )
 
-    // 7. Write the output
-    if (m2mTarget !== undefined) {
-      await this.writeM2mResult(manifest, entry.path, inRef, m2mTarget, store, txInstance, result, {
-        buffer,
-        step,
-        json,
-        decisions
-      })
-    } else {
-      await this.writeM2tResult(manifest, inRef, outDirFlag as string, store, result, {
-        buffer,
-        step,
-        json,
-        decisions
-      })
-    }
-  }
-
-  private async writeM2mResult(
-    manifest: TxManifest,
-    packageDir: string,
-    inRef: string,
-    target: { ref: string; path: string },
-    store: ModelStore,
-    txInstance: TransformationInstance,
-    result: unknown,
-    io: {
-      buffer: EngineOutputBuffer
-      step: <T>(label: string, fn: () => T | Promise<T>, exitCode?: number) => Promise<T>
-      json: boolean
-      decisions: DecisionAnnouncement[]
-    }
-  ): Promise<void> {
-    // The transformation's own serialization of the target tree (kept by
-    // abstractM2M during transform) is preferred: the store's raw
-    // exportToJSX also emits inverse links and stringified booleans, which
-    // do not survive the import gate. exportToJSX remains the fallback for
-    // classes that do not extend abstractM2M.
-    const contextJsx = txInstance.context?.output?.jsx
-    const jsx = (
-      typeof contextJsx === 'string' && contextJsx.trim() !== ''
-        ? contextJsx
-        : await io.step('Failed to serialize the result model', () =>
-            store.exportToJSX(result as StoreElement)
-          )
-    ).trim()
-
-    const componentsSpec = manifest.target.components as string
-    if (!/^<[A-Z][A-Za-z0-9_$]*/.test(jsx)) {
-      this.jsonAwareFail(
-        io.json,
-        `Transformation '${manifest.name}' produced no serializable JSX output (expected a component tag at the root).`,
-        EXIT_CODES.FAILURE
-      )
-    }
-    const tags = uniqueJsxTags(jsx)
-    const componentsMod = await io.step(
-      `Failed to import target components module '${componentsSpec}'`,
-      () => importTxModule(packageDir, componentsSpec)
-    )
-    for (const tag of tags) {
-      if (typeof moduleExport(componentsMod, tag) !== 'function') {
-        this.jsonAwareFail(
-          io.json,
-          `Transformation output uses component '${tag}', but '${componentsSpec}' does not export it. The manifest's target.components module must cover every emitted tag.`,
-          EXIT_CODES.FAILURE
-        )
-      }
-    }
-
-    const now = new Date().toISOString()
-    const header: SynthHeader = {
-      kind: 'model',
-      metamodel: manifest.target.metamodel,
-      references: {},
-      generatedBy: {
-        tx: manifest.name,
-        txVersion: manifest.version,
-        config: 'defaults',
-        date: now
-      },
-      createdAt: now,
-      modifiedAt: now,
-      author: (await resolveGitAuthor()) ?? 'unknown',
-      version: '0.1.0',
-      description: `Generated by ${manifest.name} from ${inRef}`,
-      tags: [],
-      license: null,
-      custom: {}
-    }
-
-    await mkdir(dirname(target.path), { recursive: true })
-    await writeFile(target.path, buildModelModule(jsx, tags, componentsSpec, header), 'utf-8')
-
-    // Import-gate invariant: the CLI never leaves behind a model that
-    // `model import` would reject. Render the written file into a
-    // throwaway store; delete it on failure.
-    try {
-      await io.buffer.run(() => renderModel(target.path))
-    } catch (err) {
-      await rm(target.path, { force: true })
-      io.buffer.flushToStderr()
-      this.jsonAwareFail(
-        io.json,
-        `Generated model failed the import gate and was removed (${target.ref}): ${errorMessage(err)}`,
-        EXIT_CODES.VALIDATION_FAILURE
-      )
-    }
-
-    if (io.json) {
+    // The one place both output modes report success from
+    const emitResult = (target: Record<string, unknown>, written: string[]): void => {
       this.log(
         JSON.stringify({
           tx: manifest.name,
           in: inRef,
-          out: target.ref,
+          ...target,
           kind: manifest.kind,
-          ...(manifest.variability ? { decisions: io.decisions } : {}),
-          written: [target.path]
-        })
-      )
-    } else {
-      this.log(`Wrote ${target.ref} (${target.path})`)
-    }
-  }
-
-  private async writeM2tResult(
-    manifest: TxManifest,
-    inRef: string,
-    outDirFlag: string,
-    store: ModelStore,
-    result: unknown,
-    io: {
-      buffer: EngineOutputBuffer
-      step: <T>(label: string, fn: () => T | Promise<T>, exitCode?: number) => Promise<T>
-      json: boolean
-      decisions: DecisionAnnouncement[]
-    }
-  ): Promise<void> {
-    // --workspace/--ns switching may have changed cwd; resolve the flag
-    // against the directory the user invoked the CLI from
-    const outDir = isAbsolute(outDirFlag) ? outDirFlag : join(this.savedPwd, outDirFlag)
-    const genResult = await io.step('Text generation failed', () =>
-      generate(store, result as Parameters<typeof generate>[1], { mode: 'mock' })
-    )
-
-    await mkdir(outDir, { recursive: true })
-    const written: string[] = []
-    const failures: string[] = []
-    for (const item of genResult.results) {
-      if (item.itemType !== 'Doc') {
-        continue
-      }
-      if (!isSuccess(item.outcome)) {
-        failures.push(`${item.itemPath}: ${item.outcome.errors.map((e) => e.message).join('; ')}`)
-        continue
-      }
-      const dest = resolve(outDir, item.itemPath)
-      // Doc names come from the transformation; never let one escape --out-dir
-      if (dest !== outDir && !dest.startsWith(resolve(outDir) + sep)) {
-        failures.push(`${item.itemPath}: resolves outside the output directory`)
-        continue
-      }
-      await mkdir(dirname(dest), { recursive: true })
-      await writeFile(dest, item.outcome.value, 'utf-8')
-      written.push(dest)
-      if (!io.json) {
-        this.log(`Wrote ${dest}`)
-      }
-    }
-    if (failures.length > 0) {
-      io.buffer.flushToStderr()
-      this.jsonAwareFail(
-        io.json,
-        `Text generation reported failures:\n  ${failures.join('\n  ')}`,
-        EXIT_CODES.FAILURE
-      )
-    }
-
-    if (io.json) {
-      this.log(
-        JSON.stringify({
-          tx: manifest.name,
-          in: inRef,
-          outDir,
-          kind: manifest.kind,
-          ...(manifest.variability ? { decisions: io.decisions } : {}),
+          ...(manifest.variability ? { decisions } : {}),
           written
         })
       )
+    }
+
+    const writeM2mResult = async (target: { ref: string; path: string }): Promise<void> => {
+      // The transformation's own serialization of the target tree (kept by
+      // abstractM2M during transform) is preferred: the store's raw
+      // exportToJSX also emits inverse links and stringified booleans, which
+      // do not survive the import gate. exportToJSX remains the fallback for
+      // classes that do not extend abstractM2M.
+      const contextJsx = txInstance.context?.output?.jsx
+      const jsx = (
+        typeof contextJsx === 'string' && contextJsx.trim() !== ''
+          ? contextJsx
+          : await step('Failed to serialize the result model', () =>
+              store.exportToJSX(result as StoreElement)
+            )
+      ).trim()
+
+      const componentsSpec = manifest.target.components as string
+      if (!/^<[A-Z][A-Za-z0-9_$]*/.test(jsx)) {
+        this.jsonAwareFail(
+          json,
+          `Transformation '${manifest.name}' produced no serializable JSX output (expected a component tag at the root).`,
+          EXIT_CODES.FAILURE
+        )
+      }
+      const tags = uniqueJsxTags(jsx)
+      const componentsMod = await step(
+        `Failed to import target components module '${componentsSpec}'`,
+        () => importTxModule(entry.path, componentsSpec)
+      )
+      for (const tag of tags) {
+        if (typeof moduleExport(componentsMod, tag) !== 'function') {
+          this.jsonAwareFail(
+            json,
+            `Transformation output uses component '${tag}', but '${componentsSpec}' does not export it. The manifest's target.components module must cover every emitted tag.`,
+            EXIT_CODES.FAILURE
+          )
+        }
+      }
+
+      const header = await makeGeneratedHeader({
+        metamodel: manifest.target.metamodel,
+        generatedBy: { tx: manifest.name, txVersion: manifest.version, config: 'defaults' },
+        description: `Generated by ${manifest.name} from ${inRef}`
+      })
+
+      // Import-gate invariant: the CLI never leaves behind a model that
+      // `model import` would reject — and never destroys an existing target
+      // on failure. The module is written to a temp file, gated by
+      // rendering it into a throwaway store, and only then renamed over
+      // the target.
+      await mkdir(dirname(target.path), { recursive: true })
+      try {
+        await writeGatedModelFile(
+          target.path,
+          buildModelModule(jsx, tags, componentsSpec, header),
+          async (candidatePath) => await buffer.run(() => renderModel(candidatePath))
+        )
+      } catch (err) {
+        buffer.flushToStderr()
+        this.jsonAwareFail(
+          json,
+          `Generated model failed the import gate (${target.ref} was left unchanged): ${errorMessage(err)}`,
+          EXIT_CODES.VALIDATION_FAILURE
+        )
+      }
+
+      if (json) {
+        emitResult({ out: target.ref }, [target.path])
+      } else {
+        this.log(`Wrote ${target.ref} (${target.path})`)
+      }
+    }
+
+    const writeM2tResult = async (outDirValue: string): Promise<void> => {
+      // --workspace/--ns switching may have changed cwd; resolve the flag
+      // against the directory the user invoked the CLI from
+      const outDir = isAbsolute(outDirValue) ? outDirValue : join(this.savedPwd, outDirValue)
+      const outRoot = resolve(outDir)
+      const genResult = await step('Text generation failed', () =>
+        generate(store, result as Parameters<typeof generate>[1], { mode: 'mock' })
+      )
+
+      await mkdir(outRoot, { recursive: true })
+      const written: string[] = []
+      const failures: string[] = []
+      // dest -> the Doc that claimed it; two Docs must never silently
+      // overwrite each other
+      const claimed = new Map<string, string>()
+      for (const item of genResult.results) {
+        if (item.itemType !== 'Doc') {
+          continue
+        }
+        if (!isSuccess(item.outcome)) {
+          failures.push(`${item.itemPath}: ${item.outcome.errors.map((e) => e.message).join('; ')}`)
+          continue
+        }
+        const resolved = resolveDocDest(outRoot, item.itemPath)
+        if ('error' in resolved) {
+          failures.push(`${item.itemPath}: ${resolved.error}`)
+          continue
+        }
+        const previous = claimed.get(resolved.dest)
+        if (previous !== undefined) {
+          failures.push(
+            `${item.itemPath}: destination ${resolved.dest} is already generated by '${previous}' (two documents map to one file)`
+          )
+          continue
+        }
+        claimed.set(resolved.dest, item.itemPath)
+        try {
+          await mkdir(dirname(resolved.dest), { recursive: true })
+          await writeFile(resolved.dest, item.outcome.value, 'utf-8')
+        } catch (err) {
+          failures.push(`${item.itemPath}: ${errorMessage(err)}`)
+          continue
+        }
+        written.push(resolved.dest)
+        if (!json) {
+          this.log(`Wrote ${resolved.dest}`)
+        }
+      }
+      if (failures.length > 0) {
+        buffer.flushToStderr()
+        this.jsonAwareFail(
+          json,
+          `Text generation reported failures:\n  ${failures.join('\n  ')}`,
+          EXIT_CODES.FAILURE
+        )
+      }
+
+      if (json) {
+        emitResult({ outDir }, written)
+      }
+    }
+
+    // 7. Write the output
+    if (m2mTarget !== undefined) {
+      await writeM2mResult(m2mTarget)
+    } else {
+      await writeM2tResult(outDirFlag as string)
     }
   }
 }

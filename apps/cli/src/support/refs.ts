@@ -82,6 +82,15 @@ export function parseRef(ref: string): ParsedRef {
 }
 
 /**
+ * Parse and re-serialize a ref into its canonical `<namespace>/<name>`
+ * form (namespace dotted). Throws exactly like `parseRef` for invalid refs.
+ */
+export function normalizeRef(ref: string): string {
+  const { namespace, name } = parseRef(ref)
+  return `${namespace}/${name}`
+}
+
+/**
  * `com.example/persons` -> `<modelsDir>/com/example/persons.tsx`
  */
 export function refToModelPath(modelsDir: string, ref: string): string {

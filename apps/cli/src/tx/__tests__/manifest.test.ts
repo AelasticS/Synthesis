@@ -1,11 +1,11 @@
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { exec } from 'node:child_process'
 import { tmpdir } from 'node:os'
 import { dirname, join, resolve } from 'node:path'
 import { pathToFileURL, fileURLToPath } from 'node:url'
 import { promisify } from 'node:util'
 
-import { loadTxManifest } from '../manifest.js'
+import { loadTxManifest, loadTxManifestWithMeta } from '../manifest.js'
 
 const execAsync = promisify(exec)
 
@@ -157,20 +157,18 @@ describe('loadTxManifest — field validation', () => {
     await expectFieldError({ ...validSynth, target: { metamodel: 'mm', components: 42 } }, 'target.components')
   })
 
-  it('rejects the legacy sourceMetamodel alias in synth.json', async () => {
+  it('rejects the retired sourceMetamodel alias in synth.json', async () => {
     const { source, ...rest } = validSynth
     await expectFieldError({ ...rest, sourceMetamodel: 'mm/source' }, 'source')
   })
 
-  it('accepts the legacy aliases inside the package.json synth block', async () => {
+  it('rejects the retired aliases inside the package.json synth block', async () => {
     const { source, target, ...rest } = validSynth
     const dir = makePackage({
       ...basePkg,
       synth: { ...rest, sourceMetamodel: 'legacy-source', targetMetamodel: 'legacy-target' }
     })
-    const manifest = await loadTxManifest(dir)
-    expect(manifest.source.metamodel).toBe('legacy-source')
-    expect(manifest.target.metamodel).toBe('legacy-target')
+    await expect(loadTxManifest(dir)).rejects.toThrow(`field 'source' is required`)
   })
 
   it('validates parts entries', async () => {
@@ -199,6 +197,57 @@ describe('loadTxManifest — field validation', () => {
     await expect(loadTxManifest(noName)).rejects.toThrow(`field 'name' is required`)
     const noVersion = makePackage({ name: 'test-tx' }, validSynth)
     await expect(loadTxManifest(noVersion)).rejects.toThrow(`field 'version' is required`)
+  })
+})
+
+describe('loadTxManifest — module specifier normalization', () => {
+  it(`normalizes a path-looking specifier to './' when it names a packaged file`, async () => {
+    const dir = makePackage(basePkg, {
+      ...validSynth,
+      entry: 'lib/tx.js',
+      parts: { metamodels: [{ module: 'lib/mm.js', exportName: 'MM' }] }
+    })
+    mkdirSync(join(dir, 'lib'), { recursive: true })
+    writeFileSync(join(dir, 'lib', 'tx.js'), 'export const Tx = class {}\n')
+    writeFileSync(join(dir, 'lib', 'mm.js'), 'export const MM = () => null\n')
+    const manifest = await loadTxManifest(dir)
+    expect(manifest.entry).toBe('./lib/tx.js')
+    expect(manifest.parts?.metamodels?.[0].module).toBe('./lib/mm.js')
+  })
+
+  it('leaves a path-looking specifier alone when no packaged file matches (bare package)', async () => {
+    const dir = makePackage(basePkg, { ...validSynth, entry: 'some-package/lib/tx.js' })
+    const manifest = await loadTxManifest(dir)
+    expect(manifest.entry).toBe('some-package/lib/tx.js')
+  })
+
+  it(`never rewrites './'-relative or scoped specifiers`, async () => {
+    const dir = makePackage(basePkg, {
+      ...validSynth,
+      entry: './lib/tx.js',
+      target: { metamodel: 'mm/target', components: '@scope/pkg/components' }
+    })
+    const manifest = await loadTxManifest(dir)
+    expect(manifest.entry).toBe('./lib/tx.js')
+    expect(manifest.target.components).toBe('@scope/pkg/components')
+  })
+})
+
+describe('loadTxManifestWithMeta', () => {
+  it('returns npm metadata alongside the manifest from one package.json read', async () => {
+    const dir = makePackage(
+      { ...basePkg, description: 'A test transformation', author: { name: 'Some Author' }, license: 'MIT' },
+      validSynth
+    )
+    const { manifest, meta } = await loadTxManifestWithMeta(dir)
+    expect(manifest.name).toBe('test-tx')
+    expect(meta).toEqual({ description: 'A test transformation', author: 'Some Author', license: 'MIT' })
+  })
+
+  it('omits absent metadata fields', async () => {
+    const dir = makePackage(basePkg, validSynth)
+    const { meta } = await loadTxManifestWithMeta(dir)
+    expect(meta).toEqual({})
   })
 })
 

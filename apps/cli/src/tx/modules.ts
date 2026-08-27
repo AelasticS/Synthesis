@@ -2,10 +2,11 @@
  * Import of transformation-package modules (entry point and parts).
  *
  * A manifest references modules in two forms:
- *   - bare package specifiers resolve against the CLI installation itself:
- *     the CLI's dependencies are the runtime the packages compile against,
- *     and importing the CLI-resolved file keeps aelastics type/schema
- *     identity shared with the CLI process;
+ *   - bare package specifiers are imported directly: they resolve against
+ *     the CLI installation itself (the CLI's dependencies are the runtime
+ *     the packages compile against), honour the packages' ESM export
+ *     conditions, and share the module registry — and with it aelastics
+ *     type/schema identity — with the CLI process;
  *   - './'-relative paths resolve against the installed package directory.
  *     An installed package has no node_modules of its own, so the file is
  *     bundled with its bare imports externalized to CLI-resolved absolute
@@ -13,14 +14,10 @@
  */
 
 import { existsSync } from 'node:fs'
-import { createRequire } from 'node:module'
 import { resolve } from 'node:path'
-import { pathToFileURL } from 'node:url'
 
 import { importModel } from '../models/loader.js'
 import { errorMessage } from '../support/errors.js'
-
-const cliRequire = createRequire(import.meta.url)
 
 /** Import a manifest-referenced module of an installed transformation package. */
 export async function importTxModule(
@@ -37,16 +34,14 @@ export async function importTxModule(
     const { mod } = await importModel(filePath)
     return mod
   }
-  let resolved: string
   try {
-    resolved = cliRequire.resolve(moduleSpec)
+    return (await import(moduleSpec)) as Record<string, unknown>
   } catch (err) {
     throw new Error(
       `Cannot resolve module '${moduleSpec}': package imports must be resolvable from the Synthesis CLI installation (${errorMessage(err)})`,
       { cause: err }
     )
   }
-  return (await import(pathToFileURL(resolved).href)) as Record<string, unknown>
 }
 
 /**

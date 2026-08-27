@@ -9,7 +9,7 @@ import { renderModel } from '../../models/loader.js'
 import { parseSynthHeader } from '../../models/header.js'
 import { deriveMetamodel } from '../../models/stamp.js'
 import { errorMessage } from '../../support/errors.js'
-import { parseRef, refToModelPath } from '../../support/refs.js'
+import { normalizeRef, refToModelPath } from '../../support/refs.js'
 import { EXIT_CODES } from '../../support/exit-codes.js'
 
 export default class ModelValidate extends BaseCommand {
@@ -38,8 +38,7 @@ export default class ModelValidate extends BaseCommand {
 
     let ref: string
     try {
-      const parsed = parseRef(args.ref)
-      ref = `${parsed.namespace}/${parsed.name}`
+      ref = normalizeRef(args.ref)
     } catch (err) {
       this.error(`Invalid model ref: ${errorMessage(err)}`, { exit: EXIT_CODES.FAILURE })
     }

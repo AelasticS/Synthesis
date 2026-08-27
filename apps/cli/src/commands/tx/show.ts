@@ -1,12 +1,12 @@
 import { existsSync } from 'node:fs'
-import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 
 import { Args } from '@oclif/core'
 
 import { BaseCommand } from '../../base/base-command.js'
 import { getTransformationsPath } from '../../config/index.js'
-import { loadTxManifest, TxKind, TxManifest, TxManifestParts } from '../../tx/manifest.js'
+import { errorMessage } from '../../support/errors.js'
+import { loadTxManifestWithMeta, TxKind, TxManifestParts } from '../../tx/manifest.js'
 
 interface TransformationMetadata {
   name: string
@@ -23,6 +23,14 @@ interface TransformationMetadata {
   author?: string
   license?: string
   path: string
+}
+
+/** What an installed entry can still report when its manifest is broken. */
+interface DegradedMetadata {
+  name: string
+  version: string
+  path: string
+  manifestError: string
 }
 
 export default class TxShow extends BaseCommand {
@@ -45,6 +53,14 @@ export default class TxShow extends BaseCommand {
 
     if (flags.json) {
       this.log(JSON.stringify(metadata, null, 2))
+      return
+    }
+
+    if ('manifestError' in metadata) {
+      this.log(`Transformation: ${metadata.name}`)
+      this.log(`  version: ${metadata.version}`)
+      this.log(`  path: ${metadata.path}`)
+      this.warn(`manifest could not be loaded: ${metadata.manifestError}`)
       return
     }
 
@@ -87,7 +103,9 @@ export default class TxShow extends BaseCommand {
     }
   }
 
-  private async getTransformationMetadata(name: string): Promise<TransformationMetadata> {
+  private async getTransformationMetadata(
+    name: string
+  ): Promise<TransformationMetadata | DegradedMetadata> {
     // First, check if it's in config.transformations
     const configEntry = this.workspaceConfig.transformations[name]
     const txPath = configEntry ? configEntry.path : join(getTransformationsPath(this.workspaceConfig), name)
@@ -96,35 +114,24 @@ export default class TxShow extends BaseCommand {
       this.error(`Transformation '${name}' not found.`)
     }
 
-    let manifest: TxManifest
+    let loaded: Awaited<ReturnType<typeof loadTxManifestWithMeta>>
     try {
-      manifest = await loadTxManifest(txPath)
+      loaded = await loadTxManifestWithMeta(txPath)
     } catch (err) {
-      this.error(err instanceof Error ? err.message : String(err))
-    }
-
-    // description/author/license are npm metadata, not manifest fields.
-    let description: string | undefined
-    let author: string | undefined
-    let license: string | undefined
-    try {
-      const pkgContent = await readFile(join(txPath, 'package.json'), 'utf-8')
-      const pkg = JSON.parse(pkgContent) as {
-        description?: string
-        author?: string | { name: string }
-        license?: string
+      // An installed entry still has name/version/path in the workspace
+      // config; show those and surface the manifest problem as a warning
+      // instead of hiding the install behind a hard error.
+      if (configEntry !== undefined) {
+        return { name, version: configEntry.version, path: txPath, manifestError: errorMessage(err) }
       }
-      description = pkg.description
-      author = typeof pkg.author === 'string' ? pkg.author : pkg.author?.name
-      license = pkg.license
-    } catch {
-      // loadTxManifest already validated package.json; nothing extra to show.
+      this.error(errorMessage(err))
     }
+    const { manifest, meta } = loaded
 
     return {
       name: manifest.name,
       version: manifest.version,
-      description,
+      description: meta.description,
       kind: manifest.kind,
       entry: manifest.entry,
       exportName: manifest.exportName,
@@ -133,8 +140,8 @@ export default class TxShow extends BaseCommand {
       targetComponents: manifest.target.components,
       variability: manifest.variability,
       parts: manifest.parts,
-      author,
-      license,
+      author: meta.author,
+      license: meta.license,
       path: txPath
     }
   }

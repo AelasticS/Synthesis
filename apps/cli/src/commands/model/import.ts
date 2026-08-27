@@ -8,7 +8,7 @@ import { getModelsPath } from '../../config/index.js'
 import { renderModel } from '../../models/loader.js'
 import { stampModelText } from '../../models/stamp.js'
 import { errorMessage } from '../../support/errors.js'
-import { findMissingReferences, parseRef, refToModelPath } from '../../support/refs.js'
+import { findMissingReferences, normalizeRef, refToModelPath } from '../../support/refs.js'
 import { EXIT_CODES } from '../../support/exit-codes.js'
 
 export default class ModelImport extends BaseCommand {
@@ -65,14 +65,12 @@ export default class ModelImport extends BaseCommand {
     let ref: string
     try {
       if (flags.as) {
-        const parsed = parseRef(flags.as)
-        ref = `${parsed.namespace}/${parsed.name}`
+        ref = normalizeRef(flags.as)
       } else {
         if (!this.workspaceConfig.currentNamespace) {
           this.jsonAwareFail(json, 'No namespace set. Use --as or set a current namespace.', EXIT_CODES.FAILURE)
         }
-        const parsed = parseRef(`${this.workspaceConfig.currentNamespace}/${basename(sourcePath, '.tsx')}`)
-        ref = `${parsed.namespace}/${parsed.name}`
+        ref = normalizeRef(`${this.workspaceConfig.currentNamespace}/${basename(sourcePath, '.tsx')}`)
       }
     } catch (err) {
       this.jsonAwareFail(json, errorMessage(err), EXIT_CODES.FAILURE)
