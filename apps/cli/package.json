@@ -62,7 +62,14 @@
     "@oclif/plugin-not-found": "~3.2.85",
     "@oclif/plugin-autocomplete": "~3.2.40",
     "@synthesis/runner": "workspace:*",
-    "@synthesis/examples": "workspace:*"
+    "@synthesis/examples": "workspace:*",
+    "@synthesis/engine": "workspace:*",
+    "@synthesis/jsx-runtime": "workspace:*",
+    "@synthesis/standard-metamodels": "workspace:*",
+    "@synthesis/decision-framework": "workspace:*",
+    "@aelastics/types": "workspace:*",
+    "@aelastics/result": "workspace:*",
+    "esbuild": "~0.25.0"
   },
   "devDependencies": {
     "@rushstack/eslint-config": "~4.6.4",
