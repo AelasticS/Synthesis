@@ -14,7 +14,7 @@ import {
 } from "@synthesis/engine"
 import * as m2tmm from "@synthesis/engine"
 import * as rmT from "@synthesis/standard-metamodels/relational/model-legacy"
-import { VarPoint, VarOption, Option, DecisionAwareM2M } from "@synthesis/decision-framework"
+import { VarPoint, VarOption, Option, Default, DecisionAwareM2M } from "@synthesis/decision-framework"
 import * as cm from "@synthesis/decision-framework/decisions/3.configuration-model/configuration-meta.model"
 
 /**
@@ -91,6 +91,10 @@ export class Rel2DdlTransformation extends DecisionAwareM2M<
     throw new Error("Not implemented VarOptions for VarPoint IdentifierQuoting")
   }
 
+  // @Default matches the decision model's `isDefault` on Unquoted: with no
+  // configuration model at all (store-only construction), the VarPoint
+  // dispatcher falls back to this option instead of throwing.
+  @Default()
   @VarOption("quoteIdentifier", Option("Unquoted"))
   unquotedIdentifier(name: string): string {
     return name

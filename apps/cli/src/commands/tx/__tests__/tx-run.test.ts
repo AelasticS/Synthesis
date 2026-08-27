@@ -153,13 +153,15 @@ describe('tx run configuration consent (uniform policy)', () => {
     expect(existsSync(join(modelsDir, 'com', 'example', 'never-consent.tsx'))).toBe(false)
   })
 
-  it('rejects --config combined with --default-configs', async () => {
+  it('rejects --config combined with --default-configs (core exclusivity, exit 1)', async () => {
+    // The exclusivity lives in the execution core, not in oclif flag
+    // metadata, so `tx run` and `run` fail with one identical message.
     const { code, stderr } = await run([
       'tx', 'run', 'eer-to-relational', '--in', 'com.example/persons',
       '--config', 'com.example/whatever', '--default-configs', '--out', 'com.example/never-consent'
     ])
-    expect(code).not.toBe(0)
-    expect(flatten(stderr)).toContain('--default-configs')
+    expect(code).toBe(1)
+    expect(flatten(stderr)).toContain('--config and --default-configs are mutually exclusive')
   })
 
   it('rejects --save-config without --default-configs (exit 1, before any engine work)', async () => {
@@ -439,6 +441,19 @@ describe('tx run --save-config collision guards', () => {
     expect(code).toBe(1)
     expect(flatten(stderr)).toContain('default --out target')
   })
+
+  it('rejects an --out target equal to --in even with --overwrite', async () => {
+    const before = readFileSync(join(modelsDir, 'com', 'example', 'persons.tsx'), 'utf-8')
+    const { code, stderr } = await run([
+      'tx', 'run', 'eer-to-relational', '--in', 'com.example/persons', '--default-configs',
+      '--out', 'com.example/persons', '--overwrite'
+    ])
+    expect(code).toBe(1)
+    const message = flatten(stderr)
+    expect(message).toContain('the --out target com.example/persons is the same ref as --in')
+    expect(message).toContain('overwrite the input model')
+    expect(readFileSync(join(modelsDir, 'com', 'example', 'persons.tsx'), 'utf-8')).toBe(before)
+  })
 })
 
 describe('tx run --config with deleted choices (default materialization)', () => {
@@ -586,6 +601,12 @@ describe('tx run m2t', () => {
     const sql = readFileSync(join(genDir, sqlFiles[0]), 'utf-8')
     expect(sql).toContain('CREATE TABLE person')
     expect(sql).toContain('person_id INTEGER PRIMARY KEY')
+    // FK REFERENCES targets go through the same naming convention as the
+    // CREATE TABLE identifiers: snake_case 'organization', never the raw
+    // entity name 'Organization'
+    expect(sql).toContain('CREATE TABLE organization')
+    expect(sql).toContain('REFERENCES organization')
+    expect(sql).not.toContain('REFERENCES Organization')
   })
 
   it('honors an explicit DoubleQuoted configuration for the m2t step', async () => {
@@ -613,5 +634,8 @@ describe('tx run m2t', () => {
     const sql = readFileSync(join(genDir, sqlFiles[0]), 'utf-8')
     expect(sql).toContain('CREATE TABLE "person"')
     expect(sql).toContain('"person_id" INTEGER PRIMARY KEY')
+    // The quoted REFERENCES target matches the quoted table name exactly
+    expect(sql).toContain('CREATE TABLE "organization"')
+    expect(sql).toContain('REFERENCES "organization"')
   })
 })

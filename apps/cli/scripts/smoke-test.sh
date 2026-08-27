@@ -93,6 +93,7 @@ run "output model records provenance"     0 "eer-to-relational"    model show co
 run "generated model passes validate"     0 "is valid"             model validate com.example/persons-rel
 run "tx run m2t generates SQL"            0 "Wrote"                tx run rel-to-sql-ddl --in com.example/persons-rel --default-configs --out-dir "$WORK/gen"
 grep -q "CREATE TABLE person" "$WORK/gen"/*.sql && ok "SQL contains snake_case DDL" || bad "SQL contains snake_case DDL"
+grep -q "REFERENCES organization" "$WORK/gen"/*.sql && ok "FK REFERENCES matches the created table name" || bad "FK REFERENCES matches the created table name"
 run "metamodel mismatch is rejected"      2 "mismatch"             tx run rel-to-sql-ddl --in com.example/persons --default-configs --out-dir "$WORK/gen2"
 run "unknown transformation exits 3"      3 -                      tx run no-such-tx --in com.example/persons
 
@@ -159,6 +160,7 @@ run "config init against the intermediate" 0 "IdentifierQuoting -> Unquoted (def
 sed -i "s/Unquoted/DoubleQuoted/g" "$MODELS/com/example/persons-eer-to-relational-cfg.tsx"
 run "tx run applies the DoubleQuoted config" 0 "IdentifierQuoting -> DoubleQuoted" tx run rel-to-sql-ddl --in com.example/persons-eer-to-relational --config com.example/persons-eer-to-relational-cfg --out-dir "$WORK/chain-quoted"
 grep -q 'CREATE TABLE "person"' "$WORK/chain-quoted"/*.sql && ok "DDL identifiers are double-quoted" || bad "DDL identifiers are double-quoted"
+grep -q 'REFERENCES "organization"' "$WORK/chain-quoted"/*.sql && ok "quoted FK REFERENCES matches the quoted table name" || bad "quoted FK REFERENCES matches the quoted table name"
 
 # =============================================================================
 say "Summary"

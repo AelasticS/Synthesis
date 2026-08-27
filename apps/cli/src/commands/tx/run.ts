@@ -2,9 +2,7 @@ import { Args, Flags } from '@oclif/core'
 
 import { BaseCommand } from '../../base/base-command.js'
 import { getModelsPath } from '../../config/index.js'
-import { errorMessage } from '../../support/errors.js'
-import { EXIT_CODES } from '../../support/exit-codes.js'
-import { ExecuteError, executeRun } from '../../tx/execute.js'
+import { executeRun } from '../../tx/execute.js'
 
 export default class TxRun extends BaseCommand {
   static override description = `Run an installed transformation on a workspace model.
@@ -39,10 +37,11 @@ An M2M result is written back into the workspace as a model file; an M2T result 
     config: Flags.string({
       description: 'Configuration model ref to run with (decision-based transformations only).'
     }),
+    // Exclusivity with --config is enforced by the execution core (one
+    // message, one exit code for both `tx run` and `run`), not by oclif.
     'default-configs': Flags.boolean({
       description: 'Explicitly accept the generated default configuration for a decision-based transformation.',
-      default: false,
-      exclusive: ['config']
+      default: false
     }),
     'save-config': Flags.string({
       description:
@@ -79,10 +78,7 @@ An M2M result is written back into the workspace as a model file; an M2T result 
         warn: (line) => this.warn(line)
       })
     } catch (err) {
-      if (err instanceof ExecuteError) {
-        this.jsonAwareFail(json, err.message, err.exit)
-      }
-      this.jsonAwareFail(json, errorMessage(err), EXIT_CODES.FAILURE)
+      this.failFromExecuteError(json, err)
     }
   }
 }

@@ -32,7 +32,17 @@ import { Rel_Bindings } from "./03-binding-model"
  *   5. Run the M2T transformation that emits SQL DDL.
  *   6. Render the M2T tree to a string via the engine's `generate`.
  */
-export async function runEerToRelToText(): Promise<{ sql: string }> {
+export interface PipelineOptions {
+  /**
+   * When false, the Rel->DDL step runs WITHOUT a configuration model
+   * (store-only construction): the transformation must fall back to its
+   * @Default variability option (Unquoted). Default: true.
+   */
+  withDdlConfig?: boolean
+}
+
+export async function runEerToRelToText(options: PipelineOptions = {}): Promise<{ sql: string }> {
+  const withDdlConfig = options.withDdlConfig !== false
   const store = new ModelStore()
   const ctx = new Context()
 
@@ -68,12 +78,19 @@ export async function runEerToRelToText(): Promise<{ sql: string }> {
   // Phase 4 — Relational -> M2T model. The DDL transformation is
   // decision-aware too: derive its default configuration (IdentifierQuoting
   // defaults to Unquoted) from the relational schema + DDL binding model,
-  // exactly as phase 2 did for the EER->Rel step.
-  const rel2ddlCfg = new SourceModelToDefaultConfigurationModel(store, {
-    bindingModel: renderedDdlBinding,
-  })
-  const ddlConfigModel = rel2ddlCfg.transform(relSchema)
-  const rel2ddl = new Rel2DdlTransformation(store, {}, ddlConfigModel)
+  // exactly as phase 2 did for the EER->Rel step. Without a configuration
+  // (withDdlConfig: false) the transformation runs store-only and relies on
+  // its @Default option.
+  let rel2ddl: Rel2DdlTransformation
+  if (withDdlConfig) {
+    const rel2ddlCfg = new SourceModelToDefaultConfigurationModel(store, {
+      bindingModel: renderedDdlBinding,
+    })
+    const ddlConfigModel = rel2ddlCfg.transform(relSchema)
+    rel2ddl = new Rel2DdlTransformation(store, {}, ddlConfigModel)
+  } else {
+    rel2ddl = new Rel2DdlTransformation(store)
+  }
   const m2tModel = rel2ddl.transform(relSchema)
 
   // Phase 5 — M2T model -> SQL string. mock mode never touches the FS.

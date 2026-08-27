@@ -1198,7 +1198,7 @@ Run an installed transformation on a workspace model.
 ```
 USAGE
   $ synth tx run TX --in <value> [--workspace <value>] [--ns <value>] [--json] [-q] [-v] [--out <value>]
-    [--out-dir <value>] [--default-configs | --config <value>] [--save-config <value> | ] [--overwrite]
+    [--out-dir <value>] [--default-configs] [--save-config <value> | --config <value>] [--overwrite]
 
 ARGUMENTS
   TX  Name of the installed transformation to run.

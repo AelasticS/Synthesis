@@ -2,9 +2,7 @@ import { Args, Flags } from '@oclif/core'
 
 import { BaseCommand } from '../base/base-command.js'
 import { getModelsPath } from '../config/index.js'
-import { errorMessage } from '../support/errors.js'
-import { EXIT_CODES } from '../support/exit-codes.js'
-import { ExecuteError, executeRun } from '../tx/execute.js'
+import { executeRun } from '../tx/execute.js'
 
 export default class Run extends BaseCommand {
   static override description = `Run one transformation or a chain of transformations on a workspace model.
@@ -89,10 +87,7 @@ With one transformation this behaves exactly like 'tx run'. With several, the st
         warn: (line) => this.warn(line)
       })
     } catch (err) {
-      if (err instanceof ExecuteError) {
-        this.jsonAwareFail(json, err.message, err.exit)
-      }
-      this.jsonAwareFail(json, errorMessage(err), EXIT_CODES.FAILURE)
+      this.failFromExecuteError(json, err)
     }
   }
 }

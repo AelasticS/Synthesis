@@ -32,6 +32,7 @@ beforeAll(async () => {
   await run(['model', 'import', personsFixture, '--as', 'com.example/persons2'])
   await run(['tx', 'install', join(fixturesDir, 'eer-to-relational')])
   await run(['tx', 'install', join(fixturesDir, 'rel-to-sql-ddl')])
+  await run(['tx', 'install', join(fixturesDir, 'rel-copy')])
 })
 
 afterAll(() => {
@@ -40,15 +41,58 @@ afterAll(() => {
 })
 
 describe('run pre-flight', () => {
-  it('aborts a chain with an uncovered decision-based step (exit 2, teaching message)', async () => {
+  it('aborts a chain whose FIRST step is uncovered, teaching --config AND --default-configs', async () => {
+    // Step 1's input model exists in the workspace, so an explicit
+    // configuration IS possible — the message must teach it, not claim the
+    // model is produced mid-run.
     const { code, stderr } = await run([
       'run', 'eer-to-relational', 'rel-to-sql-ddl', '--in', 'com.example/persons', '--out-dir', join(tempDir, 'never')
     ])
     expect(code).toBe(2)
     const message = flatten(stderr)
     expect(message).toContain('step 1 (eer-to-relational) is decision-based')
+    expect(message).toContain('--config')
+    expect(message).toContain('synth config init eer-to-relational --for com.example/persons')
+    expect(message).toContain('--default-configs')
+    expect(message).not.toContain('produced mid-run')
+    expect(existsSync(join(tempDir, 'never'))).toBe(false)
+  })
+
+  it('aborts a chain whose LATER step is uncovered with the mid-run wording', async () => {
+    const init = await run([
+      'config', 'init', 'eer-to-relational', '--for', 'com.example/persons', '--out', 'com.example/preflight-cfg'
+    ])
+    expect(init.error).toBeUndefined()
+    const { code, stderr } = await run([
+      'run', 'eer-to-relational', 'rel-to-sql-ddl', '--in', 'com.example/persons',
+      '--config', 'com.example/preflight-cfg', '--out-dir', join(tempDir, 'never')
+    ])
+    expect(code).toBe(2)
+    const message = flatten(stderr)
+    expect(message).toContain('step 2 (rel-to-sql-ddl) is decision-based')
+    expect(message).toContain('produced mid-run')
     expect(message).toContain('--default-configs')
     expect(existsSync(join(tempDir, 'never'))).toBe(false)
+  })
+
+  it('rejects --config combined with --default-configs on a single step (core exclusivity)', async () => {
+    const { code, stderr } = await run([
+      'run', 'eer-to-relational', '--in', 'com.example/persons',
+      '--config', 'com.example/whatever-cfg', '--default-configs', '--out', 'com.example/never'
+    ])
+    expect(code).toBe(1)
+    expect(flatten(stderr)).toContain('--config and --default-configs are mutually exclusive')
+  })
+
+  it('rejects --keep-intermediates on a single-step run (exit 1)', async () => {
+    const { code, stderr } = await run([
+      'run', 'eer-to-relational', '--in', 'com.example/persons',
+      '--default-configs', '--keep-intermediates', '--out', 'com.example/never'
+    ])
+    expect(code).toBe(1)
+    const message = flatten(stderr)
+    expect(message).toContain('--keep-intermediates is only valid for a multi-step chain')
+    expect(existsSync(join(modelsDir, 'com', 'example', 'never.tsx'))).toBe(false)
   })
 
   it('rejects an m2t step in the middle of a chain', async () => {
@@ -236,5 +280,83 @@ describe('run single step (tx run parity)', () => {
     ])
     expect(code).toBe(2)
     expect(flatten(stderr)).toContain(`Transformation 'eer-to-relational' is decision-based`)
+  })
+})
+
+describe('run pre-flight ref collisions (claimed-refs check)', () => {
+  // rel-copy is endogenous (relational -> relational), so chaining it with
+  // itself derives IDENTICAL intermediate and final refs — exactly the
+  // collision the pre-flight check must catch before any engine work.
+  beforeAll(async () => {
+    await run(['model', 'import', personsFixture, '--as', 'com.example/collide'])
+    const mkRel = await run([
+      'run', 'eer-to-relational', '--in', 'com.example/collide', '--default-configs', '--out', 'com.example/collide-rel'
+    ])
+    expect(mkRel.error).toBeUndefined()
+  })
+
+  it('rejects a self-chained tx whose derived intermediate and final refs collide', async () => {
+    const { code, stderr } = await run([
+      'run', 'rel-copy', 'rel-copy', '--in', 'com.example/collide-rel', '--keep-intermediates'
+    ])
+    expect(code).toBe(1)
+    const message = flatten(stderr)
+    expect(message).toContain('the default --out target derived from --in')
+    expect(message).toContain('com.example/collide-rel-rel-copy')
+    expect(message).toContain('is the same ref as the intermediate model of step 1 (rel-copy)')
+    expect(existsSync(join(modelsDir, 'com', 'example', 'collide-rel-rel-copy.tsx'))).toBe(false)
+  })
+
+  it('rejects an explicit --out equal to a derived intermediate ref', async () => {
+    const { code, stderr } = await run([
+      'run', 'eer-to-relational', 'rel-copy', '--in', 'com.example/collide',
+      '--default-configs', '--keep-intermediates', '--out', 'com.example/collide-eer-to-relational'
+    ])
+    expect(code).toBe(1)
+    const message = flatten(stderr)
+    expect(message).toContain(
+      'the --out target com.example/collide-eer-to-relational is the same ref as the intermediate model of step 1 (eer-to-relational)'
+    )
+    expect(existsSync(join(modelsDir, 'com', 'example', 'collide-eer-to-relational.tsx'))).toBe(false)
+  })
+})
+
+describe('run chain provenance (per-step actual input refs)', () => {
+  beforeAll(async () => {
+    await run(['model', 'import', personsFixture, '--as', 'com.example/prov'])
+  })
+
+  it('stamps the final model of a kept-intermediates chain as generated FROM the intermediate ref', async () => {
+    const { stdout, error } = await run([
+      'run', 'eer-to-relational', 'rel-copy', '--in', 'com.example/prov',
+      '--default-configs', '--keep-intermediates', '--out', 'com.example/prov-final', '--json'
+    ])
+    expect(error).toBeUndefined()
+    const parsed = JSON.parse(stdout)
+    expect(parsed.intermediates).toEqual(['com.example/prov-eer-to-relational'])
+
+    const showFinal = await run(['model', 'show', 'com.example/prov-final', '--json'])
+    expect(showFinal.error).toBeUndefined()
+    const finalHeader = JSON.parse(showFinal.stdout).header
+    expect(finalHeader.generatedBy.tx).toBe('rel-copy')
+    // Step 2's ACTUAL input is the kept intermediate, not the original --in
+    expect(finalHeader.description).toBe('Generated by rel-copy from com.example/prov-eer-to-relational')
+
+    const showIntermediate = await run(['model', 'show', 'com.example/prov-eer-to-relational', '--json'])
+    expect(showIntermediate.error).toBeUndefined()
+    const intermediateHeader = JSON.parse(showIntermediate.stdout).header
+    expect(intermediateHeader.description).toBe('Generated by eer-to-relational from com.example/prov')
+  })
+
+  it('records an in-memory derivation marker when the intermediate is not kept', async () => {
+    const { error } = await run([
+      'run', 'eer-to-relational', 'rel-copy', '--in', 'com.example/prov',
+      '--default-configs', '--out', 'com.example/prov-final2'
+    ])
+    expect(error).toBeUndefined()
+    const show = await run(['model', 'show', 'com.example/prov-final2', '--json'])
+    expect(show.error).toBeUndefined()
+    const header = JSON.parse(show.stdout).header
+    expect(header.description).toBe('Generated by rel-copy from com.example/prov via eer-to-relational')
   })
 })

@@ -51,6 +51,7 @@ import type { ResolvedConfigModel, WritableTarget } from './config-model.js'
 import { formatDecisionAnnouncement, validateConfigStructure } from './decisions.js'
 import type { DecisionAnnouncement } from './decisions.js'
 import { EngineOutputBuffer } from './engine-output.js'
+import { ExecuteError } from './execute-error.js'
 import {
   CLOSURE_EXIT_CODES,
   renderTxParts,
@@ -78,16 +79,7 @@ type TransformationCtor = new (
   configModel?: unknown
 ) => TransformationInstance
 
-/** Typed failure of the execution core; `exit` maps to the CLI exit code. */
-export class ExecuteError extends Error {
-  public constructor(
-    public readonly exit: number,
-    message: string,
-    options?: { cause?: unknown }
-  ) {
-    super(message, options)
-  }
-}
+export { ExecuteError }
 
 // Ref name segments allow only [A-Za-z0-9_-]; anything else in the tx name
 // (e.g. '@scope/name') collapses to '-' for the default output ref.
@@ -136,11 +128,23 @@ export interface ExecuteRequest {
   warn: (line: string) => void
 }
 
+/**
+ * How a step's configuration is sourced, resolved ONCE in pre-flight:
+ *   'explicit' — step 1 running on the model named with --config;
+ *   'defaults' — decision-based step running on generated defaults
+ *                (valid only with the --default-configs consent);
+ *   'none'     — the transformation declares no decisions.
+ * The consent gate, the execution branch, the --save-config write, and the
+ * provenance all read this field instead of re-deriving the coverage.
+ */
+type StepConfigSource = 'explicit' | 'defaults' | 'none'
+
 interface Step {
   /** Name as given on the command line (resolves the installed entry). */
   txName: string
   packageDir: string
   manifest: TxManifest
+  configSource: StepConfigSource
 }
 
 interface StepReport {
@@ -162,12 +166,22 @@ export async function executeRun(request: ExecuteRequest): Promise<void> {
     throw new ExecuteError(exit, message, cause === undefined ? undefined : { cause })
   }
 
-  // 1. Resolve every transformation and its manifest
+  // 1. Resolve every transformation and its manifest, and derive each
+  // step's configuration source (--config covers step 1 only)
   const steps: Step[] = []
   for (const txName of request.txNames) {
     try {
       const { packageDir, manifest } = await resolveInstalledTx(workspaceConfig, txName)
-      steps.push({ txName, packageDir, manifest })
+      steps.push({
+        txName,
+        packageDir,
+        manifest,
+        configSource: manifest.variability
+          ? steps.length === 0 && request.config !== undefined
+            ? 'explicit'
+            : 'defaults'
+          : 'none'
+      })
     } catch (err) {
       fail(err instanceof TxResolveError ? err.exit : EXIT_CODES.FAILURE, errorMessage(err), err)
     }
@@ -215,10 +229,25 @@ export async function executeRun(request: ExecuteRequest): Promise<void> {
   if (last.manifest.kind === 'm2t' && request.outDir === undefined) {
     fail(EXIT_CODES.FAILURE, `--out-dir is required for m2t transformation '${last.manifest.name}'.`)
   }
+  if (request.keepIntermediates && !multi) {
+    fail(
+      EXIT_CODES.FAILURE,
+      `--keep-intermediates is only valid for a multi-step chain; a single transformation has no intermediate results.`
+    )
+  }
 
-  // 4. Configuration flags: --config binds to step 1 ONLY; --default-configs
-  // needs at least one decision-based step; --save-config persists what
-  // --default-configs generated (single-step only, never in chains).
+  // 4. Configuration flags: --config and --default-configs are mutually
+  // exclusive for a single step (the exclusivity lives HERE, in the core,
+  // so both command surfaces enforce it identically); --config binds to
+  // step 1 ONLY; --default-configs needs at least one decision-based step;
+  // --save-config persists what --default-configs generated (single-step
+  // only, never in chains).
+  if (!multi && request.config !== undefined && request.defaultConfigs) {
+    fail(
+      EXIT_CODES.FAILURE,
+      `--config and --default-configs are mutually exclusive for a single transformation: --config runs on the named configuration, --default-configs on generated defaults.`
+    )
+  }
   if (request.config !== undefined && !first.manifest.variability) {
     fail(
       EXIT_CODES.FAILURE,
@@ -227,19 +256,10 @@ export async function executeRun(request: ExecuteRequest): Promise<void> {
         : `--config is only valid for decision-based transformations; '${first.manifest.name}' declares no decision/binding model parts.`
     )
   }
-  // --config covers step 1 only; --default-configs must have at least one
-  // decision-based step left to consent to.
-  const coveredByConfig = (index: number): boolean => index === 0 && request.config !== undefined
-  const uncoveredSteps = steps.filter((step, index) => step.manifest.variability && !coveredByConfig(index))
+  // --default-configs must have at least one decision-based step left to
+  // consent to (i.e. one that would run on generated defaults).
+  const uncoveredSteps = steps.filter((step) => step.configSource === 'defaults')
   if (request.defaultConfigs && uncoveredSteps.length === 0) {
-    if (!multi && first.manifest.variability) {
-      // request.config is necessarily set here (tx run also declares the
-      // flags as exclusive; run reaches this through the core alone)
-      fail(
-        EXIT_CODES.FAILURE,
-        `--config and --default-configs are mutually exclusive for a single transformation: --config runs on the named configuration, --default-configs on generated defaults.`
-      )
-    }
     fail(
       EXIT_CODES.FAILURE,
       multi
@@ -279,16 +299,19 @@ export async function executeRun(request: ExecuteRequest): Promise<void> {
   const inRef = source.ref
 
   // 6. Consent gate: every decision-based step must be covered by --config
-  // (step 1 only) or --default-configs — BEFORE any engine work.
+  // (step 1 only) or --default-configs — BEFORE any engine work. The
+  // message depends on WHICH step is uncovered: step 1's input model
+  // exists in the workspace, so an explicit configuration is possible and
+  // is taught; only a later step's input is produced mid-run.
   if (!request.defaultConfigs) {
-    const uncovered = steps.findIndex((step, index) => step.manifest.variability && !coveredByConfig(index))
-    if (uncovered === 0 && !multi) {
+    const uncovered = steps.findIndex((step) => step.configSource === 'defaults')
+    if (uncovered === 0) {
       fail(
         EXIT_CODES.VALIDATION_FAILURE,
-        `Transformation '${first.manifest.name}' is decision-based. Provide --config <ref> (create one with: synth config init ${first.manifest.name} --for ${inRef}) or accept generated defaults explicitly with --default-configs.`
+        `${multi ? stepLabel(0) : `Transformation '${first.manifest.name}'`} is decision-based. Provide --config <ref> (create one with: synth config init ${first.manifest.name} --for ${inRef}) or accept generated defaults explicitly with --default-configs.`
       )
     }
-    if (uncovered >= 0) {
+    if (uncovered > 0) {
       fail(
         EXIT_CODES.VALIDATION_FAILURE,
         `${stepLabel(uncovered)} is decision-based; a chain cannot take an explicit configuration for a model that is produced mid-run. Either run stepwise: tx run + config init against the intermediate, or accept generated defaults explicitly: --default-configs.`
@@ -368,9 +391,7 @@ export async function executeRun(request: ExecuteRequest): Promise<void> {
     }
   }
 
-  // 9. --save-config target resolves before any engine work, like --out —
-  // and must never claim the input's or the result's ref: writing the
-  // configuration there would destroy that model.
+  // 9. --save-config target resolves before any engine work, like --out.
   let saveConfigTarget: WritableTarget | undefined
   if (request.saveConfig !== undefined) {
     try {
@@ -378,18 +399,37 @@ export async function executeRun(request: ExecuteRequest): Promise<void> {
     } catch (err) {
       fail(EXIT_CODES.FAILURE, errorMessage(err), err)
     }
-    if (saveConfigTarget.ref === inRef) {
+  }
+
+  // 10. Every ref the run will write — kept intermediates, the final --out
+  // target, the --save-config target — and the --in ref must be pairwise
+  // distinct: a duplicate would make the run overwrite its own input or
+  // one of its own outputs. Checked here, before any engine work.
+  const claimedRefs = new Map<string, string>()
+  const claimRef = (ref: string, what: string): void => {
+    const holder = claimedRefs.get(ref)
+    if (holder !== undefined) {
       fail(
         EXIT_CODES.FAILURE,
-        `--save-config target ${saveConfigTarget.ref} is the same ref as --in; saving the configuration there would overwrite the input model. Choose a different ref.`
+        `${what} ${ref} is the same ref as ${holder}; ${
+          holder === '--in' ? 'the run would overwrite the input model' : 'one run cannot write the same ref twice'
+        }. Choose a different ref.`
       )
     }
-    if (m2mTarget !== undefined && saveConfigTarget.ref === m2mTarget.ref) {
-      fail(
-        EXIT_CODES.FAILURE,
-        `--save-config target ${saveConfigTarget.ref} is the same ref as the ${request.out !== undefined ? '--out target' : `default --out target derived from --in`}; the transformation result would overwrite the saved configuration. Choose a different ref.`
-      )
+    claimedRefs.set(ref, what)
+  }
+  claimRef(inRef, '--in')
+  for (let i = 0; i < intermediateTargets.length; i++) {
+    const target = intermediateTargets[i]
+    if (target !== undefined) {
+      claimRef(target.ref, `the intermediate model of ${stepLabel(i)}`)
     }
+  }
+  if (m2mTarget !== undefined) {
+    claimRef(m2mTarget.ref, request.out !== undefined ? 'the --out target' : 'the default --out target derived from --in')
+  }
+  if (saveConfigTarget !== undefined) {
+    claimRef(saveConfigTarget.ref, '--save-config target')
   }
 
   if (multi) {
@@ -408,7 +448,7 @@ export async function executeRun(request: ExecuteRequest): Promise<void> {
     }
   }
 
-  // 10. Load the input model's reference closure, then the model, into ONE
+  // 11. Load the input model's reference closure, then the model, into ONE
   // store shared by every step of the run.
   const store = new ModelStore()
   try {
@@ -435,7 +475,9 @@ export async function executeRun(request: ExecuteRequest): Promise<void> {
     txInstance: TransformationInstance,
     result: unknown,
     target: WritableTarget,
-    configProvenance: string
+    configProvenance: string,
+    /** The step's ACTUAL input: a workspace ref or a mid-chain marker. */
+    stepSourceRef: string
   ): Promise<void> => {
     const { manifest } = current
     // The transformation's own serialization of the target tree (kept by
@@ -477,7 +519,7 @@ export async function executeRun(request: ExecuteRequest): Promise<void> {
         txVersion: manifest.version,
         config: configProvenance
       },
-      description: `Generated by ${manifest.name} from ${inRef}`
+      description: `Generated by ${manifest.name} from ${stepSourceRef}`
     })
 
     await mkdir(dirname(target.path), { recursive: true })
@@ -561,10 +603,13 @@ export async function executeRun(request: ExecuteRequest): Promise<void> {
     }
   }
 
-  // 11. Execute the steps: per step render that step's manifest parts,
-  // resolve its configuration (explicit for step 1, generated defaults
-  // otherwise), transform, and hand the result to the next step in memory.
+  // 12. Execute the steps: per step render that step's manifest parts,
+  // resolve its configuration (per the pre-flight configSource), transform,
+  // and hand the result to the next step in memory. `stepSourceRef` tracks
+  // each step's ACTUAL input for provenance and default-config generation:
+  // the kept-intermediate ref when it exists, else a derivation marker.
   let stepInput: unknown = inputRoot
+  let stepSourceRef = inRef
   for (let i = 0; i < stepCount; i++) {
     const current = steps[i]
     const { manifest, packageDir } = current
@@ -587,8 +632,8 @@ export async function executeRun(request: ExecuteRequest): Promise<void> {
     // store) or generate the default one; announce every effective decision.
     let configModel: unknown
     let decisions: DecisionAnnouncement[] = []
-    if (manifest.variability) {
-      if (i === 0 && configTarget !== undefined) {
+    if (current.configSource !== 'none') {
+      if (current.configSource === 'explicit' && configTarget !== undefined) {
         const config = configTarget
         try {
           await buffer.run(async () => {
@@ -644,9 +689,11 @@ export async function executeRun(request: ExecuteRequest): Promise<void> {
             parts,
             manifest,
             packageDir,
-            sourceRef: inRef,
+            sourceRef: stepSourceRef,
             modelsDir,
-            target: i === 0 ? saveConfigTarget : undefined,
+            // Pre-flight rejects --save-config on multi-step runs, so a
+            // defined target here always belongs to the only step.
+            target: saveConfigTarget,
             announce: (line) => {
               if (!json) {
                 request.log(`${prefix}${line}`)
@@ -662,7 +709,7 @@ export async function executeRun(request: ExecuteRequest): Promise<void> {
         for (const warning of defaults.warnings) {
           request.warn(warning)
         }
-        if (i === 0 && saveConfigTarget !== undefined && !json) {
+        if (saveConfigTarget !== undefined && !json) {
           request.log(`Wrote ${saveConfigTarget.ref} (${saveConfigTarget.path})`)
         }
       }
@@ -686,24 +733,30 @@ export async function executeRun(request: ExecuteRequest): Promise<void> {
       ...(manifest.variability ? { decisions } : {})
     })
 
-    const configProvenance = i === 0 && configTarget !== undefined ? configTarget.ref : 'defaults'
+    const configProvenance =
+      current.configSource === 'explicit' && configTarget !== undefined ? configTarget.ref : 'defaults'
     if (i < stepCount - 1) {
       // Non-final step: the in-memory result is the next step's input;
       // --keep-intermediates additionally persists it as a workspace model.
       const intermediateTarget = intermediateTargets[i]
       if (intermediateTarget !== undefined) {
-        await writeM2mResult(current, txInstance, result, intermediateTarget, configProvenance)
+        await writeM2mResult(current, txInstance, result, intermediateTarget, configProvenance, stepSourceRef)
         intermediates.push(intermediateTarget.ref)
       }
       stepInput = result
+      // The next step's actual input is the kept intermediate when there is
+      // one; otherwise the result exists only in memory and provenance
+      // records how it was derived.
+      stepSourceRef =
+        intermediateTarget !== undefined ? intermediateTarget.ref : `${stepSourceRef} via ${manifest.name}`
     } else if (m2mTarget !== undefined) {
-      await writeM2mResult(current, txInstance, result, m2mTarget, configProvenance)
+      await writeM2mResult(current, txInstance, result, m2mTarget, configProvenance, stepSourceRef)
     } else {
       await writeM2tResult(result, outDirJoined as string)
     }
   }
 
-  // 12. The one place both output modes report success from
+  // 13. The one place both output modes report success from
   if (json) {
     const target = m2mTarget !== undefined ? { out: m2mTarget.ref } : { outDir: outDirJoined }
     request.log(

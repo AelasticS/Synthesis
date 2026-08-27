@@ -96,7 +96,7 @@ export class EER2RelDomainWithDecisionTransformation extends DecisionAwareM2M<
           type={this.getColumnType(fkSide.domain)}
           isForeignKey={true}
           isKey={false}
-          references={fkSide.domain.name}
+          references={this.applyNaming(fkSide.domain.name)}
           isNullable={fkSide.lb === "0"}
         />
       </Table>
@@ -114,7 +114,7 @@ export class EER2RelDomainWithDecisionTransformation extends DecisionAwareM2M<
           name={this.applyNaming(role1.domain.name + "Id_FK")}
           type={this.getColumnType(role1)}
           isForeignKey={true}
-          references={role1.domain.name}
+          references={this.applyNaming(role1.domain.name)}
           isNullable={role1.lb !== "1" && role1.ub !== "1"}
           isKey={role1.ub === "1"}
         />
@@ -122,7 +122,7 @@ export class EER2RelDomainWithDecisionTransformation extends DecisionAwareM2M<
           name={this.applyNaming(role2.domain.name + "Id_FK")}
           type={this.getColumnType(role2)}
           isForeignKey={true}
-          references={role2.domain.name}
+          references={this.applyNaming(role2.domain.name)}
           isNullable={role2.lb !== "1"}
           isKey={role2.ub === "1"}
         />

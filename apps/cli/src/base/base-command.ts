@@ -7,6 +7,9 @@ import {
   expandPath,
   isWorkspaceInitialized
 } from '../config/index.js'
+import { errorMessage } from '../support/errors.js'
+import { EXIT_CODES } from '../support/exit-codes.js'
+import { ExecuteError } from '../tx/execute-error.js'
 
 /**
  * Base command class for all synth commands.
@@ -100,6 +103,19 @@ export abstract class BaseCommand<T extends typeof Command = typeof Command> ext
       this.exit(exit)
     }
     this.error(message, { exit })
+  }
+
+  /**
+   * Map a failure thrown by the transformation execution core to the
+   * command's exit: a typed ExecuteError keeps its exit code, anything
+   * else is a generic failure. Shared by `run` and `tx run` so the two
+   * surfaces cannot drift.
+   */
+  protected failFromExecuteError(json: boolean, err: unknown): never {
+    if (err instanceof ExecuteError) {
+      this.jsonAwareFail(json, err.message, err.exit)
+    }
+    this.jsonAwareFail(json, errorMessage(err), EXIT_CODES.FAILURE)
   }
 
   /**

@@ -48,8 +48,8 @@ CREATE TABLE organization (
 );
 
 CREATE TABLE works_in (
-  organization_id_fk VARCHAR(255) PRIMARY KEY AUTOINCREMENT REFERENCES Organization,
-  person_id_fk VARCHAR(255) AUTOINCREMENT REFERENCES Person
+  organization_id_fk VARCHAR(255) PRIMARY KEY AUTOINCREMENT REFERENCES organization,
+  person_id_fk VARCHAR(255) AUTOINCREMENT REFERENCES person
 );
 ```
 
