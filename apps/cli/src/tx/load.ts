@@ -18,13 +18,28 @@ import { Context } from '@synthesis/jsx-runtime'
 
 import type { WorkspaceConfig } from '../config/index.js'
 import { parseSynthHeader } from '../models/header.js'
+import type { SynthHeader } from '../models/header.js'
 import { renderFactory, renderModel, renderReferenceClosure } from '../models/loader.js'
-import type { RenderedModel } from '../models/loader.js'
+import type { ModelClosureErrorKind, RenderedModel } from '../models/loader.js'
 import { errorMessage } from '../support/errors.js'
 import { EXIT_CODES } from '../support/exit-codes.js'
+import { modelPathToRef, normalizeRef, refToModelPath } from '../support/refs.js'
 import { loadTxManifest } from './manifest.js'
 import type { TxManifest, TxPartRef } from './manifest.js'
 import { importTxModule, requireExport } from './modules.js'
+
+/**
+ * A broken reference closure maps to the same exit codes the equivalent
+ * direct failure would produce: missing model -> NOT_FOUND, malformed
+ * header -> VALIDATION_FAILURE, everything else -> FAILURE. One table for
+ * every command that loads a closure (`tx run`, `config init`).
+ */
+export const CLOSURE_EXIT_CODES: Record<ModelClosureErrorKind, number> = {
+  'invalid-ref': EXIT_CODES.FAILURE,
+  'missing-ref': EXIT_CODES.NOT_FOUND,
+  'header-parse-failure': EXIT_CODES.VALIDATION_FAILURE,
+  'render-failure': EXIT_CODES.FAILURE
+}
 
 /** Failure to resolve an installed transformation; `exit` maps to the CLI exit code. */
 export class TxResolveError extends Error {
@@ -76,6 +91,62 @@ export async function resolveInstalledTx(
     throw new TxResolveError(EXIT_CODES.FAILURE, errorMessage(err))
   }
   return { packageDir: entry.path, manifest }
+}
+
+/** Typed failure of `resolveSourceModel`; `exit` maps to the CLI exit code. */
+export class SourceModelError extends Error {
+  public constructor(
+    public readonly exit: number,
+    message: string
+  ) {
+    super(message)
+  }
+}
+
+export interface ResolvedSourceModel {
+  ref: string
+  path: string
+  header: SynthHeader | null
+}
+
+/**
+ * Resolve the source model a transformation is applied to: normalize the
+ * ref, find the file, parse the `$synth` header (a malformed header is a
+ * broken declaration, not a missing one — the gate cannot be silently
+ * skipped), and gate the declared metamodel against the manifest. Shared
+ * by `tx run --in` and `config init --for` so checks, wording, and exit
+ * codes cannot drift.
+ */
+export async function resolveSourceModel(
+  modelsDir: string,
+  rawRef: string,
+  manifest: TxManifest
+): Promise<ResolvedSourceModel> {
+  let ref: string
+  try {
+    ref = normalizeRef(rawRef)
+  } catch (err) {
+    throw new SourceModelError(EXIT_CODES.FAILURE, errorMessage(err))
+  }
+  const path = refToModelPath(modelsDir, ref)
+  if (!existsSync(path)) {
+    throw new SourceModelError(EXIT_CODES.NOT_FOUND, `Source model not found: ${ref} (looked for ${path})`)
+  }
+  const parsed = parseSynthHeader(await readFile(path, 'utf-8'))
+  if (parsed.error !== undefined) {
+    throw new SourceModelError(
+      EXIT_CODES.VALIDATION_FAILURE,
+      `Source model ${ref} has a malformed $synth header: ${parsed.error}`
+    )
+  }
+  const header = parsed.header
+  if (header !== null && header.metamodel !== '' && header.metamodel !== manifest.source.metamodel) {
+    throw new SourceModelError(
+      EXIT_CODES.VALIDATION_FAILURE,
+      `Type mismatch: source model ${ref} declares metamodel '${header.metamodel}' but transformation '${manifest.name}' expects '${manifest.source.metamodel}'.`
+    )
+  }
+  return { ref, path, header }
 }
 
 /** Roots of the package parts rendered into a store. */
@@ -134,22 +205,100 @@ export interface RenderedModelWithTxContext extends RenderedModel {
  * models, whose `$refByName` references reach into the transformation's
  * decision/binding models and into the source model they configure — a
  * plain renderModel of such a file can never resolve them.
+ *
+ * A caller that already loaded the package manifest passes it to skip the
+ * re-read. When the file lives inside the models tree, its own ref is
+ * excluded from the closure (mirroring renderModelClosure's root
+ * exclusion) so a reference cycle back to the file never renders it twice.
  */
 export async function renderModelWithTxContext(
   filePath: string,
   txPackageDir: string,
   store: ModelStore = new ModelStore(),
-  modelsDir?: string
+  modelsDir?: string,
+  manifest?: TxManifest
 ): Promise<RenderedModelWithTxContext> {
-  const manifest = await loadTxManifest(txPackageDir)
-  const parts = await renderTxParts(txPackageDir, manifest, store)
+  const txManifest = manifest ?? (await loadTxManifest(txPackageDir))
+  const parts = await renderTxParts(txPackageDir, txManifest, store)
   if (modelsDir !== undefined) {
     const parsed = parseSynthHeader(await readFile(filePath, 'utf-8'))
     if (parsed.error !== undefined) {
       throw new Error(`Model ${filePath} has a malformed $synth header: ${parsed.error}`)
     }
-    await renderReferenceClosure(modelsDir, parsed.header?.references ?? {}, store, filePath)
+    const ownRef = modelPathToRef(modelsDir, filePath)
+    await renderReferenceClosure(
+      modelsDir,
+      parsed.header?.references ?? {},
+      store,
+      filePath,
+      ownRef === null ? [] : [ownRef]
+    )
   }
   const rendered = await renderModel(filePath, store)
   return { ...rendered, parts }
+}
+
+// A dangling $refByName means the model references an element that neither
+// the file itself nor the store provides.
+const DANGLING_REF_RE = /Not existing object referenced with name "([^"]+)"/
+
+/**
+ * Typed render failure of the model gate; carries the classified pieces
+ * the commands compose their messages from.
+ */
+export class GateRenderError extends Error {
+  public constructor(
+    message: string,
+    /** Ready-to-append hint ('' or the configuration-model --tx hint). */
+    public readonly hint: string,
+    /** The dangling `$refByName` target, when the failure is a missing dependency. */
+    public readonly missingRef?: string,
+    options?: { cause?: unknown }
+  ) {
+    super(message, options)
+  }
+}
+
+/**
+ * The validation render shared by `model import` and `model validate`:
+ * plain renderModel without --tx, renderModelWithTxContext (installed
+ * package parts + header reference closure) with it. Render failures are
+ * rethrown as GateRenderError with the configuration-model hint and the
+ * dangling-ref classification already computed; a failure to resolve the
+ * installed transformation propagates as TxResolveError.
+ */
+export async function renderForGate(
+  workspaceConfig: WorkspaceConfig,
+  filePath: string,
+  txName: string | undefined,
+  modelsDir: string
+): Promise<{ header: unknown }> {
+  let txPackageDir: string | undefined
+  let manifest: TxManifest | undefined
+  if (txName !== undefined) {
+    ;({ packageDir: txPackageDir, manifest } = await resolveInstalledTx(workspaceConfig, txName))
+  }
+  try {
+    const rendered =
+      txPackageDir === undefined
+        ? await renderModel(filePath)
+        : await renderModelWithTxContext(filePath, txPackageDir, new ModelStore(), modelsDir, manifest)
+    return { header: rendered.header }
+  } catch (err) {
+    const message = errorMessage(err)
+    // A configuration model's references only resolve with its
+    // transformation's parts in the store; point at the flag that loads them
+    let kind: string | undefined
+    try {
+      kind = parseSynthHeader(await readFile(filePath, 'utf-8')).header?.kind
+    } catch {
+      kind = undefined
+    }
+    const hint =
+      txPackageDir === undefined && kind === 'configuration-model'
+        ? ` Hint: configuration models render only with their transformation's context — pass --tx <name> (e.g. the transformation named in the header's generatedBy).`
+        : ''
+    const dangling = DANGLING_REF_RE.exec(message)
+    throw new GateRenderError(message, hint, dangling?.[1], { cause: err })
+  }
 }

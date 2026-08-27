@@ -2,18 +2,16 @@ import { existsSync } from 'node:fs'
 import { readFile } from 'node:fs/promises'
 
 import { Args, Flags } from '@oclif/core'
-import { ModelStore } from '@synthesis/engine'
 
 import { BaseCommand } from '../../base/base-command.js'
 import { getModelsPath } from '../../config/index.js'
-import { renderModel } from '../../models/loader.js'
 import { parseSynthHeader } from '../../models/header.js'
 import { deriveMetamodel } from '../../models/stamp.js'
 import { errorMessage } from '../../support/errors.js'
 import { normalizeRef, refToModelPath } from '../../support/refs.js'
 import { EXIT_CODES } from '../../support/exit-codes.js'
 import { EngineOutputBuffer } from '../../tx/engine-output.js'
-import { renderModelWithTxContext, resolveInstalledTx, TxResolveError } from '../../tx/load.js'
+import { GateRenderError, renderForGate, TxResolveError } from '../../tx/load.js'
 
 export default class ModelValidate extends BaseCommand {
   static override description = `Check the model against its metamodel.
@@ -61,16 +59,6 @@ Configuration models reference their transformation's decision/binding models; p
       })
     }
 
-    let txPackageDir: string | undefined
-    if (flags.tx !== undefined) {
-      try {
-        ;({ packageDir: txPackageDir } = await resolveInstalledTx(this.workspaceConfig, flags.tx))
-      } catch (err) {
-        const exit = err instanceof TxResolveError ? err.exit : EXIT_CODES.FAILURE
-        this.error(errorMessage(err), { exit })
-      }
-    }
-
     const text = await readFile(modelPath, 'utf-8')
 
     // Real structural validation: transpile, import, and render into a
@@ -79,24 +67,23 @@ Configuration models reference their transformation's decision/binding models; p
     // render first — the context configuration models need.
     const buffer = new EngineOutputBuffer(!flags.verbose)
     try {
-      await buffer.run(() =>
-        txPackageDir === undefined
-          ? renderModel(modelPath)
-          : renderModelWithTxContext(modelPath, txPackageDir, new ModelStore(), modelsDir)
-      )
+      await buffer.run(() => renderForGate(this.workspaceConfig, modelPath, flags.tx, modelsDir))
     } catch (err) {
       buffer.flushToStderr()
-      const kind = parseSynthHeader(text).header?.kind
-      const txHint =
-        txPackageDir === undefined && kind === 'configuration-model'
-          ? ` Hint: configuration models render only with their transformation's context — pass --tx <name> (e.g. the transformation named in the header's generatedBy).`
-          : ''
-      this.error(`Validation failed: ${errorMessage(err)}${txHint}`, {
+      if (err instanceof TxResolveError) {
+        this.error(errorMessage(err), { exit: err.exit })
+      }
+      if (err instanceof GateRenderError) {
+        this.error(`Validation failed: ${err.message}${err.hint}`, {
+          exit: EXIT_CODES.VALIDATION_FAILURE
+        })
+      }
+      this.error(`Validation failed: ${errorMessage(err)}`, {
         exit: EXIT_CODES.VALIDATION_FAILURE
       })
     }
     this.log('[ok] file transpiles and imports')
-    this.log(txPackageDir === undefined ? '[ok] default export renders' : `[ok] default export renders (with '${flags.tx}' context)`)
+    this.log(flags.tx === undefined ? '[ok] default export renders' : `[ok] default export renders (with '${flags.tx}' context)`)
 
     const { header, error } = parseSynthHeader(text)
     if (header === null) {
@@ -118,11 +105,11 @@ Configuration models reference their transformation's decision/binding models; p
             { exit: EXIT_CODES.VALIDATION_FAILURE }
           )
         }
-      } else if (header.kind === 'model') {
+      } else if (header.kind !== 'configuration-model') {
         // The header is the declared metamodel; a differing derivation is a
         // heads-up, not a failure. Only an explicit --against mismatch fails.
-        // The import heuristic only speaks for plain models — special kinds
-        // (configuration models) import component modules, not metamodels.
+        // The import heuristic speaks for every kind except configuration
+        // models, whose imports are component modules, not metamodels.
         const derived = deriveMetamodel(text)
         if (derived !== null) {
           if (header.metamodel === derived) {

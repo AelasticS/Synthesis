@@ -1,5 +1,4 @@
-import { existsSync } from 'node:fs'
-import { mkdir, readFile, writeFile } from 'node:fs/promises'
+import { mkdir, writeFile } from 'node:fs/promises'
 import { dirname, isAbsolute, join, resolve } from 'node:path'
 
 import { Args, Flags } from '@oclif/core'
@@ -9,32 +8,42 @@ import { Context } from '@synthesis/jsx-runtime'
 
 import { BaseCommand } from '../../base/base-command.js'
 import { getModelsPath } from '../../config/index.js'
-import { parseSynthHeader, serializeSynthHeader } from '../../models/header.js'
+import { serializeSynthHeader } from '../../models/header.js'
 import type { SynthHeader } from '../../models/header.js'
 import {
   ModelClosureError,
   renderModel,
-  renderModelClosure,
+  renderReferenceClosure,
   writeGatedModelFile
 } from '../../models/loader.js'
-import type { ModelClosureErrorKind } from '../../models/loader.js'
 import { makeGeneratedHeader } from '../../models/stamp.js'
 import { errorMessage } from '../../support/errors.js'
-import { normalizeRef, refToModelPath } from '../../support/refs.js'
 import { EXIT_CODES } from '../../support/exit-codes.js'
-import { generateDefaultConfigModel, writeConfigModelFile } from '../../tx/config-model.js'
+import { normalizeRef } from '../../support/refs.js'
 import {
-  collectDecisions,
-  formatDecisionAnnouncement,
-  validateConfigStructure
-} from '../../tx/decisions.js'
+  ConfigModelResolveError,
+  DefaultConfigError,
+  generateAndPersistDefaultConfig,
+  materializeDefaultChoices,
+  resolveConfigurationModel,
+  resolveWritableRef
+} from '../../tx/config-model.js'
+import type { WritableTarget } from '../../tx/config-model.js'
+import { formatDecisionAnnouncement, validateConfigStructure } from '../../tx/decisions.js'
 import type { DecisionAnnouncement } from '../../tx/decisions.js'
 import { EngineOutputBuffer } from '../../tx/engine-output.js'
-import { renderTxParts, resolveInstalledTx, TxResolveError } from '../../tx/load.js'
-import type { TxParts } from '../../tx/load.js'
+import {
+  CLOSURE_EXIT_CODES,
+  renderTxParts,
+  resolveInstalledTx,
+  resolveSourceModel,
+  SourceModelError,
+  TxResolveError
+} from '../../tx/load.js'
+import type { ResolvedSourceModel, TxParts } from '../../tx/load.js'
 import type { TxManifest } from '../../tx/manifest.js'
 import { importTxModule, moduleExport, requireExport } from '../../tx/modules.js'
-import { resolveDocDest, uniqueJsxTags } from '../../tx/output.js'
+import { buildModelModuleSource, resolveDocDest, uniqueJsxTags } from '../../tx/output.js'
 
 type StoreElement = Parameters<ModelStore['getTypeOf']>[0]
 
@@ -50,16 +59,6 @@ type TransformationCtor = new (
   configModel?: unknown
 ) => TransformationInstance
 
-// A broken reference closure maps to the same exit codes the equivalent
-// direct failure would produce: missing model -> NOT_FOUND, malformed
-// header -> VALIDATION_FAILURE, everything else -> FAILURE.
-const CLOSURE_EXIT_CODES: Record<ModelClosureErrorKind, number> = {
-  'invalid-ref': EXIT_CODES.FAILURE,
-  'missing-ref': EXIT_CODES.NOT_FOUND,
-  'header-parse-failure': EXIT_CODES.VALIDATION_FAILURE,
-  'render-failure': EXIT_CODES.FAILURE
-}
-
 // Ref name segments allow only [A-Za-z0-9_-]; anything else in the tx name
 // (e.g. '@scope/name') collapses to '-' for the default output ref.
 function sanitizeTxName(name: string): string {
@@ -73,19 +72,14 @@ function sanitizeTxName(name: string): string {
  */
 function buildModelModule(jsx: string, tags: string[], componentsSpec: string, header: SynthHeader): string {
   const rooted = jsx.replace(/^<([A-Z][A-Za-z0-9_$]*)/, '<$1 store={store}')
-  return [
-    '/** @jsx createExprNode */',
-    '',
-    "import { createExprNode } from '@synthesis/jsx-runtime'",
-    `import { ${tags.join(', ')} } from '${componentsSpec}'`,
-    '',
+  return buildModelModuleSource(
+    [
+      "import { createExprNode } from '@synthesis/jsx-runtime'",
+      `import { ${tags.join(', ')} } from '${componentsSpec}'`
+    ],
     serializeSynthHeader(header),
-    '',
-    'export default (store) => (',
-    rooted,
-    ')',
-    ''
-  ].join('\n')
+    rooted
+  )
 }
 
 export default class TxRun extends BaseCommand {
@@ -193,38 +187,20 @@ An M2M result is written back into the workspace as a model file; an M2T result 
     }
 
     // 2. Resolve the input model and gate on its declared metamodel
-    let inRef: string
-    try {
-      inRef = normalizeRef(flags.in)
-    } catch (err) {
-      this.jsonAwareFail(json, errorMessage(err), EXIT_CODES.FAILURE)
-    }
     const modelsDir = getModelsPath(this.workspaceConfig)
-    const inPath = refToModelPath(modelsDir, inRef)
-    if (!existsSync(inPath)) {
-      this.jsonAwareFail(json, `Input model not found: ${inRef} (looked for ${inPath})`, EXIT_CODES.NOT_FOUND)
+    let source: ResolvedSourceModel
+    try {
+      source = await resolveSourceModel(modelsDir, flags.in, manifest)
+    } catch (err) {
+      const exit = err instanceof SourceModelError ? err.exit : EXIT_CODES.FAILURE
+      this.jsonAwareFail(json, errorMessage(err), exit)
     }
-    const inParsed = parseSynthHeader(await readFile(inPath, 'utf-8'))
-    // A malformed header is a broken declaration, not a missing one: the
-    // metamodel gate cannot be silently skipped.
-    if (inParsed.error !== undefined) {
-      this.jsonAwareFail(
-        json,
-        `Input model ${inRef} has a malformed $synth header: ${inParsed.error}`,
-        EXIT_CODES.VALIDATION_FAILURE
-      )
-    }
-    const inHeader = inParsed.header
-    if (inHeader !== null && inHeader.metamodel !== '' && inHeader.metamodel !== manifest.source.metamodel) {
-      this.jsonAwareFail(
-        json,
-        `Type mismatch: input model ${inRef} declares metamodel '${inHeader.metamodel}' but transformation '${manifest.name}' expects '${manifest.source.metamodel}'.`,
-        EXIT_CODES.VALIDATION_FAILURE
-      )
-    }
+    const inRef = source.ref
+    const inPath = source.path
+    const inHeader = source.header
 
     // m2m target resolves before any engine work so clashes fail fast
-    let m2mTarget: { ref: string; path: string } | undefined
+    let m2mTarget: WritableTarget | undefined
     if (manifest.kind === 'm2m') {
       if (manifest.target.components === undefined) {
         this.jsonAwareFail(
@@ -233,57 +209,31 @@ An M2M result is written back into the workspace as a model file; an M2T result 
           EXIT_CODES.FAILURE
         )
       }
-      let outRef: string
       try {
-        outRef = normalizeRef(flags.out ?? `${inRef}-${sanitizeTxName(args.tx)}`)
+        m2mTarget = resolveWritableRef(
+          modelsDir,
+          flags.out ?? `${inRef}-${sanitizeTxName(args.tx)}`,
+          flags.overwrite,
+          'Output model'
+        )
       } catch (err) {
         this.jsonAwareFail(json, errorMessage(err), EXIT_CODES.FAILURE)
       }
-      const outPath = refToModelPath(modelsDir, outRef)
-      if (existsSync(outPath) && !flags.overwrite) {
-        this.jsonAwareFail(
-          json,
-          `Output model already exists: ${outRef}. Use --overwrite to replace it.`,
-          EXIT_CODES.FAILURE
-        )
-      }
-      m2mTarget = { ref: outRef, path: outPath }
     }
 
     // Explicit configuration: nominal checks run on the header alone,
     // before any engine work (design §7).
-    let configTarget: { ref: string; path: string } | undefined
+    let configTarget: { ref: string; path: string; header: SynthHeader } | undefined
     if (flags.config !== undefined) {
-      let configRef: string
       try {
-        configRef = normalizeRef(flags.config)
+        configTarget = await resolveConfigurationModel(modelsDir, flags.config)
       } catch (err) {
+        if (err instanceof ConfigModelResolveError) {
+          this.jsonAwareFail(json, err.message, err.exit)
+        }
         this.jsonAwareFail(json, errorMessage(err), EXIT_CODES.FAILURE)
       }
-      const configPath = refToModelPath(modelsDir, configRef)
-      if (!existsSync(configPath)) {
-        this.jsonAwareFail(
-          json,
-          `Configuration model not found: ${configRef} (looked for ${configPath})`,
-          EXIT_CODES.NOT_FOUND
-        )
-      }
-      const configParsed = parseSynthHeader(await readFile(configPath, 'utf-8'))
-      if (configParsed.error !== undefined) {
-        this.jsonAwareFail(
-          json,
-          `Configuration model ${configRef} has a malformed $synth header: ${configParsed.error}`,
-          EXIT_CODES.VALIDATION_FAILURE
-        )
-      }
-      const configHeader = configParsed.header
-      if (configHeader === null || configHeader.kind !== 'configuration-model') {
-        this.jsonAwareFail(
-          json,
-          `${configRef} is not a configuration model: its $synth header ${configHeader === null ? 'is missing' : `declares kind '${configHeader.kind}'`} (expected kind 'configuration-model').`,
-          EXIT_CODES.VALIDATION_FAILURE
-        )
-      }
+      const configHeader = configTarget.header
       const declaredSource = configHeader.references.sourceModel
       let declaredSourceRef: string | undefined
       try {
@@ -294,36 +244,41 @@ An M2M result is written back into the workspace as a model file; an M2T result 
       if (declaredSourceRef !== inRef) {
         this.jsonAwareFail(
           json,
-          `Configuration model ${configRef} was created for source model '${declaredSourceRef ?? '(none declared)'}' but this run transforms '${inRef}'. Generate a configuration for ${inRef} with 'synth config init'.`,
+          `Configuration model ${configTarget.ref} was created for source model '${declaredSourceRef ?? '(none declared)'}' but this run transforms '${inRef}'. Generate a configuration for ${inRef} with 'synth config init'.`,
           EXIT_CODES.VALIDATION_FAILURE
         )
       }
       if (configHeader.generatedBy !== null && configHeader.generatedBy.tx !== manifest.name) {
         this.warn(
-          `Configuration model ${configRef} was generated by transformation '${configHeader.generatedBy.tx}', not '${manifest.name}'; its choices may not match this transformation's decision model.`
+          `Configuration model ${configTarget.ref} was generated by transformation '${configHeader.generatedBy.tx}', not '${manifest.name}'; its choices may not match this transformation's decision model.`
         )
       }
-      configTarget = { ref: configRef, path: configPath }
     }
 
-    // --save-config target resolves before any engine work, like --out
-    let saveConfigTarget: { ref: string; path: string } | undefined
+    // --save-config target resolves before any engine work, like --out —
+    // and must never claim the input's or the result's ref: writing the
+    // configuration there would destroy that model.
+    let saveConfigTarget: WritableTarget | undefined
     if (flags['save-config'] !== undefined) {
-      let saveRef: string
       try {
-        saveRef = normalizeRef(flags['save-config'])
+        saveConfigTarget = resolveWritableRef(modelsDir, flags['save-config'], flags.overwrite, 'Configuration model')
       } catch (err) {
         this.jsonAwareFail(json, errorMessage(err), EXIT_CODES.FAILURE)
       }
-      const savePath = refToModelPath(modelsDir, saveRef)
-      if (existsSync(savePath) && !flags.overwrite) {
+      if (saveConfigTarget.ref === inRef) {
         this.jsonAwareFail(
           json,
-          `Configuration model already exists: ${saveRef}. Use --overwrite to replace it.`,
+          `--save-config target ${saveConfigTarget.ref} is the same ref as --in; saving the configuration there would overwrite the input model. Choose a different ref.`,
           EXIT_CODES.FAILURE
         )
       }
-      saveConfigTarget = { ref: saveRef, path: savePath }
+      if (m2mTarget !== undefined && saveConfigTarget.ref === m2mTarget.ref) {
+        this.jsonAwareFail(
+          json,
+          `--save-config target ${saveConfigTarget.ref} is the same ref as the ${flags.out !== undefined ? '--out target' : `default --out target derived from --in`}; the transformation result would overwrite the saved configuration. Choose a different ref.`,
+          EXIT_CODES.FAILURE
+        )
+      }
     }
 
     info(`Running ${manifest.name}@${manifest.version} (${manifest.kind}) on ${inRef}`)
@@ -341,7 +296,7 @@ An M2M result is written back into the workspace as a model file; an M2T result 
     // 3. Load the input model's reference closure, then the model, into ONE store
     const store = new ModelStore()
     try {
-      await buffer.run(() => renderModelClosure(modelsDir, inRef, store))
+      await buffer.run(() => renderReferenceClosure(modelsDir, inHeader?.references ?? {}, store, inRef, [inRef]))
     } catch (err) {
       buffer.flushToStderr()
       const exit = err instanceof ModelClosureError ? CLOSURE_EXIT_CODES[err.kind] : EXIT_CODES.FAILURE
@@ -369,16 +324,29 @@ An M2M result is written back into the workspace as a model file; an M2T result 
       if (configTarget !== undefined) {
         const config = configTarget
         try {
-          ;({ root: configModel } = await buffer.run(() => renderModel(config.path, store)))
+          await buffer.run(async () => {
+            // The configuration's own header closure renders first (helper
+            // models a hand-written configuration references); the input
+            // model and the configuration itself are already in the store
+            // or about to render — excluded like renderModelClosure's root.
+            await renderReferenceClosure(modelsDir, config.header.references, store, config.ref, [inRef, config.ref])
+            ;({ root: configModel } = await renderModel(config.path, store))
+          })
         } catch (err) {
           buffer.flushToStderr()
+          if (err instanceof ModelClosureError) {
+            this.jsonAwareFail(json, errorMessage(err), CLOSURE_EXIT_CODES[err.kind])
+          }
           this.jsonAwareFail(
             json,
             `Configuration model ${config.ref} failed to load against '${manifest.name}' and ${inRef}: ${errorMessage(err)}`,
             EXIT_CODES.VALIDATION_FAILURE
           )
         }
-        const structure = validateConfigStructure(store, configModel, parts.decisionModel, inputRoot)
+        const structure = validateConfigStructure(store, configModel, parts.decisionModel, parts.bindingModel, inputRoot)
+        for (const warning of structure.warnings) {
+          this.warn(warning)
+        }
         if (structure.errors.length > 0) {
           this.jsonAwareFail(
             json,
@@ -387,42 +355,50 @@ An M2M result is written back into the workspace as a model file; an M2T result 
           )
         }
         decisions = structure.announcements
-      } else {
-        configModel = await step('Failed to generate the default configuration', () =>
-          generateDefaultConfigModel(store, inputRoot, parts.bindingModel)
-        )
-        decisions = collectDecisions(store, configModel, parts.decisionModel)
-      }
-      if (!json) {
-        for (const announcement of decisions) {
-          this.log(formatDecisionAnnouncement(announcement))
-        }
-      }
-      if (saveConfigTarget !== undefined) {
-        const saveTarget = saveConfigTarget
-        try {
-          await buffer.run(() =>
-            writeConfigModelFile({
-              store,
-              configModel,
-              decisionModel: parts.decisionModel,
-              manifest,
-              packageDir,
-              sourceRef: inRef,
-              targetPath: saveTarget.path,
-              modelsDir
-            })
-          )
-        } catch (err) {
-          buffer.flushToStderr()
-          this.jsonAwareFail(
-            json,
-            `Generated configuration model failed the import gate (${saveTarget.ref} was left unchanged): ${errorMessage(err)}`,
-            EXIT_CODES.VALIDATION_FAILURE
+        // Every announced '(default)' must exist as a real Choice in the
+        // model the transformation receives — the engine applies nothing
+        // for a slot without one.
+        if (structure.uncoveredDefaults.length > 0) {
+          await step('Failed to apply the default choices for uncovered issues', () =>
+            materializeDefaultChoices(store, configModel, structure.uncoveredDefaults)
           )
         }
         if (!json) {
-          this.log(`Wrote ${saveTarget.ref} (${saveTarget.path})`)
+          for (const announcement of decisions) {
+            this.log(formatDecisionAnnouncement(announcement))
+          }
+        }
+      } else {
+        let defaults
+        try {
+          defaults = await generateAndPersistDefaultConfig({
+            buffer,
+            store,
+            inputRoot,
+            parts,
+            manifest,
+            packageDir,
+            sourceRef: inRef,
+            modelsDir,
+            target: saveConfigTarget,
+            announce: (line) => {
+              if (!json) {
+                this.log(line)
+              }
+            }
+          })
+        } catch (err) {
+          buffer.flushToStderr()
+          const exit = err instanceof DefaultConfigError ? err.exit : EXIT_CODES.FAILURE
+          this.jsonAwareFail(json, errorMessage(err), exit)
+        }
+        configModel = defaults.configModel
+        decisions = defaults.decisions
+        for (const warning of defaults.warnings) {
+          this.warn(warning)
+        }
+        if (saveConfigTarget !== undefined && !json) {
+          this.log(`Wrote ${saveConfigTarget.ref} (${saveConfigTarget.path})`)
         }
       }
     }

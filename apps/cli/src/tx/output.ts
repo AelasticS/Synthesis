@@ -20,6 +20,27 @@ export function uniqueJsxTags(jsx: string): string[] {
 }
 
 /**
+ * Wrap rendered model JSX into a complete workspace model module — the
+ * shared skeleton behind tx run's m2m writer and the configuration-model
+ * serializer: jsx pragma, import lines, `$synth` header text, and a
+ * default-exported `(store) => (<jsx>)` factory.
+ */
+export function buildModelModuleSource(importLines: string[], headerText: string, body: string): string {
+  return [
+    '/** @jsx createExprNode */',
+    '',
+    ...importLines,
+    '',
+    headerText,
+    '',
+    'export default (store) => (',
+    body,
+    ')',
+    ''
+  ].join('\n')
+}
+
+/**
  * Resolve a generated Doc's item path against the output root. Doc names
  * come from the transformation, so they are untrusted: an empty path, the
  * output root itself, or anything escaping the root is rejected.

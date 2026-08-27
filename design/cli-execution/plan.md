@@ -147,6 +147,13 @@ real fix belongs in the engine:
   only the bare doc name, so `<Dir>` structure is lost and same-named docs
   collide (the CLI now detects collisions and fails instead of silently
   overwriting). `generate` should report the accumulated path.
+- **Configuration models round-trip through neither engine serialization**:
+  the transformation-kept `context.output.jsx` prints object props as bare
+  identifiers (`selectedOption={SnakeCase}`) and `exportToJSX` inlines the
+  referenced decision/source graphs — so the CLI serializes configuration
+  models itself (`apps/cli/src/tx/config-model.ts`). An engine
+  `serializeModel` API should cover configuration models too (emit
+  `$refByName` references for cross-model links instead of inlining).
 
 ## Open items carried alongside
 

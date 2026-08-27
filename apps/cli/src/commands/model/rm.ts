@@ -1,16 +1,17 @@
-import { unlink } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
 import { Args, Flags } from '@oclif/core'
 
 import { BaseCommand } from '../../base/base-command.js'
 import { getModelsPath } from '../../config/index.js'
-import { errorMessage } from '../../support/errors.js'
 import {
-  findTransitiveDependents,
-  formatDependencyTree,
-  parseRef,
-  refToModelPath
-} from '../../support/refs.js'
+  DanglingDependentsError,
+  removalJson,
+  removalLines,
+  removeModelWithDependents
+} from '../../models/remove.js'
+import type { ModelRemoval } from '../../models/remove.js'
+import { errorMessage } from '../../support/errors.js'
+import { parseRef, refToModelPath } from '../../support/refs.js'
 import { EXIT_CODES } from '../../support/exit-codes.js'
 
 export default class ModelRm extends BaseCommand {
@@ -56,41 +57,21 @@ export default class ModelRm extends BaseCommand {
     // Deletion mirror of the import gate: the CLI never leaves dangling
     // references. Either nothing depends on the target, or the whole
     // reverse-dependency closure goes with it (--cascade).
-    const { closure, edges } = await findTransitiveDependents(modelsDir, [ref])
-    const tree = formatDependencyTree([ref], edges)
-
-    if (closure.length > 0 && !flags.cascade) {
-      this.jsonAwareFail(
-        json,
-        `Cannot remove ${ref} — ${closure.length} dependent model(s) would be left dangling:\n` +
-          `${tree.join('\n')}\n` +
-          'Remove or update them first, or pass --cascade to delete all of the above together.',
-        EXIT_CODES.VALIDATION_FAILURE
-      )
-    }
-
-    const deleted = [ref, ...closure]
-    for (const target of deleted) {
-      await unlink(refToModelPath(modelsDir, target))
+    let removal: ModelRemoval
+    try {
+      removal = await removeModelWithDependents(modelsDir, ref, flags.cascade)
+    } catch (err) {
+      if (err instanceof DanglingDependentsError) {
+        this.jsonAwareFail(json, err.message, EXIT_CODES.VALIDATION_FAILURE)
+      }
+      throw err
     }
 
     if (flags.json) {
-      this.log(
-        JSON.stringify(
-          closure.length > 0
-            ? { deleted: ref, path: filePath, cascaded: closure }
-            : { deleted: ref, path: filePath }
-        )
-      )
+      this.log(JSON.stringify(removalJson(ref, filePath, removal)))
     } else {
-      if (closure.length > 0) {
-        this.log('Cascade delete of the dependency graph:')
-        for (const line of tree) {
-          this.log(`  ${line}`)
-        }
-      }
-      for (const target of deleted) {
-        this.log(`Deleted ${target}`)
+      for (const line of removalLines(removal)) {
+        this.log(line)
       }
     }
   }

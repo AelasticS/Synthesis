@@ -2,18 +2,15 @@ import { existsSync } from 'node:fs'
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { basename, dirname, isAbsolute, join } from 'node:path'
 import { Args, Flags } from '@oclif/core'
-import { ModelStore } from '@synthesis/engine'
 
 import { BaseCommand } from '../../base/base-command.js'
 import { getModelsPath } from '../../config/index.js'
-import { parseSynthHeader } from '../../models/header.js'
-import { renderModel } from '../../models/loader.js'
 import { stampModelText } from '../../models/stamp.js'
 import { errorMessage } from '../../support/errors.js'
 import { findMissingReferences, normalizeRef, refToModelPath } from '../../support/refs.js'
 import { EXIT_CODES } from '../../support/exit-codes.js'
 import { EngineOutputBuffer } from '../../tx/engine-output.js'
-import { renderModelWithTxContext, resolveInstalledTx, TxResolveError } from '../../tx/load.js'
+import { GateRenderError, renderForGate, TxResolveError } from '../../tx/load.js'
 
 export default class ModelImport extends BaseCommand {
   static override description = `Validate a .tsx model file and copy it into the workspace.
@@ -90,50 +87,29 @@ Configuration models reference their transformation's decision/binding models an
     const modelsDir = getModelsPath(this.workspaceConfig)
     const text = await readFile(sourcePath, 'utf-8')
 
-    // With --tx, the installed transformation's parts render into the
-    // validation store first — the context configuration models need
-    let txPackageDir: string | undefined
-    if (flags.tx !== undefined) {
-      try {
-        ;({ packageDir: txPackageDir } = await resolveInstalledTx(this.workspaceConfig, flags.tx))
-      } catch (err) {
-        const exit = err instanceof TxResolveError ? err.exit : EXIT_CODES.FAILURE
-        this.jsonAwareFail(json, errorMessage(err), exit)
-      }
-    }
-
     // Validation gate: the model must transpile, import, and render into a
-    // throwaway store before anything is copied into the workspace.
+    // throwaway store before anything is copied into the workspace. With
+    // --tx, the installed transformation's parts render into the store
+    // first — the context configuration models need.
     let moduleHeader: unknown
     const buffer = new EngineOutputBuffer(!flags.verbose)
     try {
-      const rendered = await buffer.run(() =>
-        txPackageDir === undefined
-          ? renderModel(sourcePath)
-          : renderModelWithTxContext(sourcePath, txPackageDir, new ModelStore(), modelsDir)
-      )
-      moduleHeader = rendered.header
+      ;({ header: moduleHeader } = await buffer.run(() =>
+        renderForGate(this.workspaceConfig, sourcePath, flags.tx, modelsDir)
+      ))
     } catch (err) {
       buffer.flushToStderr()
-      const message = errorMessage(err)
-      // A configuration model's references only resolve with its
-      // transformation's parts in the store; point at the flag that loads them
-      const kind = parseSynthHeader(text).header?.kind
-      const txHint =
-        txPackageDir === undefined && kind === 'configuration-model'
-          ? ` Hint: configuration models render only with their transformation's context — pass --tx <name> (e.g. the transformation named in the header's generatedBy).`
-          : ''
-      // A dangling $refByName means the model references an element that
-      // neither the file itself nor the store provides
-      const dangling = /Not existing object referenced with name "([^"]+)"/.exec(message)
-      if (dangling) {
-        this.jsonAwareFail(
-          json,
-          `Import rejected: missing dependency '${dangling[1]}' — ${message}${txHint}`,
-          EXIT_CODES.VALIDATION_FAILURE
-        )
+      if (err instanceof TxResolveError) {
+        this.jsonAwareFail(json, errorMessage(err), err.exit)
       }
-      this.jsonAwareFail(json, `Import rejected: ${message}${txHint}`, EXIT_CODES.VALIDATION_FAILURE)
+      if (err instanceof GateRenderError) {
+        const prefix =
+          err.missingRef !== undefined
+            ? `Import rejected: missing dependency '${err.missingRef}' — `
+            : 'Import rejected: '
+        this.jsonAwareFail(json, `${prefix}${err.message}${err.hint}`, EXIT_CODES.VALIDATION_FAILURE)
+      }
+      this.jsonAwareFail(json, `Import rejected: ${errorMessage(err)}`, EXIT_CODES.VALIDATION_FAILURE)
     }
 
     const { text: stamped, header } = await stampModelText(text, moduleHeader, {

@@ -35,13 +35,21 @@ export default class ConfigLs extends BaseCommand {
 
     const modelsDir = getModelsPath(this.workspaceConfig)
     const rows: ConfigRow[] = []
-    for (const entry of await listModels(modelsDir)) {
-      // Static fast path only: no transpile, no execution. Unreadable or
-      // headerless files simply are not configuration models.
-      let text: string
-      try {
-        text = await readFile(entry.path, 'utf-8')
-      } catch {
+    const entries = await listModels(modelsDir)
+    // Static fast path only: no transpile, no execution. Unreadable or
+    // headerless files simply are not configuration models.
+    const texts = await Promise.all(
+      entries.map(async (entry) => {
+        try {
+          return await readFile(entry.path, 'utf-8')
+        } catch {
+          return null
+        }
+      })
+    )
+    for (const [index, entry] of entries.entries()) {
+      const text = texts[index]
+      if (text === null) {
         continue
       }
       const { header } = parseSynthHeader(text)

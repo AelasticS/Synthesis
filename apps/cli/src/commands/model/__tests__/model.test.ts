@@ -357,6 +357,23 @@ describe('model validate', () => {
     await run(['model', 'rm', 'com.example/declared'])
   })
 
+  it('reports the derived-metamodel heads-up for non-model kinds too', async () => {
+    // A decision-model/metamodel file imports its metamodel like any other
+    // model; only configuration models (component-module imports) are
+    // exempt from the consistency heads-up.
+    const stamped = readFileSync(join(modelsDir, 'com', 'example', 'persons.tsx'), 'utf-8')
+    const mmPath = join(modelsDir, 'com', 'example', 'mm-kind.tsx')
+    writeFileSync(mmPath, stamped.replace("kind: 'model',", "kind: 'metamodel',"))
+    try {
+      const { stdout, error } = await run(['model', 'validate', 'com.example/mm-kind'])
+      expect(error).toBeUndefined()
+      expect(stdout).toContain('[ok] header.metamodel matches the metamodel import')
+      expect(stdout).toContain('Model com.example/mm-kind is valid')
+    } finally {
+      rmSync(mmPath, { force: true })
+    }
+  })
+
   it('fails with the underlying cause when the model does not render', async () => {
     const brokenPath = join(modelsDir, 'com', 'example', 'unrenderable.tsx')
     writeFileSync(

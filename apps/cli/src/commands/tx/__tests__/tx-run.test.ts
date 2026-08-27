@@ -52,7 +52,7 @@ describe('tx run errors', () => {
       'tx', 'run', 'eer-to-relational', '--in', 'com.example/missing', '--out', 'com.example/x'
     ])
     expect(code).toBe(3)
-    expect(stderr).toContain('Input model not found')
+    expect(stderr).toContain('Source model not found')
   })
 
   it('fails with NOT_FOUND and a reinstall hint when the installed package is gone', async () => {
@@ -310,6 +310,179 @@ describe('tx run --config', () => {
     expect(decisions.length).toBeGreaterThan(0)
     expect(decisions.every((decision) => decision.isDefault === false)).toBe(true)
     expect(decisions.map((decision) => decision.option)).toContain('SnakeCase')
+  })
+})
+
+describe('tx run --save-config collision guards', () => {
+  it('rejects a --save-config target equal to --in even with --overwrite', async () => {
+    const { code, stderr } = await run([
+      'tx', 'run', 'eer-to-relational', '--in', 'com.example/persons',
+      '--save-config', 'com.example/persons', '--overwrite', '--out', 'com.example/never-collide'
+    ])
+    expect(code).toBe(1)
+    const message = flatten(stderr)
+    expect(message).toContain('--save-config target com.example/persons is the same ref as --in')
+    // Failing fast: neither the input model nor the output may be touched
+    expect(readFileSync(join(modelsDir, 'com', 'example', 'persons.tsx'), 'utf-8')).toContain('EERSchema')
+    expect(existsSync(join(modelsDir, 'com', 'example', 'never-collide.tsx'))).toBe(false)
+  })
+
+  it('detects the collision through ref normalization (slash namespace form)', async () => {
+    const { code, stderr } = await run([
+      'tx', 'run', 'eer-to-relational', '--in', 'com.example/persons',
+      '--save-config', 'com/example/persons', '--overwrite', '--out', 'com.example/never-collide'
+    ])
+    expect(code).toBe(1)
+    expect(flatten(stderr)).toContain('same ref as --in')
+  })
+
+  it('rejects a --save-config target equal to the explicit --out ref', async () => {
+    const { code, stderr } = await run([
+      'tx', 'run', 'eer-to-relational', '--in', 'com.example/persons',
+      '--save-config', 'com.example/never-collide', '--out', 'com.example/never-collide'
+    ])
+    expect(code).toBe(1)
+    expect(flatten(stderr)).toContain('same ref as the --out target')
+    expect(existsSync(join(modelsDir, 'com', 'example', 'never-collide.tsx'))).toBe(false)
+  })
+
+  it('rejects a --save-config target equal to the derived default --out ref', async () => {
+    const { code, stderr } = await run([
+      'tx', 'run', 'eer-to-relational', '--in', 'com.example/persons',
+      '--save-config', 'com.example/persons-eer-to-relational'
+    ])
+    expect(code).toBe(1)
+    expect(flatten(stderr)).toContain('default --out target')
+  })
+})
+
+describe('tx run --config with deleted choices (default materialization)', () => {
+  // THE acceptance criterion of the default fallback: what tx run announces
+  // as '(default)' must be what the engine actually applies. The engine's
+  // Option() evaluation has no fallback of its own, so tx run has to add
+  // the default choice to the configuration model it hands over.
+  const matCfgPath = () => join(modelsDir, 'com', 'example', 'mat-cfg.tsx')
+
+  /** Remove the whole GlobalChoice/ElementChoice block containing `marker`. */
+  const removeDecisionBlock = (text: string, marker: string): string => {
+    const markerIdx = text.indexOf(marker)
+    expect(markerIdx).toBeGreaterThan(-1)
+    const open = text.lastIndexOf('\n    <', markerIdx)
+    const close = text.indexOf('/>', text.indexOf(']}', markerIdx)) + '/>'.length
+    return text.slice(0, open) + text.slice(close)
+  }
+
+  beforeAll(async () => {
+    const init = await run([
+      'config', 'init', 'eer-to-relational', '--for', 'com.example/persons', '--out', 'com.example/mat-cfg'
+    ])
+    expect(init.error).toBeUndefined()
+  })
+
+  it('applies and announces the default when the global NamingConvention choice was deleted', async () => {
+    const edited = removeDecisionBlock(readFileSync(matCfgPath(), 'utf-8'), 'gc_NamingConvention')
+    writeFileSync(join(modelsDir, 'com', 'example', 'mat-cfg-no-nc.tsx'), edited)
+
+    const { stdout, error } = await run([
+      'tx', 'run', 'eer-to-relational', '--in', 'com.example/persons',
+      '--config', 'com.example/mat-cfg-no-nc', '--out', 'com.example/rel-mat-no-nc'
+    ])
+    expect(error).toBeUndefined()
+    expect(stdout).toContain('decision NamingConvention -> SnakeCase (default)')
+    // The default (SnakeCase) really steered the transformation
+    const model = readFileSync(join(modelsDir, 'com', 'example', 'rel-mat-no-nc.tsx'), 'utf-8')
+    expect(model).toContain('name="person_id"')
+    expect(model).not.toContain('name="personId"')
+  })
+
+  it('applies and announces the per-element default when one element choice was deleted', async () => {
+    const edited = removeDecisionBlock(readFileSync(matCfgPath(), 'utf-8'), 'ec_personId')
+    expect(edited).not.toContain('ec_personId')
+    writeFileSync(join(modelsDir, 'com', 'example', 'mat-cfg-no-pid.tsx'), edited)
+
+    const { stdout, error } = await run([
+      'tx', 'run', 'eer-to-relational', '--in', 'com.example/persons',
+      '--config', 'com.example/mat-cfg-no-pid', '--out', 'com.example/rel-mat-no-pid'
+    ])
+    expect(error).toBeUndefined()
+    expect(stdout).toContain('decision for element personId: PrimaryKeyStrategy -> UseAutoIncrement (default)')
+    // Without the materialized default the engine would have thrown (no
+    // option condition true, no default VarOption); with it, personId's
+    // primary key strategy is applied for real.
+    const model = readFileSync(join(modelsDir, 'com', 'example', 'rel-mat-no-pid.tsx'), 'utf-8')
+    expect(model).toContain('name="person_id" isKey={true} isAutoincrement={true}')
+  })
+
+  it('rejects duplicate choices for one issue, naming the issue and both options (exit 2)', async () => {
+    const text = readFileSync(matCfgPath(), 'utf-8')
+    const start = text.indexOf('    <GlobalChoice')
+    const end = text.indexOf('/>', text.indexOf(']}', start)) + '/>'.length
+    const block = text.slice(start, end)
+    const duplicate = block
+      .replaceAll('gc_NamingConvention', 'gc_NamingConvention2')
+      .replaceAll('SnakeCase', 'CamelCase')
+    writeFileSync(join(modelsDir, 'com', 'example', 'mat-cfg-dup.tsx'), text.slice(0, end) + '\n' + duplicate + text.slice(end))
+
+    const { code, stderr } = await run([
+      'tx', 'run', 'eer-to-relational', '--in', 'com.example/persons',
+      '--config', 'com.example/mat-cfg-dup', '--out', 'com.example/never-dup'
+    ])
+    expect(code).toBe(2)
+    const message = flatten(stderr)
+    expect(message).toContain(`issue 'NamingConvention'`)
+    expect(message).toContain('SnakeCase')
+    expect(message).toContain('CamelCase')
+    expect(existsSync(join(modelsDir, 'com', 'example', 'never-dup.tsx'))).toBe(false)
+  })
+
+  it('renders the configuration with its own header reference closure (helper models)', async () => {
+    // A hand-edited configuration referencing a helper workspace model:
+    // validate/show already load the header closure — tx run must too.
+    const helper = [
+      '/** @jsx createExprNode */',
+      '',
+      "import { createExprNode } from '@synthesis/jsx-runtime'",
+      "import { DecisionModel, ModelIssue, Option, SimpleOption } from '@synthesis/decision-framework/decisions/1.decision-model/decision-meta.model-components'",
+      '',
+      'export const $synth = {',
+      "  kind: 'decision-model',",
+      "  metamodel: '',",
+      "  description: 'Workspace copy of the naming issue, referenced by a hand-edited configuration'",
+      '} as const',
+      '',
+      'export default (store) => (',
+      '  <DecisionModel name="HelperIssues" description="Helper decision model" store={store}>',
+      '    <ModelIssue name="NamingConvention" description="Copy of the naming issue">',
+      '      <Option name="SnakeCaseCopy" isDefault={true} optionType={<SimpleOption name="SnakeCaseCopyOption" />} />',
+      '    </ModelIssue>',
+      '  </DecisionModel>',
+      ')',
+      ''
+    ].join('\n')
+    writeFileSync(join(modelsDir, 'com', 'example', 'helper-issues.tsx'), helper)
+
+    const edited = readFileSync(matCfgPath(), 'utf-8')
+      .replace(
+        "references: {\n    sourceModel: 'com.example/persons'\n  },",
+        "references: {\n    sourceModel: 'com.example/persons',\n    helperIssues: 'com.example/helper-issues'\n  },"
+      )
+      .replace(
+        'issue={<GlobalIssue $refByName="//www.aelastics.org/RelationSchemaDesign/NamingConvention" />}',
+        'issue={<GlobalIssue $refByName="//www.aelastics.org/HelperIssues/NamingConvention" />}'
+      )
+    expect(edited).toContain('helperIssues')
+    expect(edited).toContain('HelperIssues/NamingConvention')
+    writeFileSync(join(modelsDir, 'com', 'example', 'mat-cfg-helper.tsx'), edited)
+
+    const validate = await run(['model', 'validate', 'com.example/mat-cfg-helper', '--tx', 'eer-to-relational'])
+    expect(validate.error).toBeUndefined()
+
+    const { stdout, error } = await run([
+      'tx', 'run', 'eer-to-relational', '--in', 'com.example/persons',
+      '--config', 'com.example/mat-cfg-helper', '--out', 'com.example/rel-mat-helper'
+    ])
+    expect(error).toBeUndefined()
+    expect(stdout).toContain('Wrote com.example/rel-mat-helper')
   })
 })
 

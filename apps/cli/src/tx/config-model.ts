@@ -1,5 +1,5 @@
 /**
- * Configuration-model generation and persistence.
+ * Configuration-model resolution, generation, and persistence.
  *
  * The engine's serializations do not round-trip a configuration model: the
  * transformation-kept JSX prints object props as bare identifiers
@@ -11,21 +11,34 @@
  * is exactly why such a file only renders with the tx context loaded.
  */
 
-import { mkdir } from 'node:fs/promises'
+import { existsSync } from 'node:fs'
+import { mkdir, readFile } from 'node:fs/promises'
 import { dirname } from 'node:path'
 
 import { ModelStore } from '@synthesis/engine'
+import { Context } from '@synthesis/jsx-runtime'
 import { SourceModelToDefaultConfigurationModel } from '@synthesis/decision-framework/decisions/4.source-model-2-default-configuration-model/SourceModel2DefaultConfigurationModel'
+import {
+  Choice as ChoiceTemplate,
+  ElementChoice as ElementChoiceTemplate,
+  GlobalChoice as GlobalChoiceTemplate
+} from '@synthesis/decision-framework/decisions/3.configuration-model/configuration-meta.model-components'
 
-import { serializeSynthHeader } from '../models/header.js'
+import { parseSynthHeader, serializeSynthHeader } from '../models/header.js'
 import type { SynthHeader } from '../models/header.js'
 import { writeGatedModelFile } from '../models/loader.js'
 import { makeGeneratedHeader } from '../models/stamp.js'
-import { indexDecisionModel } from './decisions.js'
+import { errorMessage } from '../support/errors.js'
+import { EXIT_CODES } from '../support/exit-codes.js'
+import { normalizeRef, refToModelPath } from '../support/refs.js'
+import { collectDecisions, formatDecisionAnnouncement, indexDecisionModel } from './decisions.js'
+import type { DecisionAnnouncement, UncoveredDefaultSlot } from './decisions.js'
+import type { EngineOutputBuffer } from './engine-output.js'
 import { renderModelWithTxContext } from './load.js'
+import type { TxParts } from './load.js'
 import type { TxManifest } from './manifest.js'
 import { importTxModule, moduleExport } from './modules.js'
-import { uniqueJsxTags } from './output.js'
+import { buildModelModuleSource, uniqueJsxTags } from './output.js'
 
 type StoreElement = Parameters<ModelStore['getTypeOf']>[0]
 
@@ -62,6 +75,99 @@ const DefaultConfigGenerator = SourceModelToDefaultConfigurationModel as unknown
   extra: { bindingModel: unknown }
 ) => { transform(input: unknown): unknown }
 
+/** Why resolving a configuration-model ref failed. */
+export type ConfigModelResolveErrorKind = 'invalid-ref' | 'missing' | 'malformed-header' | 'wrong-kind'
+
+/**
+ * Typed failure of `resolveConfigurationModel`; `exit` is the CLI exit
+ * code the failure maps to — one contract for every command that takes a
+ * configuration-model ref.
+ */
+export class ConfigModelResolveError extends Error {
+  public constructor(
+    public readonly kind: ConfigModelResolveErrorKind,
+    public readonly exit: number,
+    message: string
+  ) {
+    super(message)
+  }
+}
+
+export interface ResolvedConfigModel {
+  ref: string
+  path: string
+  header: SynthHeader
+}
+
+/**
+ * Resolve a configuration-model ref nominally: normalize the ref, find the
+ * file, parse the `$synth` header (parse errors are surfaced, never
+ * swallowed), and require kind 'configuration-model'. Shared by
+ * `config show`/`rm`/`edit` and `tx run --config` so their checks and exit
+ * codes cannot drift: missing -> NOT_FOUND, malformed header or wrong
+ * kind -> VALIDATION_FAILURE.
+ */
+export async function resolveConfigurationModel(
+  modelsDir: string,
+  rawRef: string
+): Promise<ResolvedConfigModel> {
+  let ref: string
+  try {
+    ref = normalizeRef(rawRef)
+  } catch (err) {
+    throw new ConfigModelResolveError('invalid-ref', EXIT_CODES.FAILURE, errorMessage(err))
+  }
+  const path = refToModelPath(modelsDir, ref)
+  if (!existsSync(path)) {
+    throw new ConfigModelResolveError(
+      'missing',
+      EXIT_CODES.NOT_FOUND,
+      `Configuration model not found: ${ref} (looked for ${path})`
+    )
+  }
+  const parsed = parseSynthHeader(await readFile(path, 'utf-8'))
+  if (parsed.error !== undefined) {
+    throw new ConfigModelResolveError(
+      'malformed-header',
+      EXIT_CODES.VALIDATION_FAILURE,
+      `Configuration model ${ref} has a malformed $synth header: ${parsed.error}`
+    )
+  }
+  const header = parsed.header
+  if (header === null || header.kind !== 'configuration-model') {
+    throw new ConfigModelResolveError(
+      'wrong-kind',
+      EXIT_CODES.VALIDATION_FAILURE,
+      `${ref} is not a configuration model: its $synth header ${header === null ? 'is missing' : `declares kind '${header.kind}'`} (expected kind 'configuration-model').`
+    )
+  }
+  return { ref, path, header }
+}
+
+export interface WritableTarget {
+  ref: string
+  path: string
+}
+
+/**
+ * Resolve a ref a command is about to write: normalize it and enforce the
+ * exists/--overwrite gate. Shared by `tx run --out`, `tx run --save-config`,
+ * and `config init --out`.
+ */
+export function resolveWritableRef(
+  modelsDir: string,
+  rawRef: string,
+  overwrite: boolean,
+  label: string
+): WritableTarget {
+  const ref = normalizeRef(rawRef)
+  const path = refToModelPath(modelsDir, ref)
+  if (existsSync(path) && !overwrite) {
+    throw new Error(`${label} already exists: ${ref}. Use --overwrite to replace it.`)
+  }
+  return { ref, path }
+}
+
 /**
  * Run `SourceModelToDefaultConfigurationModel` over the input model: one
  * default choice per issue the binding model attaches, global and
@@ -74,6 +180,74 @@ export function generateDefaultConfigModel(
 ): unknown {
   const generator = new DefaultConfigGenerator(store, { bindingModel })
   return generator.transform(inputRoot)
+}
+
+/**
+ * Materialize default choices for uncovered (issue, element?) slots into a
+ * rendered configuration model, exactly as the default generator would
+ * have created them: a GlobalChoice/ElementChoice decision holding one
+ * Choice whose selectedOption is the issue's default option. Without this
+ * the engine would apply nothing for those slots — its Option() evaluation
+ * has no default fallback — while the CLI announces '(default)'.
+ */
+export function materializeDefaultChoices(
+  store: ModelStore,
+  configModel: unknown,
+  slots: UncoveredDefaultSlot[]
+): void {
+  if (slots.length === 0) {
+    return
+  }
+  const root = configModel as { name?: unknown; path?: unknown; decisions?: unknown[] }
+  if (typeof root.name !== 'string' || typeof root.path !== 'string') {
+    throw new Error('cannot materialize default choices: the configuration model root has no name/path')
+  }
+  const modelPath = `${root.path}/${root.name}`
+  // The store enforces unique qualified names; suffix until free so a
+  // user-kept decision with the base name never collides.
+  const uniqueName = (base: string): string => {
+    let name = base
+    let counter = 2
+    while (store.getByName(`${modelPath}/${name}`) !== undefined) {
+      name = `${base}_${counter++}`
+    }
+    return name
+  }
+  const context = new Context()
+  context.pushStore(store as unknown as Parameters<Context['pushStore']>[0])
+  context.pushModel(configModel as Parameters<Context['pushModel']>[0])
+  try {
+    for (const slot of slots) {
+      const choiceNode = ChoiceTemplate({
+        name: uniqueName(`default_${slot.issue.name}_${slot.option.name}`),
+        description: `Default choice for issue ${slot.issue.name}`,
+        issue: slot.issue.element,
+        selectedOption: slot.option.element
+      } as unknown as Parameters<typeof ChoiceTemplate>[0])
+      const decisionNode =
+        slot.element === undefined
+          ? GlobalChoiceTemplate({
+              name: uniqueName(`default_gc_${slot.issue.name}`),
+              choices: [choiceNode]
+            } as unknown as Parameters<typeof GlobalChoiceTemplate>[0])
+          : ElementChoiceTemplate({
+              name: uniqueName(`default_ec_${String((slot.element as { name?: unknown }).name ?? 'element')}_${slot.issue.name}`),
+              element: slot.element,
+              choices: [choiceNode]
+            } as unknown as Parameters<typeof ElementChoiceTemplate>[0])
+      const rendered = decisionNode.render(context)
+      // A standalone render creates the decision inside the model but does
+      // not connect it to the parent's `decisions` collection (that wiring
+      // is the ConfigurationModel tag's connectionInfo); connect here.
+      const decisions = root.decisions
+      if (Array.isArray(decisions) && !decisions.includes(rendered)) {
+        decisions.push(rendered)
+      }
+    }
+  } finally {
+    context.popModel()
+    context.popStore()
+  }
 }
 
 interface NamedElement {
@@ -179,11 +353,11 @@ export function serializeConfigModel(
 }
 
 /**
- * Wrap serialized configuration JSX into a complete workspace model module
- * — the same shape `model import --tx` accepts. Imports are grouped per
- * component module and cover exactly the tags the JSX uses.
+ * Group the tags a serialized configuration JSX uses by the component
+ * module exporting them — one scan serves both the import lines and the
+ * export verification. An unexpected tag is a serializer defect.
  */
-export function buildConfigModelModule(jsx: string, header: SynthHeader): string {
+export function groupConfigTagsByModule(jsx: string): Map<string, string[]> {
   const byModule = new Map<string, string[]>()
   for (const tag of uniqueJsxTags(jsx)) {
     const module = TAG_MODULES[tag]
@@ -192,26 +366,29 @@ export function buildConfigModelModule(jsx: string, header: SynthHeader): string
     }
     byModule.set(module, [...(byModule.get(module) ?? []), tag])
   }
+  return byModule
+}
+
+/**
+ * Wrap serialized configuration JSX into a complete workspace model module
+ * — the same shape `model import --tx` accepts. Imports are grouped per
+ * component module and cover exactly the tags the JSX uses; callers that
+ * already computed the grouping pass it in.
+ */
+export function buildConfigModelModule(
+  jsx: string,
+  header: SynthHeader,
+  byModule: Map<string, string[]> = groupConfigTagsByModule(jsx)
+): string {
   const jsxRuntimeTags = ['createExprNode', ...(byModule.get(JSX_RUNTIME) ?? [])]
-  byModule.delete(JSX_RUNTIME)
   const importLines = [
     `import { ${jsxRuntimeTags.join(', ')} } from '${JSX_RUNTIME}'`,
     ...[...byModule.entries()]
+      .filter(([module]) => module !== JSX_RUNTIME)
       .sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
       .map(([module, tags]) => `import { ${tags.join(', ')} } from '${module}'`)
   ]
-  return [
-    '/** @jsx createExprNode */',
-    '',
-    ...importLines,
-    '',
-    serializeSynthHeader(header),
-    '',
-    'export default (store) => (',
-    jsx.replace(/^/gm, '  '),
-    ')',
-    ''
-  ].join('\n')
+  return buildModelModuleSource(importLines, serializeSynthHeader(header), jsx.replace(/^/gm, '  '))
 }
 
 export interface ConfigWriteRequest {
@@ -240,14 +417,14 @@ export async function writeConfigModelFile(request: ConfigWriteRequest): Promise
 
   // Same verification approach as tx run's m2m writer: every tag the JSX
   // uses must be exported (as a component function) by its declared module.
-  for (const tag of uniqueJsxTags(jsx)) {
-    const module = TAG_MODULES[tag]
-    if (module === undefined) {
-      throw new Error(`serialized configuration JSX uses unexpected tag '${tag}'`)
-    }
+  // The grouping is computed once and reused for the emitted import lines.
+  const byModule = groupConfigTagsByModule(jsx)
+  for (const [module, tags] of byModule) {
     const mod = await importTxModule(packageDir, module)
-    if (typeof moduleExport(mod, tag) !== 'function') {
-      throw new Error(`configuration output uses component '${tag}', but '${module}' does not export it`)
+    for (const tag of tags) {
+      if (typeof moduleExport(mod, tag) !== 'function') {
+        throw new Error(`configuration output uses component '${tag}', but '${module}' does not export it`)
+      }
     }
   }
 
@@ -262,7 +439,92 @@ export async function writeConfigModelFile(request: ConfigWriteRequest): Promise
   await mkdir(dirname(targetPath), { recursive: true })
   await writeGatedModelFile(
     targetPath,
-    buildConfigModelModule(jsx, header),
-    async (candidatePath) => await renderModelWithTxContext(candidatePath, packageDir, new ModelStore(), modelsDir)
+    buildConfigModelModule(jsx, header, byModule),
+    async (candidatePath) =>
+      await renderModelWithTxContext(candidatePath, packageDir, new ModelStore(), modelsDir, manifest)
   )
+}
+
+/** Typed failure of `generateAndPersistDefaultConfig`; `exit` maps to the CLI exit code. */
+export class DefaultConfigError extends Error {
+  public constructor(
+    public readonly exit: number,
+    message: string,
+    options?: { cause?: unknown }
+  ) {
+    super(message, options)
+  }
+}
+
+export interface DefaultConfigRequest {
+  buffer: EngineOutputBuffer
+  store: ModelStore
+  inputRoot: unknown
+  parts: TxParts
+  manifest: TxManifest
+  packageDir: string
+  /** Workspace ref of the source model the configuration applies to. */
+  sourceRef: string
+  modelsDir: string
+  /** Pre-resolved target; when set, the generated model is persisted there. */
+  target?: WritableTarget
+  /** Called once per effective decision, before any persistence. */
+  announce: (line: string) => void
+}
+
+export interface DefaultConfigResult {
+  configModel: unknown
+  decisions: DecisionAnnouncement[]
+  /** Decision-model defects worth surfacing (duplicate option names). */
+  warnings: string[]
+}
+
+/**
+ * The default-configuration flow shared by `config init` and
+ * `tx run --save-config` (and tx run's implicit generation): generate the
+ * default configuration in the caller's store, announce every decision it
+ * records, and — when a target is given — persist it through the gated
+ * writer. Failures carry the exit code the caller must use.
+ */
+export async function generateAndPersistDefaultConfig(
+  request: DefaultConfigRequest
+): Promise<DefaultConfigResult> {
+  const { buffer, store, inputRoot, parts, manifest, packageDir, sourceRef, modelsDir, target, announce } = request
+  let configModel: unknown
+  try {
+    configModel = await buffer.run(() => generateDefaultConfigModel(store, inputRoot, parts.bindingModel))
+  } catch (err) {
+    throw new DefaultConfigError(
+      EXIT_CODES.FAILURE,
+      `Failed to generate the default configuration: ${errorMessage(err)}`,
+      { cause: err }
+    )
+  }
+  const decisions = collectDecisions(store, configModel, parts.decisionModel)
+  for (const announcement of decisions) {
+    announce(formatDecisionAnnouncement(announcement))
+  }
+  if (target !== undefined) {
+    try {
+      await buffer.run(() =>
+        writeConfigModelFile({
+          store,
+          configModel,
+          decisionModel: parts.decisionModel,
+          manifest,
+          packageDir,
+          sourceRef,
+          targetPath: target.path,
+          modelsDir
+        })
+      )
+    } catch (err) {
+      throw new DefaultConfigError(
+        EXIT_CODES.VALIDATION_FAILURE,
+        `Generated configuration model failed the import gate (${target.ref} was left unchanged): ${errorMessage(err)}`,
+        { cause: err }
+      )
+    }
+  }
+  return { configModel, decisions, warnings: indexDecisionModel(store, parts.decisionModel).warnings }
 }

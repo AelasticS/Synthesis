@@ -5,6 +5,7 @@ import { join } from 'node:path'
 import {
   parseRef,
   refToModelPath,
+  modelPathToRef,
   namespaceToDir,
   namespaceExists,
   dirToNamespace,
@@ -60,6 +61,28 @@ describe('refToModelPath', () => {
 
   it('maps a single-segment namespace', () => {
     expect(refToModelPath('/ws/models', 'demo/cars')).toBe('/ws/models/demo/cars.tsx')
+  })
+})
+
+describe('modelPathToRef', () => {
+  it('is the inverse of refToModelPath', () => {
+    expect(modelPathToRef('/ws/models', '/ws/models/com/example/persons.tsx')).toBe('com.example/persons')
+    expect(modelPathToRef('/ws/models', '/ws/models/demo/cars.tsx')).toBe('demo/cars')
+  })
+
+  it('returns null for files outside the models tree', () => {
+    expect(modelPathToRef('/ws/models', '/ws/other/persons.tsx')).toBeNull()
+    expect(modelPathToRef('/ws/models', '/tmp/persons.tsx')).toBeNull()
+  })
+
+  it('returns null for a model file at the models root (no namespace)', () => {
+    expect(modelPathToRef('/ws/models', '/ws/models/persons.tsx')).toBeNull()
+  })
+
+  it('returns null for non-.tsx files and unaddressable segments', () => {
+    expect(modelPathToRef('/ws/models', '/ws/models/com/example/persons.txt')).toBeNull()
+    expect(modelPathToRef('/ws/models', '/ws/models/com.example/persons.tsx')).toBeNull()
+    expect(modelPathToRef('/ws/models', '/ws/models/com/example/per.sons.tsx')).toBeNull()
   })
 })
 

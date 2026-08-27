@@ -106,6 +106,24 @@ export function namespaceToDir(modelsDir: string, namespace: string): string {
 }
 
 /**
+ * `<modelsDir>/com/example/persons.tsx` -> `com.example/persons` — the
+ * inverse of `refToModelPath`. Returns null when the path is not an
+ * addressable model file inside the nested tree (outside the tree, at the
+ * tree root, or with segments the ref grammar cannot express).
+ */
+export function modelPathToRef(modelsDir: string, filePath: string): string | null {
+  const rel = relative(resolve(modelsDir), resolve(filePath))
+  if (rel === '' || rel.startsWith('..') || isAbsolute(rel) || !rel.endsWith('.tsx')) {
+    return null
+  }
+  const segments = rel.slice(0, -'.tsx'.length).split(sep)
+  if (segments.length < 2 || segments.some((segment) => !SEGMENT_PATTERN.test(segment))) {
+    return null
+  }
+  return `${segments.slice(0, -1).join('.')}/${segments[segments.length - 1]}`
+}
+
+/**
  * Whether the namespace has a directory in the nested tree.
  * Throws for a namespace that violates the segment grammar.
  */

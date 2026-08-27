@@ -1,15 +1,12 @@
-import { existsSync } from 'node:fs'
-import { readFile } from 'node:fs/promises'
-
 import { Args, Flags } from '@oclif/core'
 import { ModelStore } from '@synthesis/engine'
 
 import { BaseCommand } from '../../base/base-command.js'
 import { getModelsPath } from '../../config/index.js'
-import { parseSynthHeader } from '../../models/header.js'
 import { errorMessage } from '../../support/errors.js'
-import { normalizeRef, refToModelPath } from '../../support/refs.js'
 import { EXIT_CODES } from '../../support/exit-codes.js'
+import { ConfigModelResolveError, resolveConfigurationModel } from '../../tx/config-model.js'
+import type { ResolvedConfigModel } from '../../tx/config-model.js'
 import { collectDecisions, formatDecisionAnnouncement } from '../../tx/decisions.js'
 import { EngineOutputBuffer } from '../../tx/engine-output.js'
 import { renderModelWithTxContext, resolveInstalledTx, TxResolveError } from '../../tx/load.js'
@@ -41,30 +38,17 @@ The model renders with its transformation's context (decision/binding models); t
     const { args, flags } = await this.parse(ConfigShow)
     const json = Boolean(flags.json)
 
-    let ref: string
+    const modelsDir = getModelsPath(this.workspaceConfig)
+    let resolved: ResolvedConfigModel
     try {
-      ref = normalizeRef(args.ref)
+      resolved = await resolveConfigurationModel(modelsDir, args.ref)
     } catch (err) {
+      if (err instanceof ConfigModelResolveError) {
+        this.jsonAwareFail(json, err.message, err.exit)
+      }
       this.jsonAwareFail(json, errorMessage(err), EXIT_CODES.FAILURE)
     }
-    const modelsDir = getModelsPath(this.workspaceConfig)
-    const modelPath = refToModelPath(modelsDir, ref)
-    if (!existsSync(modelPath)) {
-      this.jsonAwareFail(json, `Configuration model not found: ${ref} (looked for ${modelPath})`, EXIT_CODES.NOT_FOUND)
-    }
-
-    const parsed = parseSynthHeader(await readFile(modelPath, 'utf-8'))
-    if (parsed.error !== undefined) {
-      this.jsonAwareFail(json, `${ref} has a malformed $synth header: ${parsed.error}`, EXIT_CODES.VALIDATION_FAILURE)
-    }
-    const header = parsed.header
-    if (header === null || header.kind !== 'configuration-model') {
-      this.jsonAwareFail(
-        json,
-        `${ref} is not a configuration model: its $synth header ${header === null ? 'is missing' : `declares kind '${header.kind}'`}.`,
-        EXIT_CODES.VALIDATION_FAILURE
-      )
-    }
+    const { ref, path: modelPath, header } = resolved
 
     const txName = flags.tx ?? header.generatedBy?.tx
     if (txName === undefined) {

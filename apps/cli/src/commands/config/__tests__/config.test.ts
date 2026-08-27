@@ -66,7 +66,7 @@ describe('config init', () => {
   it('fails with NOT_FOUND when the model is missing', async () => {
     const { code, stderr } = await run(['config', 'init', 'eer-to-relational', '--for', 'com.example/missing'])
     expect(code).toBe(3)
-    expect(stderr).toContain('Model not found')
+    expect(stderr).toContain('Source model not found')
   })
 
   it('rejects a model whose metamodel does not match the transformation (exit 2)', async () => {
@@ -136,6 +136,31 @@ describe('config init', () => {
     expect(options).toContain('SnakeCase')
     expect(options).toContain('JoinTable')
     expect(parsed.written).toEqual([configPath('persons-cfg-json')])
+  })
+
+  it('maps a malformed header in a referenced model to exit 2, like tx run', async () => {
+    // The reference closure gate: a broken referenced header is a broken
+    // declaration (VALIDATION_FAILURE), not a generic failure
+    const brokenPath = configPath('broken-ref-target')
+    const referrerPath = configPath('persons-brokenref')
+    writeFileSync(
+      brokenPath,
+      `export const $synth = { kind: 'model', metamodel: undefined }\nexport default () => ({ render: () => 'x' })\n`
+    )
+    const referrer = readFileSync(join(modelsDir, 'com', 'example', 'persons.tsx'), 'utf-8').replace(
+      'references: {},',
+      "references: { broken: 'com.example/broken-ref-target' },"
+    )
+    expect(referrer).toContain('broken-ref-target')
+    writeFileSync(referrerPath, referrer)
+    try {
+      const { code, stderr } = await run(['config', 'init', 'eer-to-relational', '--for', 'com.example/persons-brokenref'])
+      expect(code).toBe(2)
+      expect(flatten(stderr)).toContain('malformed $synth header')
+    } finally {
+      rmSync(brokenPath, { force: true })
+      rmSync(referrerPath, { force: true })
+    }
   })
 })
 
@@ -271,10 +296,12 @@ describe('config rm', () => {
     expect(existsSync(configPath('persons-cfg-back'))).toBe(false)
   })
 
-  it('refuses a ref that is not a configuration model', async () => {
+  it('refuses a ref that is not a configuration model (exit 2, with the model rm hint)', async () => {
     const { code, stderr } = await run(['config', 'rm', 'com.example/persons'])
-    expect(code).toBe(1)
-    expect(flatten(stderr)).toContain('not a configuration model')
+    expect(code).toBe(2)
+    const message = flatten(stderr)
+    expect(message).toContain('not a configuration model')
+    expect(message).toContain('model rm')
     expect(existsSync(join(modelsDir, 'com', 'example', 'persons.tsx'))).toBe(true)
   })
 
@@ -289,6 +316,49 @@ describe('config edit', () => {
     const { code, stderr } = await run(['config', 'edit', 'com.example/no-such-cfg'])
     expect(code).toBe(3)
     expect(stderr).toContain('Configuration model not found')
+  })
+
+  it('refuses a ref that is not a configuration model (exit 2, same contract as show/rm)', async () => {
+    const { code, stderr } = await run(['config', 'edit', 'com.example/persons'])
+    expect(code).toBe(2)
+    expect(flatten(stderr)).toContain('not a configuration model')
+  })
+
+  it('refuses a headerless model instead of opening it (the old null-header bypass)', async () => {
+    const rawPath = join(modelsDir, 'com', 'example', 'headerless.tsx')
+    writeFileSync(rawPath, `export default (store) => ({ render: () => 'x' })\n`)
+    try {
+      const { code, stderr } = await run(['config', 'edit', 'com.example/headerless'])
+      expect(code).toBe(2)
+      expect(flatten(stderr)).toContain('is missing')
+    } finally {
+      rmSync(rawPath, { force: true })
+    }
+  })
+})
+
+describe('model validate --tx with a reference cycle', () => {
+  it('renders each model of the cycle exactly once', async () => {
+    // cycle-a and cycle-b reference each other; the closure must exclude
+    // the validated file's own ref (like renderModelClosure's root
+    // exclusion) or it renders twice and the store rejects the duplicate.
+    const personsText = readFileSync(join(modelsDir, 'com', 'example', 'persons.tsx'), 'utf-8')
+    const cycleModel = (name: string, back: string): string =>
+      personsText
+        .replace('references: {},', `references: { back: '${back}' },`)
+        .replace('name="Persons"', `name="${name}"`)
+    const aPath = join(modelsDir, 'com', 'example', 'cycle-a.tsx')
+    const bPath = join(modelsDir, 'com', 'example', 'cycle-b.tsx')
+    writeFileSync(aPath, cycleModel('CycleA', 'com.example/cycle-b'))
+    writeFileSync(bPath, cycleModel('CycleB', 'com.example/cycle-a'))
+    try {
+      const { stdout, error } = await run(['model', 'validate', 'com.example/cycle-a', '--tx', 'eer-to-relational'])
+      expect(error).toBeUndefined()
+      expect(stdout).toContain('Model com.example/cycle-a is valid')
+    } finally {
+      rmSync(aPath, { force: true })
+      rmSync(bPath, { force: true })
+    }
   })
 })
 

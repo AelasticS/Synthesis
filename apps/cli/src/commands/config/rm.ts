@@ -1,15 +1,18 @@
-import { existsSync } from 'node:fs'
-import { readFile } from 'node:fs/promises'
-
 import { Args, Flags } from '@oclif/core'
 
 import { BaseCommand } from '../../base/base-command.js'
 import { getModelsPath } from '../../config/index.js'
-import { parseSynthHeader } from '../../models/header.js'
+import {
+  DanglingDependentsError,
+  removalJson,
+  removalLines,
+  removeModelWithDependents
+} from '../../models/remove.js'
+import type { ModelRemoval } from '../../models/remove.js'
 import { errorMessage } from '../../support/errors.js'
-import { normalizeRef, refToModelPath } from '../../support/refs.js'
 import { EXIT_CODES } from '../../support/exit-codes.js'
-import ModelRm from '../model/rm.js'
+import { ConfigModelResolveError, resolveConfigurationModel } from '../../tx/config-model.js'
+import type { ResolvedConfigModel } from '../../tx/config-model.js'
 
 export default class ConfigRm extends BaseCommand {
   static override description = `Delete a configuration model from the workspace.
@@ -36,26 +39,35 @@ Configuration models live in the models tree, so removal has 'model rm' semantic
     const { args, flags } = await this.parse(ConfigRm)
     const json = Boolean(flags.json)
 
-    let ref: string
+    const modelsDir = getModelsPath(this.workspaceConfig)
+    let resolved: ResolvedConfigModel
     try {
-      ref = normalizeRef(args.ref)
+      resolved = await resolveConfigurationModel(modelsDir, args.ref)
     } catch (err) {
+      if (err instanceof ConfigModelResolveError) {
+        const hint = err.kind === 'wrong-kind' ? ` Use 'synth model rm' for general models.` : ''
+        this.jsonAwareFail(json, `${err.message}${hint}`, err.exit)
+      }
       this.jsonAwareFail(json, errorMessage(err), EXIT_CODES.FAILURE)
     }
-    const modelPath = refToModelPath(getModelsPath(this.workspaceConfig), ref)
-    if (!existsSync(modelPath)) {
-      this.jsonAwareFail(json, `Configuration model not found: ${ref} (looked for ${modelPath})`, EXIT_CODES.NOT_FOUND)
-    }
-    const { header } = parseSynthHeader(await readFile(modelPath, 'utf-8'))
-    if (header === null || header.kind !== 'configuration-model') {
-      this.jsonAwareFail(
-        json,
-        `${ref} is not a configuration model${header === null ? ' (no $synth header)' : ` (header kind '${header.kind}')`}; use 'synth model rm' for general models.`,
-        EXIT_CODES.FAILURE
-      )
+
+    // Same semantics as model rm (dependency check, --cascade)
+    let removal: ModelRemoval
+    try {
+      removal = await removeModelWithDependents(modelsDir, resolved.ref, flags.cascade)
+    } catch (err) {
+      if (err instanceof DanglingDependentsError) {
+        this.jsonAwareFail(json, err.message, EXIT_CODES.VALIDATION_FAILURE)
+      }
+      throw err
     }
 
-    // Same semantics as model rm (dependency check, --cascade): delegate
-    await ModelRm.run(this.argv, this.config)
+    if (json) {
+      this.log(JSON.stringify(removalJson(resolved.ref, resolved.path, removal)))
+    } else {
+      for (const line of removalLines(removal)) {
+        this.log(line)
+      }
+    }
   }
 }
