@@ -485,6 +485,88 @@ describe('model rm', () => {
   })
 })
 
+describe('deletion dependency guard', () => {
+  const targetRef = 'com.example/guard-target'
+  const holderRef = 'com.example/guard-holder'
+
+  const injectReference = (filePath: string, entry: string) => {
+    const text = readFileSync(filePath, 'utf-8')
+    const updated = text.replace('references: {}', `references: { ${entry} }`)
+    expect(updated).not.toBe(text)
+    writeFileSync(filePath, updated)
+  }
+
+  const grandRef = 'com.example/guard-grand'
+
+  beforeAll(async () => {
+    await run(['model', 'import', personsCopy, '--as', targetRef])
+    await run(['model', 'import', personsCopy, '--as', holderRef])
+    await run(['model', 'import', personsCopy, '--as', grandRef])
+    injectReference(
+      join(modelsDir, 'com', 'example', 'guard-holder.tsx'),
+      `basedOn: '${targetRef}'`
+    )
+    injectReference(
+      join(modelsDir, 'com', 'example', 'guard-grand.tsx'),
+      `uses: '${holderRef}'`
+    )
+  })
+
+  it('model rm refuses and prints the transitive dependency graph', async () => {
+    const { error, stderr, code } = await run(['model', 'rm', targetRef])
+    expect(error).toBeDefined()
+    expect(code).toBe(2)
+    expect(stderr).toContain('guard-holder')
+    expect(stderr).toContain('guard-grand')
+    expect(stderr).toContain('--cascade')
+    expect(existsSync(join(modelsDir, 'com', 'example', 'guard-target.tsx'))).toBe(true)
+  })
+
+  it('model rm --json refusal exits non-zero naming the dependents', async () => {
+    const { stdout, code } = await run(['model', 'rm', targetRef, '--json'])
+    expect(code).toBe(2)
+    const parsed = JSON.parse(stdout)
+    expect(parsed.error).toContain('guard-holder')
+    expect(existsSync(join(modelsDir, 'com', 'example', 'guard-target.tsx'))).toBe(true)
+  })
+
+  it('model rm --cascade deletes the whole closure and doctor stays clean', async () => {
+    const { stdout, error } = await run(['model', 'rm', targetRef, '--cascade', '--json'])
+    expect(error).toBeUndefined()
+    const parsed = JSON.parse(stdout)
+    expect(parsed.deleted).toBe(targetRef)
+    expect(parsed.cascaded).toEqual(expect.arrayContaining([holderRef, grandRef]))
+    expect(existsSync(join(modelsDir, 'com', 'example', 'guard-target.tsx'))).toBe(false)
+    expect(existsSync(join(modelsDir, 'com', 'example', 'guard-holder.tsx'))).toBe(false)
+    expect(existsSync(join(modelsDir, 'com', 'example', 'guard-grand.tsx'))).toBe(false)
+    const doctor = await run(['doctor'])
+    expect(doctor.stdout).toContain('All header references resolve')
+  })
+
+  it('ns rm refuses when outside models depend on it; --cascade deletes them too', async () => {
+    await run(['ns', 'mk', 'com.dephold'])
+    await run(['model', 'import', personsCopy, '--as', 'com.dephold/inner'])
+    await run(['model', 'import', personsCopy, '--as', 'com.example/outer-holder'])
+    injectReference(
+      join(modelsDir, 'com', 'example', 'outer-holder.tsx'),
+      "uses: 'com.dephold/inner'"
+    )
+
+    const refusal = await run(['ns', 'rm', 'com.dephold', '--force'])
+    expect(refusal.error).toBeDefined()
+    expect(refusal.stderr).toContain('outer-holder')
+    expect(refusal.stderr).toContain('--cascade')
+
+    const { stdout, error } = await run(['ns', 'rm', 'com.dephold', '--cascade', '--json'])
+    expect(error).toBeUndefined()
+    const parsed = JSON.parse(stdout)
+    expect(parsed.removed).toBe(true)
+    expect(parsed.cascaded).toEqual(['com.example/outer-holder'])
+    expect(existsSync(join(modelsDir, 'com', 'example', 'outer-holder.tsx'))).toBe(false)
+    expect(existsSync(join(modelsDir, 'com', 'dephold'))).toBe(false)
+  })
+})
+
 describe('--json failures exit non-zero', () => {
   // Scripts must see failures in the exit code; the {error} JSON object is
   // the only stdout output in JSON mode.

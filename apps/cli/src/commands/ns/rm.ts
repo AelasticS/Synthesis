@@ -6,7 +6,13 @@ import { join } from 'node:path'
 import { BaseCommand } from '../../base/base-command.js'
 import { getModelsPath, saveConfig } from '../../config/index.js'
 import { errorMessage } from '../../support/errors.js'
-import { namespaceToDir } from '../../support/refs.js'
+import {
+  findTransitiveDependents,
+  formatDependencyTree,
+  listModels,
+  namespaceToDir,
+  refToModelPath
+} from '../../support/refs.js'
 
 // Data-loss guard: any file at any depth (hidden files and non-.tsx
 // included) counts as content; empty (sub)directories do not. Early-exits
@@ -50,6 +56,11 @@ export default class NsRm extends BaseCommand {
     force: Flags.boolean({
       description: 'Remove even if the namespace contains files.',
       default: false
+    }),
+    cascade: Flags.boolean({
+      description:
+        'Also delete every model outside the namespace that transitively references a model inside it (implies --force).',
+      default: false
     })
   }
 
@@ -78,10 +89,40 @@ export default class NsRm extends BaseCommand {
       return
     }
 
+    // Deletion mirror of the import gate, one level up: models OUTSIDE the
+    // namespace that transitively reference models inside it would be left
+    // dangling. The CLI never does that silently — without --cascade the
+    // removal is refused; with it, the whole external closure goes too.
+    const inside = await listModels(modelsPath, args.namespace)
+    const insideRefs = new Set(inside.map((m) => m.ref))
+    const { closure, edges } = await findTransitiveDependents(modelsPath, insideRefs)
+
+    if (closure.length > 0 && !flags.cascade) {
+      const tree = formatDependencyTree(insideRefs, edges).join('\n')
+      const message =
+        `Cannot remove namespace '${args.namespace}' — ${closure.length} model(s) outside it ` +
+        `reference models inside it:\n${tree}\n` +
+        'Remove or update them first, or pass --cascade to delete all of the above together.'
+      if (flags.json) {
+        this.log(
+          JSON.stringify({
+            removed: false,
+            namespace: args.namespace,
+            error: 'would leave dangling references',
+            dependents: closure,
+            hint: 'use --cascade to delete the dependent models as well'
+          })
+        )
+      } else {
+        this.error(message)
+      }
+      return
+    }
+
     // Refuse when the directory contains any file at any depth (models,
     // notes, hidden files, ...); only a tree of empty directories is
-    // removable without --force
-    if (!flags.force && (await hasAnyFile(nsPath))) {
+    // removable without --force. --cascade implies --force.
+    if (!flags.force && !flags.cascade && (await hasAnyFile(nsPath))) {
       if (flags.json) {
         this.log(
           JSON.stringify({
@@ -99,6 +140,11 @@ export default class NsRm extends BaseCommand {
       return
     }
 
+    // Cascade: delete the external dependent models first, then the tree
+    for (const dependent of closure) {
+      await rm(refToModelPath(modelsPath, dependent), { force: true })
+    }
+
     // Remove the namespace (with any sub-namespaces)
     await rm(nsPath, { recursive: true })
 
@@ -110,9 +156,18 @@ export default class NsRm extends BaseCommand {
     }
 
     if (flags.json) {
-      this.log(JSON.stringify({ removed: true, namespace: args.namespace }))
+      this.log(
+        JSON.stringify(
+          closure.length > 0
+            ? { removed: true, namespace: args.namespace, cascaded: closure }
+            : { removed: true, namespace: args.namespace }
+        )
+      )
     } else {
       this.log(`Removed namespace: ${args.namespace}`)
+      for (const dependent of closure) {
+        this.log(`Deleted ${dependent} (cascade)`)
+      }
     }
   }
 }

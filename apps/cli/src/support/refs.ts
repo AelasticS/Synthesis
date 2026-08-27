@@ -13,9 +13,11 @@
  */
 
 import { existsSync } from 'node:fs'
-import { readdir } from 'node:fs/promises'
+import { readdir, readFile } from 'node:fs/promises'
 import type { Dirent } from 'node:fs'
 import { isAbsolute, join, relative, resolve, sep } from 'node:path'
+
+import { parseSynthHeader } from '../models/header.js'
 
 const SEGMENT_PATTERN = /^[A-Za-z0-9_-]+$/
 
@@ -225,6 +227,108 @@ export async function listModels(modelsDir: string, namespace?: string): Promise
  * The header references (key -> ref) that do not resolve to an existing
  * model file in the workspace. Invalid refs count as missing.
  */
+export interface DependentReference {
+  dependent: string
+  key: string
+  target: string
+}
+
+export interface DependencyGraph {
+  /** Transitive dependents of the roots (roots excluded), BFS order. */
+  closure: string[]
+  /** Every reference edge reaching into roots ∪ closure (self-references excluded). */
+  edges: DependentReference[]
+}
+
+/**
+ * The full reverse-dependency closure of the given roots: every model
+ * that would be left dangling — directly or transitively — if the roots
+ * were deleted. One header scan over the workspace builds the reverse
+ * adjacency; models with unreadable/unparseable headers are skipped
+ * (doctor reports those separately).
+ */
+export async function findTransitiveDependents(
+  modelsDir: string,
+  roots: Iterable<string>
+): Promise<DependencyGraph> {
+  const rootSet = new Set(roots)
+  if (rootSet.size === 0) {
+    return { closure: [], edges: [] }
+  }
+  const reverse = new Map<string, DependentReference[]>()
+  for (const model of await listModels(modelsDir)) {
+    let text: string
+    try {
+      text = await readFile(model.path, 'utf-8')
+    } catch {
+      continue
+    }
+    const { header } = parseSynthHeader(text)
+    if (header === null) {
+      continue
+    }
+    for (const [key, target] of Object.entries(header.references)) {
+      if (model.ref === target) {
+        continue
+      }
+      const list = reverse.get(target) ?? []
+      list.push({ dependent: model.ref, key, target })
+      reverse.set(target, list)
+    }
+  }
+  const closure: string[] = []
+  const edges: DependentReference[] = []
+  const seen = new Set(rootSet)
+  const queue = [...rootSet]
+  while (queue.length > 0) {
+    const current = queue.shift() as string
+    for (const edge of reverse.get(current) ?? []) {
+      edges.push(edge)
+      if (!seen.has(edge.dependent)) {
+        seen.add(edge.dependent)
+        closure.push(edge.dependent)
+        queue.push(edge.dependent)
+      }
+    }
+  }
+  return { closure, edges }
+}
+
+/**
+ * Render the reverse-dependency graph as an indented tree, one line per
+ * model: each level shows who references the level above (and via which
+ * key). Cycles are cut with an [already listed] marker.
+ */
+export function formatDependencyTree(roots: Iterable<string>, edges: DependentReference[]): string[] {
+  const reverse = new Map<string, DependentReference[]>()
+  for (const edge of edges) {
+    const list = reverse.get(edge.target) ?? []
+    list.push(edge)
+    reverse.set(edge.target, list)
+  }
+  const lines: string[] = []
+  const visited = new Set<string>()
+  const visit = (ref: string, depth: number, key?: string): void => {
+    const indent = '  '.repeat(depth)
+    const suffix = key === undefined ? '' : `  (${key})`
+    if (visited.has(ref)) {
+      lines.push(`${indent}<- ${ref}${suffix}  [already listed]`)
+      return
+    }
+    visited.add(ref)
+    lines.push(depth === 0 ? ref : `${indent}<- ${ref}${suffix}`)
+    for (const edge of reverse.get(ref) ?? []) {
+      visit(edge.dependent, depth + 1, edge.key)
+    }
+  }
+  for (const root of roots) {
+    if (!visited.has(root)) {
+      visit(root, 0)
+    }
+  }
+  return lines
+}
+
 export function findMissingReferences(
   modelsDir: string,
   references: Record<string, string>

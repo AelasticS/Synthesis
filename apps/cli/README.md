@@ -536,10 +536,13 @@ Delete a model from the workspace.
 
 ```
 USAGE
-  $ synth model rm REF [--workspace <value>] [--ns <value>] [--json] [-q] [-v]
+  $ synth model rm REF [--workspace <value>] [--ns <value>] [--json] [-q] [-v] [--cascade]
 
 ARGUMENTS
   REF  Model ref to delete.
+
+FLAGS
+  --cascade  Also delete every model that transitively references this one.
 
 GLOBAL FLAGS
   -q, --quiet              Suppress informational output.
@@ -553,6 +556,8 @@ DESCRIPTION
 
 EXAMPLES
   $ synth model rm com.example/persons
+
+  $ synth model rm com.example/persons --cascade
 ```
 
 ## `synth model show REF`
@@ -663,13 +668,15 @@ Remove a namespace (must be empty unless --force).
 
 ```
 USAGE
-  $ synth ns rm NAMESPACE [--workspace <value>] [--ns <value>] [--json] [-q] [-v] [--force]
+  $ synth ns rm NAMESPACE [--workspace <value>] [--ns <value>] [--json] [-q] [-v] [--force] [--cascade]
 
 ARGUMENTS
   NAMESPACE  Name of the namespace to remove.
 
 FLAGS
-  --force  Remove even if the namespace contains files.
+  --cascade  Also delete every model outside the namespace that transitively references a model inside it (implies
+             --force).
+  --force    Remove even if the namespace contains files.
 
 GLOBAL FLAGS
   -q, --quiet              Suppress informational output.
