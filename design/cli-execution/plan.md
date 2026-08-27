@@ -94,6 +94,32 @@ executes; same invocation piped/CI errors cleanly.
 3. CHANGELOG, version bump, tag `cli-v0.1.0`, GitHub release via the
    (already fixed) tarball workflow; smoke-test per CONTRIBUTING.
 
+## Deferred review follow-ups (from the Phase 1 code review)
+
+Consciously postponed, with the phase where each becomes relevant:
+
+- **Header fast path via TS AST** — the hand-rolled literal parser anchors on
+  the first textual `export const $synth =`; a file containing that string in
+  a comment/template literal would confuse it. A `ts.createSourceFile` parse
+  would be robust and would also delete the second string-scanner used by the
+  writer. Revisit if headers ever misparse in practice (typescript would need
+  to become a runtime dep).
+- **Metamodel derivation from the rendered store** — Phase 2: once tx
+  manifests land, derive `header.metamodel` authoritatively from the rendered
+  root element's schema instead of the import-scan heuristic.
+- **Typed DanglingReferenceError in @synthesis/jsx-runtime** — Phase 6
+  prerequisite: the interactive "import the missing dependency?" offer needs
+  the missing ref as data; today import classifies it by matching the engine's
+  error message text.
+- **esbuild transpile cache** — key by content hash in a stable cache dir to
+  skip repeat transpiles of unchanged models (matters once tx run loads many
+  models per invocation).
+- **Concurrent file reads** in doctor and model ls; subtree-rooted walk for
+  `model ls --ns`; both matter only for large workspaces.
+- **Uniform --json exit-code contract** — model commands now exit non-zero on
+  JSON errors; ns/config/tx commands still use the old exit-0 convention.
+  Unify in one sweep (Phase 4 surface cleanup).
+
 ## Open items carried alongside
 
 - Transformation manifest location (`synth.json` vs `package.json#synth`)
