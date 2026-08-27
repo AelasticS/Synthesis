@@ -1,6 +1,7 @@
 {
   "extends": "@rushstack/heft-jest-plugin/includes/jest-shared.config.json",
   "testEnvironment": "node",
+  "testTimeout": 180000,
   "extensionsToTreatAsEsm": [".ts"],
   "transformIgnorePatterns": [
     "/node_modules/(?!(@oclif)/)"

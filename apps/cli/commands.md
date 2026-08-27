@@ -242,7 +242,10 @@ Check workspace integrity: missing files, broken references.
 
 ```
 USAGE
-  $ synth doctor [--workspace <value>] [--ns <value>] [--json] [-q] [-v]
+  $ synth doctor [--workspace <value>] [--ns <value>] [--json] [-q] [-v] [--fix]
+
+FLAGS
+  --fix  Re-derive and write missing or unparseable model headers.
 
 GLOBAL FLAGS
   -q, --quiet              Suppress informational output.
@@ -256,6 +259,8 @@ DESCRIPTION
 
 EXAMPLES
   $ synth doctor
+
+  $ synth doctor --fix
 ```
 
 ## `synth example describe ID`
@@ -442,24 +447,29 @@ DESCRIPTION
   Write a model from the workspace to a file on disk.
 
 EXAMPLES
-  $ synth model export com.example/order-1
+  $ synth model export com.example/persons
 
-  $ synth model export com.example/order-1 --to ./out/order.json
+  $ synth model export com.example/persons --to ./out/persons.tsx
 ```
 
 ## `synth model import FILE`
 
-Copy a JSON file from disk into the workspace.
+Validate a .tsx model file and copy it into the workspace.
 
 ```
 USAGE
-  $ synth model import FILE [--workspace <value>] [--ns <value>] [--json] [-q] [-v] [--as <value>]
+  $ synth model import FILE [--workspace <value>] [--ns <value>] [--json] [-q] [-v] [--as <value>] [--author
+    <value>] [--description <value>] [--tags <value>] [--force]
 
 ARGUMENTS
-  FILE  Path to the JSON file to import.
+  FILE  Path to the .tsx model file to import.
 
 FLAGS
-  --as=<value>  Ref to assign to the imported model (namespace/name).
+  --as=<value>           Ref to assign to the imported model (namespace/name).
+  --author=<value>       Author for the $synth header (default: existing header, then git config).
+  --description=<value>  One-line description for the $synth header.
+  --force                Overwrite the target model if it already exists.
+  --tags=<value>         Comma-separated tags for the $synth header.
 
 GLOBAL FLAGS
   -q, --quiet              Suppress informational output.
@@ -469,17 +479,19 @@ GLOBAL FLAGS
       --workspace=<value>  Override active workspace for this invocation.
 
 DESCRIPTION
-  Copy a JSON file from disk into the workspace.
+  Validate a .tsx model file and copy it into the workspace.
 
 EXAMPLES
-  $ synth model import ./examples/order.json
+  $ synth model import ./persons.tsx
 
-  $ synth model import ./examples/order.json --as com.example/order-1
+  $ synth model import ./persons.tsx --as com.example/persons
+
+  $ synth model import ./persons.tsx --tags eer,demo --force
 ```
 
 ## `synth model ls`
 
-List all models in the current namespace.
+List models in the workspace or a namespace.
 
 ```
 USAGE
@@ -493,7 +505,7 @@ GLOBAL FLAGS
       --workspace=<value>  Override active workspace for this invocation.
 
 DESCRIPTION
-  List all models in the current namespace.
+  List models in the workspace or a namespace.
 
 EXAMPLES
   $ synth model ls
@@ -523,12 +535,12 @@ DESCRIPTION
   Delete a model from the workspace.
 
 EXAMPLES
-  $ synth model rm com.example/order-1
+  $ synth model rm com.example/persons
 ```
 
 ## `synth model show REF`
 
-Read and display a model file.
+Show a model header and file location.
 
 ```
 USAGE
@@ -545,10 +557,10 @@ GLOBAL FLAGS
       --workspace=<value>  Override active workspace for this invocation.
 
 DESCRIPTION
-  Read and display a model file.
+  Show a model header and file location.
 
 EXAMPLES
-  $ synth model show com.example/order-1
+  $ synth model show com.example/persons
 ```
 
 ## `synth model validate REF`
@@ -563,7 +575,7 @@ ARGUMENTS
   REF  Model ref to validate.
 
 FLAGS
-  --against=<value>  Metamodel to validate against (defaults to model header).
+  --against=<value>  Metamodel the header must declare (defaults to the derived import).
 
 GLOBAL FLAGS
   -q, --quiet              Suppress informational output.
@@ -576,9 +588,9 @@ DESCRIPTION
   Check the model against its metamodel.
 
 EXAMPLES
-  $ synth model validate com.example/order-1
+  $ synth model validate com.example/persons
 
-  $ synth model validate com.example/order-1 --against @aelastics/order-metamodel
+  $ synth model validate com.example/persons --against @synthesis/standard-metamodels/eer
 ```
 
 ## `synth ns ls`
@@ -640,7 +652,7 @@ ARGUMENTS
   NAMESPACE  Name of the namespace to remove.
 
 FLAGS
-  --force  Remove even if the namespace contains models.
+  --force  Remove even if the namespace contains files.
 
 GLOBAL FLAGS
   -q, --quiet              Suppress informational output.

@@ -1,18 +1,20 @@
 import { readFile, writeFile } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
-import { join } from 'node:path'
+import { isAbsolute, join } from 'node:path'
 import { Args, Flags } from '@oclif/core'
 
 import { BaseCommand } from '../../base/base-command.js'
-import { getNamespacePath } from '../../config/index.js'
-import { parseRef } from '../../types/refs.js'
+import { getModelsPath } from '../../config/index.js'
+import { errorMessage } from '../../support/errors.js'
+import { parseRef, refToModelPath } from '../../support/refs.js'
+import { EXIT_CODES } from '../../support/exit-codes.js'
 
 export default class ModelExport extends BaseCommand {
   static override description = 'Write a model from the workspace to a file on disk.'
 
   static override examples = [
-    '<%= config.bin %> <%= command.id %> com.example/order-1',
-    '<%= config.bin %> <%= command.id %> com.example/order-1 --to ./out/order.json'
+    '<%= config.bin %> <%= command.id %> com.example/persons',
+    '<%= config.bin %> <%= command.id %> com.example/persons --to ./out/persons.tsx'
   ]
 
   static override args = {
@@ -30,45 +32,37 @@ export default class ModelExport extends BaseCommand {
 
   public async execute(): Promise<void> {
     const { args, flags } = await this.parse(ModelExport)
+    const json = Boolean(flags.json)
 
-    const parsed = parseRef(args.ref)
-    if (!parsed) {
-      if (flags.json) {
-        this.log(JSON.stringify({ error: `Invalid ref format: ${args.ref}. Expected namespace/name.` }))
-      } else {
-        this.error(`Invalid ref format: ${args.ref}. Expected namespace/name.`)
-      }
-      return
+    let ref: string
+    let name: string
+    try {
+      const parsed = parseRef(args.ref)
+      ref = `${parsed.namespace}/${parsed.name}`
+      name = parsed.name
+    } catch (err) {
+      this.jsonAwareFail(json, errorMessage(err), EXIT_CODES.FAILURE)
     }
 
-    const { namespace, name } = parsed
-    const nsPath = getNamespacePath(this.workspaceConfig, namespace)
-    const sourcePath = join(nsPath, `${name}.json`)
-
+    const sourcePath = refToModelPath(getModelsPath(this.workspaceConfig), ref)
     if (!existsSync(sourcePath)) {
-      if (flags.json) {
-        this.log(JSON.stringify({ error: `Model not found: ${args.ref}` }))
-      } else {
-        this.error(`Model not found: ${args.ref}`)
-      }
-      return
+      this.jsonAwareFail(json, `Model not found: ${ref}`, EXIT_CODES.NOT_FOUND)
     }
 
-    // Determine destination path
     const destPath = flags.to
-      ? (flags.to.startsWith('/') ? flags.to : join(this.savedPwd, flags.to))
-      : join(this.savedPwd, `${name}.json`)
+      ? isAbsolute(flags.to)
+        ? flags.to
+        : join(this.savedPwd, flags.to)
+      : join(this.savedPwd, `${name}.tsx`)
 
-    // Read source file
+    // Verbatim copy: the $synth header travels with the file
     const content = await readFile(sourcePath, 'utf-8')
-
-    // Write to destination
     await writeFile(destPath, content, 'utf-8')
 
     if (flags.json) {
-      this.log(JSON.stringify({ exported: args.ref, source: sourcePath, destination: destPath }))
+      this.log(JSON.stringify({ exported: ref, source: sourcePath, destination: destPath }))
     } else {
-      this.log(`Exported ${args.ref} to ${destPath}`)
+      this.log(`Exported ${ref} to ${destPath}`)
     }
   }
 }

@@ -1,8 +1,8 @@
-import { readdir } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
 
 import { BaseCommand } from '../../base/base-command.js'
 import { getModelsPath } from '../../config/index.js'
+import { listNamespaces } from '../../support/refs.js'
 
 export default class NsLs extends BaseCommand {
   static override description = 'List all namespaces in the workspace.'
@@ -22,11 +22,9 @@ export default class NsLs extends BaseCommand {
       return
     }
 
-    const entries = await readdir(modelsPath, { withFileTypes: true })
-    const namespaces = entries
-      .filter((entry) => entry.isDirectory())
-      .map((entry) => entry.name)
-      .sort()
+    // Nested dirs read as dotted namespaces (com/example -> com.example);
+    // dot-named flat dirs are unaddressable and skipped (`doctor` reports them).
+    const namespaces = await listNamespaces(modelsPath)
 
     if (flags.json) {
       this.log(JSON.stringify({ namespaces }))

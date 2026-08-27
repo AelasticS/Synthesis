@@ -3,7 +3,9 @@ import { mkdir } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
 
 import { BaseCommand } from '../../base/base-command.js'
-import { getNamespacePath, getModelsPath } from '../../config/index.js'
+import { getModelsPath } from '../../config/index.js'
+import { errorMessage } from '../../support/errors.js'
+import { namespaceToDir } from '../../support/refs.js'
 
 export default class NsMk extends BaseCommand {
   static override description = 'Create an empty namespace.'
@@ -25,7 +27,13 @@ export default class NsMk extends BaseCommand {
       this.error('Workspace not initialized. Run `synth init` first.')
     }
 
-    const nsPath = getNamespacePath(this.workspaceConfig, args.namespace)
+    let nsPath: string
+    try {
+      // com.example -> <models>/com/example
+      nsPath = namespaceToDir(modelsPath, args.namespace)
+    } catch (err) {
+      this.error(errorMessage(err))
+    }
 
     if (existsSync(nsPath)) {
       if (flags.json) {

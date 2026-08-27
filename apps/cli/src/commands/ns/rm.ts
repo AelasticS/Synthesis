@@ -1,9 +1,35 @@
 import { Args, Flags } from '@oclif/core'
-import { readdir, rmdir, rm } from 'node:fs/promises'
+import { readdir, rm } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
+import { join } from 'node:path'
 
 import { BaseCommand } from '../../base/base-command.js'
-import { getNamespacePath, getModelsPath, saveConfig } from '../../config/index.js'
+import { getModelsPath, saveConfig } from '../../config/index.js'
+import { errorMessage } from '../../support/errors.js'
+import { namespaceToDir } from '../../support/refs.js'
+
+// Data-loss guard: any file at any depth (hidden files and non-.tsx
+// included) counts as content; empty (sub)directories do not. Early-exits
+// on the first file found. An unreadable directory counts as content so
+// nothing is deleted when emptiness cannot be verified.
+async function hasAnyFile(dir: string): Promise<boolean> {
+  let entries
+  try {
+    entries = await readdir(dir, { withFileTypes: true })
+  } catch {
+    return true
+  }
+  for (const entry of entries) {
+    if (entry.isDirectory()) {
+      if (await hasAnyFile(join(dir, entry.name))) {
+        return true
+      }
+    } else {
+      return true
+    }
+  }
+  return false
+}
 
 export default class NsRm extends BaseCommand {
   static override description = 'Remove a namespace (must be empty unless --force).'
@@ -22,7 +48,7 @@ export default class NsRm extends BaseCommand {
 
   static override flags = {
     force: Flags.boolean({
-      description: 'Remove even if the namespace contains models.',
+      description: 'Remove even if the namespace contains files.',
       default: false
     })
   }
@@ -35,7 +61,13 @@ export default class NsRm extends BaseCommand {
       this.error('Workspace not initialized. Run `synth init` first.')
     }
 
-    const nsPath = getNamespacePath(this.workspaceConfig, args.namespace)
+    let nsPath: string
+    try {
+      // com.example -> <models>/com/example
+      nsPath = namespaceToDir(modelsPath, args.namespace)
+    } catch (err) {
+      this.error(errorMessage(err))
+    }
 
     if (!existsSync(nsPath)) {
       if (flags.json) {
@@ -46,9 +78,10 @@ export default class NsRm extends BaseCommand {
       return
     }
 
-    // Check if namespace is empty
-    const entries = await readdir(nsPath)
-    if (entries.length > 0 && !flags.force) {
+    // Refuse when the directory contains any file at any depth (models,
+    // notes, hidden files, ...); only a tree of empty directories is
+    // removable without --force
+    if (!flags.force && (await hasAnyFile(nsPath))) {
       if (flags.json) {
         this.log(
           JSON.stringify({
@@ -66,15 +99,12 @@ export default class NsRm extends BaseCommand {
       return
     }
 
-    // Remove the namespace
-    if (entries.length > 0) {
-      await rm(nsPath, { recursive: true })
-    } else {
-      await rmdir(nsPath)
-    }
+    // Remove the namespace (with any sub-namespaces)
+    await rm(nsPath, { recursive: true })
 
-    // If this was the current namespace, clear it
-    if (this.workspaceConfig.currentNamespace === args.namespace) {
+    // If this or one of its sub-namespaces was the current namespace, clear it
+    const current = this.workspaceConfig.currentNamespace
+    if (current !== undefined && (current === args.namespace || current.startsWith(`${args.namespace}.`))) {
       this.workspaceConfig.currentNamespace = undefined
       await saveConfig(this.workspaceConfig)
     }

@@ -1,8 +1,9 @@
 import { Args } from '@oclif/core'
 
 import { BaseCommand } from '../base/base-command.js'
-import { saveConfig, getNamespacePath } from '../config/index.js'
-import { existsSync } from 'node:fs'
+import { saveConfig, getModelsPath } from '../config/index.js'
+import { errorMessage } from '../support/errors.js'
+import { namespaceExists } from '../support/refs.js'
 
 export default class Cd extends BaseCommand {
   static override description = 'Change or display the current namespace.'
@@ -32,9 +33,14 @@ export default class Cd extends BaseCommand {
       return
     }
 
-    // Verify namespace exists
-    const nsPath = getNamespacePath(this.workspaceConfig, args.namespace)
-    if (!existsSync(nsPath)) {
+    // Verify the namespace has a directory in the nested layout
+    let exists: boolean
+    try {
+      exists = namespaceExists(getModelsPath(this.workspaceConfig), args.namespace)
+    } catch (err) {
+      this.error(errorMessage(err))
+    }
+    if (!exists) {
       this.error(`Namespace '${args.namespace}' does not exist. Use 'synth ns mk ${args.namespace}' to create it.`)
     }
 

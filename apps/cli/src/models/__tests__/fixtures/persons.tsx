@@ -1,0 +1,40 @@
+/** @jsx createExprNode */
+
+import { createExprNode } from '@synthesis/jsx-runtime'
+import type { ExprNode } from '@synthesis/jsx-runtime'
+import type { ModelStore } from '@synthesis/engine'
+import { EERSchema, Entity, Attribute, Domain, Relationship, Role } from '@synthesis/standard-metamodels/eer'
+import type * as t from '@synthesis/standard-metamodels/eer/model'
+
+export const $synth = {
+  kind: 'model',
+  metamodel: '@synthesis/standard-metamodels/eer',
+  author: 'Test Author <test@example.org>',
+  version: '0.1.0',
+  description: 'Persons EER schema used by the model loader tests'
+} as const
+
+export default (store: ModelStore): ExprNode<t.IEERSchema> => (
+  <EERSchema name="Persons" MDA_level="M1" store={store}>
+    <Entity name="Person">
+      <Attribute name="personId" isKey={true}>
+        <Domain name="number" />
+      </Attribute>
+      <Attribute name="personName" isKey={false}>
+        <Domain name="string" />
+      </Attribute>
+    </Entity>
+    <Entity name="Organization">
+      <Attribute name="organizationId" isKey={true}>
+        <Domain $refByName="number" />
+      </Attribute>
+      <Attribute name="organizationName" isKey={false}>
+        <Domain $refByName="string" />
+      </Attribute>
+    </Entity>
+    <Relationship name="worksIn">
+      <Role name="WorksIn" lb="0" ub="1" domain={<Entity $refByName="Organization"></Entity>} />
+      <Role name="Employs" lb="0" ub="M" domain={<Entity $refByName="Person"></Entity>} />
+    </Relationship>
+  </EERSchema>
+)

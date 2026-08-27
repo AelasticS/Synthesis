@@ -1,16 +1,18 @@
-import { readFile } from 'node:fs/promises'
+import { readFile, stat } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
-import { join } from 'node:path'
 import { Args } from '@oclif/core'
 
 import { BaseCommand } from '../../base/base-command.js'
-import { getNamespacePath } from '../../config/index.js'
-import { parseRef } from '../../types/refs.js'
+import { getModelsPath } from '../../config/index.js'
+import { parseSynthHeader } from '../../models/header.js'
+import { errorMessage } from '../../support/errors.js'
+import { parseRef, refToModelPath } from '../../support/refs.js'
+import { EXIT_CODES } from '../../support/exit-codes.js'
 
 export default class ModelShow extends BaseCommand {
-  static override description = 'Read and display a model file.'
+  static override description = 'Show a model header and file location.'
 
-  static override examples = ['<%= config.bin %> <%= command.id %> com.example/order-1']
+  static override examples = ['<%= config.bin %> <%= command.id %> com.example/persons']
 
   static override args = {
     ref: Args.string({
@@ -21,48 +23,62 @@ export default class ModelShow extends BaseCommand {
 
   public async execute(): Promise<void> {
     const { args, flags } = await this.parse(ModelShow)
+    const json = Boolean(flags.json)
 
-    const parsed = parseRef(args.ref)
-    if (!parsed) {
-      if (flags.json) {
-        this.log(JSON.stringify({ error: `Invalid ref format: ${args.ref}. Expected namespace/name.` }))
-      } else {
-        this.error(`Invalid ref format: ${args.ref}. Expected namespace/name.`)
-      }
-      return
+    let ref: string
+    try {
+      const parsed = parseRef(args.ref)
+      ref = `${parsed.namespace}/${parsed.name}`
+    } catch (err) {
+      this.jsonAwareFail(json, errorMessage(err), EXIT_CODES.FAILURE)
     }
 
-    const { namespace, name } = parsed
-    const nsPath = getNamespacePath(this.workspaceConfig, namespace)
-    const filePath = join(nsPath, `${name}.json`)
-
+    const filePath = refToModelPath(getModelsPath(this.workspaceConfig), ref)
     if (!existsSync(filePath)) {
-      if (flags.json) {
-        this.log(JSON.stringify({ error: `Model not found: ${args.ref}` }))
-      } else {
-        this.error(`Model not found: ${args.ref}`)
-      }
-      return
+      this.jsonAwareFail(json, `Model not found: ${ref}`, EXIT_CODES.NOT_FOUND)
     }
 
-    const content = await readFile(filePath, 'utf-8')
+    // Static fast path only: no transpile, no execution
+    const [text, info] = await Promise.all([readFile(filePath, 'utf-8'), stat(filePath)])
+    const { header, error } = parseSynthHeader(text)
 
     if (flags.json) {
-      // Parse and re-stringify to ensure valid JSON output
-      try {
-        const parsed = JSON.parse(content)
-        this.log(JSON.stringify({ ref: args.ref, model: parsed }))
-      } catch {
-        this.log(JSON.stringify({ error: `Invalid JSON in model file: ${filePath}` }))
+      this.log(JSON.stringify({ ref, path: filePath, header }))
+      return
+    }
+
+    this.log(`Ref:         ${ref}`)
+    this.log(`Path:        ${filePath}`)
+    this.log(`Size:        ${info.size} bytes`)
+    if (header === null) {
+      if (error !== undefined) {
+        this.log(`Header:      unparseable $synth header: ${error}`)
+      } else {
+        this.log(`Header:      no $synth header ('synth model import' stamps one)`)
       }
+      return
+    }
+    this.log(`Kind:        ${header.kind}`)
+    this.log(`Metamodel:   ${header.metamodel}`)
+    this.log(`Version:     ${header.version}`)
+    this.log(`Author:      ${header.author}`)
+    this.log(`Description: ${header.description}`)
+    this.log(`Tags:        ${header.tags.length > 0 ? header.tags.join(', ') : '(none)'}`)
+    this.log(`License:     ${header.license ?? '(none)'}`)
+    this.log(`Created:     ${header.createdAt}`)
+    this.log(`Modified:    ${header.modifiedAt}`)
+    if (header.generatedBy === null) {
+      this.log('Generated:   (authored)')
     } else {
-      // Pretty print the JSON
-      try {
-        const parsed = JSON.parse(content)
-        this.log(JSON.stringify(parsed, null, 2))
-      } catch {
-        // If not valid JSON, just print raw content
-        this.log(content)
+      const gb = header.generatedBy
+      const version = gb.txVersion !== undefined ? `@${gb.txVersion}` : ''
+      this.log(`Generated:   by ${gb.tx}${version} on ${gb.date}`)
+    }
+    const references = Object.entries(header.references)
+    if (references.length > 0) {
+      this.log('References:')
+      for (const [key, target] of references) {
+        this.log(`  ${key} -> ${target}`)
       }
     }
   }

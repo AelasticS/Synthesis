@@ -1,19 +1,23 @@
 import { existsSync } from 'node:fs'
 import { readFile } from 'node:fs/promises'
-import { join } from 'node:path'
 
 import { Args, Flags } from '@oclif/core'
 
 import { BaseCommand } from '../../base/base-command.js'
 import { getModelsPath } from '../../config/index.js'
+import { renderModel } from '../../models/loader.js'
+import { parseSynthHeader } from '../../models/header.js'
+import { deriveMetamodel } from '../../models/stamp.js'
+import { errorMessage } from '../../support/errors.js'
+import { parseRef, refToModelPath } from '../../support/refs.js'
 import { EXIT_CODES } from '../../support/exit-codes.js'
 
 export default class ModelValidate extends BaseCommand {
   static override description = 'Check the model against its metamodel.'
 
   static override examples = [
-    '<%= config.bin %> <%= command.id %> com.example/order-1',
-    '<%= config.bin %> <%= command.id %> com.example/order-1 --against @aelastics/order-metamodel'
+    '<%= config.bin %> <%= command.id %> com.example/persons',
+    '<%= config.bin %> <%= command.id %> com.example/persons --against @synthesis/standard-metamodels/eer'
   ]
 
   static override args = {
@@ -25,67 +29,77 @@ export default class ModelValidate extends BaseCommand {
 
   static override flags = {
     against: Flags.string({
-      description: 'Metamodel to validate against (defaults to model header).'
+      description: 'Metamodel the header must declare (defaults to the derived import).'
     })
   }
 
   public async execute(): Promise<void> {
     const { args, flags } = await this.parse(ModelValidate)
 
-    // Parse the ref (namespace/name format)
-    const refParts = args.ref.split('/')
-    if (refParts.length < 2) {
-      this.error(`Invalid model ref: ${args.ref}. Expected format: namespace/name`, {
-        exit: EXIT_CODES.FAILURE
-      })
+    let ref: string
+    try {
+      const parsed = parseRef(args.ref)
+      ref = `${parsed.namespace}/${parsed.name}`
+    } catch (err) {
+      this.error(`Invalid model ref: ${errorMessage(err)}`, { exit: EXIT_CODES.FAILURE })
     }
 
-    const namespace = refParts.slice(0, -1).join('/')
-    const modelName = refParts[refParts.length - 1]
-
-    // Resolve the model file path
-    const modelsDir = getModelsPath(this.workspaceConfig)
-    const modelPath = join(modelsDir, namespace, `${modelName}.json`)
-
-    // Check if the model file exists
+    const modelPath = refToModelPath(getModelsPath(this.workspaceConfig), ref)
     if (!existsSync(modelPath)) {
-      this.error(`Model not found: ${args.ref} (looked for ${modelPath})`, {
+      this.error(`Model not found: ${ref} (looked for ${modelPath})`, {
         exit: EXIT_CODES.NOT_FOUND
       })
     }
 
-    // Try to read and parse the JSON
-    let content: string
+    // Real structural validation: transpile, import, and render into a
+    // throwaway store; any failure is the model's failure
     try {
-      content = await readFile(modelPath, 'utf-8')
+      await renderModel(modelPath)
     } catch (err) {
-      this.error(`Failed to read model file: ${modelPath}`, {
-        exit: EXIT_CODES.FAILURE
-      })
-    }
-
-    // Validate JSON syntax
-    let parsedModel: unknown
-    try {
-      parsedModel = JSON.parse(content)
-    } catch (err) {
-      const parseError = err as SyntaxError
-      this.error(`Invalid JSON in model ${args.ref}: ${parseError.message}`, {
+      this.error(`Validation failed: ${errorMessage(err)}`, {
         exit: EXIT_CODES.VALIDATION_FAILURE
       })
     }
+    this.log('[ok] file transpiles and imports')
+    this.log('[ok] default export renders')
 
-    // Store the --against flag for future metamodel validation
-    const metamodel = flags.against ?? null
-    if (metamodel) {
-      this.log(`[info] Metamodel validation against ${metamodel} not yet implemented`)
+    const text = await readFile(modelPath, 'utf-8')
+    const { header, error } = parseSynthHeader(text)
+    if (header === null) {
+      // Missing header is a warning, not a failure: import stamps it, but
+      // hand-placed files may lack one
+      if (error !== undefined) {
+        this.log(`[warn] unparseable $synth header: ${error}`)
+      } else {
+        this.log(`[warn] no $synth header ('synth model import' stamps one)`)
+      }
+    } else {
+      this.log('[ok] $synth header present')
+      if (flags.against !== undefined) {
+        if (header.metamodel === flags.against) {
+          this.log(`[ok] header.metamodel matches --against (${flags.against})`)
+        } else {
+          this.error(
+            `header.metamodel '${header.metamodel}' does not match --against '${flags.against}'`,
+            { exit: EXIT_CODES.VALIDATION_FAILURE }
+          )
+        }
+      } else {
+        // The header is the declared metamodel; a differing derivation is a
+        // heads-up, not a failure. Only an explicit --against mismatch fails.
+        const derived = deriveMetamodel(text)
+        if (derived !== null) {
+          if (header.metamodel === derived) {
+            this.log(`[ok] header.metamodel matches the metamodel import (${derived})`)
+          } else {
+            this.log(
+              `[warn] header.metamodel '${header.metamodel}' does not match the metamodel import '${derived}'`
+            )
+          }
+        }
+      }
     }
 
-    // Report success
-    this.log(`Model ${args.ref} is valid JSON`)
-    if (typeof parsedModel === 'object' && parsedModel !== null) {
-      const keys = Object.keys(parsedModel)
-      this.log(`  Top-level keys: ${keys.length > 0 ? keys.join(', ') : '(empty object)'}`)
-    }
+    this.log(`Model ${ref} is valid`)
   }
 }

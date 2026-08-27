@@ -89,6 +89,20 @@ export abstract class BaseCommand<T extends typeof Command = typeof Command> ext
   }
 
   /**
+   * Fail the command with the given exit code in both output modes. In
+   * JSON mode the machine-readable `{ error }` object is the only stdout
+   * output; otherwise the message goes through this.error as usual.
+   * Either way the process exits non-zero so scripts can detect failure.
+   */
+  protected jsonAwareFail(json: boolean, message: string, exit: number): never {
+    if (json) {
+      this.log(JSON.stringify({ error: message }))
+      this.exit(exit)
+    }
+    this.error(message, { exit })
+  }
+
+  /**
    * Get the resolved workspace path.
    */
   protected getWorkspacePath(): string {

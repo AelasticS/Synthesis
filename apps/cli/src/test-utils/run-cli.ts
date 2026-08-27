@@ -11,6 +11,8 @@ const binPath = resolve(__dirname, '../..', 'bin/run.js')
 export interface RunResult {
   stdout: string
   stderr: string
+  /** Exit code of the CLI process: 0 on success, undefined when killed by a signal. */
+  code?: number
   error?: Error
 }
 
@@ -39,12 +41,15 @@ export async function runCli(args: string[], options?: RunOptions): Promise<RunR
         cwd: options?.cwd
       }
     )
-    return { stdout, stderr }
+    return { stdout, stderr, code: 0 }
   } catch (err: unknown) {
-    const execError = err as { stdout?: string; stderr?: string; message?: string }
+    // Under jest's vm modules the exec error comes from another realm, so
+    // `instanceof Error` is unreliable; read the fields structurally.
+    const execError = err as { stdout?: string; stderr?: string; code?: unknown }
     return {
       stdout: execError.stdout ?? '',
       stderr: execError.stderr ?? '',
+      code: typeof execError.code === 'number' ? execError.code : undefined,
       error: err instanceof Error ? err : new Error(String(err))
     }
   }
