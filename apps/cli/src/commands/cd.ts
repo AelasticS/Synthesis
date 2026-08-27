@@ -41,7 +41,7 @@ export default class Cd extends BaseCommand {
       this.error(errorMessage(err))
     }
     if (!exists) {
-      this.error(`Namespace '${args.namespace}' does not exist. Use 'synth ns mk ${args.namespace}' to create it.`)
+      this.error(`Namespace '${args.namespace}' does not exist. Use 'synth namespace mk ${args.namespace}' to create it.`)
     }
 
     // Update config with new namespace

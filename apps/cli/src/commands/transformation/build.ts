@@ -5,7 +5,9 @@ import { join } from 'node:path'
 
 import { BaseCommand } from '../../base/base-command.js'
 
-export default class TxBuild extends BaseCommand {
+export default class TransformationBuild extends BaseCommand {
+  static override aliases = ['tx:build']
+
   static override description = 'Build the transformation in the current directory.'
 
   static override examples = ['<%= config.bin %> <%= command.id %>']

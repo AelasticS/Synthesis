@@ -1,7 +1,7 @@
 /**
  * Loading an installed transformation's execution context.
  *
- * Shared between `tx run`, `config init`, `config show`, and the --tx
+ * Shared between `transformation run`, `config init`, `config show`, and the --tx
  * variants of `model import`/`model validate`: resolving the installed
  * package, rendering its manifest-declared parts (metamodels, decision
  * model, binding model) into a store, and rendering a workspace model
@@ -32,7 +32,7 @@ import { importTxModule, requireExport } from './modules.js'
  * A broken reference closure maps to the same exit codes the equivalent
  * direct failure would produce: missing model -> NOT_FOUND, malformed
  * header -> VALIDATION_FAILURE, everything else -> FAILURE. One table for
- * every command that loads a closure (`tx run`, `config init`).
+ * every command that loads a closure (`transformation run`, `config init`).
  */
 export const CLOSURE_EXIT_CODES: Record<ModelClosureErrorKind, number> = {
   'invalid-ref': EXIT_CODES.FAILURE,
@@ -73,7 +73,7 @@ export async function resolveInstalledTx(
     const hint =
       installed.length > 0
         ? `Installed transformations: ${installed.join(', ')}`
-        : `No transformations installed. Use 'synth tx install' to install one.`
+        : `No transformations installed. Use 'synth transformation install' to install one.`
     throw new TxResolveError(EXIT_CODES.NOT_FOUND, `Transformation not found: ${txName}. ${hint}`)
   }
   // A config entry whose package directory has vanished is a missing
@@ -81,7 +81,7 @@ export async function resolveInstalledTx(
   if (!existsSync(entry.path) || !existsSync(join(entry.path, 'package.json'))) {
     throw new TxResolveError(
       EXIT_CODES.NOT_FOUND,
-      `Transformation '${txName}' is registered in the workspace config but its installed package is missing (expected ${entry.path} with a package.json). Reinstall it with 'synth tx install'.`
+      `Transformation '${txName}' is registered in the workspace config but its installed package is missing (expected ${entry.path} with a package.json). Reinstall it with 'synth transformation install'.`
     )
   }
   let manifest: TxManifest
@@ -114,7 +114,7 @@ export interface ResolvedSourceModel {
  * ref, find the file, parse the `$synth` header (a malformed header is a
  * broken declaration, not a missing one — the gate cannot be silently
  * skipped), and gate the declared metamodel against the manifest. Shared
- * by `tx run --in` and `config init --for` so checks, wording, and exit
+ * by `transformation run --in` and `config init --for` so checks, wording, and exit
  * codes cannot drift.
  */
 export async function resolveSourceModel(

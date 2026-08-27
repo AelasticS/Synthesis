@@ -9,10 +9,12 @@ import { getPipelinesPath, getTransformationsPath, saveConfig } from '../../conf
 import { findPipelinesUsingTx } from '../../pipelines/store.js'
 import { EXIT_CODES } from '../../support/exit-codes.js'
 
-export default class TxUninstall extends BaseCommand {
+export default class TransformationUninstall extends BaseCommand {
+  static override aliases = ['tx:uninstall']
+
   static override description = `Remove an installed transformation.
 
-Refused while any saved pipeline lists the transformation as a step (a replay would break); update those pipelines or delete them with 'synth pipeline rm' first — there is no cascade.`
+Refused while any saved pipeline lists the transformation as a step (running the pipeline would break); update those pipelines or delete them with 'synth pipeline rm' first — there is no cascade. An invalid pipeline file still protects its steps: its step list is read best-effort, because repairing the file with 'synth pipeline edit' must stay possible.`
 
   static override examples = ['<%= config.bin %> <%= command.id %> eer-to-relational']
 
@@ -24,12 +26,25 @@ Refused while any saved pipeline lists the transformation as a step (a replay wo
   }
 
   public async execute(): Promise<void> {
-    const { args, flags } = await this.parse(TxUninstall)
+    const { args, flags } = await this.parse(TransformationUninstall)
     const txName = args.name
     const json = Boolean(flags.json)
 
-    // Deletion guard, mirroring model removal: uninstalling a step of a
-    // saved pipeline would leave the pipeline dangling.
+    // 1. Existence first: uninstalling something that is not installed is
+    // a missing resource (exit 3) — no pipeline scan for a phantom.
+    const configEntry = this.workspaceConfig.transformations[txName]
+    const txPath = configEntry !== undefined ? configEntry.path : join(getTransformationsPath(this.workspaceConfig), txName)
+    if (!existsSync(txPath)) {
+      this.jsonAwareFail(
+        json,
+        `Transformation not found: ${txName}. See 'synth transformation ls'.`,
+        EXIT_CODES.NOT_FOUND
+      )
+    }
+
+    // 2. Deletion guard: uninstalling a step of a saved pipeline would
+    // break the pipeline. The scan is lenient — an invalid pipeline file
+    // still names its steps.
     const dependents = await findPipelinesUsingTx(getPipelinesPath(this.workspaceConfig), txName)
     if (dependents.length > 0) {
       this.jsonAwareFail(
@@ -40,31 +55,14 @@ Refused while any saved pipeline lists the transformation as a step (a replay wo
       )
     }
 
-    // Check if it's in config
-    const configEntry = this.workspaceConfig.transformations[txName]
-    let txPath: string
-
-    if (configEntry) {
-      txPath = configEntry.path
-    } else {
-      // Check in transformations directory
-      txPath = join(getTransformationsPath(this.workspaceConfig), txName)
-    }
-
-    if (!existsSync(txPath)) {
-      this.error(`Transformation '${txName}' not found.`)
-    }
-
-    // Remove the directory
+    // 3. Remove the directory, then the config entry
     await rm(txPath, { recursive: true, force: true })
-
-    // Remove from config if present
     if (configEntry) {
       delete this.workspaceConfig.transformations[txName]
       await saveConfig(this.workspaceConfig)
     }
 
-    if (flags.json) {
+    if (json) {
       this.log(
         JSON.stringify(
           {

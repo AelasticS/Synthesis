@@ -12,13 +12,15 @@ interface TransformationInfo {
   source: 'config' | 'directory'
 }
 
-export default class TxLs extends BaseCommand {
+export default class TransformationLs extends BaseCommand {
+  static override aliases = ['tx:ls']
+
   static override description = 'List installed transformations with versions.'
 
   static override examples = ['<%= config.bin %> <%= command.id %>']
 
   public async execute(): Promise<void> {
-    const { flags } = await this.parse(TxLs)
+    const { flags } = await this.parse(TransformationLs)
     const transformations = await this.getInstalledTransformations()
 
     if (flags.json) {

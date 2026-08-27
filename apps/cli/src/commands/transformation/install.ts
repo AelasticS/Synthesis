@@ -25,7 +25,9 @@ function invalidNameReason(name: string): string | undefined {
   return undefined
 }
 
-export default class TxInstall extends BaseCommand {
+export default class TransformationInstall extends BaseCommand {
+  static override aliases = ['tx:install']
+
   static override description = 'Install a transformation from npm, git, or local path.'
 
   static override examples = [
@@ -43,7 +45,7 @@ export default class TxInstall extends BaseCommand {
   }
 
   public async execute(): Promise<void> {
-    const { args, flags } = await this.parse(TxInstall)
+    const { args, flags } = await this.parse(TransformationInstall)
     const packageSpec = args.package
 
     // For now, only support local directory install
@@ -87,7 +89,7 @@ export default class TxInstall extends BaseCommand {
     const destPath = join(txBasePath, name)
 
     if (existsSync(destPath)) {
-      this.error(`Transformation '${name}' is already installed at '${destPath}'. Use 'tx uninstall' first.`)
+      this.error(`Transformation '${name}' is already installed at '${destPath}'. Use 'synth transformation uninstall' first.`)
     }
 
     await cp(sourcePath, destPath, { recursive: true })

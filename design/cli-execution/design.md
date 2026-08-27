@@ -17,69 +17,118 @@ only after this works.
 
 ## 2. Command surface
 
-Resource → verb everywhere. Execution:
+Resource → verb everywhere: every command is `<resource topic> <verb>`,
+and an argument's resource type is always determined by the topic it was
+typed under — never guessed from what happens to exist in the workspace.
 
-- `synth tx run <tx> --in <ref> [--config <ref>] [--out <ref> | --out-dir <dir>]`
-  — run ONE transformation. M2M vs M2T is decided by the transformation's
-  manifest `kind`, never by the command name.
-- `synth run <tx|pipeline> [<tx> ...]` — workspace-level execution verb:
-  a superset of `tx run`. One name behaves exactly like `tx run`; several
-  names form a **chain**; a saved **pipeline** name replays a stored chain.
-- `synth m2t` — **removed** (no deprecation alias; nothing was ever
-  published).
-- `synth example list` → renamed `example ls` (consistency).
-- New topic `synth pipeline ls|show|rm|edit` for saved pipelines
-  (delivered in Phase 5; semantics below).
+### Canonical names and typing aliases
 
-### Pipelines (as delivered in Phase 5)
+Every resource topic has a full-word CANONICAL name — the one shown in
+help, documentation, and error hints — and may additionally have a
+two-letter typing alias: a pure shortcut with identical behavior.
 
-A pipeline is a SAVED INVOCATION of the chaining `run` — the steps plus
-their bindings — stored as **plain JSON, not a model**, at
-`pipelines/<name>.json` in the workspace (sibling of `models/` and
-`transformations/`; `init` creates the directory, `doctor` tolerates its
-absence). Schema: `{ name, steps, in, out? | outDir?, config?,
-defaultConfigs?, keepIntermediates?, description, createdAt, modifiedAt }`
-— refs stored canonically, `outDir` as invoked, optional bindings only
-when set (a replay re-derives the same defaults, e.g. the `--out` ref
-derived from `--in`). `src/pipelines/store.ts` owns the schema
-(hand-rolled validation with precise per-field errors, like the manifest
-reader) and the load/save/list/scan primitives; the commands are thin.
+| resource | canonical topic | alias | alias rationale |
+|---|---|---|---|
+| transformation | `transformation` | `tx` | first letter + x |
+| namespace | `namespace` | `ns` | compound-word initials |
+| pipeline | `pipeline` | `pl` | compound-word initials |
+| model | `model` | — | short already |
+| config | `config` | — | short already |
+| workspace | `workspace` | — | rarely typed |
+| example | `example` | — | rarely typed |
 
-- **Saving**: `synth run ... --save-as <name>` persists the invocation
-  after a SUCCESSFUL run (single or multi step). The name must be a valid
-  segment (`[A-Za-z0-9_-]+`) and must NOT equal an installed
-  transformation name (would shadow it); an existing pipeline requires
-  `--overwrite` (which preserves `createdAt`/`description`);
-  `--save-as` + `--save-config` together is an error. All save-as checks
-  run in pre-flight, before any engine work.
-- **Replay**: `synth run <name>` — a single positional name resolves as a
-  pipeline FIRST, then as a transformation; a name matching both runs the
-  pipeline with a shadowing warning (`tx run` never resolves pipelines).
-  The execution request is rebuilt from the saved fields with invocation
-  flags overriding saved values (`--in`, `--out`, `--out-dir`, `--config`,
-  `--default-configs`, `--keep-intermediates`, `--overwrite`,
-  `--verbose`). Replay runs the full normal pre-flight (type-check,
-  configuration consent, claimed-refs) — a pipeline is convenience, never
-  a bypass. A pipeline name plus further transformation names is an
-  error; a name that is neither pipeline nor transformation exits 3.
-- **Management**: `pipeline ls` (name, steps, in; `--json`),
-  `pipeline show <name>` (all fields; `--json`), `pipeline rm <name>` (no
-  dependency check — nothing references a pipeline), `pipeline edit
-  <name>` (`$EDITOR`; after the editor closes the file is re-validated
-  and every schema problem is a warning). Missing pipeline → exit 3;
-  invalid file → exit 2 listing every problem; `jsonAwareFail`
-  everywhere.
-- **Deletion guards** (pipelines never cascade; the repair is update or
-  `pipeline rm` first): `tx uninstall` refuses (exit 2) while any saved
-  pipeline lists the transformation as a step, naming the pipelines;
-  model deletion (`model rm`/`config rm`, incl. `--cascade` closures)
-  refuses (exit 2) when a pipeline's `in` or `config` binds any model
-  that would be deleted, naming pipeline and binding. `doctor` checks
-  every pipeline file: schema-valid, steps installed, `in` exists,
-  `config` (when set) exists and is a configuration model — problems are
-  warnings naming the pipeline.
+Mechanically the aliases are per-command oclif aliases (`tx:run` on
+`transformation:run`, etc.); the alias topics are declared (hidden) in
+the `oclif.topics` map so `synth tx`/`synth ns`/`synth pl` render their
+own topic help, while the root help lists only the canonical topics.
 
-### Chaining rules (as delivered in Phase 4)
+### Execution
+
+- `synth transformation run <tx> [<tx> ...] --in <ref> ...` — run ONE
+  transformation or an ad-hoc **chain** (several names, executed in
+  order; rules below). M2M vs M2T is decided by the manifest `kind`,
+  never by the command name. `--save-as <name>` saves the steps of a
+  successful run as a pipeline.
+- `synth pipeline run <name> --in <ref> ...` — run a saved pipeline: the
+  run verb ON the pipeline resource. The pipeline substitutes its steps;
+  everything else is the identical request path as `transformation run`
+  with those steps (full pre-flight, explicit data flags, normal consent
+  policy).
+- There is NO top-level `synth run`. The Phase-5 polymorphic `run
+  <tx|pipeline>` was removed: a verb that guesses its argument's
+  resource type needs resolution-order rules and shadow warnings — the
+  two-verb surface needs neither. `transformation run` arguments are
+  always transformations; `pipeline run`'s argument is always a
+  pipeline.
+- `synth m2t` — **removed** in Phase 4 (no deprecation alias; nothing
+  was ever published). `example list` → renamed `example ls`.
+
+### Pipelines (final Phase-5 design)
+
+A pipeline is a NAMED PROCESS: an ordered list of transformation steps,
+stored as **plain JSON, not a model**, at `pipelines/<name>.json` in the
+workspace (sibling of `models/` and `transformations/`; `init` creates
+the directory, `doctor` tolerates its absence).
+
+Schema — process only: `{ name, steps, description, createdAt,
+modifiedAt }`. Unknown fields are validation errors. A pipeline stores
+NO data bindings — no `in`/`out`/`outDir`, no `config`, no
+`defaultConfigs`/`keepIntermediates` consents. Rationale: stored data
+bindings silently steer replays — the same hazard as implicit defaults
+(the Phase-4 consent policy exists precisely to prevent unreviewed
+decisions); and a stored configuration is provably wrong for any other
+input, since a configuration model's `references.sourceModel` must equal
+the model named with `--in`. Every `pipeline run` therefore names its
+own data and consents explicitly, per the normal policy — `--in` is
+always required (a missing `--in` is a clear error, not a fallback).
+`src/pipelines/store.ts` owns the schema (hand-rolled validation with
+precise per-field errors, like the manifest reader) and the
+load/save/list/scan primitives; the commands are thin.
+
+- **Authoring**: `pipeline mk <name> <tx...> [--description]
+  [--overwrite]` validates STATICALLY — nothing executes: name segment
+  grammar (`[A-Za-z0-9_-]+`), no shadowing of an installed
+  transformation name (one name meaning two runnable things invites
+  invoking the wrong one), at least one step, every step installed, the
+  chain type-checks from the manifests (step N target metamodel = step
+  N+1 source metamodel, incompatible pair named), only the last step may
+  be m2t. The chain checks are the SAME code the execution pre-flight
+  runs (`src/tx/chain.ts`) — authoring-time and run-time judgments
+  cannot drift. An existing pipeline requires `--overwrite`
+  (`createdAt` survives; `--description` overrides, else preserved).
+- **Saving from a run**: `transformation run ... --save-as <name>`
+  persists the steps after a SUCCESSFUL run — same name checks as
+  `pipeline mk`, in pre-flight before any engine work;
+  `--save-as` + `--save-config` together is an error.
+- **Running**: `pipeline run <name> [data flags]` loads the pipeline
+  (unknown name → exit 3; schema-invalid file → exit 2 listing every
+  problem, repair path `pipeline edit`), substitutes its steps, and
+  executes through the shared core exactly like `transformation run` —
+  full pre-flight, `--config` on step 1 only, `--default-configs`
+  consent, claimed-refs, m2t-last. A pipeline is convenience, never a
+  bypass.
+- **Management**: `pipeline ls` (name, steps, description; `--json`),
+  `pipeline show <name>` (all fields; `--json`), `pipeline rm <name>`
+  (no dependency check — nothing references a pipeline), `pipeline edit
+  <name>` (`$EDITOR`; after the editor closes the file gets the same
+  static validation as `pipeline mk` — schema, steps installed, chain
+  compatibility — reported as warnings). All pipeline commands require
+  an initialized workspace; `jsonAwareFail` everywhere.
+- **Uninstall guard**: `transformation uninstall` refuses (exit 2)
+  while any saved pipeline lists the transformation as a step, naming
+  the pipelines (the repair is updating them or `pipeline rm`). The
+  existence check comes FIRST (an unknown transformation exits 3
+  without any pipeline scan), and the step scan is LENIENT — a pipeline
+  file that fails schema validation still protects the steps its raw
+  JSON names, because repairing it with `pipeline edit` must stay
+  possible. Model deletion is NOT guarded by pipelines anymore: with no
+  stored model bindings there is nothing to dangle.
+- **doctor** applies the `pipeline mk` static checks to every pipeline
+  file (schema, steps installed, chain compatibility) — problems are
+  warnings naming the pipeline; a broken pipeline never blocks the
+  workspace.
+
+### Chaining rules (as delivered in Phase 4, verbs renamed in Phase 5)
 
 - Step N's output model feeds step N+1 in memory (same `ModelStore`,
   `transform(root)` hand-off); intermediates are not persisted unless
@@ -100,10 +149,11 @@ reader) and the load/save/list/scan primitives; the commands are thin.
   BEFORE any engine work with a teaching message. Per-step/positional
   `--config` was dropped as illogical: an explicit configuration cannot
   exist for a model that is only produced mid-run — the configured path
-  is stepwise (`tx run` + `config init` against a kept intermediate).
-  `--save-config` is single-step only.
-- `synth m2t` is gone (removed in Phase 4, no alias); `example list`
-  is now `example ls`.
+  is stepwise (`transformation run` + `config init` against a kept
+  intermediate). `--save-config` is single-step only.
+- These rules apply identically to ad-hoc chains (`transformation run`
+  with several names) and to saved pipelines (`pipeline run`): both go
+  through the one shared execution core (`src/tx/execute.ts`).
 
 ## 3. Workspace model format: TSX
 
@@ -191,15 +241,15 @@ Declares what the CLI needs without loading code:
   workspace models)
 - `variability` presence = the transformation is decision-based; it
   REFERENCES the decision/binding model modules — never duplicates the
-  issue list (single source of truth; `tx show` loads the decision model
+  issue list (single source of truth; `transformation show` loads the decision model
   to display issues/options/defaults).
 
 **OPEN:** manifest location — separate `synth.json` (docs' original spec)
 vs `synth` block in `package.json` (partially implemented). Until decided,
 the reader supports both; the writer/scaffolder follows the decision when
-made. `tx install` verifies manifest claims against the loaded class.
+made. `transformation install` verifies manifest claims against the loaded class.
 
-## 7. Execution semantics (`tx run`, single step)
+## 7. Execution semantics (`transformation run`, single step)
 
 1. Read tx manifest → register metamodel schemas → render the package's
    decision + binding models (if decision-based).

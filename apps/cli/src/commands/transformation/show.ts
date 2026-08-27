@@ -33,7 +33,9 @@ interface DegradedMetadata {
   manifestError: string
 }
 
-export default class TxShow extends BaseCommand {
+export default class TransformationShow extends BaseCommand {
+  static override aliases = ['tx:show']
+
   static override description = "Print the transformation's kind, source/target metamodels, and variability points."
 
   static override examples = ['<%= config.bin %> <%= command.id %> eer-to-relational']
@@ -46,7 +48,7 @@ export default class TxShow extends BaseCommand {
   }
 
   public async execute(): Promise<void> {
-    const { args, flags } = await this.parse(TxShow)
+    const { args, flags } = await this.parse(TransformationShow)
     const txName = args.name
 
     const metadata = await this.getTransformationMetadata(txName)

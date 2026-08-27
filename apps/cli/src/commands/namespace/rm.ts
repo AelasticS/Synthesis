@@ -38,7 +38,9 @@ async function hasAnyFile(dir: string): Promise<boolean> {
   return false
 }
 
-export default class NsRm extends BaseCommand {
+export default class NamespaceRm extends BaseCommand {
+  static override aliases = ['ns:rm']
+
   static override description = 'Remove a namespace (must be empty unless --force).'
 
   static override examples = [
@@ -66,7 +68,7 @@ export default class NsRm extends BaseCommand {
   }
 
   public async execute(): Promise<void> {
-    const { args, flags } = await this.parse(NsRm)
+    const { args, flags } = await this.parse(NamespaceRm)
     const json = Boolean(flags.json)
     const modelsPath = getModelsPath(this.workspaceConfig)
 

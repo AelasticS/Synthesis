@@ -5,13 +5,15 @@ import { getModelsPath } from '../../config/index.js'
 import { EXIT_CODES } from '../../support/exit-codes.js'
 import { listNamespaces } from '../../support/refs.js'
 
-export default class NsLs extends BaseCommand {
+export default class NamespaceLs extends BaseCommand {
+  static override aliases = ['ns:ls']
+
   static override description = 'List all namespaces in the workspace.'
 
   static override examples = ['<%= config.bin %> <%= command.id %>']
 
   public async execute(): Promise<void> {
-    const { flags } = await this.parse(NsLs)
+    const { flags } = await this.parse(NamespaceLs)
     const modelsPath = getModelsPath(this.workspaceConfig)
 
     if (!existsSync(modelsPath)) {
@@ -32,7 +34,7 @@ export default class NsLs extends BaseCommand {
     }
 
     if (namespaces.length === 0) {
-      this.log('No namespaces found. Use `synth ns mk <name>` to create one.')
+      this.log('No namespaces found. Use `synth namespace mk <name>` to create one.')
       return
     }
 

@@ -8,7 +8,9 @@ import { errorMessage } from '../../support/errors.js'
 import { EXIT_CODES } from '../../support/exit-codes.js'
 import { namespaceToDir } from '../../support/refs.js'
 
-export default class NsMk extends BaseCommand {
+export default class NamespaceMk extends BaseCommand {
+  static override aliases = ['ns:mk']
+
   static override description = 'Create an empty namespace.'
 
   static override examples = ['<%= config.bin %> <%= command.id %> com.example.orders']
@@ -21,7 +23,7 @@ export default class NsMk extends BaseCommand {
   }
 
   public async execute(): Promise<void> {
-    const { args, flags } = await this.parse(NsMk)
+    const { args, flags } = await this.parse(NamespaceMk)
     const json = Boolean(flags.json)
     const modelsPath = getModelsPath(this.workspaceConfig)
 

@@ -1,9 +1,12 @@
+import { existsSync } from 'node:fs'
+
 import { Command, Flags } from '@oclif/core'
 import {
   WorkspaceConfig,
   loadConfig,
   getWorkspacePath,
   getCurrentNamespacePath,
+  getModelsPath,
   expandPath,
   isWorkspaceInitialized
 } from '../config/index.js'
@@ -108,7 +111,7 @@ export abstract class BaseCommand<T extends typeof Command = typeof Command> ext
   /**
    * Map a failure thrown by the transformation execution core to the
    * command's exit: a typed ExecuteError keeps its exit code, anything
-   * else is a generic failure. Shared by `run` and `tx run` so the two
+   * else is a generic failure. Shared by `transformation run` and `pipeline run` so the two
    * surfaces cannot drift.
    */
   protected failFromExecuteError(json: boolean, err: unknown): never {
@@ -116,6 +119,17 @@ export abstract class BaseCommand<T extends typeof Command = typeof Command> ext
       this.jsonAwareFail(json, err.message, err.exit)
     }
     this.jsonAwareFail(json, errorMessage(err), EXIT_CODES.FAILURE)
+  }
+
+  /**
+   * Guard for commands that only make sense inside an initialized
+   * workspace (namespace and pipeline management): fail with
+   * WORKSPACE_ERROR when the workspace's models directory does not exist.
+   */
+  protected requireInitializedWorkspace(json: boolean): void {
+    if (!existsSync(getModelsPath(this.workspaceConfig))) {
+      this.jsonAwareFail(json, 'Workspace not initialized. Run `synth init` first.', EXIT_CODES.WORKSPACE_ERROR)
+    }
   }
 
   /**

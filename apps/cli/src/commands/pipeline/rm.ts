@@ -8,9 +8,11 @@ import { pipelineFileExists, pipelinePath } from '../../pipelines/store.js'
 import { EXIT_CODES } from '../../support/exit-codes.js'
 
 export default class PipelineRm extends BaseCommand {
+  static override aliases = ['pl:rm']
+
   static override description = `Delete a saved pipeline.
 
-A pipeline is a saved invocation, not a model: nothing references it, so deletion needs no dependency check and no --cascade. The models and transformations it named stay untouched.`
+A pipeline is a saved process, not a model: nothing references it, so deletion needs no dependency check and no --cascade. The transformations it named stay installed.`
 
   static override examples = ['<%= config.bin %> <%= command.id %> gen-sql']
 
@@ -24,6 +26,7 @@ A pipeline is a saved invocation, not a model: nothing references it, so deletio
   public async execute(): Promise<void> {
     const { args, flags } = await this.parse(PipelineRm)
     const json = Boolean(flags.json)
+    this.requireInitializedWorkspace(json)
 
     const pipelinesDir = getPipelinesPath(this.workspaceConfig)
     if (!pipelineFileExists(pipelinesDir, args.name)) {

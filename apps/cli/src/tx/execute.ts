@@ -1,8 +1,8 @@
 /**
- * The transformation execution core shared by `tx run` (always one step)
- * and `run` (one step or a chain). Both commands are thin CLI shells over
- * `executeRun`; every check, message, and exit code lives here exactly
- * once so the two surfaces cannot drift.
+ * The transformation execution core shared by `transformation run` (one
+ * step or an ad-hoc chain) and `pipeline run` (a saved chain). Both
+ * commands are thin CLI shells over `executeRun`; every check, message,
+ * and exit code lives here exactly once so the two surfaces cannot drift.
  *
  * Configuration policy (uniform, applies to every execution path):
  * decisions are never applied without explicit user consent. A
@@ -48,18 +48,12 @@ import {
   resolveWritableRef
 } from './config-model.js'
 import type { ResolvedConfigModel, WritableTarget } from './config-model.js'
+import { chainStructureProblems, resolveChainSteps } from './chain.js'
 import { formatDecisionAnnouncement, validateConfigStructure } from './decisions.js'
 import type { DecisionAnnouncement } from './decisions.js'
 import { EngineOutputBuffer } from './engine-output.js'
 import { ExecuteError } from './execute-error.js'
-import {
-  CLOSURE_EXIT_CODES,
-  renderTxParts,
-  resolveInstalledTx,
-  resolveSourceModel,
-  SourceModelError,
-  TxResolveError
-} from './load.js'
+import { CLOSURE_EXIT_CODES, renderTxParts, resolveSourceModel, SourceModelError } from './load.js'
 import type { ResolvedSourceModel, TxParts } from './load.js'
 import type { TxManifest } from './manifest.js'
 import { importTxModule, moduleExport, requireExport } from './modules.js'
@@ -166,51 +160,28 @@ export async function executeRun(request: ExecuteRequest): Promise<void> {
     throw new ExecuteError(exit, message, cause === undefined ? undefined : { cause })
   }
 
-  // 1. Resolve every transformation and its manifest, and derive each
-  // step's configuration source (--config covers step 1 only)
-  const steps: Step[] = []
-  for (const txName of request.txNames) {
-    try {
-      const { packageDir, manifest } = await resolveInstalledTx(workspaceConfig, txName)
-      steps.push({
-        txName,
-        packageDir,
-        manifest,
-        configSource: manifest.variability
-          ? steps.length === 0 && request.config !== undefined
-            ? 'explicit'
-            : 'defaults'
-          : 'none'
-      })
-    } catch (err) {
-      fail(err instanceof TxResolveError ? err.exit : EXIT_CODES.FAILURE, errorMessage(err), err)
-    }
-  }
+  // 1. Resolve every transformation and its manifest (shared with the
+  // static authoring path), and derive each step's configuration source
+  // (--config covers step 1 only)
+  const steps: Step[] = (await resolveChainSteps(workspaceConfig, request.txNames)).map((step, index) => ({
+    ...step,
+    configSource: step.manifest.variability
+      ? index === 0 && request.config !== undefined
+        ? 'explicit'
+        : 'defaults'
+      : 'none'
+  }))
   const stepCount = steps.length
   const multi = stepCount > 1
   const first = steps[0]
   const last = steps[stepCount - 1]
   const stepLabel = (index: number): string => `step ${index + 1} (${steps[index].manifest.name})`
 
-  // 2. Chain structural checks, from manifests alone: text is terminal,
-  // and step N's target metamodel must be step N+1's source metamodel.
-  for (let i = 0; i < stepCount - 1; i++) {
-    if (steps[i].manifest.kind === 'm2t') {
-      fail(
-        EXIT_CODES.FAILURE,
-        `${stepLabel(i)} is m2t; text is terminal, so an m2t transformation can only be the last step of a chain.`
-      )
-    }
-  }
-  for (let i = 0; i < stepCount - 1; i++) {
-    const produced = steps[i].manifest.target.metamodel
-    const expected = steps[i + 1].manifest.source.metamodel
-    if (produced !== expected) {
-      fail(
-        EXIT_CODES.VALIDATION_FAILURE,
-        `Chain type mismatch: ${stepLabel(i)} produces metamodel '${produced}' but ${stepLabel(i + 1)} expects '${expected}'.`
-      )
-    }
+  // 2. Chain structural checks, from manifests alone (shared with
+  // `pipeline mk`): text is terminal, and step N's target metamodel must
+  // be step N+1's source metamodel.
+  for (const problem of chainStructureProblems(steps)) {
+    fail(problem.exit, problem.message)
   }
 
   // 3. Output flags must match the LAST step's kind before any work runs
@@ -273,7 +244,7 @@ export async function executeRun(request: ExecuteRequest): Promise<void> {
     if (multi) {
       fail(
         EXIT_CODES.FAILURE,
-        `--save-config is not supported for multi-step runs; the configured path is stepwise: run each step with 'tx run' and create configurations with 'synth config init'.`
+        `--save-config is not supported for multi-step runs; the configured path is stepwise: run each step with 'transformation run' and create configurations with 'synth config init'.`
       )
     }
     if (!first.manifest.variability) {
@@ -314,7 +285,7 @@ export async function executeRun(request: ExecuteRequest): Promise<void> {
     if (uncovered > 0) {
       fail(
         EXIT_CODES.VALIDATION_FAILURE,
-        `${stepLabel(uncovered)} is decision-based; a chain cannot take an explicit configuration for a model that is produced mid-run. Either run stepwise: tx run + config init against the intermediate, or accept generated defaults explicitly: --default-configs.`
+        `${stepLabel(uncovered)} is decision-based; a chain cannot take an explicit configuration for a model that is produced mid-run. Either run stepwise: transformation run + config init against the intermediate, or accept generated defaults explicitly: --default-configs.`
       )
     }
   }

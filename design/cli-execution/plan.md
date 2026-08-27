@@ -93,32 +93,40 @@ Acceptance (met): `synth run eer-to-relational rel-to-sql-ddl --in ...
 --default-configs --out-dir ./gen` reproduces the example showcase
 output from workspace content.
 
-## Phase 5 — Pipelines — DELIVERED (2026-08-27)
+## Phase 5 — Pipelines — DELIVERED (2026-08-27, revised 2026-08-28)
 
-`--save-as`, `pipelines/<name>.json`, `pipeline ls/show/rm/edit`,
-override semantics, save-time + run-time validation. As-delivered
-semantics live in design.md §2 "Pipelines".
+`pipeline mk/run/ls/show/rm/edit`, `pipelines/<name>.json`,
+`transformation run ... --save-as`, static + run-time validation.
+As-delivered semantics live in design.md §2 "Pipelines".
 
-> Scope notes from execution (2026-08-27): a pipeline shipped as a saved
-> INVOCATION (plain JSON, not a model; `src/pipelines/store.ts` owns
-> schema + primitives, commands stay thin). Save-time validation runs in
-> pre-flight (segment-grammar name, no shadowing of an installed tx,
-> `--overwrite` for an existing pipeline — preserving createdAt and
-> description; `--save-as` + `--save-config` is an error); only
-> explicitly-bound values are frozen, so a replay re-derives defaults
-> such as the `--out` ref. Replay resolves pipelines before
-> transformations (warning when a name matches both; `tx run` never
-> resolves pipelines) and runs the FULL normal pre-flight — a pipeline is
-> convenience, never a bypass. Beyond the planned surface, deletion
-> guards shipped with it: `tx uninstall` refuses while a pipeline uses
-> the tx as a step, `model rm`/`config rm` refuse while a pipeline's `in`
-> or `config` binds a model being deleted (pipelines never cascade), and
-> `doctor` warns per pipeline on schema violations, uninstalled steps,
-> missing `in`, or a non-configuration `config` binding.
+> Scope notes from execution (2026-08-27/28; the final design replaced
+> the first-cut "saved invocation" model after review): a pipeline is a
+> NAMED PROCESS — steps only, plain JSON, not a model
+> (`src/pipelines/store.ts` owns schema + primitives, commands stay
+> thin). The schema stores NO data bindings and no consent flags:
+> stored bindings silently steer replays (the hazard the Phase-4
+> consent policy exists to prevent), and a stored configuration is
+> provably wrong for any other input. `pipeline mk` authors a pipeline
+> with STATIC manifest-driven validation (shared with the execution
+> pre-flight via `src/tx/chain.ts` — nothing executes);
+> `transformation run --save-as` saves a successful run's steps under
+> the same name checks. `pipeline run <name>` requires `--in` and takes
+> the identical request path as `transformation run` — full pre-flight,
+> normal consent policy, never a bypass. Alongside, the command surface
+> was purified: every topic got a full-word canonical name with
+> two-letter typing aliases (`transformation`/`tx`, `namespace`/`ns`,
+> `pipeline`/`pl`), the polymorphic top-level `run` was deleted
+> (`transformation run` now chains; no name-guessing, no
+> resolution-order rules), and `transformation uninstall` keeps the one
+> remaining guard: refuse while a pipeline's steps (leniently extracted
+> even from schema-invalid files) name the transformation. The
+> model-deletion pipeline guards became obsolete with the binding-free
+> schema and were removed.
 
-Acceptance (met): save the Phase-4 chain (`--save-as gen-sql`), replay by
-name on another input model via `--in` override (jest + `rushx smoke`
-Phase 5 section).
+Acceptance (met): `pipeline mk gen-sql eer-to-relational
+rel-to-sql-ddl` validates statically; `pipeline run gen-sql --in ...
+--default-configs --out-dir ./gen` reproduces the Phase-4 chain output;
+`pl run` behaves identically (jest + `rushx smoke` Phase 5 section).
 
 ## Phase 6 — Interactive layer
 

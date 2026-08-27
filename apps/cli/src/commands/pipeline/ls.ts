@@ -5,18 +5,21 @@ import { listPipelines } from '../../pipelines/store.js'
 interface PipelineRow {
   name: string
   steps: string[]
-  in: string
+  description: string
 }
 
 export default class PipelineLs extends BaseCommand {
+  static override aliases = ['pl:ls']
+
   static override description =
-    "List saved pipelines (replayable 'run' invocations stored under pipelines/ in the workspace)."
+    'List saved pipelines (named transformation chains stored under pipelines/ in the workspace).'
 
   static override examples = ['<%= config.bin %> <%= command.id %>', '<%= config.bin %> <%= command.id %> --json']
 
   public async execute(): Promise<void> {
     const { flags } = await this.parse(PipelineLs)
     const json = Boolean(flags.json)
+    this.requireInitializedWorkspace(json)
 
     const entries = await listPipelines(getPipelinesPath(this.workspaceConfig))
     const rows: PipelineRow[] = []
@@ -27,7 +30,7 @@ export default class PipelineLs extends BaseCommand {
         this.warn(`Pipeline '${entry.name}' is invalid and not listed: ${entry.errors.join('; ')}`)
         continue
       }
-      rows.push({ name: entry.name, steps: entry.pipeline.steps, in: entry.pipeline.in })
+      rows.push({ name: entry.name, steps: entry.pipeline.steps, description: entry.pipeline.description })
     }
 
     if (json) {
@@ -36,13 +39,14 @@ export default class PipelineLs extends BaseCommand {
     }
 
     if (rows.length === 0) {
-      this.log("No pipelines saved. Save one with: synth run <tx...> ... --save-as <name>")
+      this.log('No pipelines saved. Create one with: synth pipeline mk <name> <transformation...>')
       return
     }
 
     const width = Math.max(...rows.map((row) => row.name.length))
     for (const row of rows) {
-      this.log(`${row.name.padEnd(width)}  ${row.steps.join(' -> ')}  on ${row.in}`)
+      const description = row.description === '' ? '' : `  # ${row.description}`
+      this.log(`${row.name.padEnd(width)}  ${row.steps.join(' -> ')}${description}`)
     }
   }
 }

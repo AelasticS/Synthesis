@@ -4,7 +4,9 @@ import { join } from 'node:path'
 
 import { BaseCommand } from '../../base/base-command.js'
 
-export default class TxPack extends BaseCommand {
+export default class TransformationPack extends BaseCommand {
+  static override aliases = ['tx:pack']
+
   static override description = 'Produce a distributable tarball.'
 
   static override examples = ['<%= config.bin %> <%= command.id %>']
@@ -37,7 +39,7 @@ export default class TxPack extends BaseCommand {
       this.log(`  npm install ${join(cwd, tarball)}`)
       this.log('')
       this.log('Or publish to npm with:')
-      this.log('  synth tx publish')
+      this.log('  synth transformation publish')
     } catch {
       this.error('Pack failed. Check the output above for errors.')
     }

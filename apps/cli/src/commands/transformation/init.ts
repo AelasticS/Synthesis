@@ -5,7 +5,9 @@ import { join } from 'node:path'
 
 import { BaseCommand } from '../../base/base-command.js'
 
-export default class TxInit extends BaseCommand {
+export default class TransformationInit extends BaseCommand {
+  static override aliases = ['tx:init']
+
   static override description = 'Scaffold a new transformation project.'
 
   static override examples = ['<%= config.bin %> <%= command.id %> eer-to-relational']
@@ -18,7 +20,7 @@ export default class TxInit extends BaseCommand {
   }
 
   public async execute(): Promise<void> {
-    const { args } = await this.parse(TxInit)
+    const { args } = await this.parse(TransformationInit)
     const projectName = args.name
     const projectDir = join(this.savedPwd, projectName)
 
@@ -54,7 +56,7 @@ export default class TxInit extends BaseCommand {
     }
     await writeFile(join(projectDir, 'package.json'), JSON.stringify(packageJson, null, 2) + '\n')
 
-    // Create synth.json — the manifest 'tx install' validates. The scaffold
+    // Create synth.json — the manifest 'transformation install' validates. The scaffold
     // is installable as-is; the metamodel placeholders are for the author
     // to replace.
     const synthJson = {
@@ -88,7 +90,7 @@ export default class TxInit extends BaseCommand {
     await writeFile(join(projectDir, 'tsconfig.json'), JSON.stringify(tsconfig, null, 2) + '\n')
 
     // Create src/index.ts template. The exported class name must match
-    // synth.json's exportName — 'tx run' loads exactly that export.
+    // synth.json's exportName — 'transformation run' loads exactly that export.
     const indexTs = `/**
  * Synthesis transformation: ${projectName}
  *
@@ -123,6 +125,6 @@ export class MyTransformation {
     this.log(`  cd ${projectName}`)
     this.log('  npm install')
     this.log('  # Edit src/index.ts to implement your transformation')
-    this.log('  synth tx build')
+    this.log('  synth transformation build')
   }
 }

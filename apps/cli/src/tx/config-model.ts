@@ -103,7 +103,7 @@ export interface ResolvedConfigModel {
  * Resolve a configuration-model ref nominally: normalize the ref, find the
  * file, parse the `$synth` header (parse errors are surfaced, never
  * swallowed), and require kind 'configuration-model'. Shared by
- * `config show`/`rm`/`edit` and `tx run --config` so their checks and exit
+ * `config show`/`rm`/`edit` and `transformation run --config` so their checks and exit
  * codes cannot drift: missing -> NOT_FOUND, malformed header or wrong
  * kind -> VALIDATION_FAILURE.
  */
@@ -151,7 +151,7 @@ export interface WritableTarget {
 
 /**
  * Resolve a ref a command is about to write: normalize it and enforce the
- * exists/--overwrite gate. Shared by `tx run --out`, `tx run --save-config`,
+ * exists/--overwrite gate. Shared by `transformation run --out`, `transformation run --save-config`,
  * and `config init --out`.
  */
 export function resolveWritableRef(
@@ -415,7 +415,7 @@ export async function writeConfigModelFile(request: ConfigWriteRequest): Promise
   const { store, configModel, decisionModel, manifest, packageDir, sourceRef, targetPath, modelsDir } = request
   const jsx = serializeConfigModel(store, configModel, decisionModel)
 
-  // Same verification approach as tx run's m2m writer: every tag the JSX
+  // Same verification approach as transformation run's m2m writer: every tag the JSX
   // uses must be exported (as a component function) by its declared module.
   // The grouping is computed once and reused for the emitted import lines.
   const byModule = groupConfigTagsByModule(jsx)

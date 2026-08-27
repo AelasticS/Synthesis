@@ -5,7 +5,9 @@ import { join } from 'node:path'
 
 import { BaseCommand } from '../../base/base-command.js'
 
-export default class TxPublish extends BaseCommand {
+export default class TransformationPublish extends BaseCommand {
+  static override aliases = ['tx:publish']
+
   static override description = 'Publish the transformation to npm.'
 
   static override examples = [
@@ -29,7 +31,7 @@ export default class TxPublish extends BaseCommand {
   }
 
   public async execute(): Promise<void> {
-    const { flags } = await this.parse(TxPublish)
+    const { flags } = await this.parse(TransformationPublish)
     const cwd = this.savedPwd
 
     // Check for package.json

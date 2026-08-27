@@ -1,5 +1,5 @@
 /**
- * Pure helpers for writing `tx run` results, kept free of command/engine
+ * Pure helpers for writing `transformation run` results, kept free of command/engine
  * imports so their edge cases stay unit-testable.
  */
 
@@ -21,7 +21,7 @@ export function uniqueJsxTags(jsx: string): string[] {
 
 /**
  * Wrap rendered model JSX into a complete workspace model module — the
- * shared skeleton behind tx run's m2m writer and the configuration-model
+ * shared skeleton behind transformation run's m2m writer and the configuration-model
  * serializer: jsx pragma, import lines, `$synth` header text, and a
  * default-exported `(store) => (<jsx>)` factory.
  */

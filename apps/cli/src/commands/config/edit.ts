@@ -1,9 +1,8 @@
-import { spawn } from 'node:child_process'
-
 import { Args } from '@oclif/core'
 
 import { BaseCommand } from '../../base/base-command.js'
 import { getModelsPath } from '../../config/index.js'
+import { openInEditor } from '../../support/editor.js'
 import { errorMessage } from '../../support/errors.js'
 import { EXIT_CODES } from '../../support/exit-codes.js'
 import { ConfigModelResolveError, resolveConfigurationModel } from '../../tx/config-model.js'
@@ -35,26 +34,6 @@ After editing, 'synth model validate <ref> --tx <name>' checks that the file sti
       }
       this.error(errorMessage(err), { exit: EXIT_CODES.FAILURE })
     }
-    const modelPath = resolved.path
-
-    const editor = process.env.EDITOR || 'vi'
-
-    return new Promise((resolve, reject) => {
-      const child = spawn(editor, [modelPath], {
-        stdio: 'inherit'
-      })
-
-      child.on('close', (code) => {
-        if (code === 0) {
-          resolve()
-        } else {
-          reject(new Error(`Editor exited with code ${code}`))
-        }
-      })
-
-      child.on('error', (err) => {
-        reject(new Error(`Failed to spawn editor: ${err.message}`))
-      })
-    })
+    await openInEditor(resolved.path)
   }
 }

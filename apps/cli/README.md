@@ -38,13 +38,24 @@ synth --help
 * [`synth model rm REF`](#synth-model-rm-ref)
 * [`synth model show REF`](#synth-model-show-ref)
 * [`synth model validate REF`](#synth-model-validate-ref)
+* [`synth namespace ls`](#synth-namespace-ls)
+* [`synth namespace mk NAMESPACE`](#synth-namespace-mk-namespace)
+* [`synth namespace rm NAMESPACE`](#synth-namespace-rm-namespace)
 * [`synth ns ls`](#synth-ns-ls)
 * [`synth ns mk NAMESPACE`](#synth-ns-mk-namespace)
 * [`synth ns rm NAMESPACE`](#synth-ns-rm-namespace)
 * [`synth pipeline edit NAME`](#synth-pipeline-edit-name)
 * [`synth pipeline ls`](#synth-pipeline-ls)
+* [`synth pipeline mk NAME [TX]`](#synth-pipeline-mk-name-tx)
 * [`synth pipeline rm NAME`](#synth-pipeline-rm-name)
+* [`synth pipeline run NAME`](#synth-pipeline-run-name)
 * [`synth pipeline show NAME`](#synth-pipeline-show-name)
+* [`synth pl edit NAME`](#synth-pl-edit-name)
+* [`synth pl ls`](#synth-pl-ls)
+* [`synth pl mk NAME [TX]`](#synth-pl-mk-name-tx)
+* [`synth pl rm NAME`](#synth-pl-rm-name)
+* [`synth pl run NAME`](#synth-pl-run-name)
+* [`synth pl show NAME`](#synth-pl-show-name)
 * [`synth plugins`](#synth-plugins)
 * [`synth plugins add PLUGIN`](#synth-plugins-add-plugin)
 * [`synth plugins:inspect PLUGIN...`](#synth-pluginsinspect-plugin)
@@ -55,7 +66,16 @@ synth --help
 * [`synth plugins uninstall [PLUGIN]`](#synth-plugins-uninstall-plugin)
 * [`synth plugins unlink [PLUGIN]`](#synth-plugins-unlink-plugin)
 * [`synth plugins update`](#synth-plugins-update)
-* [`synth run TX`](#synth-run-tx)
+* [`synth transformation build`](#synth-transformation-build)
+* [`synth transformation init NAME`](#synth-transformation-init-name)
+* [`synth transformation install PACKAGE`](#synth-transformation-install-package)
+* [`synth transformation ls`](#synth-transformation-ls)
+* [`synth transformation pack`](#synth-transformation-pack)
+* [`synth transformation publish`](#synth-transformation-publish)
+* [`synth transformation run TX`](#synth-transformation-run-tx)
+* [`synth transformation show NAME`](#synth-transformation-show-name)
+* [`synth transformation test`](#synth-transformation-test)
+* [`synth transformation uninstall NAME`](#synth-transformation-uninstall-name)
 * [`synth tx build`](#synth-tx-build)
 * [`synth tx init NAME`](#synth-tx-init-name)
 * [`synth tx install PACKAGE`](#synth-tx-install-package)
@@ -183,9 +203,9 @@ DESCRIPTION
 
   Runs the transformation's default-configuration generation (one default choice per issue its binding model attaches,
   global and per-element) against the model named with --for and saves the result as an editable configuration model in
-  the workspace — the same generation 'tx run --default-configs' accepts in memory. Edit the saved file to steer the
-  transformation, then pass it to 'tx run --config'. Exit codes: 2 for a source-metamodel mismatch or a result that
-  fails the import gate, 3 for an unknown transformation or missing model.
+  the workspace — the same generation 'transformation run --default-configs' accepts in memory. Edit the saved file to
+  steer the transformation, then pass it to 'transformation run --config'. Exit codes: 2 for a source-metamodel mismatch
+  or a result that fails the import gate, 3 for an unknown transformation or missing model.
 
 EXAMPLES
   $ synth config init eer-to-relational --for com.example/persons
@@ -632,6 +652,94 @@ EXAMPLES
   $ synth model validate com.example/persons-cfg --tx eer-to-relational
 ```
 
+## `synth namespace ls`
+
+List all namespaces in the workspace.
+
+```
+USAGE
+  $ synth namespace ls [--workspace <value>] [--ns <value>] [--json] [-q] [-v]
+
+GLOBAL FLAGS
+  -q, --quiet              Suppress informational output.
+  -v, --verbose            Print debug-level logs.
+      --json               Emit machine-readable JSON.
+      --ns=<value>         Namespace context override (otherwise resolved from config).
+      --workspace=<value>  Override active workspace for this invocation.
+
+DESCRIPTION
+  List all namespaces in the workspace.
+
+ALIASES
+  $ synth ns ls
+
+EXAMPLES
+  $ synth namespace ls
+```
+
+## `synth namespace mk NAMESPACE`
+
+Create an empty namespace.
+
+```
+USAGE
+  $ synth namespace mk NAMESPACE [--workspace <value>] [--ns <value>] [--json] [-q] [-v]
+
+ARGUMENTS
+  NAMESPACE  Name of the namespace to create.
+
+GLOBAL FLAGS
+  -q, --quiet              Suppress informational output.
+  -v, --verbose            Print debug-level logs.
+      --json               Emit machine-readable JSON.
+      --ns=<value>         Namespace context override (otherwise resolved from config).
+      --workspace=<value>  Override active workspace for this invocation.
+
+DESCRIPTION
+  Create an empty namespace.
+
+ALIASES
+  $ synth ns mk
+
+EXAMPLES
+  $ synth namespace mk com.example.orders
+```
+
+## `synth namespace rm NAMESPACE`
+
+Remove a namespace (must be empty unless --force).
+
+```
+USAGE
+  $ synth namespace rm NAMESPACE [--workspace <value>] [--ns <value>] [--json] [-q] [-v] [--force] [--cascade]
+
+ARGUMENTS
+  NAMESPACE  Name of the namespace to remove.
+
+FLAGS
+  --cascade  Also delete every model outside the namespace that transitively references a model inside it (implies
+             --force).
+  --force    Remove even if the namespace contains files.
+
+GLOBAL FLAGS
+  -q, --quiet              Suppress informational output.
+  -v, --verbose            Print debug-level logs.
+      --json               Emit machine-readable JSON.
+      --ns=<value>         Namespace context override (otherwise resolved from config).
+      --workspace=<value>  Override active workspace for this invocation.
+
+DESCRIPTION
+  Remove a namespace (must be empty unless --force).
+
+ALIASES
+  $ synth ns rm
+
+EXAMPLES
+  $ synth namespace rm com.example.orders
+
+  $ synth namespace rm com.example.orders --force
+```
+
 ## `synth ns ls`
 
 List all namespaces in the workspace.
@@ -649,6 +757,9 @@ GLOBAL FLAGS
 
 DESCRIPTION
   List all namespaces in the workspace.
+
+ALIASES
+  $ synth ns ls
 
 EXAMPLES
   $ synth ns ls
@@ -674,6 +785,9 @@ GLOBAL FLAGS
 
 DESCRIPTION
   Create an empty namespace.
+
+ALIASES
+  $ synth ns mk
 
 EXAMPLES
   $ synth ns mk com.example.orders
@@ -705,6 +819,9 @@ GLOBAL FLAGS
 DESCRIPTION
   Remove a namespace (must be empty unless --force).
 
+ALIASES
+  $ synth ns rm
+
 EXAMPLES
   $ synth ns rm com.example.orders
 
@@ -732,8 +849,12 @@ GLOBAL FLAGS
 DESCRIPTION
   Open a saved pipeline in $EDITOR.
 
-  After the editor closes, the file is re-parsed and validated against the pipeline schema; every problem is reported as
-  a warning ('run <name>' would refuse to replay until they are fixed).
+  After the editor closes, the file is validated like 'pipeline mk' validates a new pipeline — schema (process-only
+  fields), every step installed, chain type compatibility — and every problem is reported as a warning ('pipeline run
+  <name>' would refuse until they are fixed).
+
+ALIASES
+  $ synth pl edit
 
 EXAMPLES
   $ synth pipeline edit gen-sql
@@ -741,7 +862,7 @@ EXAMPLES
 
 ## `synth pipeline ls`
 
-List saved pipelines (replayable 'run' invocations stored under pipelines/ in the workspace).
+List saved pipelines (named transformation chains stored under pipelines/ in the workspace).
 
 ```
 USAGE
@@ -755,12 +876,58 @@ GLOBAL FLAGS
       --workspace=<value>  Override active workspace for this invocation.
 
 DESCRIPTION
-  List saved pipelines (replayable 'run' invocations stored under pipelines/ in the workspace).
+  List saved pipelines (named transformation chains stored under pipelines/ in the workspace).
+
+ALIASES
+  $ synth pl ls
 
 EXAMPLES
   $ synth pipeline ls
 
   $ synth pipeline ls --json
+```
+
+## `synth pipeline mk NAME [TX]`
+
+Create a saved pipeline from an ordered list of installed transformations.
+
+```
+USAGE
+  $ synth pipeline mk NAME... [TX...] [--workspace <value>] [--ns <value>] [--json] [-q] [-v] [--description
+    <value>] [--overwrite]
+
+ARGUMENTS
+  NAME...  Name for the pipeline (letters, digits, hyphen, underscore).
+  [TX...]  Installed transformations forming the steps, in execution order (at least one).
+
+FLAGS
+  --description=<value>  One-line description stored with the pipeline.
+  --overwrite            Replace an existing pipeline of the same name (createdAt survives).
+
+GLOBAL FLAGS
+  -q, --quiet              Suppress informational output.
+  -v, --verbose            Print debug-level logs.
+      --json               Emit machine-readable JSON.
+      --ns=<value>         Namespace context override (otherwise resolved from config).
+      --workspace=<value>  Override active workspace for this invocation.
+
+DESCRIPTION
+  Create a saved pipeline from an ordered list of installed transformations.
+
+  Validation is static — nothing is executed: the name must be a valid segment and must not shadow an installed
+  transformation, every step must be installed, the chain must type-check from the manifests (step N's target metamodel
+  equals step N+1's source metamodel), and only the last step may be m2t. A pipeline stores the process only (its steps)
+  — no input model, no configuration, no consent flags; every 'pipeline run' names its own data explicitly. An existing
+  pipeline is only replaced with --overwrite (createdAt survives). Exit codes: 2 for a chain type mismatch, 3 for a step
+  that is not installed.
+
+ALIASES
+  $ synth pl mk
+
+EXAMPLES
+  $ synth pipeline mk gen-sql eer-to-relational rel-to-sql-ddl
+
+  $ synth pipeline mk gen-sql eer-to-relational rel-to-sql-ddl --description "EER to SQL DDL" --overwrite
 ```
 
 ## `synth pipeline rm NAME`
@@ -784,11 +951,69 @@ GLOBAL FLAGS
 DESCRIPTION
   Delete a saved pipeline.
 
-  A pipeline is a saved invocation, not a model: nothing references it, so deletion needs no dependency check and no
-  --cascade. The models and transformations it named stay untouched.
+  A pipeline is a saved process, not a model: nothing references it, so deletion needs no dependency check and no
+  --cascade. The transformations it named stay installed.
+
+ALIASES
+  $ synth pl rm
 
 EXAMPLES
   $ synth pipeline rm gen-sql
+```
+
+## `synth pipeline run NAME`
+
+Run a saved pipeline on a workspace model.
+
+```
+USAGE
+  $ synth pipeline run NAME [--workspace <value>] [--ns <value>] [--json] [-q] [-v] [--in <value>] [--out <value>]
+    [--out-dir <value>] [--default-configs] [--save-config <value> | --config <value>] [--keep-intermediates]
+    [--overwrite]
+
+ARGUMENTS
+  NAME  Name of the saved pipeline to run.
+
+FLAGS
+  --config=<value>       Configuration model ref for step 1 (decision-based only; later steps take --default-configs).
+  --default-configs      Explicitly accept generated default configurations for every decision-based step not covered by
+                         --config.
+  --in=<value>           Source model ref the first step transforms (always required — a pipeline stores no data
+                         bindings).
+  --keep-intermediates   Also write every intermediate step result as a workspace model
+                         ('<namespace>/<name>-<step-tx>').
+  --out=<value>          Destination ref for the final result model (last step m2m only; default:
+                         '<namespace>/<name>-<last-tx>' derived from --in).
+  --out-dir=<value>      Output directory for generated files (last step m2t only).
+  --overwrite            Replace existing targets (final and intermediate models, --save-config target).
+  --save-config=<value>  Persist the generated default configuration as a workspace model at this ref (single-step
+                         pipeline with --default-configs only).
+
+GLOBAL FLAGS
+  -q, --quiet              Suppress informational output.
+  -v, --verbose            Print debug-level logs.
+      --json               Emit machine-readable JSON.
+      --ns=<value>         Namespace context override (otherwise resolved from config).
+      --workspace=<value>  Override active workspace for this invocation.
+
+DESCRIPTION
+  Run a saved pipeline on a workspace model.
+
+  A pipeline stores only the process — its transformation steps. Every run names its own data explicitly, exactly like
+  'transformation run' with the same steps: --in is always required, output goes to --out (last step m2m; default
+  '<namespace>/<name>-<last-tx>' derived from --in) or --out-dir (last step m2t), and configuration consent follows the
+  normal policy (--config binds to step 1 only; every other decision-based step requires --default-configs, otherwise
+  the run aborts before any engine work). The full pre-flight applies — a pipeline is convenience, never a bypass. Exit
+  codes: 2 for a missing configuration consent, a chain or source metamodel mismatch, an invalid configuration or
+  pipeline file, or a result that fails the import gate, 3 for an unknown pipeline, transformation, or model.
+
+ALIASES
+  $ synth pl run
+
+EXAMPLES
+  $ synth pipeline run gen-sql --in com.example/persons --default-configs --out-dir ./generated
+
+  $ synth pipeline run to-relational --in com.example/persons --config com.example/persons-cfg
 ```
 
 ## `synth pipeline show NAME`
@@ -812,10 +1037,231 @@ GLOBAL FLAGS
 DESCRIPTION
   Show every field of a saved pipeline.
 
+ALIASES
+  $ synth pl show
+
 EXAMPLES
   $ synth pipeline show gen-sql
 
   $ synth pipeline show gen-sql --json
+```
+
+## `synth pl edit NAME`
+
+Open a saved pipeline in $EDITOR.
+
+```
+USAGE
+  $ synth pl edit NAME [--workspace <value>] [--ns <value>] [--json] [-q] [-v]
+
+ARGUMENTS
+  NAME  Name of the saved pipeline to edit.
+
+GLOBAL FLAGS
+  -q, --quiet              Suppress informational output.
+  -v, --verbose            Print debug-level logs.
+      --json               Emit machine-readable JSON.
+      --ns=<value>         Namespace context override (otherwise resolved from config).
+      --workspace=<value>  Override active workspace for this invocation.
+
+DESCRIPTION
+  Open a saved pipeline in $EDITOR.
+
+  After the editor closes, the file is validated like 'pipeline mk' validates a new pipeline — schema (process-only
+  fields), every step installed, chain type compatibility — and every problem is reported as a warning ('pipeline run
+  <name>' would refuse until they are fixed).
+
+ALIASES
+  $ synth pl edit
+
+EXAMPLES
+  $ synth pl edit gen-sql
+```
+
+## `synth pl ls`
+
+List saved pipelines (named transformation chains stored under pipelines/ in the workspace).
+
+```
+USAGE
+  $ synth pl ls [--workspace <value>] [--ns <value>] [--json] [-q] [-v]
+
+GLOBAL FLAGS
+  -q, --quiet              Suppress informational output.
+  -v, --verbose            Print debug-level logs.
+      --json               Emit machine-readable JSON.
+      --ns=<value>         Namespace context override (otherwise resolved from config).
+      --workspace=<value>  Override active workspace for this invocation.
+
+DESCRIPTION
+  List saved pipelines (named transformation chains stored under pipelines/ in the workspace).
+
+ALIASES
+  $ synth pl ls
+
+EXAMPLES
+  $ synth pl ls
+
+  $ synth pl ls --json
+```
+
+## `synth pl mk NAME [TX]`
+
+Create a saved pipeline from an ordered list of installed transformations.
+
+```
+USAGE
+  $ synth pl mk NAME... [TX...] [--workspace <value>] [--ns <value>] [--json] [-q] [-v] [--description
+    <value>] [--overwrite]
+
+ARGUMENTS
+  NAME...  Name for the pipeline (letters, digits, hyphen, underscore).
+  [TX...]  Installed transformations forming the steps, in execution order (at least one).
+
+FLAGS
+  --description=<value>  One-line description stored with the pipeline.
+  --overwrite            Replace an existing pipeline of the same name (createdAt survives).
+
+GLOBAL FLAGS
+  -q, --quiet              Suppress informational output.
+  -v, --verbose            Print debug-level logs.
+      --json               Emit machine-readable JSON.
+      --ns=<value>         Namespace context override (otherwise resolved from config).
+      --workspace=<value>  Override active workspace for this invocation.
+
+DESCRIPTION
+  Create a saved pipeline from an ordered list of installed transformations.
+
+  Validation is static — nothing is executed: the name must be a valid segment and must not shadow an installed
+  transformation, every step must be installed, the chain must type-check from the manifests (step N's target metamodel
+  equals step N+1's source metamodel), and only the last step may be m2t. A pipeline stores the process only (its steps)
+  — no input model, no configuration, no consent flags; every 'pipeline run' names its own data explicitly. An existing
+  pipeline is only replaced with --overwrite (createdAt survives). Exit codes: 2 for a chain type mismatch, 3 for a step
+  that is not installed.
+
+ALIASES
+  $ synth pl mk
+
+EXAMPLES
+  $ synth pl mk gen-sql eer-to-relational rel-to-sql-ddl
+
+  $ synth pl mk gen-sql eer-to-relational rel-to-sql-ddl --description "EER to SQL DDL" --overwrite
+```
+
+## `synth pl rm NAME`
+
+Delete a saved pipeline.
+
+```
+USAGE
+  $ synth pl rm NAME [--workspace <value>] [--ns <value>] [--json] [-q] [-v]
+
+ARGUMENTS
+  NAME  Name of the saved pipeline to delete.
+
+GLOBAL FLAGS
+  -q, --quiet              Suppress informational output.
+  -v, --verbose            Print debug-level logs.
+      --json               Emit machine-readable JSON.
+      --ns=<value>         Namespace context override (otherwise resolved from config).
+      --workspace=<value>  Override active workspace for this invocation.
+
+DESCRIPTION
+  Delete a saved pipeline.
+
+  A pipeline is a saved process, not a model: nothing references it, so deletion needs no dependency check and no
+  --cascade. The transformations it named stay installed.
+
+ALIASES
+  $ synth pl rm
+
+EXAMPLES
+  $ synth pl rm gen-sql
+```
+
+## `synth pl run NAME`
+
+Run a saved pipeline on a workspace model.
+
+```
+USAGE
+  $ synth pl run NAME [--workspace <value>] [--ns <value>] [--json] [-q] [-v] [--in <value>] [--out <value>]
+    [--out-dir <value>] [--default-configs] [--save-config <value> | --config <value>] [--keep-intermediates]
+    [--overwrite]
+
+ARGUMENTS
+  NAME  Name of the saved pipeline to run.
+
+FLAGS
+  --config=<value>       Configuration model ref for step 1 (decision-based only; later steps take --default-configs).
+  --default-configs      Explicitly accept generated default configurations for every decision-based step not covered by
+                         --config.
+  --in=<value>           Source model ref the first step transforms (always required — a pipeline stores no data
+                         bindings).
+  --keep-intermediates   Also write every intermediate step result as a workspace model
+                         ('<namespace>/<name>-<step-tx>').
+  --out=<value>          Destination ref for the final result model (last step m2m only; default:
+                         '<namespace>/<name>-<last-tx>' derived from --in).
+  --out-dir=<value>      Output directory for generated files (last step m2t only).
+  --overwrite            Replace existing targets (final and intermediate models, --save-config target).
+  --save-config=<value>  Persist the generated default configuration as a workspace model at this ref (single-step
+                         pipeline with --default-configs only).
+
+GLOBAL FLAGS
+  -q, --quiet              Suppress informational output.
+  -v, --verbose            Print debug-level logs.
+      --json               Emit machine-readable JSON.
+      --ns=<value>         Namespace context override (otherwise resolved from config).
+      --workspace=<value>  Override active workspace for this invocation.
+
+DESCRIPTION
+  Run a saved pipeline on a workspace model.
+
+  A pipeline stores only the process — its transformation steps. Every run names its own data explicitly, exactly like
+  'transformation run' with the same steps: --in is always required, output goes to --out (last step m2m; default
+  '<namespace>/<name>-<last-tx>' derived from --in) or --out-dir (last step m2t), and configuration consent follows the
+  normal policy (--config binds to step 1 only; every other decision-based step requires --default-configs, otherwise
+  the run aborts before any engine work). The full pre-flight applies — a pipeline is convenience, never a bypass. Exit
+  codes: 2 for a missing configuration consent, a chain or source metamodel mismatch, an invalid configuration or
+  pipeline file, or a result that fails the import gate, 3 for an unknown pipeline, transformation, or model.
+
+ALIASES
+  $ synth pl run
+
+EXAMPLES
+  $ synth pl run gen-sql --in com.example/persons --default-configs --out-dir ./generated
+
+  $ synth pl run to-relational --in com.example/persons --config com.example/persons-cfg
+```
+
+## `synth pl show NAME`
+
+Show every field of a saved pipeline.
+
+```
+USAGE
+  $ synth pl show NAME [--workspace <value>] [--ns <value>] [--json] [-q] [-v]
+
+ARGUMENTS
+  NAME  Name of the saved pipeline to show.
+
+GLOBAL FLAGS
+  -q, --quiet              Suppress informational output.
+  -v, --verbose            Print debug-level logs.
+      --json               Emit machine-readable JSON.
+      --ns=<value>         Namespace context override (otherwise resolved from config).
+      --workspace=<value>  Override active workspace for this invocation.
+
+DESCRIPTION
+  Show every field of a saved pipeline.
+
+ALIASES
+  $ synth pl show
+
+EXAMPLES
+  $ synth pl show gen-sql
+
+  $ synth pl show gen-sql --json
 ```
 
 ## `synth plugins`
@@ -1108,24 +1554,197 @@ DESCRIPTION
 
 _See code: [@oclif/plugin-plugins](https://github.com/oclif/plugin-plugins/blob/5.4.67/src/commands/plugins/update.ts)_
 
-## `synth run TX`
+## `synth transformation build`
 
-Run one transformation, a chain of transformations, or a saved pipeline on a workspace model.
+Build the transformation in the current directory.
 
 ```
 USAGE
-  $ synth run TX... [--workspace <value>] [--ns <value>] [--json] [-q] [-v] [--in <value>] [--out
-    <value>] [--out-dir <value>] [--default-configs] [--save-config <value> | --config <value>] [--save-as <value>]
+  $ synth transformation build [--workspace <value>] [--ns <value>] [--json] [-q] [-v]
+
+GLOBAL FLAGS
+  -q, --quiet              Suppress informational output.
+  -v, --verbose            Print debug-level logs.
+      --json               Emit machine-readable JSON.
+      --ns=<value>         Namespace context override (otherwise resolved from config).
+      --workspace=<value>  Override active workspace for this invocation.
+
+DESCRIPTION
+  Build the transformation in the current directory.
+
+ALIASES
+  $ synth tx build
+
+EXAMPLES
+  $ synth transformation build
+```
+
+## `synth transformation init NAME`
+
+Scaffold a new transformation project.
+
+```
+USAGE
+  $ synth transformation init NAME [--workspace <value>] [--ns <value>] [--json] [-q] [-v]
+
+ARGUMENTS
+  NAME  Name for the new transformation project.
+
+GLOBAL FLAGS
+  -q, --quiet              Suppress informational output.
+  -v, --verbose            Print debug-level logs.
+      --json               Emit machine-readable JSON.
+      --ns=<value>         Namespace context override (otherwise resolved from config).
+      --workspace=<value>  Override active workspace for this invocation.
+
+DESCRIPTION
+  Scaffold a new transformation project.
+
+ALIASES
+  $ synth tx init
+
+EXAMPLES
+  $ synth transformation init eer-to-relational
+```
+
+## `synth transformation install PACKAGE`
+
+Install a transformation from npm, git, or local path.
+
+```
+USAGE
+  $ synth transformation install PACKAGE [--workspace <value>] [--ns <value>] [--json] [-q] [-v]
+
+ARGUMENTS
+  PACKAGE  Package spec: npm name, git URL, local directory, or tarball.
+
+GLOBAL FLAGS
+  -q, --quiet              Suppress informational output.
+  -v, --verbose            Print debug-level logs.
+      --json               Emit machine-readable JSON.
+      --ns=<value>         Namespace context override (otherwise resolved from config).
+      --workspace=<value>  Override active workspace for this invocation.
+
+DESCRIPTION
+  Install a transformation from npm, git, or local path.
+
+ALIASES
+  $ synth tx install
+
+EXAMPLES
+  $ synth transformation install @aelastics/eer-to-relational
+
+  $ synth transformation install git+https://github.com/user/tx.git
+
+  $ synth transformation install ./my-transformation
+
+  $ synth transformation install ./eer-to-relational-1.0.0.tgz
+```
+
+## `synth transformation ls`
+
+List installed transformations with versions.
+
+```
+USAGE
+  $ synth transformation ls [--workspace <value>] [--ns <value>] [--json] [-q] [-v]
+
+GLOBAL FLAGS
+  -q, --quiet              Suppress informational output.
+  -v, --verbose            Print debug-level logs.
+      --json               Emit machine-readable JSON.
+      --ns=<value>         Namespace context override (otherwise resolved from config).
+      --workspace=<value>  Override active workspace for this invocation.
+
+DESCRIPTION
+  List installed transformations with versions.
+
+ALIASES
+  $ synth tx ls
+
+EXAMPLES
+  $ synth transformation ls
+```
+
+## `synth transformation pack`
+
+Produce a distributable tarball.
+
+```
+USAGE
+  $ synth transformation pack [--workspace <value>] [--ns <value>] [--json] [-q] [-v]
+
+GLOBAL FLAGS
+  -q, --quiet              Suppress informational output.
+  -v, --verbose            Print debug-level logs.
+      --json               Emit machine-readable JSON.
+      --ns=<value>         Namespace context override (otherwise resolved from config).
+      --workspace=<value>  Override active workspace for this invocation.
+
+DESCRIPTION
+  Produce a distributable tarball.
+
+ALIASES
+  $ synth tx pack
+
+EXAMPLES
+  $ synth transformation pack
+```
+
+## `synth transformation publish`
+
+Publish the transformation to npm.
+
+```
+USAGE
+  $ synth transformation publish [--workspace <value>] [--ns <value>] [--json] [-q] [-v] [--access public|restricted] [--tag
+    <value>] [--dry-run]
+
+FLAGS
+  --access=<option>  Package access level (public or restricted).
+                     <options: public|restricted>
+  --dry-run          Perform a dry run without actually publishing.
+  --tag=<value>      [default: latest] Tag to publish with (e.g., beta, next).
+
+GLOBAL FLAGS
+  -q, --quiet              Suppress informational output.
+  -v, --verbose            Print debug-level logs.
+      --json               Emit machine-readable JSON.
+      --ns=<value>         Namespace context override (otherwise resolved from config).
+      --workspace=<value>  Override active workspace for this invocation.
+
+DESCRIPTION
+  Publish the transformation to npm.
+
+ALIASES
+  $ synth tx publish
+
+EXAMPLES
+  $ synth transformation publish
+
+  $ synth transformation publish --access public
+
+  $ synth transformation publish --tag beta
+```
+
+## `synth transformation run TX`
+
+Run one transformation, or a chain of transformations, on a workspace model.
+
+```
+USAGE
+  $ synth transformation run TX... --in <value> [--workspace <value>] [--ns <value>] [--json] [-q] [-v] [--out <value>]
+    [--out-dir <value>] [--default-configs] [--save-config <value> | --config <value>] [--save-as <value>]
     [--keep-intermediates] [--overwrite]
 
 ARGUMENTS
-  TX...  Installed transformation(s) to run in order, or the name of one saved pipeline.
+  TX...  Installed transformation(s) to run in order.
 
 FLAGS
   --config=<value>       Configuration model ref for step 1 (decision-based only; later steps take --default-configs).
   --default-configs      Explicitly accept generated default configurations for every decision-based step not covered by
                          --config.
-  --in=<value>           Source model ref the first step transforms (required unless a saved pipeline provides it).
+  --in=<value>           (required) Source model ref the first step transforms.
   --keep-intermediates   Also write every intermediate step result as a workspace model
                          ('<namespace>/<name>-<step-tx>').
   --out=<value>          Destination ref for the final result model (last step m2m only; default:
@@ -1133,8 +1752,8 @@ FLAGS
   --out-dir=<value>      Output directory for generated files (last step m2t only).
   --overwrite            Replace existing targets (final and intermediate models, --save-config target, --save-as
                          pipeline).
-  --save-as=<value>      After a successful run, save this invocation (steps + bindings) as a pipeline at
-                         pipelines/<name>.json; replay it with 'run <name>'.
+  --save-as=<value>      After a successful run, save the steps as a pipeline at pipelines/<name>.json; run it with
+                         'pipeline run <name> --in <ref>'.
   --save-config=<value>  Persist the generated default configuration as a workspace model at this ref (single step with
                          --default-configs only).
 
@@ -1146,30 +1765,118 @@ GLOBAL FLAGS
       --workspace=<value>  Override active workspace for this invocation.
 
 DESCRIPTION
-  Run one transformation, a chain of transformations, or a saved pipeline on a workspace model.
+  Run one transformation, or a chain of transformations, on a workspace model.
 
-  With one transformation this behaves exactly like 'tx run'. With several, the steps form a chain: step N's output
-  model feeds step N+1 in memory (one shared model store), the chain is type-checked from the manifests before execution
-  (step N's target metamodel must equal step N+1's source metamodel), and only the last step may be m2t (text is
-  terminal; it requires --out-dir). An m2m chain writes only the final result (--out, default
-  '<namespace>/<name>-<last-tx>' derived from --in); pass --keep-intermediates to also persist every intermediate result
-  as a workspace model at '<namespace>/<name>-<step-tx>'. Configuration consent is explicit everywhere: --config binds
-  to step 1 only, and every other decision-based step (and step 1 without --config) requires --default-configs — without
-  it the run aborts before any engine work. --save-config is single-step only; for chains, run stepwise with 'tx run'
-  and 'config init'. After a successful run, --save-as <name> persists the invocation (steps + bindings) as a pipeline
-  at pipelines/<name>.json in the workspace. A single positional name that matches a saved pipeline replays it: the
-  execution request is rebuilt from the saved fields, invocation flags override saved values, and the full normal
-  pre-flight applies — a pipeline is convenience, never a bypass. Pipelines resolve before transformations ('tx run'
-  never resolves pipelines); a name matching both runs the pipeline with a warning. Exit codes: 2 for a missing
-  configuration consent, a chain or source metamodel mismatch, an invalid configuration or pipeline file, or a result
-  that fails the import gate, 3 for an unknown transformation, pipeline, or model.
+  With one transformation: an m2m result is written back into the workspace as a model file (--out; default
+  '<namespace>/<name>-<tx>' derived from --in), an m2t result generates files under --out-dir; an existing target is
+  only replaced with --overwrite. With several transformations the steps form a chain: step N's output model feeds step
+  N+1 in memory (one shared model store), the chain is type-checked from the manifests before execution (step N's target
+  metamodel must equal step N+1's source metamodel), and only the last step may be m2t (text is terminal; it requires
+  --out-dir). Pass --keep-intermediates to also persist every intermediate result as a workspace model at
+  '<namespace>/<name>-<step-tx>'. Configuration consent is explicit everywhere: --config binds to step 1 only, and every
+  other decision-based step (and step 1 without --config) requires --default-configs — without it the run aborts before
+  any engine work. --save-config persists the generated default configuration (single step, only together with
+  --default-configs); for chains, run stepwise with 'transformation run' and 'config init'. After a successful run,
+  --save-as <name> saves the steps as a pipeline at pipelines/<name>.json — the process only, no data bindings —
+  replayable with 'synth pipeline run <name> --in <ref>'. Exit codes: 2 for a missing configuration consent, a chain or
+  source metamodel mismatch, an invalid configuration, or a result that fails the import gate, 3 for an unknown
+  transformation or model.
+
+ALIASES
+  $ synth tx run
 
 EXAMPLES
-  $ synth run eer-to-relational --in com.example/persons --config com.example/persons-cfg
+  $ synth transformation run eer-to-relational --in com.example/persons --config com.example/persons-cfg
 
-  $ synth run eer-to-relational rel-to-sql-ddl --in com.example/persons --default-configs --out-dir ./generated --save-as gen-sql
+  $ synth transformation run eer-to-relational --in com.example/persons --default-configs --out com.example/persons-rel
 
-  $ synth run gen-sql --in com.example/persons2
+  $ synth transformation run eer-to-relational rel-to-sql-ddl --in com.example/persons --default-configs --out-dir ./generated --save-as gen-sql
+```
+
+## `synth transformation show NAME`
+
+Print the transformation's kind, source/target metamodels, and variability points.
+
+```
+USAGE
+  $ synth transformation show NAME [--workspace <value>] [--ns <value>] [--json] [-q] [-v]
+
+ARGUMENTS
+  NAME  Name of the transformation to show.
+
+GLOBAL FLAGS
+  -q, --quiet              Suppress informational output.
+  -v, --verbose            Print debug-level logs.
+      --json               Emit machine-readable JSON.
+      --ns=<value>         Namespace context override (otherwise resolved from config).
+      --workspace=<value>  Override active workspace for this invocation.
+
+DESCRIPTION
+  Print the transformation's kind, source/target metamodels, and variability points.
+
+ALIASES
+  $ synth tx show
+
+EXAMPLES
+  $ synth transformation show eer-to-relational
+```
+
+## `synth transformation test`
+
+Run test fixtures against the built transformation.
+
+```
+USAGE
+  $ synth transformation test [--workspace <value>] [--ns <value>] [--json] [-q] [-v]
+
+GLOBAL FLAGS
+  -q, --quiet              Suppress informational output.
+  -v, --verbose            Print debug-level logs.
+      --json               Emit machine-readable JSON.
+      --ns=<value>         Namespace context override (otherwise resolved from config).
+      --workspace=<value>  Override active workspace for this invocation.
+
+DESCRIPTION
+  Run test fixtures against the built transformation.
+
+ALIASES
+  $ synth tx test
+
+EXAMPLES
+  $ synth transformation test
+```
+
+## `synth transformation uninstall NAME`
+
+Remove an installed transformation.
+
+```
+USAGE
+  $ synth transformation uninstall NAME [--workspace <value>] [--ns <value>] [--json] [-q] [-v]
+
+ARGUMENTS
+  NAME  Name of the transformation to uninstall.
+
+GLOBAL FLAGS
+  -q, --quiet              Suppress informational output.
+  -v, --verbose            Print debug-level logs.
+      --json               Emit machine-readable JSON.
+      --ns=<value>         Namespace context override (otherwise resolved from config).
+      --workspace=<value>  Override active workspace for this invocation.
+
+DESCRIPTION
+  Remove an installed transformation.
+
+  Refused while any saved pipeline lists the transformation as a step (running the pipeline would break); update those
+  pipelines or delete them with 'synth pipeline rm' first — there is no cascade. An invalid pipeline file still protects
+  its steps: its step list is read best-effort, because repairing the file with 'synth pipeline edit' must stay
+  possible.
+
+ALIASES
+  $ synth tx uninstall
+
+EXAMPLES
+  $ synth transformation uninstall eer-to-relational
 ```
 
 ## `synth tx build`
@@ -1189,6 +1896,9 @@ GLOBAL FLAGS
 
 DESCRIPTION
   Build the transformation in the current directory.
+
+ALIASES
+  $ synth tx build
 
 EXAMPLES
   $ synth tx build
@@ -1215,6 +1925,9 @@ GLOBAL FLAGS
 DESCRIPTION
   Scaffold a new transformation project.
 
+ALIASES
+  $ synth tx init
+
 EXAMPLES
   $ synth tx init eer-to-relational
 ```
@@ -1239,6 +1952,9 @@ GLOBAL FLAGS
 
 DESCRIPTION
   Install a transformation from npm, git, or local path.
+
+ALIASES
+  $ synth tx install
 
 EXAMPLES
   $ synth tx install @aelastics/eer-to-relational
@@ -1268,6 +1984,9 @@ GLOBAL FLAGS
 DESCRIPTION
   List installed transformations with versions.
 
+ALIASES
+  $ synth tx ls
+
 EXAMPLES
   $ synth tx ls
 ```
@@ -1289,6 +2008,9 @@ GLOBAL FLAGS
 
 DESCRIPTION
   Produce a distributable tarball.
+
+ALIASES
+  $ synth tx pack
 
 EXAMPLES
   $ synth tx pack
@@ -1319,6 +2041,9 @@ GLOBAL FLAGS
 DESCRIPTION
   Publish the transformation to npm.
 
+ALIASES
+  $ synth tx publish
+
 EXAMPLES
   $ synth tx publish
 
@@ -1329,26 +2054,33 @@ EXAMPLES
 
 ## `synth tx run TX`
 
-Run an installed transformation on a workspace model.
+Run one transformation, or a chain of transformations, on a workspace model.
 
 ```
 USAGE
-  $ synth tx run TX --in <value> [--workspace <value>] [--ns <value>] [--json] [-q] [-v] [--out <value>]
-    [--out-dir <value>] [--default-configs] [--save-config <value> | --config <value>] [--overwrite]
+  $ synth tx run TX... --in <value> [--workspace <value>] [--ns <value>] [--json] [-q] [-v] [--out <value>]
+    [--out-dir <value>] [--default-configs] [--save-config <value> | --config <value>] [--save-as <value>]
+    [--keep-intermediates] [--overwrite]
 
 ARGUMENTS
-  TX  Name of the installed transformation to run.
+  TX...  Installed transformation(s) to run in order.
 
 FLAGS
-  --config=<value>       Configuration model ref to run with (decision-based transformations only).
-  --default-configs      Explicitly accept the generated default configuration for a decision-based transformation.
-  --in=<value>           (required) Source model ref to transform.
-  --out=<value>          Destination ref for the result model (m2m only; default: '<namespace>/<name>-<tx>' derived from
-                         --in).
-  --out-dir=<value>      Output directory for generated files (m2t only).
-  --overwrite            Replace the target model (and --save-config target) if it already exists.
-  --save-config=<value>  Persist the generated default configuration as a workspace model at this ref (only together
-                         with --default-configs).
+  --config=<value>       Configuration model ref for step 1 (decision-based only; later steps take --default-configs).
+  --default-configs      Explicitly accept generated default configurations for every decision-based step not covered by
+                         --config.
+  --in=<value>           (required) Source model ref the first step transforms.
+  --keep-intermediates   Also write every intermediate step result as a workspace model
+                         ('<namespace>/<name>-<step-tx>').
+  --out=<value>          Destination ref for the final result model (last step m2m only; default:
+                         '<namespace>/<name>-<last-tx>' derived from --in).
+  --out-dir=<value>      Output directory for generated files (last step m2t only).
+  --overwrite            Replace existing targets (final and intermediate models, --save-config target, --save-as
+                         pipeline).
+  --save-as=<value>      After a successful run, save the steps as a pipeline at pipelines/<name>.json; run it with
+                         'pipeline run <name> --in <ref>'.
+  --save-config=<value>  Persist the generated default configuration as a workspace model at this ref (single step with
+                         --default-configs only).
 
 GLOBAL FLAGS
   -q, --quiet              Suppress informational output.
@@ -1358,24 +2090,32 @@ GLOBAL FLAGS
       --workspace=<value>  Override active workspace for this invocation.
 
 DESCRIPTION
-  Run an installed transformation on a workspace model.
+  Run one transformation, or a chain of transformations, on a workspace model.
 
-  An M2M result is written back into the workspace as a model file; an M2T result generates files under --out-dir.
-  Without --out, an M2M result goes to '<namespace>/<name>-<tx>' derived from --in (tx name sanitized to ref-safe
-  characters); an existing target is only replaced with --overwrite (exit 1 otherwise). A decision-based transformation
-  never applies decisions without explicit consent: run it either on the configuration model named with --config (create
-  one with 'synth config init'), or on its generated default configuration by passing --default-configs — with neither,
-  the run aborts before any engine work. Every effective decision is announced. --save-config persists the generated
-  default configuration as a workspace model and is only valid together with --default-configs. Exit codes: 2 for a
-  missing configuration consent, a source-metamodel mismatch, an invalid configuration, or a result that fails the
-  import gate, 3 for an unknown transformation or missing model.
+  With one transformation: an m2m result is written back into the workspace as a model file (--out; default
+  '<namespace>/<name>-<tx>' derived from --in), an m2t result generates files under --out-dir; an existing target is
+  only replaced with --overwrite. With several transformations the steps form a chain: step N's output model feeds step
+  N+1 in memory (one shared model store), the chain is type-checked from the manifests before execution (step N's target
+  metamodel must equal step N+1's source metamodel), and only the last step may be m2t (text is terminal; it requires
+  --out-dir). Pass --keep-intermediates to also persist every intermediate result as a workspace model at
+  '<namespace>/<name>-<step-tx>'. Configuration consent is explicit everywhere: --config binds to step 1 only, and every
+  other decision-based step (and step 1 without --config) requires --default-configs — without it the run aborts before
+  any engine work. --save-config persists the generated default configuration (single step, only together with
+  --default-configs); for chains, run stepwise with 'transformation run' and 'config init'. After a successful run,
+  --save-as <name> saves the steps as a pipeline at pipelines/<name>.json — the process only, no data bindings —
+  replayable with 'synth pipeline run <name> --in <ref>'. Exit codes: 2 for a missing configuration consent, a chain or
+  source metamodel mismatch, an invalid configuration, or a result that fails the import gate, 3 for an unknown
+  transformation or model.
+
+ALIASES
+  $ synth tx run
 
 EXAMPLES
   $ synth tx run eer-to-relational --in com.example/persons --config com.example/persons-cfg
 
   $ synth tx run eer-to-relational --in com.example/persons --default-configs --out com.example/persons-rel
 
-  $ synth tx run rel-to-sql-ddl --in com.example/persons-rel --default-configs --out-dir ./generated
+  $ synth tx run eer-to-relational rel-to-sql-ddl --in com.example/persons --default-configs --out-dir ./generated --save-as gen-sql
 ```
 
 ## `synth tx show NAME`
@@ -1399,6 +2139,9 @@ GLOBAL FLAGS
 DESCRIPTION
   Print the transformation's kind, source/target metamodels, and variability points.
 
+ALIASES
+  $ synth tx show
+
 EXAMPLES
   $ synth tx show eer-to-relational
 ```
@@ -1420,6 +2163,9 @@ GLOBAL FLAGS
 
 DESCRIPTION
   Run test fixtures against the built transformation.
+
+ALIASES
+  $ synth tx test
 
 EXAMPLES
   $ synth tx test
@@ -1446,8 +2192,13 @@ GLOBAL FLAGS
 DESCRIPTION
   Remove an installed transformation.
 
-  Refused while any saved pipeline lists the transformation as a step (a replay would break); update those pipelines or
-  delete them with 'synth pipeline rm' first — there is no cascade.
+  Refused while any saved pipeline lists the transformation as a step (running the pipeline would break); update those
+  pipelines or delete them with 'synth pipeline rm' first — there is no cascade. An invalid pipeline file still protects
+  its steps: its step list is read best-effort, because repairing the file with 'synth pipeline edit' must stay
+  possible.
+
+ALIASES
+  $ synth tx uninstall
 
 EXAMPLES
   $ synth tx uninstall eer-to-relational

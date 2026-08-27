@@ -234,23 +234,14 @@ describe('workspace', () => {
   })
 })
 
-describe('run', () => {
-  it('requires tx arg and --in flag', async () => {
-    const { error } = await runCli(['run'], { home: testHome })
-    expect(error).toBeDefined()
-  })
-
-  it('errors when transformation not found', async () => {
+describe('run (removed)', () => {
+  // The polymorphic top-level `run` is gone: transformations run with
+  // 'transformation run', pipelines with 'pipeline run' — the argument's
+  // resource type is always explicit, never guessed.
+  it('is no longer a synth command', async () => {
     const { error, stderr } = await runCli(['run', 'my-tx', '--in', 'ns/model'], { home: testHome })
     expect(error).toBeDefined()
-    // Should report transformation not found (verifies real file check)
-    expect(stderr).toContain('Transformation not found')
-  })
-
-  it('validates transformation exists before running', async () => {
-    const { error, stderr } = await runCli(['run', 'nonexistent-tx', '--in', 'ns/model'], { home: testHome })
-    expect(error).toBeDefined()
-    expect(stderr).toContain('Transformation not found: nonexistent-tx')
+    expect(stderr).toContain('is not a synth command')
   })
 })
 

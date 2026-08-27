@@ -1,16 +1,19 @@
-import { spawn } from 'node:child_process'
-
 import { Args } from '@oclif/core'
 
 import { BaseCommand } from '../../base/base-command.js'
 import { getPipelinesPath } from '../../config/index.js'
 import { pipelineFileExists, pipelinePath, readPipelineFile } from '../../pipelines/store.js'
+import { openInEditor } from '../../support/editor.js'
+import { errorMessage } from '../../support/errors.js'
 import { EXIT_CODES } from '../../support/exit-codes.js'
+import { chainStructureProblems, resolveChainSteps } from '../../tx/chain.js'
 
 export default class PipelineEdit extends BaseCommand {
+  static override aliases = ['pl:edit']
+
   static override description = `Open a saved pipeline in $EDITOR.
 
-After the editor closes, the file is re-parsed and validated against the pipeline schema; every problem is reported as a warning ('run <name>' would refuse to replay until they are fixed).`
+After the editor closes, the file is validated like 'pipeline mk' validates a new pipeline — schema (process-only fields), every step installed, chain type compatibility — and every problem is reported as a warning ('pipeline run <name>' would refuse until they are fixed).`
 
   static override examples = ['<%= config.bin %> <%= command.id %> gen-sql']
 
@@ -22,7 +25,8 @@ After the editor closes, the file is re-parsed and validated against the pipelin
   }
 
   public async execute(): Promise<void> {
-    const { args } = await this.parse(PipelineEdit)
+    const { args, flags } = await this.parse(PipelineEdit)
+    this.requireInitializedWorkspace(Boolean(flags.json))
 
     const pipelinesDir = getPipelinesPath(this.workspaceConfig)
     if (!pipelineFileExists(pipelinesDir, args.name)) {
@@ -30,35 +34,26 @@ After the editor closes, the file is re-parsed and validated against the pipelin
         exit: EXIT_CODES.NOT_FOUND
       })
     }
-    const path = pipelinePath(pipelinesDir, args.name)
+    await openInEditor(pipelinePath(pipelinesDir, args.name))
 
-    const editor = process.env.EDITOR || 'vi'
-    await new Promise<void>((resolve, reject) => {
-      const child = spawn(editor, [path], {
-        stdio: 'inherit'
-      })
-
-      child.on('close', (code) => {
-        if (code === 0) {
-          resolve()
-        } else {
-          reject(new Error(`Editor exited with code ${code}`))
-        }
-      })
-
-      child.on('error', (err) => {
-        reject(new Error(`Failed to spawn editor: ${err.message}`))
-      })
-    })
-
-    // Re-parse + validate what the editor left behind; problems are
-    // warnings (the file stays as edited), replay is what enforces them.
-    const { errors } = await readPipelineFile(pipelinesDir, args.name)
-    for (const problem of errors) {
+    // Re-validate what the editor left behind — the same static checks as
+    // `pipeline mk`. Problems are warnings (the file stays as edited);
+    // `pipeline run` is what enforces them.
+    const problems: string[] = []
+    const { pipeline, errors } = await readPipelineFile(pipelinesDir, args.name)
+    problems.push(...errors)
+    if (pipeline !== null) {
+      try {
+        problems.push(...chainStructureProblems(await resolveChainSteps(this.workspaceConfig, pipeline.steps)).map((problem) => problem.message))
+      } catch (err) {
+        problems.push(errorMessage(err))
+      }
+    }
+    for (const problem of problems) {
       this.warn(`Pipeline '${args.name}': ${problem}`)
     }
-    if (errors.length > 0) {
-      this.warn(`'synth run ${args.name}' will refuse to replay until the problems above are fixed.`)
+    if (problems.length > 0) {
+      this.warn(`'synth pipeline run ${args.name}' will refuse to run until the problems above are fixed.`)
     }
   }
 }

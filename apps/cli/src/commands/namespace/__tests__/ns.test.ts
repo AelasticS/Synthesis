@@ -27,6 +27,13 @@ describe('ns ls', () => {
     expect(stdout).toBeTruthy()
   })
 
+  it('is the alias of the canonical namespace ls (identical output)', async () => {
+    const alias = await runCli(['ns', 'ls'], { home: testHome })
+    const canonical = await runCli(['namespace', 'ls'], { home: testHome })
+    expect(canonical.error).toBeUndefined()
+    expect(canonical.stdout).toBe(alias.stdout)
+  })
+
   it('outputs JSON with --json flag', async () => {
     const { stdout, error } = await runCli(['ns', 'ls', '--json'], { home: testHome })
     expect(error).toBeUndefined()

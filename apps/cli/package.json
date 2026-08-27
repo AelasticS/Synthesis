@@ -38,20 +38,32 @@
       "@oclif/plugin-autocomplete"
     ],
     "topics": {
-      "ns": {
+      "namespace": {
         "description": "Manage namespaces (folders under models/)."
+      },
+      "ns": {
+        "description": "Alias of 'namespace'.",
+        "hidden": true
       },
       "model": {
         "description": "Manage model instances in the workspace."
       },
+      "transformation": {
+        "description": "Install, inspect, author, and run transformations."
+      },
       "tx": {
-        "description": "Install, inspect, and author transformations."
+        "description": "Alias of 'transformation'.",
+        "hidden": true
       },
       "config": {
         "description": "Manage variability configurations."
       },
       "pipeline": {
-        "description": "Manage saved pipelines (replayable run invocations)."
+        "description": "Manage and run saved pipelines (named transformation chains)."
+      },
+      "pl": {
+        "description": "Alias of 'pipeline'.",
+        "hidden": true
       },
       "workspace": {
         "description": "Inspect or switch the active workspace."

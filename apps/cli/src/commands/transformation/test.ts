@@ -5,7 +5,9 @@ import { join } from 'node:path'
 
 import { BaseCommand } from '../../base/base-command.js'
 
-export default class TxTest extends BaseCommand {
+export default class TransformationTest extends BaseCommand {
+  static override aliases = ['tx:test']
+
   static override description = 'Run test fixtures against the built transformation.'
 
   static override examples = ['<%= config.bin %> <%= command.id %>']

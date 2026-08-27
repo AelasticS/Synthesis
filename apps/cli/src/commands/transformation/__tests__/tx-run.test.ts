@@ -82,7 +82,7 @@ describe('tx run errors', () => {
       const { code, stderr } = await run(['tx', 'run', 'ghost-tx', '--in', 'com.example/persons'])
       expect(code).toBe(3)
       expect(flatten(stderr)).toContain('installed package is missing')
-      expect(flatten(stderr)).toContain('tx install')
+      expect(flatten(stderr)).toContain('transformation install')
     } finally {
       await run(['tx', 'uninstall', 'ghost-tx'])
     }

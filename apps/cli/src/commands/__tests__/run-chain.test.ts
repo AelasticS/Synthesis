@@ -5,9 +5,10 @@ import { fileURLToPath } from 'node:url'
 
 import { runCli } from '../../test-utils/run-cli.js'
 
-// `run` is the workspace-level execution verb: one name behaves exactly
-// like `tx run` (same execution core), several names form a chain with
-// in-memory hand-off between the steps.
+// `transformation run` is the execution verb: one name runs a single
+// transformation, several names form an ad-hoc chain with in-memory
+// hand-off between the steps. `tx run` is the typing alias — most tests
+// here use it (proving the alias), one uses the canonical form.
 const packageRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../../..')
 const fixturesDir = join(packageRoot, 'src/tx/__tests__/fixtures')
 const personsFixture = join(packageRoot, 'src/models/__tests__/fixtures/persons.tsx')
@@ -40,13 +41,13 @@ afterAll(() => {
   rmSync(tempDir, { recursive: true, force: true })
 })
 
-describe('run pre-flight', () => {
+describe('chain pre-flight', () => {
   it('aborts a chain whose FIRST step is uncovered, teaching --config AND --default-configs', async () => {
     // Step 1's input model exists in the workspace, so an explicit
     // configuration IS possible — the message must teach it, not claim the
     // model is produced mid-run.
     const { code, stderr } = await run([
-      'run', 'eer-to-relational', 'rel-to-sql-ddl', '--in', 'com.example/persons', '--out-dir', join(tempDir, 'never')
+      'tx', 'run', 'eer-to-relational', 'rel-to-sql-ddl', '--in', 'com.example/persons', '--out-dir', join(tempDir, 'never')
     ])
     expect(code).toBe(2)
     const message = flatten(stderr)
@@ -64,7 +65,7 @@ describe('run pre-flight', () => {
     ])
     expect(init.error).toBeUndefined()
     const { code, stderr } = await run([
-      'run', 'eer-to-relational', 'rel-to-sql-ddl', '--in', 'com.example/persons',
+      'tx', 'run', 'eer-to-relational', 'rel-to-sql-ddl', '--in', 'com.example/persons',
       '--config', 'com.example/preflight-cfg', '--out-dir', join(tempDir, 'never')
     ])
     expect(code).toBe(2)
@@ -77,7 +78,7 @@ describe('run pre-flight', () => {
 
   it('rejects --config combined with --default-configs on a single step (core exclusivity)', async () => {
     const { code, stderr } = await run([
-      'run', 'eer-to-relational', '--in', 'com.example/persons',
+      'tx', 'run', 'eer-to-relational', '--in', 'com.example/persons',
       '--config', 'com.example/whatever-cfg', '--default-configs', '--out', 'com.example/never'
     ])
     expect(code).toBe(1)
@@ -86,7 +87,7 @@ describe('run pre-flight', () => {
 
   it('rejects --keep-intermediates on a single-step run (exit 1)', async () => {
     const { code, stderr } = await run([
-      'run', 'eer-to-relational', '--in', 'com.example/persons',
+      'tx', 'run', 'eer-to-relational', '--in', 'com.example/persons',
       '--default-configs', '--keep-intermediates', '--out', 'com.example/never'
     ])
     expect(code).toBe(1)
@@ -97,7 +98,7 @@ describe('run pre-flight', () => {
 
   it('rejects an m2t step in the middle of a chain', async () => {
     const { code, stderr } = await run([
-      'run', 'rel-to-sql-ddl', 'rel-to-sql-ddl', '--in', 'com.example/persons',
+      'tx', 'run', 'rel-to-sql-ddl', 'rel-to-sql-ddl', '--in', 'com.example/persons',
       '--default-configs', '--out-dir', join(tempDir, 'never')
     ])
     expect(code).toBe(1)
@@ -108,7 +109,7 @@ describe('run pre-flight', () => {
 
   it('rejects a chain whose metamodels do not line up, naming the pair (exit 2)', async () => {
     const { code, stderr } = await run([
-      'run', 'eer-to-relational', 'eer-to-relational', '--in', 'com.example/persons',
+      'tx', 'run', 'eer-to-relational', 'eer-to-relational', '--in', 'com.example/persons',
       '--default-configs', '--out', 'com.example/never'
     ])
     expect(code).toBe(2)
@@ -122,34 +123,36 @@ describe('run pre-flight', () => {
 
   it('requires --out-dir when the last step is m2t and rejects --out', async () => {
     const noDir = await run([
-      'run', 'eer-to-relational', 'rel-to-sql-ddl', '--in', 'com.example/persons', '--default-configs'
+      'tx', 'run', 'eer-to-relational', 'rel-to-sql-ddl', '--in', 'com.example/persons', '--default-configs'
     ])
     expect(noDir.code).toBe(1)
     expect(noDir.stderr).toContain('--out-dir')
 
     const withOut = await run([
-      'run', 'eer-to-relational', 'rel-to-sql-ddl', '--in', 'com.example/persons',
+      'tx', 'run', 'eer-to-relational', 'rel-to-sql-ddl', '--in', 'com.example/persons',
       '--default-configs', '--out', 'com.example/never'
     ])
     expect(withOut.code).toBe(1)
     expect(flatten(withOut.stderr)).toContain('--out is only valid when the last step is m2m')
   })
 
-  it('rejects --save-config on a multi-step chain', async () => {
+  it('rejects --save-config on a multi-step chain, teaching the stepwise path', async () => {
     const { code, stderr } = await run([
-      'run', 'eer-to-relational', 'rel-to-sql-ddl', '--in', 'com.example/persons',
+      'tx', 'run', 'eer-to-relational', 'rel-to-sql-ddl', '--in', 'com.example/persons',
       '--default-configs', '--save-config', 'com.example/never-cfg', '--out-dir', join(tempDir, 'never')
     ])
     expect(code).toBe(1)
-    expect(flatten(stderr)).toContain('--save-config is not supported for multi-step runs')
+    const message = flatten(stderr)
+    expect(message).toContain('--save-config is not supported for multi-step runs')
+    expect(message).toContain(`'transformation run'`)
   })
 })
 
-describe('run chain execution', () => {
-  it('chains eer-to-relational into rel-to-sql-ddl with --default-configs, producing SQL', async () => {
+describe('chain execution', () => {
+  it('chains eer-to-relational into rel-to-sql-ddl (canonical command form), producing SQL', async () => {
     const genDir = join(tempDir, 'gen')
     const { stdout, error } = await run([
-      'run', 'eer-to-relational', 'rel-to-sql-ddl', '--in', 'com.example/persons',
+      'transformation', 'run', 'eer-to-relational', 'rel-to-sql-ddl', '--in', 'com.example/persons',
       '--default-configs', '--out-dir', genDir
     ])
     expect(error).toBeUndefined()
@@ -167,7 +170,7 @@ describe('run chain execution', () => {
   it('emits the chain JSON shape: steps with per-step decisions, in, outDir, written', async () => {
     const genDir = join(tempDir, 'gen-json')
     const { stdout, error } = await run([
-      'run', 'eer-to-relational', 'rel-to-sql-ddl', '--in', 'com.example/persons',
+      'tx', 'run', 'eer-to-relational', 'rel-to-sql-ddl', '--in', 'com.example/persons',
       '--default-configs', '--out-dir', genDir, '--json'
     ])
     expect(error).toBeUndefined()
@@ -194,7 +197,7 @@ describe('run chain execution', () => {
 
     const genDir = join(tempDir, 'gen-camel')
     const { stdout, error } = await run([
-      'run', 'eer-to-relational', 'rel-to-sql-ddl', '--in', 'com.example/persons',
+      'tx', 'run', 'eer-to-relational', 'rel-to-sql-ddl', '--in', 'com.example/persons',
       '--config', 'com.example/camel-cfg', '--default-configs', '--out-dir', genDir
     ])
     expect(error).toBeUndefined()
@@ -209,7 +212,7 @@ describe('run chain execution', () => {
   it('persists the intermediate with --keep-intermediates: gated write, provenance, validates', async () => {
     const genDir = join(tempDir, 'gen-keep')
     const { stdout, error } = await run([
-      'run', 'eer-to-relational', 'rel-to-sql-ddl', '--in', 'com.example/persons',
+      'tx', 'run', 'eer-to-relational', 'rel-to-sql-ddl', '--in', 'com.example/persons',
       '--default-configs', '--keep-intermediates', '--out-dir', genDir, '--json'
     ])
     expect(error).toBeUndefined()
@@ -234,7 +237,7 @@ describe('run chain execution', () => {
     // Same run again without --overwrite: the existing intermediate is
     // refused before any engine work
     const again = await run([
-      'run', 'eer-to-relational', 'rel-to-sql-ddl', '--in', 'com.example/persons',
+      'tx', 'run', 'eer-to-relational', 'rel-to-sql-ddl', '--in', 'com.example/persons',
       '--default-configs', '--keep-intermediates', '--out-dir', join(tempDir, 'gen-keep2')
     ])
     expect(again.code).toBe(1)
@@ -242,24 +245,22 @@ describe('run chain execution', () => {
     expect(existsSync(join(tempDir, 'gen-keep2'))).toBe(false)
   })
 
-  it('writes the final model of an m2m-only chain to the default ref derived from --in and the last tx', async () => {
-    // Single m2m step through `run` (the smallest m2m 'chain'): the default
-    // out ref is '<ns>/<name>-<lastTx>'. persons2 keeps this independent of
-    // the intermediate the --keep-intermediates test materialized.
+  it('writes the final model of an m2m chain to the default ref derived from --in and the last tx', async () => {
+    // Single m2m step (the smallest 'chain'): the default out ref is
+    // '<ns>/<name>-<lastTx>'. persons2 keeps this independent of the
+    // intermediate the --keep-intermediates test materialized.
     const { stdout, error } = await run([
-      'run', 'eer-to-relational', '--in', 'com.example/persons2', '--default-configs', '--json'
+      'tx', 'run', 'eer-to-relational', '--in', 'com.example/persons2', '--default-configs', '--json'
     ])
     expect(error).toBeUndefined()
     const parsed = JSON.parse(stdout)
     expect(parsed.out).toBe('com.example/persons2-eer-to-relational')
     expect(parsed.tx).toBe('eer-to-relational')
   })
-})
 
-describe('run single step (tx run parity)', () => {
-  it('behaves exactly like tx run, including the JSON shape and --save-config', async () => {
+  it('single-step keeps the single JSON shape and --save-config', async () => {
     const { stdout, error } = await run([
-      'run', 'eer-to-relational', '--in', 'com.example/persons', '--default-configs',
+      'tx', 'run', 'eer-to-relational', '--in', 'com.example/persons', '--default-configs',
       '--save-config', 'com.example/run-saved-cfg', '--out', 'com.example/run-rel', '--json'
     ])
     expect(error).toBeUndefined()
@@ -274,30 +275,30 @@ describe('run single step (tx run parity)', () => {
     expect(existsSync(join(modelsDir, 'com', 'example', 'run-rel.tsx'))).toBe(true)
   })
 
-  it('aborts a decision-based single run without consent, like tx run', async () => {
+  it('aborts a decision-based single run without consent (exit 2)', async () => {
     const { code, stderr } = await run([
-      'run', 'eer-to-relational', '--in', 'com.example/persons', '--out', 'com.example/never'
+      'tx', 'run', 'eer-to-relational', '--in', 'com.example/persons', '--out', 'com.example/never'
     ])
     expect(code).toBe(2)
     expect(flatten(stderr)).toContain(`Transformation 'eer-to-relational' is decision-based`)
   })
 })
 
-describe('run pre-flight ref collisions (claimed-refs check)', () => {
+describe('chain pre-flight ref collisions (claimed-refs check)', () => {
   // rel-copy is endogenous (relational -> relational), so chaining it with
   // itself derives IDENTICAL intermediate and final refs — exactly the
   // collision the pre-flight check must catch before any engine work.
   beforeAll(async () => {
     await run(['model', 'import', personsFixture, '--as', 'com.example/collide'])
     const mkRel = await run([
-      'run', 'eer-to-relational', '--in', 'com.example/collide', '--default-configs', '--out', 'com.example/collide-rel'
+      'tx', 'run', 'eer-to-relational', '--in', 'com.example/collide', '--default-configs', '--out', 'com.example/collide-rel'
     ])
     expect(mkRel.error).toBeUndefined()
   })
 
   it('rejects a self-chained tx whose derived intermediate and final refs collide', async () => {
     const { code, stderr } = await run([
-      'run', 'rel-copy', 'rel-copy', '--in', 'com.example/collide-rel', '--keep-intermediates'
+      'tx', 'run', 'rel-copy', 'rel-copy', '--in', 'com.example/collide-rel', '--keep-intermediates'
     ])
     expect(code).toBe(1)
     const message = flatten(stderr)
@@ -309,7 +310,7 @@ describe('run pre-flight ref collisions (claimed-refs check)', () => {
 
   it('rejects an explicit --out equal to a derived intermediate ref', async () => {
     const { code, stderr } = await run([
-      'run', 'eer-to-relational', 'rel-copy', '--in', 'com.example/collide',
+      'tx', 'run', 'eer-to-relational', 'rel-copy', '--in', 'com.example/collide',
       '--default-configs', '--keep-intermediates', '--out', 'com.example/collide-eer-to-relational'
     ])
     expect(code).toBe(1)
@@ -321,78 +322,14 @@ describe('run pre-flight ref collisions (claimed-refs check)', () => {
   })
 })
 
-describe('run pipelines: --save-as and replay', () => {
-  // A pipeline is a SAVED INVOCATION of the chaining run: --save-as
-  // persists steps + bindings as pipelines/<name>.json after a successful
-  // run; `run <name>` rebuilds the request from the saved fields, with
-  // invocation flags overriding saved values.
-  const pipelineFile = () => join(testHome, '.synth', 'pipelines', 'gen-sql.json')
-
-  it('saves a successful chain with --save-as, storing the invocation as plain JSON', async () => {
-    const genDir = join(tempDir, 'pipe-gen')
-    const { stdout, error } = await run([
-      'run', 'eer-to-relational', 'rel-to-sql-ddl', '--in', 'com.example/persons',
-      '--default-configs', '--out-dir', genDir, '--save-as', 'gen-sql'
-    ])
-    expect(error).toBeUndefined()
-    expect(stdout).toContain(`Saved pipeline 'gen-sql'`)
-    const definition = JSON.parse(readFileSync(pipelineFile(), 'utf-8'))
-    expect(definition).toMatchObject({
-      name: 'gen-sql',
-      steps: ['eer-to-relational', 'rel-to-sql-ddl'],
-      in: 'com.example/persons',
-      outDir: genDir,
-      defaultConfigs: true,
-      description: ''
-    })
-    // Only explicitly-bound values are frozen; a replay re-derives the rest
-    expect(definition.out).toBeUndefined()
-    expect(definition.config).toBeUndefined()
-    expect(definition.keepIntermediates).toBeUndefined()
-    expect(definition.createdAt).toBeTruthy()
-    expect(definition.modifiedAt).toBeTruthy()
-  })
-
-  it('replays the chain by name through the full pre-flight, honoring the saved consent', async () => {
-    const replayDir = join(tempDir, 'pipe-replay')
-    const { stdout, error } = await run(['run', 'gen-sql', '--out-dir', replayDir])
-    expect(error).toBeUndefined()
-    // The saved defaultConfigs consent covers the decision-based steps
-    expect(stdout).toContain('[step 2/2 rel-to-sql-ddl] decision IdentifierQuoting -> Unquoted (default)')
-    const sqlFiles = readdirSync(replayDir).filter((name) => name.endsWith('.sql'))
-    expect(sqlFiles.length).toBe(1)
-    expect(readFileSync(join(replayDir, sqlFiles[0]), 'utf-8')).toContain('CREATE TABLE person')
-  })
-
-  it('replays on another input model via the --in override', async () => {
-    const replayDir = join(tempDir, 'pipe-replay-in')
-    const { stdout, error } = await run([
-      'run', 'gen-sql', '--in', 'com.example/persons2', '--out-dir', replayDir, '--json'
-    ])
-    expect(error).toBeUndefined()
-    const parsed = JSON.parse(stdout)
-    expect(parsed.in).toBe('com.example/persons2')
-    expect(parsed.steps.map((step: { tx: string }) => step.tx)).toEqual(['eer-to-relational', 'rel-to-sql-ddl'])
-    const sqlFiles = readdirSync(replayDir).filter((name) => name.endsWith('.sql'))
-    expect(sqlFiles.length).toBe(1)
-  })
-
-  it('rejects a pipeline name combined with further transformation names', async () => {
-    const { code, stderr } = await run(['run', 'gen-sql', 'rel-to-sql-ddl', '--out-dir', join(tempDir, 'never-pipe')])
-    expect(code).toBe(1)
-    expect(flatten(stderr)).toContain('replays alone')
-    expect(existsSync(join(tempDir, 'never-pipe'))).toBe(false)
-  })
-})
-
-describe('run chain provenance (per-step actual input refs)', () => {
+describe('chain provenance (per-step actual input refs)', () => {
   beforeAll(async () => {
     await run(['model', 'import', personsFixture, '--as', 'com.example/prov'])
   })
 
   it('stamps the final model of a kept-intermediates chain as generated FROM the intermediate ref', async () => {
     const { stdout, error } = await run([
-      'run', 'eer-to-relational', 'rel-copy', '--in', 'com.example/prov',
+      'tx', 'run', 'eer-to-relational', 'rel-copy', '--in', 'com.example/prov',
       '--default-configs', '--keep-intermediates', '--out', 'com.example/prov-final', '--json'
     ])
     expect(error).toBeUndefined()
@@ -414,7 +351,7 @@ describe('run chain provenance (per-step actual input refs)', () => {
 
   it('records an in-memory derivation marker when the intermediate is not kept', async () => {
     const { error } = await run([
-      'run', 'eer-to-relational', 'rel-copy', '--in', 'com.example/prov',
+      'tx', 'run', 'eer-to-relational', 'rel-copy', '--in', 'com.example/prov',
       '--default-configs', '--out', 'com.example/prov-final2'
     ])
     expect(error).toBeUndefined()

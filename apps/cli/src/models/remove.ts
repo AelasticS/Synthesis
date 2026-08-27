@@ -7,8 +7,6 @@
 
 import { unlink } from 'node:fs/promises'
 
-import { findPipelinesReferencingModels } from '../pipelines/store.js'
-import type { PipelineModelDependent } from '../pipelines/store.js'
 import { findTransitiveDependents, formatDependencyTree, refToModelPath } from '../support/refs.js'
 
 /** Removal refused: dependents would be left dangling (use --cascade). */
@@ -26,29 +24,6 @@ export class DanglingDependentsError extends Error {
   }
 }
 
-/**
- * Removal refused: a saved pipeline binds one of the models to delete
- * (`in` or `config`). Pipelines are not deletable via --cascade — the
- * repair is to update them or delete them with `pipeline rm` first.
- */
-export class PipelineDependentsError extends Error {
-  public constructor(
-    ref: string,
-    public readonly dependents: PipelineModelDependent[]
-  ) {
-    super(
-      `Cannot remove ${ref} — saved pipeline(s) reference the model(s) to delete:\n` +
-        dependents
-          .map(
-            (dependent) =>
-              `  ${dependent.name}: ${dependent.bindings.map((binding) => `${binding.field} -> ${binding.ref}`).join(', ')}`
-          )
-          .join('\n') +
-        `\nPipelines are not deleted by --cascade; update them or delete them with 'synth pipeline rm' first.`
-    )
-  }
-}
-
 export interface ModelRemoval {
   /** Every deleted ref: the target first, then the cascaded dependents. */
   deleted: string[]
@@ -61,16 +36,14 @@ export interface ModelRemoval {
 /**
  * Delete a model (the ref must exist — callers gate on that) together with
  * its reverse-dependency closure when `cascade` is set. Refuses with
- * DanglingDependentsError when dependents exist and cascade is off, and —
- * when `pipelinesDir` is given — with PipelineDependentsError when a saved
- * pipeline's `in` or `config` binds any model that would be deleted
- * (pipelines never cascade).
+ * DanglingDependentsError when dependents exist and cascade is off.
+ * Saved pipelines never block model removal: a pipeline stores only its
+ * transformation steps, no model bindings.
  */
 export async function removeModelWithDependents(
   modelsDir: string,
   ref: string,
-  cascade: boolean,
-  pipelinesDir?: string
+  cascade: boolean
 ): Promise<ModelRemoval> {
   const { closure, edges } = await findTransitiveDependents(modelsDir, [ref])
   const tree = formatDependencyTree([ref], edges)
@@ -78,12 +51,6 @@ export async function removeModelWithDependents(
     throw new DanglingDependentsError(ref, tree, closure.length)
   }
   const deleted = [ref, ...closure]
-  if (pipelinesDir !== undefined) {
-    const pipelineDependents = await findPipelinesReferencingModels(pipelinesDir, deleted)
-    if (pipelineDependents.length > 0) {
-      throw new PipelineDependentsError(ref, pipelineDependents)
-    }
-  }
   for (const target of deleted) {
     await unlink(refToModelPath(modelsDir, target))
   }

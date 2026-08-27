@@ -116,7 +116,7 @@ export async function importModel(filePath: string): Promise<ImportedModel> {
 /**
  * Call a model/part factory `(store: ModelStore) => <jsx expression>` and
  * render the returned expression node into the store. Shared between
- * renderModel and `tx run`'s package-part rendering so the factory-shape
+ * renderModel and `transformation run`'s package-part rendering so the factory-shape
  * checks cannot diverge. `what` names the factory in error messages.
  */
 export function renderFactory(

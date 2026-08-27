@@ -17,8 +17,9 @@ import type { SynthHeader } from '../models/header.js'
 import { stampModelText } from '../models/stamp.js'
 import { listPipelines } from '../pipelines/store.js'
 import { errorMessage } from '../support/errors.js'
-import { findMissingReferences, namespaceExists, refToModelPath, scanModelsTree } from '../support/refs.js'
+import { findMissingReferences, namespaceExists, scanModelsTree } from '../support/refs.js'
 import { EXIT_CODES } from '../support/exit-codes.js'
+import { chainStructureProblems, resolveChainSteps } from '../tx/chain.js'
 
 interface CheckResult {
   name: string
@@ -232,12 +233,13 @@ export default class Doctor extends BaseCommand {
       })
     }
 
-    // Check 9: every saved pipeline is replayable — the file parses
-    // against the schema, every step is installed, the input model exists,
-    // and the config binding (when set) is an existing configuration
-    // model. Problems are warnings naming the pipeline (a broken pipeline
-    // never blocks the workspace); a missing pipelines/ directory is fine
-    // (older workspace, nothing saved yet).
+    // Check 9: every saved pipeline is runnable — the same static checks
+    // as `pipeline mk`: the file parses against the process-only schema,
+    // every step is installed, and the chain type-checks from the
+    // manifests. (Pipelines store no data bindings, so there is nothing
+    // else to verify.) Problems are warnings naming the pipeline (a
+    // broken pipeline never blocks the workspace); a missing pipelines/
+    // directory is fine (older workspace, nothing saved yet).
     const pipelinesPath = getPipelinesPath(this.workspaceConfig)
     if (existsSync(pipelinesPath)) {
       let pipelineProblems = 0
@@ -254,32 +256,23 @@ export default class Doctor extends BaseCommand {
           continue
         }
         const pipeline = entry.pipeline
+        let allInstalled = true
         for (const stepName of pipeline.steps) {
           if (this.workspaceConfig.transformations[stepName] === undefined) {
             warnPipeline(entry.name, `Step '${stepName}' is not an installed transformation`)
+            allInstalled = false
           }
         }
-        if (!existsSync(refToModelPath(modelsPath, pipeline.in))) {
-          warnPipeline(entry.name, `Input model '${pipeline.in}' does not exist in the workspace`)
+        if (!allInstalled) {
+          continue
         }
-        if (pipeline.config !== undefined) {
-          const configPath = refToModelPath(modelsPath, pipeline.config)
-          if (!existsSync(configPath)) {
-            warnPipeline(entry.name, `Configuration model '${pipeline.config}' does not exist in the workspace`)
-          } else {
-            let kind: string | undefined
-            try {
-              kind = parseSynthHeader(await readFile(configPath, 'utf-8')).header?.kind
-            } catch {
-              kind = undefined
-            }
-            if (kind !== 'configuration-model') {
-              warnPipeline(
-                entry.name,
-                `Config binding '${pipeline.config}' is not a configuration model (header kind: ${kind ?? 'unreadable'})`
-              )
-            }
+        try {
+          for (const problem of chainStructureProblems(await resolveChainSteps(this.workspaceConfig, pipeline.steps))) {
+            warnPipeline(entry.name, problem.message)
           }
+        } catch (err) {
+          // Steps are installed but a manifest is missing or broken
+          warnPipeline(entry.name, errorMessage(err))
         }
       }
       if (pipelineProblems === 0) {

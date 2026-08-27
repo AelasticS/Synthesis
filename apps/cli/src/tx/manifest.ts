@@ -14,7 +14,7 @@
  * without the `./` prefix (`lib/transformation.js`) is normalized to the
  * package-relative form at load time when it names an existing file under
  * the package directory. Resolution against the installed package happens
- * at execution time (`tx run`), when the modules are actually imported.
+ * at execution time (`transformation run`), when the modules are actually imported.
  */
 
 import { existsSync } from 'node:fs'
