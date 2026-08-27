@@ -107,6 +107,8 @@ export function resolveGitAuthor(): Promise<string | null> {
 }
 
 export interface GeneratedHeaderOptions {
+  /** Header kind; defaults to 'model'. */
+  kind?: SynthHeaderKind
   metamodel: string
   generatedBy: Omit<SynthGeneratedBy, 'date'>
   description?: string
@@ -123,7 +125,7 @@ export interface GeneratedHeaderOptions {
 export async function makeGeneratedHeader(options: GeneratedHeaderOptions): Promise<SynthHeader> {
   const now = new Date().toISOString()
   return {
-    kind: 'model',
+    kind: options.kind ?? 'model',
     metamodel: options.metamodel,
     references: options.references ?? {},
     generatedBy: { ...options.generatedBy, date: now },

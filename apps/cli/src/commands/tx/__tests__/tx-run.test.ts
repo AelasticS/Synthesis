@@ -224,6 +224,95 @@ describe('tx run m2m', () => {
   })
 })
 
+describe('tx run --config', () => {
+  const cfgPath = () => join(modelsDir, 'com', 'example', 'tx-cfg.tsx')
+
+  beforeAll(async () => {
+    const init = await run(['config', 'init', 'eer-to-relational', '--for', 'com.example/persons', '--out', 'com.example/tx-cfg'])
+    expect(init.error).toBeUndefined()
+    await run(['model', 'import', personsFixture, '--as', 'com.example/persons-b'])
+  })
+
+  it('fails with NOT_FOUND for a missing configuration ref', async () => {
+    const { code, stderr } = await run([
+      'tx', 'run', 'eer-to-relational', '--in', 'com.example/persons',
+      '--config', 'com.example/no-such-cfg', '--out', 'com.example/never-cfg'
+    ])
+    expect(code).toBe(3)
+    expect(stderr).toContain('Configuration model not found')
+  })
+
+  it('rejects a --config model that is not a configuration model (exit 2)', async () => {
+    const { code, stderr } = await run([
+      'tx', 'run', 'eer-to-relational', '--in', 'com.example/persons',
+      '--config', 'com.example/persons', '--out', 'com.example/never-cfg'
+    ])
+    expect(code).toBe(2)
+    expect(flatten(stderr)).toContain('not a configuration model')
+  })
+
+  it('rejects a configuration whose sourceModel does not match --in (exit 2, naming both)', async () => {
+    const { code, stderr } = await run([
+      'tx', 'run', 'eer-to-relational', '--in', 'com.example/persons-b',
+      '--config', 'com.example/tx-cfg', '--out', 'com.example/never-cfg'
+    ])
+    expect(code).toBe(2)
+    const message = flatten(stderr)
+    expect(message).toContain(`created for source model 'com.example/persons'`)
+    expect(message).toContain(`transforms 'com.example/persons-b'`)
+  })
+
+  it('rejects a configuration selecting an unknown option (exit 2, naming it)', async () => {
+    const edited = readFileSync(cfgPath(), 'utf-8').replaceAll('SnakeCase', 'NoSuchOption')
+    const badPath = join(modelsDir, 'com', 'example', 'tx-cfg-bad.tsx')
+    writeFileSync(badPath, edited)
+    try {
+      const { code, stderr } = await run([
+        'tx', 'run', 'eer-to-relational', '--in', 'com.example/persons',
+        '--config', 'com.example/tx-cfg-bad', '--out', 'com.example/never-cfg'
+      ])
+      expect(code).toBe(2)
+      expect(flatten(stderr)).toContain('NoSuchOption')
+    } finally {
+      rmSync(badPath, { force: true })
+    }
+  })
+
+  it('rejects --config on a transformation without decisions', async () => {
+    const { code, stderr } = await run([
+      'tx', 'run', 'rel-to-sql-ddl', '--in', 'com.example/persons-rel',
+      '--config', 'com.example/tx-cfg', '--out-dir', join(tempDir, 'never-cfg')
+    ])
+    expect(code).toBe(1)
+    expect(flatten(stderr)).toContain('--config is only valid for decision-based transformations')
+  })
+
+  it('rejects --save-config combined with --config', async () => {
+    const { code, stderr } = await run([
+      'tx', 'run', 'eer-to-relational', '--in', 'com.example/persons',
+      '--config', 'com.example/tx-cfg', '--save-config', 'com.example/never-save',
+      '--out', 'com.example/never-cfg'
+    ])
+    expect(code).not.toBe(0)
+    expect(flatten(stderr)).toContain('cannot also be provided')
+    expect(existsSync(join(modelsDir, 'com', 'example', 'never-save.tsx'))).toBe(false)
+  })
+
+  it('runs with the explicit configuration and announces choices without the default suffix', async () => {
+    const { stdout, error } = await run([
+      'tx', 'run', 'eer-to-relational', '--in', 'com.example/persons',
+      '--config', 'com.example/tx-cfg', '--out', 'com.example/persons-rel-explicit', '--json'
+    ])
+    expect(error).toBeUndefined()
+    const parsed = JSON.parse(stdout)
+    expect(parsed.config).toBe('com.example/tx-cfg')
+    const decisions = parsed.decisions as Array<{ option: string; isDefault: boolean }>
+    expect(decisions.length).toBeGreaterThan(0)
+    expect(decisions.every((decision) => decision.isDefault === false)).toBe(true)
+    expect(decisions.map((decision) => decision.option)).toContain('SnakeCase')
+  })
+})
+
 describe('tx run m2t', () => {
   it('chains the generated relational model into SQL DDL generation', async () => {
     const genDir = join(tempDir, 'gen')

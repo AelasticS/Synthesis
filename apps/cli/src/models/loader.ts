@@ -185,21 +185,24 @@ export class ModelClosureError extends Error {
 }
 
 /**
- * Render every model in the reference closure of `ref` (depth-first, the
- * ref itself excluded) into the store: a model's own references render
- * before the model, and reference cycles are cut on first visit. Failures
- * are reported as ModelClosureError so callers can distinguish a missing
- * reference from a broken one.
+ * Render every model reachable from a `references` map (depth-first: a
+ * model's own references render before the model itself) into the store.
+ * Reference cycles are cut on first visit; `exclude` names refs that must
+ * not be (re)rendered — e.g. the referencing model itself. `origin` names
+ * the referencing artifact in error messages. Failures are reported as
+ * ModelClosureError so callers can distinguish a missing reference from a
+ * broken one.
  */
-export async function renderModelClosure(
+export async function renderReferenceClosure(
   modelsDir: string,
-  ref: string,
-  store: ModelStore
+  references: Record<string, string>,
+  store: ModelStore,
+  origin: string,
+  exclude: Iterable<string> = []
 ): Promise<void> {
-  const rootRef = normalizeRef(ref)
-  const visited = new Set<string>([rootRef])
-  const renderReferences = async (references: Record<string, string>): Promise<void> => {
-    for (const target of Object.values(references)) {
+  const visited = new Set<string>(exclude)
+  const renderReferences = async (refs: Record<string, string>): Promise<void> => {
+    for (const target of Object.values(refs)) {
       let targetRef: string
       try {
         targetRef = normalizeRef(target)
@@ -216,7 +219,7 @@ export async function renderModelClosure(
       if (!existsSync(targetPath)) {
         throw new ModelClosureError(
           'missing-ref',
-          `Referenced model not found: ${targetRef} (required by ${rootRef} or its references)`
+          `Referenced model not found: ${targetRef} (required by ${origin} or its references)`
         )
       }
       const parsed = parseSynthHeader(await readFile(targetPath, 'utf-8'))
@@ -239,6 +242,20 @@ export async function renderModelClosure(
       }
     }
   }
+  await renderReferences(references)
+}
+
+/**
+ * Render every model in the reference closure of `ref` (depth-first, the
+ * ref itself excluded) into the store. See renderReferenceClosure for the
+ * traversal and failure semantics.
+ */
+export async function renderModelClosure(
+  modelsDir: string,
+  ref: string,
+  store: ModelStore
+): Promise<void> {
+  const rootRef = normalizeRef(ref)
   const rootPath = refToModelPath(modelsDir, rootRef)
   const rootParsed = parseSynthHeader(await readFile(rootPath, 'utf-8'))
   if (rootParsed.error !== undefined) {
@@ -247,7 +264,7 @@ export async function renderModelClosure(
       `Model ${rootRef} has a malformed $synth header: ${rootParsed.error}`
     )
   }
-  await renderReferences(rootParsed.header?.references ?? {})
+  await renderReferenceClosure(modelsDir, rootParsed.header?.references ?? {}, store, rootRef, [rootRef])
 }
 
 /**
