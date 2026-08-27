@@ -98,7 +98,12 @@ executes; same invocation piped/CI errors cleanly.
    flow, chaining, pipelines, interactivity.
 2. Resolve the manifest-location decision in `packaging-transformations.md`.
 3. CHANGELOG, version bump, tag `cli-v0.1.0`, GitHub release via the
-   (already fixed) tarball workflow; smoke-test per CONTRIBUTING.
+   (already fixed) tarball workflow; smoke-test per CONTRIBUTING
+   (`rushx smoke` in apps/cli runs the phase-by-phase smoke scenarios).
+4. Retire this folder: transfer durable design content into the published
+   docs and the engine-side follow-ups into tracked issues, then DELETE
+   `design/cli-execution/` — it is scaffolding, not a permanent artifact
+   (git history preserves it).
 
 ## Deferred review follow-ups (from the Phase 1 code review)
 

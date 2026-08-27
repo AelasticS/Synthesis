@@ -22,6 +22,7 @@
     "build": "heft build --clean",
     "test": "NODE_OPTIONS='--experimental-vm-modules' heft test --clean",
     "start": "node bin/run.js",
+    "smoke": "bash scripts/smoke-test.sh",
     "pack:tarballs": "node config/pack-tarballs.mjs",
     "pack:clean": "rm -rf dist tmp vendor"
   },
