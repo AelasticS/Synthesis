@@ -18,6 +18,9 @@ importers:
       '@aelastics/types':
         specifier: workspace:*
         version: link:../../libraries/aelastics-types
+      '@inquirer/prompts':
+        specifier: ~7.10.1
+        version: 7.10.1(@types/node@25.3.3)
       '@oclif/core':
         specifier: ~4.11.2
         version: 4.11.2

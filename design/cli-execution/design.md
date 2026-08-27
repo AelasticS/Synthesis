@@ -284,17 +284,107 @@ made. `transformation install` verifies manifest claims against the loaded class
 `config init <tx> --for <model> [--out <ref>]` = the same default-config
 generation, saved instead of used.
 
-## 8. Interactive layer
+## 8. Interactive layer (as delivered in Phase 6)
 
-- Candidate provider module: answers "which refs are valid here?" from
-  manifests + headers only (fast, no engine). Filters by type: input
-  models by the tx's source metamodel; chain continuations by the previous
-  step's target metamodel; configs by binding model.
-- Prompts: `@inquirer/prompts` (`select`, `search` type-to-filter) when a
-  required value is missing AND stdin is a TTY (never in CI/`--json`).
-- Shell tab-completion (extending `@oclif/plugin-autocomplete` scripts via
-  a hidden fast completion command) comes later, wired to the same
-  provider.
+### Candidate provider
+
+`src/candidates/provider.ts` answers "which values are valid here?" from
+manifests, `$synth` headers, and pipeline files ONLY — the static header
+parse, never a transpile/render, never the engine — fast enough for every
+TAB press. Functions: `installedTransformations` (name, kind,
+source/target metamodel, variability, description), `chainNext` (the
+transformations whose source metamodel equals the previous step's target
+— the same judgment as the chain pre-flight; empty after m2t),
+`modelsForMetamodel` (kind `model` only; a filter keeps models declaring
+an EMPTY metamodel, because the run gate accepts those), `allModels`,
+`configsFor` (kind `configuration-model`, narrowed by `generatedBy.tx` —
+unstamped hand-written configurations pass, run accepts them too — and by
+`references.sourceModel`), `pipelines` (lenient: schema-invalid files
+surface with empty steps), `namespaces`. Tolerance policy: whatever
+cannot be judged (broken package, unreadable/headerless model file,
+invalid pipeline) is silently skipped — a candidate list is assistance,
+not a gate; `doctor` reports the broken files.
+
+### Pickers
+
+Guard (`src/support/interactive.ts#isInteractiveSession`): prompts appear
+ONLY when stdin AND stdout are TTYs, no `--json`, no `--quiet`, and `CI`
+is unset. Everything else — pipes, scripts, CI, machine output — takes
+the unchanged non-interactive path with byte-identical errors (the whole
+pre-Phase-6 jest suite runs unmodified against non-TTY subprocesses and
+proves it). Mechanically: the three picker-capable commands set
+`deferParseErrors`, so BaseCommand's spec parse failure is deferred; the
+command then parses a RELAXED twin of its spec (nothing required) to see
+what is present — non-interactive sessions immediately re-parse strictly
+(reproducing today's errors exactly), interactive ones fill the gaps via
+the flows and feed the completed values into the SAME shared body the
+strict path uses. A picked value and a typed value take the identical
+route.
+
+The flows (`src/interactive/flows.ts`) program against an injected
+`Prompter` interface (`search` type-to-filter, `select`, `confirm`,
+`input`) — unit tests drive them with a scripted stub and no TTY; only
+the commands bind `@inquirer/prompts` (lazily, in the interactive branch).
+Ctrl+C in a prompt is a clean `Aborted.` with exit 130.
+
+- `transformation run` with no tx → `search` over installed
+  transformations (single step; chains are typed, not picked); missing
+  `--in` → `search` over `modelsForMetamodel(step 1 source)`; consent
+  unsatisfied → `select` per the §7 policy: use an existing configuration
+  (offered only when `configsFor(tx1, in)` is non-empty; a follow-up
+  `search` picks it, and later uncovered steps then get their own
+  defaults-or-abort consent with the mid-run wording), generate defaults
+  for this run (the interactive form of `--default-configs` — the picker
+  choice IS the explicit consent), or abort (exit 2). Last step m2t
+  without `--out-dir` → `input` prompt; no default directory is invented,
+  empty aborts (exit 1).
+- `pipeline run` with no name → `search` over the schema-valid pipelines
+  (steps shown), then the identical `--in`/consent/`--out-dir` flow with
+  the pipeline's steps.
+- `config init` with no tx → `search` over the decision-based
+  transformations; missing `--for` → `search` over the source-metamodel
+  matches.
+- Import offer: when `--in`/`--for` is not an existing workspace ref BUT
+  names an existing `.tsx` file, `confirm` offers to import it first;
+  target ref via `input` (default: current namespace + basename); the
+  import runs through the SAME machinery as `model import`
+  (`src/models/import-core.ts#importModelFile` — extracted in this phase;
+  the command is now a thin shell over it), then the flow continues with
+  the imported ref. Declining keeps the raw value, so the downstream
+  error is unchanged. Non-interactive sessions never see the offer.
+
+### Dynamic shell completion
+
+Hidden command `synth completions -- <words...>` is the STABLE machine
+contract (`src/candidates/completion.ts`): input is the command-line
+words after the program name, the last word being the one under the
+cursor (`''` when a new word starts); output is newline-separated
+candidate VALUES for that position, filtered by the partial; anything it
+cannot complete — unknown context, flag-name partials, free-form
+positions — prints nothing and exits 0, NEVER an error. Values only:
+command and flag names remain the base completion's job. Completed
+positions: tx names after `transformation run` (chain-aware via
+`chainNext` from the second positional), `transformation
+show`/`uninstall`, and `pipeline mk` steps; model refs after `--in`
+(source-metamodel-filtered when the tx — or the pipeline's first step —
+is on the line), `--for`, and `model show`/`rm`/`validate`/`export`;
+configuration refs after `--config` (tx- and `--in`-aware) and `config
+show`/`rm`/`edit`; pipeline names after `pipeline run`/`show`/`rm`/
+`edit`; namespaces after `cd`, `namespace rm`, and `--ns`. The typing
+aliases (`tx`, `pl`, `ns`) complete like their canonical topics.
+
+Shell wiring: `@oclif/plugin-autocomplete`'s generated scripts complete
+commands and flag NAMES only, from a static snapshot, with no extension
+hook — so value completion ships as standalone wrapper scripts,
+`scripts/completion/synth.bash` and `synth.zsh` (wiring instructions in
+their header comments). On TAB the wrapper first asks `synth completions`
+for value candidates; when there are none it falls back to the plugin's
+generated function (`_synth_autocomplete` / `_synth`) when loaded, else
+to the shell default. Users source the wrapper AFTER the plugin's
+`synth autocomplete` setup so the wrapper's registration wins.
+Limitations, accepted: completion is TAB-triggered only, needs the
+one-time sourcing, and bash/zsh are first-class (no powershell wiring);
+each TAB spawns one CLI invocation (fast: manifest/header reads only).
 
 ## 9. Out of scope for this effort
 

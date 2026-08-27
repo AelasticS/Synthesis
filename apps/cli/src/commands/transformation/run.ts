@@ -2,6 +2,7 @@ import { Args, Flags } from '@oclif/core'
 
 import { BaseCommand } from '../../base/base-command.js'
 import { getModelsPath, getPipelinesPath } from '../../config/index.js'
+import { importModelFile } from '../../models/import-core.js'
 import {
   newPipelineNameProblem,
   pipelineFileExists,
@@ -10,14 +11,36 @@ import {
 } from '../../pipelines/store.js'
 import type { PipelineDefinition } from '../../pipelines/store.js'
 import { EXIT_CODES } from '../../support/exit-codes.js'
+import { isInteractiveSession, isPromptCancel } from '../../support/interactive.js'
+import type { RunFlowResult } from '../../interactive/flows.js'
 import { executeRun } from '../../tx/execute.js'
+
+/** The parsed values the shared body runs on — identical for both paths. */
+interface RunFlags {
+  in: string
+  out?: string
+  'out-dir'?: string
+  config?: string
+  'save-config'?: string
+  'save-as'?: string
+  'default-configs': boolean
+  'keep-intermediates': boolean
+  overwrite: boolean
+  json?: boolean
+  quiet?: boolean
+  verbose?: boolean
+}
 
 export default class TransformationRun extends BaseCommand {
   static override aliases = ['tx:run']
 
+  // Missing required values are rescued by pickers in a TTY session; the
+  // non-interactive path re-parses strictly and reproduces today's errors.
+  protected static override deferParseErrors = true
+
   static override description = `Run one transformation, or a chain of transformations, on a workspace model.
 
-With one transformation: an m2m result is written back into the workspace as a model file (--out; default '<namespace>/<name>-<tx>' derived from --in), an m2t result generates files under --out-dir; an existing target is only replaced with --overwrite. With several transformations the steps form a chain: step N's output model feeds step N+1 in memory (one shared model store), the chain is type-checked from the manifests before execution (step N's target metamodel must equal step N+1's source metamodel), and only the last step may be m2t (text is terminal; it requires --out-dir). Pass --keep-intermediates to also persist every intermediate result as a workspace model at '<namespace>/<name>-<step-tx>'. Configuration consent is explicit everywhere: --config binds to step 1 only, and every other decision-based step (and step 1 without --config) requires --default-configs — without it the run aborts before any engine work. --save-config persists the generated default configuration (single step, only together with --default-configs); for chains, run stepwise with 'transformation run' and 'config init'. After a successful run, --save-as <name> saves the steps as a pipeline at pipelines/<name>.json — the process only, no data bindings — replayable with 'synth pipeline run <name> --in <ref>'. Exit codes: 2 for a missing configuration consent, a chain or source metamodel mismatch, an invalid configuration, or a result that fails the import gate, 3 for an unknown transformation or model.`
+With one transformation: an m2m result is written back into the workspace as a model file (--out; default '<namespace>/<name>-<tx>' derived from --in), an m2t result generates files under --out-dir; an existing target is only replaced with --overwrite. With several transformations the steps form a chain: step N's output model feeds step N+1 in memory (one shared model store), the chain is type-checked from the manifests before execution (step N's target metamodel must equal step N+1's source metamodel), and only the last step may be m2t (text is terminal; it requires --out-dir). Pass --keep-intermediates to also persist every intermediate result as a workspace model at '<namespace>/<name>-<step-tx>'. Configuration consent is explicit everywhere: --config binds to step 1 only, and every other decision-based step (and step 1 without --config) requires --default-configs — without it the run aborts before any engine work. --save-config persists the generated default configuration (single step, only together with --default-configs); for chains, run stepwise with 'transformation run' and 'config init'. After a successful run, --save-as <name> saves the steps as a pipeline at pipelines/<name>.json — the process only, no data bindings — replayable with 'synth pipeline run <name> --in <ref>'. In a terminal session, missing values are asked for interactively: no transformation opens a picker over the installed transformations, a missing --in over the models matching the source metamodel, an unconsented decision-based step offers --config/--default-configs explicitly, and a missing --out-dir is prompted for. Piped, scripted, --json, --quiet, and CI invocations never prompt. Exit codes: 2 for a missing configuration consent, a chain or source metamodel mismatch, an invalid configuration, or a result that fails the import gate, 3 for an unknown transformation or model.`
 
   static override examples = [
     '<%= config.bin %> <%= command.id %> eer-to-relational --in com.example/persons --config com.example/persons-cfg',
@@ -79,10 +102,67 @@ With one transformation: an m2m result is written back into the workspace as a m
     })
   }
 
+  // Relaxed twin of the spec — same flags and variadic positionals, nothing
+  // required — used to see what IS present before deciding between the
+  // interactive flow and the strict re-parse.
+  private static readonly relaxedSpec = {
+    flags: { ...TransformationRun.flags, in: Flags.string({ description: 'Source model ref the first step transforms.' }) },
+    baseFlags: BaseCommand.baseFlags,
+    args: { tx: Args.string({ description: 'Installed transformation(s) to run in order.', required: false }) },
+    strict: false
+  }
+
   public async execute(): Promise<void> {
-    const { argv, flags } = await this.parse(TransformationRun)
+    const relaxed = await this.parse(TransformationRun.relaxedSpec)
+    if (!isInteractiveSession(relaxed.flags)) {
+      // Non-interactive: the strict parse reproduces today's errors exactly.
+      const { argv, flags } = await this.parse(TransformationRun)
+      await this.runParsed(argv.map(String), flags)
+      return
+    }
+
+    const flags = relaxed.flags as Omit<RunFlags, 'in'> & { in?: string }
+    const { completeRunRequest } = await import('../../interactive/flows.js')
+    const { makeInquirerPrompter } = await import('../../support/interactive.js')
+    let completed: RunFlowResult
+    try {
+      completed = await completeRunRequest(
+        {
+          prompter: await makeInquirerPrompter(),
+          workspaceConfig: this.workspaceConfig,
+          modelsDir: getModelsPath(this.workspaceConfig),
+          pipelinesDir: getPipelinesPath(this.workspaceConfig),
+          invokedFrom: this.savedPwd,
+          importModel: async (sourcePath, ref) => {
+            await importModelFile({ workspaceConfig: this.workspaceConfig, sourcePath, ref })
+          },
+          info: (line) => this.log(line)
+        },
+        {
+          txNames: relaxed.argv.map(String),
+          inRef: flags.in,
+          config: flags.config,
+          defaultConfigs: flags['default-configs'],
+          outDir: flags['out-dir']
+        }
+      )
+    } catch (err) {
+      if (isPromptCancel(err)) {
+        this.error('Aborted.', { exit: 130 })
+      }
+      this.failFromExecuteError(false, err)
+    }
+    await this.runParsed(completed.txNames, {
+      ...flags,
+      in: completed.inRef,
+      config: completed.config,
+      'default-configs': completed.defaultConfigs,
+      'out-dir': completed.outDir
+    })
+  }
+
+  private async runParsed(txNames: string[], flags: RunFlags): Promise<void> {
     const json = Boolean(flags.json)
-    const txNames = argv.map(String)
     const pipelinesDir = getPipelinesPath(this.workspaceConfig)
 
     // --save-as pre-flight: like every writable target, the pipeline

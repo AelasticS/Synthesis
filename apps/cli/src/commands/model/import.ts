@@ -1,16 +1,12 @@
 import { existsSync } from 'node:fs'
-import { mkdir, readFile, writeFile } from 'node:fs/promises'
-import { basename, dirname, isAbsolute, join } from 'node:path'
+import { basename, isAbsolute, join } from 'node:path'
 import { Args, Flags } from '@oclif/core'
 
 import { BaseCommand } from '../../base/base-command.js'
-import { getModelsPath } from '../../config/index.js'
-import { stampModelText } from '../../models/stamp.js'
+import { importModelFile, ModelImportError } from '../../models/import-core.js'
 import { errorMessage } from '../../support/errors.js'
-import { findMissingReferences, normalizeRef, refToModelPath } from '../../support/refs.js'
+import { normalizeRef } from '../../support/refs.js'
 import { EXIT_CODES } from '../../support/exit-codes.js'
-import { EngineOutputBuffer } from '../../tx/engine-output.js'
-import { GateRenderError, renderForGate, TxResolveError } from '../../tx/load.js'
 
 export default class ModelImport extends BaseCommand {
   static override description = `Validate a .tsx model file and copy it into the workspace.
@@ -84,58 +80,30 @@ Configuration models reference their transformation's decision/binding models an
       this.jsonAwareFail(json, errorMessage(err), EXIT_CODES.FAILURE)
     }
 
-    const modelsDir = getModelsPath(this.workspaceConfig)
-    const text = await readFile(sourcePath, 'utf-8')
-
-    // Validation gate: the model must transpile, import, and render into a
-    // throwaway store before anything is copied into the workspace. With
-    // --tx, the installed transformation's parts render into the store
-    // first — the context configuration models need.
-    let moduleHeader: unknown
-    const buffer = new EngineOutputBuffer(!flags.verbose)
+    // The shared machinery does the rest: validation render (the gate),
+    // header stamping, dependency check, copy into the namespace tree.
+    let destPath: string
     try {
-      ;({ header: moduleHeader } = await buffer.run(() =>
-        renderForGate(this.workspaceConfig, sourcePath, flags.tx, modelsDir)
-      ))
+      ;({ destPath } = await importModelFile({
+        workspaceConfig: this.workspaceConfig,
+        sourcePath,
+        ref,
+        tx: flags.tx,
+        author: flags.author,
+        description: flags.description,
+        tags: flags.tags
+          ?.split(',')
+          .map((tag) => tag.trim())
+          .filter((tag) => tag.length > 0),
+        force: flags.force,
+        verbose: Boolean(flags.verbose)
+      }))
     } catch (err) {
-      buffer.flushToStderr()
-      if (err instanceof TxResolveError) {
-        this.jsonAwareFail(json, errorMessage(err), err.exit)
+      if (err instanceof ModelImportError) {
+        this.jsonAwareFail(json, err.message, err.exit)
       }
-      if (err instanceof GateRenderError) {
-        const prefix =
-          err.missingRef !== undefined
-            ? `Import rejected: missing dependency '${err.missingRef}' — `
-            : 'Import rejected: '
-        this.jsonAwareFail(json, `${prefix}${err.message}${err.hint}`, EXIT_CODES.VALIDATION_FAILURE)
-      }
-      this.jsonAwareFail(json, `Import rejected: ${errorMessage(err)}`, EXIT_CODES.VALIDATION_FAILURE)
+      throw err
     }
-
-    const { text: stamped, header } = await stampModelText(text, moduleHeader, {
-      author: flags.author,
-      description: flags.description,
-      tags: flags.tags
-        ?.split(',')
-        .map((tag) => tag.trim())
-        .filter((tag) => tag.length > 0)
-    })
-
-    // Every workspace ref the header depends on must already be imported
-    for (const { key, target } of findMissingReferences(modelsDir, header.references)) {
-      this.jsonAwareFail(
-        json,
-        `Import rejected: missing dependency — header reference '${key}' -> '${target}' is not in the workspace. Import it first.`,
-        EXIT_CODES.VALIDATION_FAILURE
-      )
-    }
-
-    const destPath = refToModelPath(modelsDir, ref)
-    if (existsSync(destPath) && !flags.force) {
-      this.jsonAwareFail(json, `Model already exists: ${ref}. Use --force to overwrite.`, EXIT_CODES.FAILURE)
-    }
-    await mkdir(dirname(destPath), { recursive: true })
-    await writeFile(destPath, stamped, 'utf-8')
 
     if (flags.json) {
       this.log(JSON.stringify({ imported: ref, source: sourcePath, destination: destPath }))

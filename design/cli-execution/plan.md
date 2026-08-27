@@ -128,14 +128,40 @@ rel-to-sql-ddl` validates statically; `pipeline run gen-sql --in ...
 --default-configs --out-dir ./gen` reproduces the Phase-4 chain output;
 `pl run` behaves identically (jest + `rushx smoke` Phase 5 section).
 
-## Phase 6 — Interactive layer
+## Phase 6 — Interactive layer — DELIVERED (2026-08-28)
 
 Candidate provider module; `@inquirer/prompts` pickers for missing
 tx/`--in`/`--config` (TTY-guarded); type-filtered lists; interactive
-import offer for unknown refs/paths.
+import offer for unknown refs/paths. As-delivered mechanics live in
+design.md §8.
 
-Acceptance: bare `synth run` in a TTY walks through picker flow and
-executes; same invocation piped/CI errors cleanly.
+> Scope notes from execution (2026-08-28): the candidate provider
+> (`src/candidates/provider.ts`) answers every "what fits here?" question
+> from manifests + headers + pipeline files only — never the engine — and
+> feeds BOTH assist surfaces. Pickers: the three picker-capable commands
+> (`transformation run`, `pipeline run`, `config init`) defer their spec
+> parse, re-parse a relaxed twin, and — only when stdin+stdout are TTYs,
+> without `--json`/`--quiet`/CI — fill the gaps via prompt flows
+> (`src/interactive/flows.ts`, prompter injected, unit-tested with a
+> scripted stub); non-interactive sessions re-parse strictly, keeping
+> every error byte-identical (the pre-existing suites pass unchanged).
+> The consent picker is the interactive form of the Phase-4 policy: an
+> existing configuration, explicit `--default-configs`, or abort — a
+> choice IS consent. The import offer reuses `model import`'s machinery,
+> extracted to `src/models/import-core.ts`. Ahead of the original plan,
+> dynamic shell completion shipped in this phase too: the hidden
+> `synth completions -- <words...>` contract plus standalone bash/zsh
+> wrapper scripts under `scripts/completion/` that fall back to
+> `@oclif/plugin-autocomplete`'s command/flag completion (the plugin's
+> generated scripts have no value hook, so extending them in place was
+> rejected). One deferred item stays deferred: the typed
+> DanglingReferenceError engine follow-up was NOT needed — the import
+> offer triggers on ".tsx path given instead of a ref", not on missing
+> references.
+
+Acceptance (met): bare `synth transformation run` in a TTY walks through
+tx/model/consent pickers and executes; the same invocation piped/CI
+errors exactly as before (jest + `rushx smoke` Phase 6 section).
 
 ## Phase 7 — Documentation + release (LAST)
 

@@ -72,6 +72,7 @@
     "additionalHelpFlags": ["-h"]
   },
   "dependencies": {
+    "@inquirer/prompts": "~7.10.1",
     "@oclif/core": "~4.11.2",
     "@oclif/plugin-help": "~6.2.48",
     "@oclif/plugin-plugins": "~5.4.67",

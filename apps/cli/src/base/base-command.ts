@@ -47,6 +47,16 @@ export abstract class BaseCommand<T extends typeof Command = typeof Command> ext
     })
   } as const
 
+  /**
+   * Commands that rescue missing required values interactively (pickers in
+   * a TTY session) set this: a failing spec parse here in run() is then
+   * NOT fatal — the command's own parse in execute() re-throws the
+   * identical error on the non-interactive path, or the interactive flow
+   * fills the missing value. Every other command keeps the fail-fast
+   * behavior unchanged.
+   */
+  protected static deferParseErrors = false
+
   protected workspaceConfig!: WorkspaceConfig
   protected savedPwd!: string
 
@@ -65,7 +75,26 @@ export abstract class BaseCommand<T extends typeof Command = typeof Command> ext
     this.workspaceConfig = await loadConfig()
 
     // Apply --workspace override if provided
-    const { flags } = await this.parse(this.constructor as typeof BaseCommand)
+    let flags: { workspace?: string; ns?: string }
+    try {
+      ;({ flags } = await this.parse(this.constructor as typeof BaseCommand))
+    } catch (err) {
+      if (!(this.constructor as typeof BaseCommand).deferParseErrors) {
+        throw err
+      }
+      // Recover the global overrides tolerantly so --workspace/--ns still
+      // apply; execute()'s own parse reproduces (or rescues) the error.
+      try {
+        ;({ flags } = (await this.parse({
+          flags: {},
+          baseFlags: BaseCommand.baseFlags,
+          args: {},
+          strict: false
+        })) as { flags: { workspace?: string; ns?: string } })
+      } catch {
+        flags = {}
+      }
+    }
     if (flags.workspace) {
       this.workspaceConfig.workspace = expandPath(flags.workspace)
     }

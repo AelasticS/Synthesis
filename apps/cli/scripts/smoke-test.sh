@@ -199,6 +199,54 @@ run "pipeline show now exits 3"            3 -                     pipeline show
 run "tx uninstall works after pipeline rm" 0 "Uninstalled"         tx uninstall rel-to-sql-ddl
 
 # =============================================================================
+# Phase 6 — interactive layer (non-TTY contract + dynamic completion)
+# Prompts appear ONLY in a real TTY session (stdin+stdout TTYs, no --json,
+# no --quiet, not CI); this script's invocations capture stdout, so every
+# command below takes the unchanged non-interactive path — the strict
+# errors must stay exactly what they always were. The hidden
+# `synth completions -- <words...>` command is the machine contract behind
+# the shipped shell scripts (scripts/completion/synth.bash|zsh): it prints
+# candidate VALUES for the current position and never errors.
+# =============================================================================
+say "Phase 6: interactive layer"
+
+run "tx install m2t fixture again"        0 "rel-to-sql-ddl"       tx install "$TX_M2T"
+run "piped bare tx run keeps the strict error" 2 "Missing 1 required arg" tx run
+run "piped tx run without --in keeps the strict error" 2 "Missing required flag" tx run eer-to-relational
+run "piped pipeline run without --in keeps its error" 1 "Missing required flag --in" pipeline run to-rel
+run "piped config init without --for keeps the strict error" 2 "Missing required flag" config init eer-to-relational
+run "pipeline mk for completion checks"   0 "Saved pipeline"       pipeline mk p6-gen-sql eer-to-relational rel-to-sql-ddl
+
+# completions: candidate values for the position the last word marks
+# ('' = a new word is being started); empty output + exit 0 elsewhere.
+out="$($CLI completions -- transformation run e 2>&1)"
+[ "$out" = "eer-to-relational" ] && ok "completions: tx names after transformation run" || bad "completions: tx names after transformation run (got '$out')"
+out="$($CLI completions -- tx run eer-to-relational '' 2>&1)"
+if printf '%s\n' "$out" | grep -qx "rel-to-sql-ddl" && ! printf '%s\n' "$out" | grep -qx "eer-to-relational"; then
+  ok "completions: second positional is chain-aware"
+else
+  bad "completions: second positional is chain-aware (got '$out')"
+fi
+out="$($CLI completions -- tx run eer-to-relational --in '' 2>&1)"
+if printf '%s\n' "$out" | grep -qx "com.example/persons" && ! printf '%s\n' "$out" | grep -qx "com.example/persons-rel"; then
+  ok "completions: --in filtered by the source metamodel"
+else
+  bad "completions: --in filtered by the source metamodel (got '$out')"
+fi
+out="$($CLI completions -- pipeline run '' 2>&1)"
+if printf '%s\n' "$out" | grep -qx "p6-gen-sql" && printf '%s\n' "$out" | grep -qx "to-rel"; then
+  ok "completions: pipeline names after pipeline run"
+else
+  bad "completions: pipeline names after pipeline run (got '$out')"
+fi
+out="$($CLI completions -- frobnicate x '' 2>&1)"; status=$?
+if [ "$status" -eq 0 ] && [ -z "$out" ]; then
+  ok "completions: unknown context is silent, exit 0"
+else
+  bad "completions: unknown context is silent, exit 0 (exit $status, got '$out')"
+fi
+
+# =============================================================================
 say "Summary"
 printf '   passed: %d   failed: %d\n' "$PASS" "$FAIL"
 rm -rf "$WORK"

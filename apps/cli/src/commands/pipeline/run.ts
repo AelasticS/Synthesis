@@ -2,17 +2,39 @@ import { Args, Flags } from '@oclif/core'
 
 import { BaseCommand } from '../../base/base-command.js'
 import { getModelsPath, getPipelinesPath } from '../../config/index.js'
+import { importModelFile } from '../../models/import-core.js'
 import { loadPipeline } from '../../pipelines/store.js'
 import type { PipelineDefinition } from '../../pipelines/store.js'
 import { EXIT_CODES } from '../../support/exit-codes.js'
+import { isInteractiveSession, isPromptCancel } from '../../support/interactive.js'
+import type { RunFlowResult } from '../../interactive/flows.js'
 import { executeRun } from '../../tx/execute.js'
+
+/** The parsed values the shared body runs on — identical for both paths. */
+interface RunFlags {
+  in?: string
+  out?: string
+  'out-dir'?: string
+  config?: string
+  'save-config'?: string
+  'default-configs': boolean
+  'keep-intermediates': boolean
+  overwrite: boolean
+  json?: boolean
+  quiet?: boolean
+  verbose?: boolean
+}
 
 export default class PipelineRun extends BaseCommand {
   static override aliases = ['pl:run']
 
+  // Missing required values are rescued by pickers in a TTY session; the
+  // non-interactive path re-parses strictly and reproduces today's errors.
+  protected static override deferParseErrors = true
+
   static override description = `Run a saved pipeline on a workspace model.
 
-A pipeline stores only the process — its transformation steps. Every run names its own data explicitly, exactly like 'transformation run' with the same steps: --in is always required, output goes to --out (last step m2m; default '<namespace>/<name>-<last-tx>' derived from --in) or --out-dir (last step m2t), and configuration consent follows the normal policy (--config binds to step 1 only; every other decision-based step requires --default-configs, otherwise the run aborts before any engine work). The full pre-flight applies — a pipeline is convenience, never a bypass. Exit codes: 2 for a missing configuration consent, a chain or source metamodel mismatch, an invalid configuration or pipeline file, or a result that fails the import gate, 3 for an unknown pipeline, transformation, or model.`
+A pipeline stores only the process — its transformation steps. Every run names its own data explicitly, exactly like 'transformation run' with the same steps: --in is always required, output goes to --out (last step m2m; default '<namespace>/<name>-<last-tx>' derived from --in) or --out-dir (last step m2t), and configuration consent follows the normal policy (--config binds to step 1 only; every other decision-based step requires --default-configs, otherwise the run aborts before any engine work). The full pre-flight applies — a pipeline is convenience, never a bypass. In a terminal session, missing values are asked for interactively: no name opens a picker over the saved pipelines, a missing --in over the models matching step 1's source metamodel, an unconsented decision-based step offers --config/--default-configs explicitly, and a missing --out-dir is prompted for. Piped, scripted, --json, --quiet, and CI invocations never prompt. Exit codes: 2 for a missing configuration consent, a chain or source metamodel mismatch, an invalid configuration or pipeline file, or a result that fails the import gate, 3 for an unknown pipeline, transformation, or model.`
 
   static override examples = [
     '<%= config.bin %> <%= command.id %> gen-sql --in com.example/persons --default-configs --out-dir ./generated',
@@ -60,8 +82,69 @@ A pipeline stores only the process — its transformation steps. Every run names
     })
   }
 
+  // Relaxed twin of the spec — the name argument not required — used to see
+  // what IS present before deciding between the interactive flow and the
+  // strict re-parse.
+  private static readonly relaxedSpec = {
+    flags: PipelineRun.flags,
+    baseFlags: BaseCommand.baseFlags,
+    args: { name: Args.string({ description: 'Name of the saved pipeline to run.', required: false }) }
+  }
+
   public async execute(): Promise<void> {
-    const { args, flags } = await this.parse(PipelineRun)
+    const relaxed = await this.parse(PipelineRun.relaxedSpec)
+    if (!isInteractiveSession(relaxed.flags)) {
+      // Non-interactive: the strict parse reproduces today's errors exactly.
+      const { args, flags } = await this.parse(PipelineRun)
+      await this.runParsed(args.name, flags)
+      return
+    }
+
+    const flags = relaxed.flags as RunFlags
+    this.requireInitializedWorkspace(false)
+    const { completeRunRequest, pickPipelineName } = await import('../../interactive/flows.js')
+    const { makeInquirerPrompter } = await import('../../support/interactive.js')
+    const deps = {
+      prompter: await makeInquirerPrompter(),
+      workspaceConfig: this.workspaceConfig,
+      modelsDir: getModelsPath(this.workspaceConfig),
+      pipelinesDir: getPipelinesPath(this.workspaceConfig),
+      invokedFrom: this.savedPwd,
+      importModel: async (sourcePath: string, ref: string): Promise<void> => {
+        await importModelFile({ workspaceConfig: this.workspaceConfig, sourcePath, ref })
+      },
+      info: (line: string) => this.log(line)
+    }
+    let name: string
+    let completed: RunFlowResult
+    try {
+      name = relaxed.args.name !== undefined ? String(relaxed.args.name) : await pickPipelineName(deps)
+      // The pipeline substitutes its steps; the flow completes the data the
+      // same way it does for 'transformation run' with those steps.
+      const pipeline = await loadPipeline(deps.pipelinesDir, name)
+      completed = await completeRunRequest(deps, {
+        txNames: pipeline.steps,
+        inRef: flags.in,
+        config: flags.config,
+        defaultConfigs: flags['default-configs'],
+        outDir: flags['out-dir']
+      })
+    } catch (err) {
+      if (isPromptCancel(err)) {
+        this.error('Aborted.', { exit: 130 })
+      }
+      this.failFromExecuteError(false, err)
+    }
+    await this.runParsed(name, {
+      ...flags,
+      in: completed.inRef,
+      config: completed.config,
+      'default-configs': completed.defaultConfigs,
+      'out-dir': completed.outDir
+    })
+  }
+
+  private async runParsed(name: string, flags: RunFlags): Promise<void> {
     const json = Boolean(flags.json)
     this.requireInitializedWorkspace(json)
 
@@ -69,7 +152,7 @@ A pipeline stores only the process — its transformation steps. Every run names
     // (run one of those with 'transformation run'). No name guessing.
     let pipeline: PipelineDefinition
     try {
-      pipeline = await loadPipeline(getPipelinesPath(this.workspaceConfig), args.name)
+      pipeline = await loadPipeline(getPipelinesPath(this.workspaceConfig), name)
     } catch (err) {
       this.failFromExecuteError(json, err)
     }

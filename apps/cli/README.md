@@ -204,8 +204,10 @@ DESCRIPTION
   Runs the transformation's default-configuration generation (one default choice per issue its binding model attaches,
   global and per-element) against the model named with --for and saves the result as an editable configuration model in
   the workspace — the same generation 'transformation run --default-configs' accepts in memory. Edit the saved file to
-  steer the transformation, then pass it to 'transformation run --config'. Exit codes: 2 for a source-metamodel mismatch
-  or a result that fails the import gate, 3 for an unknown transformation or missing model.
+  steer the transformation, then pass it to 'transformation run --config'. In a terminal session, a missing
+  transformation opens a picker over the installed decision-based transformations and a missing --for over the models
+  matching its source metamodel; piped, scripted, --json, --quiet, and CI invocations never prompt. Exit codes: 2 for a
+  source-metamodel mismatch or a result that fails the import gate, 3 for an unknown transformation or missing model.
 
 EXAMPLES
   $ synth config init eer-to-relational --for com.example/persons
@@ -1003,9 +1005,13 @@ DESCRIPTION
   'transformation run' with the same steps: --in is always required, output goes to --out (last step m2m; default
   '<namespace>/<name>-<last-tx>' derived from --in) or --out-dir (last step m2t), and configuration consent follows the
   normal policy (--config binds to step 1 only; every other decision-based step requires --default-configs, otherwise
-  the run aborts before any engine work). The full pre-flight applies — a pipeline is convenience, never a bypass. Exit
-  codes: 2 for a missing configuration consent, a chain or source metamodel mismatch, an invalid configuration or
-  pipeline file, or a result that fails the import gate, 3 for an unknown pipeline, transformation, or model.
+  the run aborts before any engine work). The full pre-flight applies — a pipeline is convenience, never a bypass. In a
+  terminal session, missing values are asked for interactively: no name opens a picker over the saved pipelines, a
+  missing --in over the models matching step 1's source metamodel, an unconsented decision-based step offers
+  --config/--default-configs explicitly, and a missing --out-dir is prompted for. Piped, scripted, --json, --quiet, and
+  CI invocations never prompt. Exit codes: 2 for a missing configuration consent, a chain or source metamodel mismatch,
+  an invalid configuration or pipeline file, or a result that fails the import gate, 3 for an unknown pipeline,
+  transformation, or model.
 
 ALIASES
   $ synth pl run
@@ -1221,9 +1227,13 @@ DESCRIPTION
   'transformation run' with the same steps: --in is always required, output goes to --out (last step m2m; default
   '<namespace>/<name>-<last-tx>' derived from --in) or --out-dir (last step m2t), and configuration consent follows the
   normal policy (--config binds to step 1 only; every other decision-based step requires --default-configs, otherwise
-  the run aborts before any engine work). The full pre-flight applies — a pipeline is convenience, never a bypass. Exit
-  codes: 2 for a missing configuration consent, a chain or source metamodel mismatch, an invalid configuration or
-  pipeline file, or a result that fails the import gate, 3 for an unknown pipeline, transformation, or model.
+  the run aborts before any engine work). The full pre-flight applies — a pipeline is convenience, never a bypass. In a
+  terminal session, missing values are asked for interactively: no name opens a picker over the saved pipelines, a
+  missing --in over the models matching step 1's source metamodel, an unconsented decision-based step offers
+  --config/--default-configs explicitly, and a missing --out-dir is prompted for. Piped, scripted, --json, --quiet, and
+  CI invocations never prompt. Exit codes: 2 for a missing configuration consent, a chain or source metamodel mismatch,
+  an invalid configuration or pipeline file, or a result that fails the import gate, 3 for an unknown pipeline,
+  transformation, or model.
 
 ALIASES
   $ synth pl run
@@ -1778,9 +1788,12 @@ DESCRIPTION
   any engine work. --save-config persists the generated default configuration (single step, only together with
   --default-configs); for chains, run stepwise with 'transformation run' and 'config init'. After a successful run,
   --save-as <name> saves the steps as a pipeline at pipelines/<name>.json — the process only, no data bindings —
-  replayable with 'synth pipeline run <name> --in <ref>'. Exit codes: 2 for a missing configuration consent, a chain or
-  source metamodel mismatch, an invalid configuration, or a result that fails the import gate, 3 for an unknown
-  transformation or model.
+  replayable with 'synth pipeline run <name> --in <ref>'. In a terminal session, missing values are asked for
+  interactively: no transformation opens a picker over the installed transformations, a missing --in over the models
+  matching the source metamodel, an unconsented decision-based step offers --config/--default-configs explicitly, and a
+  missing --out-dir is prompted for. Piped, scripted, --json, --quiet, and CI invocations never prompt. Exit codes: 2
+  for a missing configuration consent, a chain or source metamodel mismatch, an invalid configuration, or a result that
+  fails the import gate, 3 for an unknown transformation or model.
 
 ALIASES
   $ synth tx run
@@ -2103,9 +2116,12 @@ DESCRIPTION
   any engine work. --save-config persists the generated default configuration (single step, only together with
   --default-configs); for chains, run stepwise with 'transformation run' and 'config init'. After a successful run,
   --save-as <name> saves the steps as a pipeline at pipelines/<name>.json — the process only, no data bindings —
-  replayable with 'synth pipeline run <name> --in <ref>'. Exit codes: 2 for a missing configuration consent, a chain or
-  source metamodel mismatch, an invalid configuration, or a result that fails the import gate, 3 for an unknown
-  transformation or model.
+  replayable with 'synth pipeline run <name> --in <ref>'. In a terminal session, missing values are asked for
+  interactively: no transformation opens a picker over the installed transformations, a missing --in over the models
+  matching the source metamodel, an unconsented decision-based step offers --config/--default-configs explicitly, and a
+  missing --out-dir is prompted for. Piped, scripted, --json, --quiet, and CI invocations never prompt. Exit codes: 2
+  for a missing configuration consent, a chain or source metamodel mismatch, an invalid configuration, or a result that
+  fails the import gate, 3 for an unknown transformation or model.
 
 ALIASES
   $ synth tx run
