@@ -93,13 +93,32 @@ Acceptance (met): `synth run eer-to-relational rel-to-sql-ddl --in ...
 --default-configs --out-dir ./gen` reproduces the example showcase
 output from workspace content.
 
-## Phase 5 — Pipelines
+## Phase 5 — Pipelines — DELIVERED (2026-08-27)
 
 `--save-as`, `pipelines/<name>.json`, `pipeline ls/show/rm/edit`,
-override semantics, save-time + run-time validation.
+override semantics, save-time + run-time validation. As-delivered
+semantics live in design.md §2 "Pipelines".
 
-Acceptance: save the Phase-4 chain, replay by name on another input model
-via `--in` override.
+> Scope notes from execution (2026-08-27): a pipeline shipped as a saved
+> INVOCATION (plain JSON, not a model; `src/pipelines/store.ts` owns
+> schema + primitives, commands stay thin). Save-time validation runs in
+> pre-flight (segment-grammar name, no shadowing of an installed tx,
+> `--overwrite` for an existing pipeline — preserving createdAt and
+> description; `--save-as` + `--save-config` is an error); only
+> explicitly-bound values are frozen, so a replay re-derives defaults
+> such as the `--out` ref. Replay resolves pipelines before
+> transformations (warning when a name matches both; `tx run` never
+> resolves pipelines) and runs the FULL normal pre-flight — a pipeline is
+> convenience, never a bypass. Beyond the planned surface, deletion
+> guards shipped with it: `tx uninstall` refuses while a pipeline uses
+> the tx as a step, `model rm`/`config rm` refuse while a pipeline's `in`
+> or `config` binds a model being deleted (pipelines never cascade), and
+> `doctor` warns per pipeline on schema violations, uninstalled steps,
+> missing `in`, or a non-configuration `config` binding.
+
+Acceptance (met): save the Phase-4 chain (`--save-as gen-sql`), replay by
+name on another input model via `--in` override (jest + `rushx smoke`
+Phase 5 section).
 
 ## Phase 6 — Interactive layer
 

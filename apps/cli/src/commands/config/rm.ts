@@ -1,9 +1,10 @@
 import { Args, Flags } from '@oclif/core'
 
 import { BaseCommand } from '../../base/base-command.js'
-import { getModelsPath } from '../../config/index.js'
+import { getModelsPath, getPipelinesPath } from '../../config/index.js'
 import {
   DanglingDependentsError,
+  PipelineDependentsError,
   removalJson,
   removalLines,
   removeModelWithDependents
@@ -51,12 +52,17 @@ Configuration models live in the models tree, so removal has 'model rm' semantic
       this.jsonAwareFail(json, errorMessage(err), EXIT_CODES.FAILURE)
     }
 
-    // Same semantics as model rm (dependency check, --cascade)
+    // Same semantics as model rm (dependency check, --cascade, pipeline guard)
     let removal: ModelRemoval
     try {
-      removal = await removeModelWithDependents(modelsDir, resolved.ref, flags.cascade)
+      removal = await removeModelWithDependents(
+        modelsDir,
+        resolved.ref,
+        flags.cascade,
+        getPipelinesPath(this.workspaceConfig)
+      )
     } catch (err) {
-      if (err instanceof DanglingDependentsError) {
+      if (err instanceof DanglingDependentsError || err instanceof PipelineDependentsError) {
         this.jsonAwareFail(json, err.message, EXIT_CODES.VALIDATION_FAILURE)
       }
       throw err

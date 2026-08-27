@@ -321,6 +321,70 @@ describe('run pre-flight ref collisions (claimed-refs check)', () => {
   })
 })
 
+describe('run pipelines: --save-as and replay', () => {
+  // A pipeline is a SAVED INVOCATION of the chaining run: --save-as
+  // persists steps + bindings as pipelines/<name>.json after a successful
+  // run; `run <name>` rebuilds the request from the saved fields, with
+  // invocation flags overriding saved values.
+  const pipelineFile = () => join(testHome, '.synth', 'pipelines', 'gen-sql.json')
+
+  it('saves a successful chain with --save-as, storing the invocation as plain JSON', async () => {
+    const genDir = join(tempDir, 'pipe-gen')
+    const { stdout, error } = await run([
+      'run', 'eer-to-relational', 'rel-to-sql-ddl', '--in', 'com.example/persons',
+      '--default-configs', '--out-dir', genDir, '--save-as', 'gen-sql'
+    ])
+    expect(error).toBeUndefined()
+    expect(stdout).toContain(`Saved pipeline 'gen-sql'`)
+    const definition = JSON.parse(readFileSync(pipelineFile(), 'utf-8'))
+    expect(definition).toMatchObject({
+      name: 'gen-sql',
+      steps: ['eer-to-relational', 'rel-to-sql-ddl'],
+      in: 'com.example/persons',
+      outDir: genDir,
+      defaultConfigs: true,
+      description: ''
+    })
+    // Only explicitly-bound values are frozen; a replay re-derives the rest
+    expect(definition.out).toBeUndefined()
+    expect(definition.config).toBeUndefined()
+    expect(definition.keepIntermediates).toBeUndefined()
+    expect(definition.createdAt).toBeTruthy()
+    expect(definition.modifiedAt).toBeTruthy()
+  })
+
+  it('replays the chain by name through the full pre-flight, honoring the saved consent', async () => {
+    const replayDir = join(tempDir, 'pipe-replay')
+    const { stdout, error } = await run(['run', 'gen-sql', '--out-dir', replayDir])
+    expect(error).toBeUndefined()
+    // The saved defaultConfigs consent covers the decision-based steps
+    expect(stdout).toContain('[step 2/2 rel-to-sql-ddl] decision IdentifierQuoting -> Unquoted (default)')
+    const sqlFiles = readdirSync(replayDir).filter((name) => name.endsWith('.sql'))
+    expect(sqlFiles.length).toBe(1)
+    expect(readFileSync(join(replayDir, sqlFiles[0]), 'utf-8')).toContain('CREATE TABLE person')
+  })
+
+  it('replays on another input model via the --in override', async () => {
+    const replayDir = join(tempDir, 'pipe-replay-in')
+    const { stdout, error } = await run([
+      'run', 'gen-sql', '--in', 'com.example/persons2', '--out-dir', replayDir, '--json'
+    ])
+    expect(error).toBeUndefined()
+    const parsed = JSON.parse(stdout)
+    expect(parsed.in).toBe('com.example/persons2')
+    expect(parsed.steps.map((step: { tx: string }) => step.tx)).toEqual(['eer-to-relational', 'rel-to-sql-ddl'])
+    const sqlFiles = readdirSync(replayDir).filter((name) => name.endsWith('.sql'))
+    expect(sqlFiles.length).toBe(1)
+  })
+
+  it('rejects a pipeline name combined with further transformation names', async () => {
+    const { code, stderr } = await run(['run', 'gen-sql', 'rel-to-sql-ddl', '--out-dir', join(tempDir, 'never-pipe')])
+    expect(code).toBe(1)
+    expect(flatten(stderr)).toContain('replays alone')
+    expect(existsSync(join(tempDir, 'never-pipe'))).toBe(false)
+  })
+})
+
 describe('run chain provenance (per-step actual input refs)', () => {
   beforeAll(async () => {
     await run(['model', 'import', personsFixture, '--as', 'com.example/prov'])

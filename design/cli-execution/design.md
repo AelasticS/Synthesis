@@ -28,9 +28,56 @@ Resource → verb everywhere. Execution:
 - `synth m2t` — **removed** (no deprecation alias; nothing was ever
   published).
 - `synth example list` → renamed `example ls` (consistency).
-- New topic `synth pipeline ls|show|rm|edit` for saved chains
-  (stored under `pipelines/` in the workspace; created via
-  `synth run ... --save-as <name>`; invocation flags override saved values).
+- New topic `synth pipeline ls|show|rm|edit` for saved pipelines
+  (delivered in Phase 5; semantics below).
+
+### Pipelines (as delivered in Phase 5)
+
+A pipeline is a SAVED INVOCATION of the chaining `run` — the steps plus
+their bindings — stored as **plain JSON, not a model**, at
+`pipelines/<name>.json` in the workspace (sibling of `models/` and
+`transformations/`; `init` creates the directory, `doctor` tolerates its
+absence). Schema: `{ name, steps, in, out? | outDir?, config?,
+defaultConfigs?, keepIntermediates?, description, createdAt, modifiedAt }`
+— refs stored canonically, `outDir` as invoked, optional bindings only
+when set (a replay re-derives the same defaults, e.g. the `--out` ref
+derived from `--in`). `src/pipelines/store.ts` owns the schema
+(hand-rolled validation with precise per-field errors, like the manifest
+reader) and the load/save/list/scan primitives; the commands are thin.
+
+- **Saving**: `synth run ... --save-as <name>` persists the invocation
+  after a SUCCESSFUL run (single or multi step). The name must be a valid
+  segment (`[A-Za-z0-9_-]+`) and must NOT equal an installed
+  transformation name (would shadow it); an existing pipeline requires
+  `--overwrite` (which preserves `createdAt`/`description`);
+  `--save-as` + `--save-config` together is an error. All save-as checks
+  run in pre-flight, before any engine work.
+- **Replay**: `synth run <name>` — a single positional name resolves as a
+  pipeline FIRST, then as a transformation; a name matching both runs the
+  pipeline with a shadowing warning (`tx run` never resolves pipelines).
+  The execution request is rebuilt from the saved fields with invocation
+  flags overriding saved values (`--in`, `--out`, `--out-dir`, `--config`,
+  `--default-configs`, `--keep-intermediates`, `--overwrite`,
+  `--verbose`). Replay runs the full normal pre-flight (type-check,
+  configuration consent, claimed-refs) — a pipeline is convenience, never
+  a bypass. A pipeline name plus further transformation names is an
+  error; a name that is neither pipeline nor transformation exits 3.
+- **Management**: `pipeline ls` (name, steps, in; `--json`),
+  `pipeline show <name>` (all fields; `--json`), `pipeline rm <name>` (no
+  dependency check — nothing references a pipeline), `pipeline edit
+  <name>` (`$EDITOR`; after the editor closes the file is re-validated
+  and every schema problem is a warning). Missing pipeline → exit 3;
+  invalid file → exit 2 listing every problem; `jsonAwareFail`
+  everywhere.
+- **Deletion guards** (pipelines never cascade; the repair is update or
+  `pipeline rm` first): `tx uninstall` refuses (exit 2) while any saved
+  pipeline lists the transformation as a step, naming the pipelines;
+  model deletion (`model rm`/`config rm`, incl. `--cascade` closures)
+  refuses (exit 2) when a pipeline's `in` or `config` binds any model
+  that would be deleted, naming pipeline and binding. `doctor` checks
+  every pipeline file: schema-valid, steps installed, `in` exists,
+  `config` (when set) exists and is a configuration model — problems are
+  warnings naming the pipeline.
 
 ### Chaining rules (as delivered in Phase 4)
 

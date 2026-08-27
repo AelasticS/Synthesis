@@ -21,6 +21,8 @@ export interface RunOptions {
   home?: string
   /** Working directory for the command */
   cwd?: string
+  /** Extra environment variables (e.g. EDITOR) merged over process.env */
+  env?: Record<string, string>
 }
 
 /**
@@ -28,7 +30,7 @@ export interface RunOptions {
  * Use this instead of @oclif/test's runCommand to avoid Jest ESM issues.
  */
 export async function runCli(args: string[], options?: RunOptions): Promise<RunResult> {
-  const env = { ...process.env }
+  const env = { ...process.env, ...options?.env }
   if (options?.home) {
     env.HOME = options.home
   }

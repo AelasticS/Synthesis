@@ -5,10 +5,14 @@ import { join } from 'node:path'
 import { Args } from '@oclif/core'
 
 import { BaseCommand } from '../../base/base-command.js'
-import { getTransformationsPath, saveConfig } from '../../config/index.js'
+import { getPipelinesPath, getTransformationsPath, saveConfig } from '../../config/index.js'
+import { findPipelinesUsingTx } from '../../pipelines/store.js'
+import { EXIT_CODES } from '../../support/exit-codes.js'
 
 export default class TxUninstall extends BaseCommand {
-  static override description = 'Remove an installed transformation.'
+  static override description = `Remove an installed transformation.
+
+Refused while any saved pipeline lists the transformation as a step (a replay would break); update those pipelines or delete them with 'synth pipeline rm' first — there is no cascade.`
 
   static override examples = ['<%= config.bin %> <%= command.id %> eer-to-relational']
 
@@ -22,6 +26,19 @@ export default class TxUninstall extends BaseCommand {
   public async execute(): Promise<void> {
     const { args, flags } = await this.parse(TxUninstall)
     const txName = args.name
+    const json = Boolean(flags.json)
+
+    // Deletion guard, mirroring model removal: uninstalling a step of a
+    // saved pipeline would leave the pipeline dangling.
+    const dependents = await findPipelinesUsingTx(getPipelinesPath(this.workspaceConfig), txName)
+    if (dependents.length > 0) {
+      this.jsonAwareFail(
+        json,
+        `Cannot uninstall '${txName}' — ${dependents.length} saved pipeline(s) use it as a step: ${dependents.join(', ')}. ` +
+          `Update them or delete them with 'synth pipeline rm' first.`,
+        EXIT_CODES.VALIDATION_FAILURE
+      )
+    }
 
     // Check if it's in config
     const configEntry = this.workspaceConfig.transformations[txName]

@@ -50,6 +50,9 @@
       "config": {
         "description": "Manage variability configurations."
       },
+      "pipeline": {
+        "description": "Manage saved pipelines (replayable run invocations)."
+      },
       "workspace": {
         "description": "Inspect or switch the active workspace."
       }

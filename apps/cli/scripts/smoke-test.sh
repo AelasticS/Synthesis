@@ -163,6 +163,38 @@ grep -q 'CREATE TABLE "person"' "$WORK/chain-quoted"/*.sql && ok "DDL identifier
 grep -q 'REFERENCES "organization"' "$WORK/chain-quoted"/*.sql && ok "quoted FK REFERENCES matches the quoted table name" || bad "quoted FK REFERENCES matches the quoted table name"
 
 # =============================================================================
+# Phase 5 — pipelines
+# A pipeline is a saved invocation of the chaining run: --save-as persists
+# steps + bindings as plain JSON at pipelines/<name>.json; `run <name>`
+# replays it through the full normal pre-flight, with invocation flags
+# overriding the saved values. Deletion guards keep saved pipelines
+# replayable: tx uninstall refuses while a pipeline uses the tx as a step,
+# model rm refuses while a pipeline binds the model (no cascade into
+# pipelines — update them or `pipeline rm` first).
+# =============================================================================
+say "Phase 5: pipelines"
+
+run "chain with --save-as saves the pipeline" 0 "Saved pipeline 'gen-sql'" run eer-to-relational rel-to-sql-ddl --in com.example/persons --default-configs --out-dir "$WORK/p5-gen" --save-as gen-sql
+test -f "$HOME/.synth/pipelines/gen-sql.json" && ok "pipeline file exists" || bad "pipeline file exists"
+run "run gen-sql replays the saved chain"  0 "Wrote"               run gen-sql
+grep -q "CREATE TABLE person" "$WORK/p5-gen"/*.sql && ok "replayed SQL produced" || bad "replayed SQL produced"
+run "replay with --out-dir override"       0 "Wrote"               run gen-sql --out-dir "$WORK/p5-elsewhere"
+grep -q "CREATE TABLE person" "$WORK/p5-elsewhere"/*.sql && ok "override SQL produced elsewhere" || bad "override SQL produced elsewhere"
+run "import a second source model"         0 "Imported"            model import "$FIXTURE" --as com.example/persons2
+run "replay with --in override on it"      0 "Wrote"               run gen-sql --in com.example/persons2 --out-dir "$WORK/p5-in-override"
+grep -q "CREATE TABLE person" "$WORK/p5-in-override"/*.sql && ok "in-override SQL produced" || bad "in-override SQL produced"
+run "save-as shadowing a tx is rejected"   1 "shadow"              run eer-to-relational --in com.example/persons --default-configs --out com.example/never --save-as rel-to-sql-ddl
+run "tx uninstall refused while gen-sql uses it" 2 "gen-sql"       tx uninstall rel-to-sql-ddl
+run "model rm refused while gen-sql reads it"    2 "gen-sql"       model rm com.example/persons --cascade
+run "guarded model still present"          0 "com.example/persons" model show com.example/persons
+run "pipeline ls lists the pipeline"       0 "gen-sql"             pipeline ls
+run "pipeline show displays the steps"     0 "eer-to-relational -> rel-to-sql-ddl" pipeline show gen-sql
+run "doctor clean with saved pipeline"     0 "0 errors"            doctor
+run "pipeline rm deletes it"               0 "Deleted"             pipeline rm gen-sql
+run "pipeline show now exits 3"            3 -                     pipeline show gen-sql
+run "tx uninstall works after pipeline rm" 0 "Uninstalled"         tx uninstall rel-to-sql-ddl
+
+# =============================================================================
 say "Summary"
 printf '   passed: %d   failed: %d\n' "$PASS" "$FAIL"
 rm -rf "$WORK"

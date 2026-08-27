@@ -2,9 +2,10 @@ import { existsSync } from 'node:fs'
 import { Args, Flags } from '@oclif/core'
 
 import { BaseCommand } from '../../base/base-command.js'
-import { getModelsPath } from '../../config/index.js'
+import { getModelsPath, getPipelinesPath } from '../../config/index.js'
 import {
   DanglingDependentsError,
+  PipelineDependentsError,
   removalJson,
   removalLines,
   removeModelWithDependents
@@ -59,9 +60,9 @@ export default class ModelRm extends BaseCommand {
     // reverse-dependency closure goes with it (--cascade).
     let removal: ModelRemoval
     try {
-      removal = await removeModelWithDependents(modelsDir, ref, flags.cascade)
+      removal = await removeModelWithDependents(modelsDir, ref, flags.cascade, getPipelinesPath(this.workspaceConfig))
     } catch (err) {
-      if (err instanceof DanglingDependentsError) {
+      if (err instanceof DanglingDependentsError || err instanceof PipelineDependentsError) {
         this.jsonAwareFail(json, err.message, EXIT_CODES.VALIDATION_FAILURE)
       }
       throw err

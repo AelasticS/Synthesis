@@ -89,6 +89,13 @@ export function getTransformationsPath(config: WorkspaceConfig): string {
 }
 
 /**
+ * Get the pipelines directory path (saved `run` invocations).
+ */
+export function getPipelinesPath(config: WorkspaceConfig): string {
+  return join(getWorkspacePath(config), WORKSPACE_DIRS.pipelines)
+}
+
+/**
  * Get the path to a specific namespace folder.
  */
 export function getNamespacePath(config: WorkspaceConfig, namespace: string): string {
