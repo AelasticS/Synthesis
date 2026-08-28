@@ -5,8 +5,8 @@
  *   - bare package specifiers are imported directly: they resolve against
  *     the CLI installation itself (the CLI's dependencies are the runtime
  *     the packages compile against), honour the packages' ESM export
- *     conditions, and share the module registry — and with it aelastics
- *     type/schema identity — with the CLI process;
+ *     conditions, and share the module registry (and with it aelastics
+ *     type/schema identity) with the CLI process;
  *   - './'-relative paths resolve against the installed package directory.
  *     An installed package has no node_modules of its own, so the file is
  *     bundled with its bare imports externalized to CLI-resolved absolute

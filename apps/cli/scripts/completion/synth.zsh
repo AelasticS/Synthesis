@@ -1,4 +1,4 @@
-# synth — dynamic zsh completion (values: transformation names, model and
+# synth: dynamic zsh completion (values: transformation names, model and
 # configuration refs, pipeline names, namespaces).
 #
 # How it works: on TAB this wrapper asks the CLI itself for the candidate
@@ -6,7 +6,7 @@
 # a fast, engine-free lookup over the workspace's manifests and model
 # headers). When the CLI has no value candidates for the position, the
 # wrapper falls back to the command/flag completion that
-# @oclif/plugin-autocomplete generates (`_synth`), when that is loaded —
+# @oclif/plugin-autocomplete generates (`_synth`), when that is loaded,
 # and to zsh's default completion otherwise.
 #
 # One-time setup, in this order in ~/.zshrc (after `compinit`):
@@ -25,8 +25,8 @@
 # setup, and bash/zsh are the first-class shells (no powershell wiring).
 
 _synth_dynamic() {
-  # $words[1] is 'synth'; pass words 2..CURRENT — up to AND INCLUDING the
-  # word under the cursor ('' when a new word is being started) — the
+  # $words[1] is 'synth'; pass words 2..CURRENT, up to AND INCLUDING the
+  # word under the cursor ('' when a new word is being started): the
   # `synth completions` contract. Zsh keeps '--flag=partial' as ONE word,
   # which the CLI understands as-is.
   local -a cli_words

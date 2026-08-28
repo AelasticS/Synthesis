@@ -236,7 +236,7 @@ describe('workspace', () => {
 
 describe('run (removed)', () => {
   // The polymorphic top-level `run` is gone: transformations run with
-  // 'transformation run', pipelines with 'pipeline run' — the argument's
+  // 'transformation run', pipelines with 'pipeline run'; the argument's
   // resource type is always explicit, never guessed.
   it('is no longer a synth command', async () => {
     const { error, stderr } = await runCli(['run', 'my-tx', '--in', 'ns/model'], { home: testHome })

@@ -90,7 +90,7 @@ export default class NamespaceRm extends BaseCommand {
 
     // Deletion mirror of the import gate, one level up: models OUTSIDE the
     // namespace that transitively reference models inside it would be left
-    // dangling. The CLI never does that silently — without --cascade the
+    // dangling. The CLI never does that silently: without --cascade the
     // removal is refused; with it, the whole external closure goes too.
     const inside = await listModels(modelsPath, args.namespace)
     const insideRefs = new Set(inside.map((m) => m.ref))
@@ -100,7 +100,7 @@ export default class NamespaceRm extends BaseCommand {
       const tree = formatDependencyTree(insideRefs, edges).join('\n')
       this.jsonAwareFail(
         json,
-        `Cannot remove namespace '${args.namespace}' — ${closure.length} model(s) outside it ` +
+        `Cannot remove namespace '${args.namespace}': ${closure.length} model(s) outside it ` +
           `reference models inside it:\n${tree}\n` +
           'Remove or update them first, or pass --cascade to delete all of the above together.',
         EXIT_CODES.VALIDATION_FAILURE

@@ -188,7 +188,7 @@ export class ModelClosureError extends Error {
  * Render every model reachable from a `references` map (depth-first: a
  * model's own references render before the model itself) into the store.
  * Reference cycles are cut on first visit; `exclude` names refs that must
- * not be (re)rendered — e.g. the referencing model itself. `origin` names
+ * not be (re)rendered, e.g. the referencing model itself. `origin` names
  * the referencing artifact in error messages. Failures are reported as
  * ModelClosureError so callers can distinguish a missing reference from a
  * broken one.
@@ -271,7 +271,7 @@ export async function renderModelClosure(
  * Atomically replace (or create) a model file, but only when the new
  * content passes `gate`. The content is written to a temp file next to the
  * target, the gate runs against the temp file, and only on success is the
- * temp renamed over the target — a failing gate leaves any pre-existing
+ * temp renamed over the target; a failing gate leaves any pre-existing
  * target untouched and removes the temp. The temp file keeps the `.tsx`
  * extension (the transpiler selects its loader by extension); its dotted
  * stem is not a valid ref segment, so the models-tree walker can never

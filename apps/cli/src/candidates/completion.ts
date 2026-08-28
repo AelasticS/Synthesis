@@ -4,22 +4,22 @@
  * engine behind the hidden `synth completions` command that the shipped
  * bash/zsh snippets call on TAB.
  *
- * Contract (stable — the shell scripts depend on it):
+ * Contract (stable; the shell scripts depend on it):
  *   - Input: the command-line words AFTER the program name, in order, the
  *     LAST word being the one under the cursor ('' when a new word starts).
  *     The last word may arrive in the single-token `--flag=partial` form
- *     (bash reassembles its '='-split words; zsh never splits) — it
+ *     (bash reassembles its '='-split words; zsh never splits), and it
  *     completes exactly like `--flag partial`.
  *   - Output: newline-separated candidate values for that position,
  *     filtered by the partial word; nothing else.
  *   - Values only: command names and flag names are the base completion's
- *     job — for a position this module has no candidates for (including
+ *     job; for a position this module has no candidates for (including
  *     any partial starting with '-'), it prints nothing.
  *   - It NEVER errors and never blocks on the engine: candidates come from
  *     the candidate provider (manifests, headers, pipeline files).
  *
  * Command knowledge (which flags take values, which alias ids exist) is
- * derived from the loaded oclif config — never hand-maintained. Global
+ * derived from the loaded oclif config, never hand-maintained. Global
  * flags typed before the topic (`synth -q tx run <TAB>`) are skipped when
  * resolving the command, and a `--workspace`/`--ns` override anywhere on
  * the line resolves the candidates from THAT workspace, exactly like the
@@ -72,7 +72,7 @@ export interface CompletionCommandSpec {
 const GLOBAL_VALUE_FLAGS = new Set(['--workspace', '--ns'])
 
 interface ResolvedCommand {
-  /** Canonical id in space form — what the position logic switches on. */
+  /** Canonical id in space form: what the position logic switches on. */
   id: string
   valueFlags: Set<string>
 }
@@ -155,7 +155,7 @@ async function installedManifestOf(
 /**
  * The transformation whose manifest governs `--in`/`--config` at this
  * position: the first positional for `transformation run`, the named
- * pipeline's first step for `pipeline run` (ONE lenient file read — never
+ * pipeline's first step for `pipeline run` (ONE lenient file read, never
  * a directory scan).
  */
 async function stepOneTxOf(
@@ -176,7 +176,7 @@ async function stepOneTxOf(
 
 /**
  * Candidate values for the position the last word marks. Unknown context
- * yields an empty list — never an error.
+ * yields an empty list, never an error.
  */
 export async function completionCandidates(
   config: WorkspaceConfig,

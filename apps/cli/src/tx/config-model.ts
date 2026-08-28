@@ -6,7 +6,7 @@
  * (`selectedOption={SnakeCase}`) and `exportToJSX` inlines the whole
  * decision/source graphs. So the CLI serializes the rendered configuration
  * model itself, emitting the same `$refByName` reference style a
- * hand-written configuration uses — every issue/option/element/binding is
+ * hand-written configuration uses: every issue/option/element/binding is
  * a reference into the transformation's parts or the source model, which
  * is exactly why such a file only renders with the tx context loaded.
  */
@@ -80,7 +80,7 @@ export type ConfigModelResolveErrorKind = 'invalid-ref' | 'missing' | 'malformed
 
 /**
  * Typed failure of `resolveConfigurationModel`; `exit` is the CLI exit
- * code the failure maps to — one contract for every command that takes a
+ * code the failure maps to: one contract for every command that takes a
  * configuration-model ref.
  */
 export class ConfigModelResolveError extends Error {
@@ -187,8 +187,8 @@ export function generateDefaultConfigModel(
  * rendered configuration model, exactly as the default generator would
  * have created them: a GlobalChoice/ElementChoice decision holding one
  * Choice whose selectedOption is the issue's default option. Without this
- * the engine would apply nothing for those slots — its Option() evaluation
- * has no default fallback — while the CLI announces '(default)'.
+ * the engine would apply nothing for those slots (its Option() evaluation
+ * has no default fallback) while the CLI announces '(default)'.
  */
 export function materializeDefaultChoices(
   store: ModelStore,
@@ -276,7 +276,7 @@ function refByName(element: unknown, what: string): string {
  * Serialize a rendered configuration model to the editable `$refByName`
  * JSX form. Choice names are re-derived as `<decision>_<option>` so the
  * persisted file is stable across runs (the generator appends random
- * suffixes). The decision model provides each option's owning issue — the
+ * suffixes). The decision model provides each option's owning issue; the
  * choice's own issue reference stays unresolved in the rendered graph.
  */
 export function serializeConfigModel(
@@ -354,7 +354,7 @@ export function serializeConfigModel(
 
 /**
  * Group the tags a serialized configuration JSX uses by the component
- * module exporting them — one scan serves both the import lines and the
+ * module exporting them: one scan serves both the import lines and the
  * export verification. An unexpected tag is a serializer defect.
  */
 export function groupConfigTagsByModule(jsx: string): Map<string, string[]> {
@@ -371,7 +371,7 @@ export function groupConfigTagsByModule(jsx: string): Map<string, string[]> {
 
 /**
  * Wrap serialized configuration JSX into a complete workspace model module
- * — the same shape `model import --tx` accepts. Imports are grouped per
+ * (the same shape `model import --tx` accepts). Imports are grouped per
  * component module and cover exactly the tags the JSX uses; callers that
  * already computed the grouping pass it in.
  */
@@ -408,7 +408,7 @@ export interface ConfigWriteRequest {
  * serialize, verify every emitted tag against the exporting component
  * modules, stamp the provenance header, and write through the gated
  * temp-file path. The gate renders the candidate WITH the transformation's
- * parts and its header's reference closure — a plain render can never
+ * parts and its header's reference closure; a plain render can never
  * resolve a configuration model's references.
  */
 export async function writeConfigModelFile(request: ConfigWriteRequest): Promise<void> {
@@ -483,8 +483,8 @@ export interface DefaultConfigResult {
  * The default-configuration flow shared by `config init` and the
  * execution core's `--default-configs` path (with `--save-config`
  * persisting what was generated): generate the default configuration in
- * the caller's store, announce every decision it records, and — when a
- * target is given — persist it through the gated writer. Failures carry
+ * the caller's store, announce every decision it records, and (when a
+ * target is given) persist it through the gated writer. Failures carry
  * the exit code the caller must use.
  */
 export async function generateAndPersistDefaultConfig(

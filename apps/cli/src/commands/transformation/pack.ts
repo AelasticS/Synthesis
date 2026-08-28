@@ -12,7 +12,7 @@ export default class TransformationPack extends BaseCommand {
   static override examples = ['<%= config.bin %> <%= command.id %>']
 
   public async execute(): Promise<void> {
-    // No flags or args of its own — the parse still rejects unknown ones.
+    // No flags or args of its own, but the parse still rejects unknown ones.
     await this.parse(TransformationPack)
     const cwd = this.savedPwd
 

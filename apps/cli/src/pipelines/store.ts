@@ -3,7 +3,7 @@
  *
  * A pipeline is a NAMED PROCESS: an ordered list of transformation steps,
  * stored as plain JSON (not a model) at `pipelines/<name>.json` in the
- * workspace. It deliberately stores NO data bindings — no input model, no
+ * workspace. It deliberately stores NO data bindings: no input model, no
  * output target, no configuration, no consent flags. Stored bindings would
  * silently steer replays (the same hazard as implicit defaults), and a
  * stored configuration is provably wrong for any other input: a
@@ -46,7 +46,7 @@ export function isValidPipelineName(name: string): boolean {
  * Why `name` cannot become a NEW pipeline, or undefined when it can:
  * the segment grammar, and no shadowing of an installed transformation
  * (one name meaning two runnable things invites invoking the wrong one).
- * Shared by `pipeline mk` and `transformation run --save-as` — the only
+ * Shared by `pipeline mk` and `transformation run --save-as`, the only
  * two places that create pipelines.
  */
 export function newPipelineNameProblem(name: string, installedTxNames: Iterable<string>): string | undefined {
@@ -175,7 +175,7 @@ export async function readPipelineFile(pipelinesDir: string, name: string): Prom
 /**
  * Load a saved pipeline by name. Throws ExecuteError: NOT_FOUND when no
  * file exists (or the name is not even a valid pipeline name),
- * VALIDATION_FAILURE when the file exists but violates the schema — every
+ * VALIDATION_FAILURE when the file exists but violates the schema; every
  * problem is listed, with `pipeline edit` as the repair path.
  */
 export async function loadPipeline(pipelinesDir: string, name: string): Promise<PipelineDefinition> {
@@ -207,7 +207,7 @@ export async function savePipeline(pipelinesDir: string, pipeline: PipelineDefin
  * The `*.json` stems in the pipelines directory, sorted. A missing
  * directory (older workspace, nothing saved yet) yields an empty list;
  * any OTHER readdir failure (permissions, a file where the directory
- * should be) throws — silently treating it as empty would misreport the
+ * should be) throws: silently treating it as empty would misreport the
  * workspace.
  */
 async function pipelineFileNames(pipelinesDir: string): Promise<string[]> {
@@ -236,7 +236,7 @@ export interface PipelineListEntry {
 /**
  * All `*.json` files in the pipelines directory, each with its validation
  * result. Files whose stem is not a valid pipeline name are included with
- * an error — no `pipeline run <name>` can ever address them.
+ * an error; no `pipeline run <name>` can ever address them.
  */
 export async function listPipelines(pipelinesDir: string): Promise<PipelineListEntry[]> {
   const entries: PipelineListEntry[] = []
@@ -258,7 +258,7 @@ export async function listPipelines(pipelinesDir: string): Promise<PipelineListE
 }
 
 /**
- * Names of the saved pipelines whose steps include the transformation —
+ * Names of the saved pipelines whose steps include the transformation:
  * the `transformation uninstall` guard. Steps are extracted LENIENTLY
  * (best-effort from the raw JSON, even when the file fails schema
  * validation): an invalid-but-repairable pipeline still protects the

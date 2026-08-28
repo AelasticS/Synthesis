@@ -5,7 +5,7 @@
  * when both stdin and stdout are TTYs, the invocation asked for human
  * output (no --json, no --quiet), and the environment is not CI. In every
  * other case the commands take their unchanged non-interactive path and
- * fail with exactly the errors they always produced — piped invocations,
+ * fail with exactly the errors they always produced: piped invocations,
  * scripts, and CI never see a prompt.
  *
  * The flows themselves (src/interactive/flows.ts) never import
@@ -24,7 +24,7 @@ export interface PromptChoice<T> {
 
 /** The prompt surface the flows program against; injectable for tests. */
 export interface Prompter {
-  /** Type-to-filter list — for candidate sets of any size. */
+  /** Type-to-filter list, for candidate sets of any size. */
   search<T>(message: string, choices: ReadonlyArray<PromptChoice<T>>): Promise<T>
   /** Small fixed choice set. */
   select<T>(message: string, choices: ReadonlyArray<PromptChoice<T>>): Promise<T>
@@ -36,7 +36,7 @@ export interface Prompter {
 /**
  * Whether the environment declares itself CI: a set, TRUTHY `CI` value.
  * `CI=false`, `CI=0`, and `CI=` (empty) explicitly opt back IN to
- * interactivity — some tools export CI unconditionally, and a falsy value
+ * interactivity, because some tools export CI unconditionally, and a falsy value
  * in a real TTY means "not CI".
  */
 function isCiEnvironment(): boolean {

@@ -197,9 +197,9 @@ Maintainer workflow:
 1. **Run the tests and the smoke suite.** Both must be green before
    anything is tagged: the full test suite, and the CLI's executable
    end-to-end smoke scenarios (`rushx smoke` runs the composed user
-   journey through the real binary in an isolated HOME: workspace,
-   import gate, execution, configurations, chaining, pipelines,
-   completion):
+   journey of workspace, import gate, execution, configurations,
+   chaining, pipelines, and completion through the real binary in an
+   isolated HOME):
    ```bash
    rush build
    rush test

@@ -87,7 +87,7 @@ const pkgJsonPath = join(cliRoot, 'package.json')
 const originalPkgJson = readFileSync(pkgJsonPath, 'utf-8')
 
 if (!existsSync(join(cliRoot, 'oclif.manifest.json'))) {
-  throw new Error('oclif.manifest.json missing — run `rush build --to @synthesis/cli` first')
+  throw new Error('oclif.manifest.json missing; run `rush build --to @synthesis/cli` first')
 }
 
 try {
@@ -97,7 +97,7 @@ try {
 
   const cliPkg = JSON.parse(originalPkgJson)
   // devDependencies are not shipped and their peer ranges (eslint et al.)
-  // do not resolve under npm's strict resolver — drop them for packing.
+  // do not resolve under npm's strict resolver, so drop them for packing.
   delete cliPkg.devDependencies
   const projects = workspaceProjects()
   const closure = dependencyClosure(projects, cliPkg)

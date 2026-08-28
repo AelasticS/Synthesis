@@ -20,7 +20,7 @@ export function uniqueJsxTags(jsx: string): string[] {
 }
 
 /**
- * Wrap rendered model JSX into a complete workspace model module — the
+ * Wrap rendered model JSX into a complete workspace model module: the
  * shared skeleton behind transformation run's m2m writer and the configuration-model
  * serializer: jsx pragma, import lines, `$synth` header text, and a
  * default-exported `(store) => (<jsx>)` factory.

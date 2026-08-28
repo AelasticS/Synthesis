@@ -47,7 +47,7 @@ afterAll(() => {
   }
 })
 
-describe('loadTxManifest — manifest locations', () => {
+describe('loadTxManifest: manifest locations', () => {
   it('loads a complete manifest from synth.json', async () => {
     const dir = makePackage(basePkg, {
       ...validSynth,
@@ -80,7 +80,7 @@ describe('loadTxManifest — manifest locations', () => {
     const dir = makePackage({ ...basePkg, synth: validSynth })
     const promise = loadTxManifest(dir)
     await expect(promise).rejects.toThrow(`No transformation manifest found in '${dir}'`)
-    await expect(promise).rejects.toThrow('that location was retired — move the manifest into synth.json')
+    await expect(promise).rejects.toThrow('that location was retired; move the manifest into synth.json')
   })
 
   it('ignores a leftover synth block in package.json when synth.json exists', async () => {
@@ -117,7 +117,7 @@ describe('loadTxManifest — manifest locations', () => {
   })
 })
 
-describe('loadTxManifest — field validation', () => {
+describe('loadTxManifest: field validation', () => {
   const expectFieldError = async (synth: object, field: string, fragment?: string): Promise<void> => {
     const dir = makePackage(basePkg, synth)
     const promise = loadTxManifest(dir)
@@ -189,7 +189,7 @@ describe('loadTxManifest — field validation', () => {
   })
 })
 
-describe('loadTxManifest — module specifier normalization', () => {
+describe('loadTxManifest: module specifier normalization', () => {
   it(`normalizes a path-looking specifier to './' when it names a packaged file`, async () => {
     const dir = makePackage(basePkg, {
       ...validSynth,
@@ -240,7 +240,7 @@ describe('loadTxManifestWithMeta', () => {
   })
 })
 
-describe('loadTxManifest — fixture packages', () => {
+describe('loadTxManifest: fixture packages', () => {
   it('loads the eer-to-relational (m2m) fixture', async () => {
     const manifest = await loadTxManifest(m2mFixture)
     expect(manifest).toEqual({

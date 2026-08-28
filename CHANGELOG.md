@@ -127,14 +127,14 @@ overall version history.
   decision-based transformation runs only with an explicit `--config <ref>`
   or the `--default-configs` consent flag; with neither, the run aborts
   (exit 2) before any engine work with a message teaching both paths. The
-  previous behavior (silently generating and applying default
-  configurations) is gone. In chains and pipelines, `--config` binds to
+  previous behavior of silently generating and applying default
+  configurations is gone. In chains and pipelines, `--config` binds to
   step 1 only; every other decision-based step takes `--default-configs`
   or the stepwise path (`--keep-intermediates` + `config init` against
   the kept intermediate).
 - **BREAKING (CLI): canonical command names with typing aliases.** Every
   resource topic has a full-word canonical name (`transformation`,
-  `namespace`, `pipeline`, `model`, `config`, `workspace`, `example`)
+  `namespace`, `pipeline`, `model`, `config`, `workspace`, `example`),
   with `tx`, `ns`, and `pl` as two-letter typing aliases of the first
   three. `example list` is renamed `example ls`.
 - **Uniform `--json` failure contract (CLI).** Every command failing in

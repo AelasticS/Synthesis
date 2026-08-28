@@ -3,7 +3,7 @@
  *
  * A transformation package declares what the CLI needs to know without
  * loading any code. The manifest is a `synth.json` file at the package
- * root — the only supported location. (An earlier fallback that read a
+ * root, the only supported location. (An earlier fallback that read a
  * `synth` object from `package.json` was retired when the convention was
  * frozen for publication; see design/engine-follow-ups.md.)
  *
@@ -34,7 +34,7 @@ export interface TxPartRef {
 
 /**
  * Modules of the transformation package itself, rendered into the store
- * before execution — in this order: metamodels, decisionModel,
+ * before execution, in this order: metamodels, decisionModel,
  * bindingModel. These ship WITH the transformation; they are not
  * workspace models.
  */
@@ -60,7 +60,7 @@ export interface TxManifest {
     metamodel: string
     /**
      * Import specifier of the JSX component module of the target
-     * metamodel — needed to wrap M2M output into a workspace model file.
+     * metamodel, needed to wrap M2M output into a workspace model file.
      */
     components?: string
   }
@@ -104,7 +104,7 @@ async function readJsonFile(path: string): Promise<Record<string, unknown>> {
 /**
  * A specifier like `lib/transformation.js` is neither package-relative
  * (`./lib/...`) nor a scoped package; when it names an existing file under
- * the package directory, the author meant the package-relative form —
+ * the package directory, the author meant the package-relative form:
  * normalize it so execution-time resolution imports the packaged file
  * instead of attempting a bare-package lookup.
  */
@@ -121,7 +121,7 @@ function normalizeModuleSpecifier(spec: string, packageDir: string): string {
 /**
  * Load and validate the transformation manifest of a package directory,
  * together with the npm metadata (description/author/license) of its
- * package.json — one read serves both.
+ * package.json; one read serves both.
  *
  * Reads `synth.json` at the package root. Throws with a precise message
  * (which file, which field) when the file is absent or a required field
@@ -143,7 +143,7 @@ export async function loadTxManifestWithMeta(
     // A "synth" object in package.json was an earlier manifest location;
     // give migrating authors a pointer instead of a bare not-found.
     const retiredHint = isRecord(pkg.synth)
-      ? ` (The "synth" object in its package.json is not read: that location was retired — move the manifest into ${SYNTH_MANIFEST_FILENAME}.)`
+      ? ` (The "synth" object in its package.json is not read: that location was retired; move the manifest into ${SYNTH_MANIFEST_FILENAME}.)`
       : ''
     throw new ManifestError(
       `No transformation manifest found in '${packageDir}': expected a '${SYNTH_MANIFEST_FILENAME}' file at the package root.${retiredHint}`

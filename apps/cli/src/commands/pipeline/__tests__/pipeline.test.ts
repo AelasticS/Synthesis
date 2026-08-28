@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url'
 import { runCli } from '../../../test-utils/run-cli.js'
 
 // The `pipeline` topic (canonical name; `pl` is the typing alias). A
-// pipeline is a NAMED PROCESS — steps only, no data bindings — stored as
+// pipeline is a NAMED PROCESS (steps only, no data bindings) stored as
 // plain JSON at pipelines/<name>.json. Hand-writing files here is a
 // legitimate way to arrange states (that IS the format), while `pipeline
 // mk` and `transformation run --save-as` cover the tool-written paths.
@@ -45,7 +45,7 @@ afterAll(() => {
   rmSync(tempDir, { recursive: true, force: true })
 })
 
-describe('pipeline mk (static authoring — nothing executes)', () => {
+describe('pipeline mk (static authoring, nothing executes)', () => {
   it('saves a process-only file after manifest-driven validation, without executing anything', async () => {
     const { stdout, error } = await run(['pipeline', 'mk', 'gen-sql', 'eer-to-relational', 'rel-to-sql-ddl'])
     expect(error).toBeUndefined()
@@ -414,7 +414,7 @@ describe('workspace guard', () => {
 })
 
 describe('doctor pipeline checks', () => {
-  it('warns about schema violations, uninstalled steps, and chain mismatches — the pipeline mk checks', async () => {
+  it('warns about schema violations, uninstalled steps, and chain mismatches: the pipeline mk checks', async () => {
     writePipeline('ghost', { name: 'ghost', steps: ['ghost-tx'] })
     writePipeline('mismatched', { name: 'mismatched', steps: ['eer-to-relational', 'eer-to-relational'] })
     writePipeline('legacy', { name: 'legacy', steps: ['eer-to-relational'], in: 'com.example/persons' })

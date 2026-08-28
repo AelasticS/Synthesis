@@ -219,7 +219,7 @@ describe('tx show', () => {
   })
 
   it('degrades to config data with a warning when the installed manifest is broken', async () => {
-    // A synth.json at the package root takes precedence — a broken one
+    // A synth.json at the package root takes precedence, so a broken one
     // makes every manifest load fail for this installed entry.
     const installedDir = join(testHome, '.synth', 'transformations', 'test-tx')
     writeFileSync(join(installedDir, 'synth.json'), '{ broken json')

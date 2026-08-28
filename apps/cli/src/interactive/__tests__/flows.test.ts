@@ -10,7 +10,7 @@ import { completeConfigInitRequest, completeRunRequest, FlowAborted, pickPipelin
 import type { FlowDeps } from '../flows.js'
 
 // The flows read manifests (real fixture packages) and headers (synthetic,
-// header-only model files that could never render) — proving the pickers
+// header-only model files that could never render), proving the pickers
 // never touch the engine. Prompts are scripted through a stub prompter;
 // each test asserts the resulting completed request.
 const packageRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../../..')
@@ -138,7 +138,7 @@ beforeAll(() => {
   writeFileSync(join(pipelinesDir, 'broken.json'), JSON.stringify({ steps: 'nope' }))
 
   writeFileSync(join(invokedFrom, 'newcomer.tsx'), 'export default () => null\n')
-  // Same stem as the existing workspace model com.example/persons — the
+  // Same stem as the existing workspace model com.example/persons; the
   // import offer must surface that model instead of dead-ending.
   writeFileSync(join(invokedFrom, 'persons.tsx'), 'export default () => null\n')
   // A configuration model FILE: its inline import can never succeed
@@ -301,7 +301,7 @@ describe('completeRunRequest', () => {
   })
 
   it('offers the existing workspace model when the .tsx default ref already exists', async () => {
-    // ./persons.tsx would import as com.example/persons — which exists.
+    // ./persons.tsx would import as com.example/persons, which exists.
     const deps = makeDeps(['existing', 'defaults'])
     const result = await completeRunRequest(deps, {
       txNames: ['eer-to-relational'],
@@ -363,7 +363,7 @@ describe('completeRunRequest', () => {
 
   it('offers only the defaults consent when --save-config is on the line', async () => {
     // com.example/persons-cfg WOULD fit, but --config next to --save-config
-    // is rejected at parse time — the picker must never assemble it.
+    // is rejected at parse time, so the picker must never assemble it.
     const deps = makeDeps(['defaults'])
     const result = await completeRunRequest(deps, {
       txNames: ['eer-to-relational'],
