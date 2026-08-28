@@ -13,6 +13,10 @@ const lightCodeTheme: typeof prismThemes.github = {
       types: ['comment', 'prolog', 'doctype', 'cdata'],
       style: {color: '#0b8235', fontStyle: 'italic' as const},
     },
+    // synth CLI sessions (tokens from src/theme/prism-include-languages):
+    // every flag amber, every operand (ref/path/name/URL) blue.
+    {types: ['parameter'], style: {color: '#e36209'}},
+    {types: ['operand-path', 'operand-name'], style: {color: '#005cc5'}},
   ],
 };
 const darkCodeTheme: typeof prismThemes.dracula = {
@@ -23,6 +27,8 @@ const darkCodeTheme: typeof prismThemes.dracula = {
       types: ['comment', 'prolog', 'doctype', 'cdata'],
       style: {color: '#6a9955', fontStyle: 'italic' as const},
     },
+    {types: ['parameter'], style: {color: '#ffb86c'}},
+    {types: ['operand-path', 'operand-name'], style: {color: '#8be9fd'}},
   ],
 };
 

@@ -1,8 +1,17 @@
 /**
  * Swizzled from @docusaurus/theme-classic to extend the bash grammar for
  * synth CLI sessions. Prism's stock bash grammar tokenizes only comments,
- * strings, flags, and a fixed list of well-known commands, so `synth`,
- * workspace refs (com.example/persons), and paths rendered as plain text.
+ * strings, and a fixed list of well-known commands, and its flag pattern
+ * rejects hyphenated flag names (--out-dir), which left them gray next to
+ * colored flags on the same line.
+ *
+ * Consistency scheme (colors defined in docusaurus.config.ts):
+ *   commands (synth, curl, tar, ...)      -> function color
+ *   flags (--in, --default-configs, -q)   -> 'parameter'
+ *   operands (refs, paths, names, URLs)   -> 'operand-path' / 'operand-name'
+ *   quoted strings                        -> string color
+ *   comments                              -> comment color
+ * Bare single words (subcommands, plain arguments) stay plain.
  */
 import siteConfig from '@generated/docusaurus.config';
 
@@ -32,22 +41,31 @@ export default function prismIncludeLanguages(PrismObject) {
   }
 
   if (PrismObject.languages.bash) {
+    const bash = PrismObject.languages.bash;
+    // Replace the stock flag pattern: it disallows hyphens inside flag
+    // names, so --in matched but --default-configs did not.
+    bash.parameter = {
+      pattern: /(^|\s)-{1,2}[\w-]+(?==|\s|$)/m,
+      lookbehind: true,
+    };
     PrismObject.languages.insertBefore('bash', 'function', {
-      // The synth binary itself, colored like other known commands.
+      // The synth binary, colored like other recognized commands.
       'synth-command': {
         pattern: /\bsynth\b/,
         alias: 'function',
       },
-      // Workspace refs: com.example/persons, com.example/persons-cfg
-      'workspace-ref': {
-        pattern: /\b[\w-]+(?:\.[\w-]+)+\/[\w./-]+/,
-        alias: 'attr-name',
-      },
-      // Filesystem paths: ./persons.tsx, ./generated, ~/.synth/, /usr/local
-      'path': {
-        pattern: /(^|\s)(?:\.{1,2}|~)?\/[\w.~/-]+/m,
+      // Slash-bearing operands: URLs, filesystem paths, workspace refs,
+      // package specifiers (com.example/persons, ./generated, ~/.synth,
+      // common/scripts/x.js, https://..., @scope/name).
+      'operand-path': {
+        pattern:
+          /(^|\s)(?:[\w+]+:\/\/[\w./~-]+|(?:\.{1,2}\/|~\/|\/)[\w.~/-]+)|@?\b[\w.-]+(?:\/[\w.-]+)+/m,
         lookbehind: true,
-        alias: 'string',
+      },
+      // Dotted or hyphenated bare names: transformation and pipeline
+      // names (eer-to-relational, gen-sql), namespaces (com.example).
+      'operand-name': {
+        pattern: /\b[A-Za-z]\w*(?:[-.]\w+)+\b/,
       },
     });
   }
