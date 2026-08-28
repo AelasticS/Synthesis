@@ -76,16 +76,14 @@ describe('loadTxManifest — manifest locations', () => {
     })
   })
 
-  it('loads the manifest from the synth block in package.json when synth.json is absent', async () => {
+  it('does not read the retired synth block in package.json', async () => {
     const dir = makePackage({ ...basePkg, synth: validSynth })
-    const manifest = await loadTxManifest(dir)
-    expect(manifest.kind).toBe('m2m')
-    expect(manifest.source.metamodel).toBe('mm/source')
-    expect(manifest.variability).toBe(false)
-    expect(manifest.parts).toBeUndefined()
+    const promise = loadTxManifest(dir)
+    await expect(promise).rejects.toThrow(`No transformation manifest found in '${dir}'`)
+    await expect(promise).rejects.toThrow('that location was retired — move the manifest into synth.json')
   })
 
-  it('prefers synth.json over the synth block in package.json', async () => {
+  it('ignores a leftover synth block in package.json when synth.json exists', async () => {
     const dir = makePackage(
       { ...basePkg, synth: { ...validSynth, kind: 'm2t' } },
       validSynth
@@ -101,10 +99,10 @@ describe('loadTxManifest — manifest locations', () => {
     expect(manifest.version).toBe('1.0.0')
   })
 
-  it('fails when neither synth.json nor a synth block exists', async () => {
+  it('fails when synth.json is absent', async () => {
     const dir = makePackage(basePkg)
     await expect(loadTxManifest(dir)).rejects.toThrow(
-      `No transformation manifest found in '${dir}': expected a 'synth.json' file at the package root or a "synth" object in package.json.`
+      `No transformation manifest found in '${dir}': expected a 'synth.json' file at the package root.`
     )
   })
 
@@ -160,15 +158,6 @@ describe('loadTxManifest — field validation', () => {
   it('rejects the retired sourceMetamodel alias in synth.json', async () => {
     const { source, ...rest } = validSynth
     await expectFieldError({ ...rest, sourceMetamodel: 'mm/source' }, 'source')
-  })
-
-  it('rejects the retired aliases inside the package.json synth block', async () => {
-    const { source, target, ...rest } = validSynth
-    const dir = makePackage({
-      ...basePkg,
-      synth: { ...rest, sourceMetamodel: 'legacy-source', targetMetamodel: 'legacy-target' }
-    })
-    await expect(loadTxManifest(dir)).rejects.toThrow(`field 'source' is required`)
   })
 
   it('validates parts entries', async () => {

@@ -51,13 +51,16 @@ workarounds for all of them; none blocks the cli-v0.1.0 release.
 - **Concurrent file reads** in doctor and model ls; subtree-rooted walk for
   `model ls --ns`; both matter only for large workspaces.
 
-## Open decisions
+## Resolved decisions
 
-- **Transformation manifest location** (`synth.json` vs `package.json#synth`)
-  — deliberately open; the reader supports both (synth.json takes
-  precedence), the docs state the implemented truth, and `tx init`
-  scaffolds `synth.json`. Decide before publishing transformation-authoring
-  guidance more widely.
+- **Transformation manifest location** — resolved 2026-08-28: `synth.json`
+  at the package root is the ONLY manifest location. The fallback that
+  read a `synth` object from `package.json` (a remnant of the first
+  tx-management implementation; the docs' spec always said `synth.json`)
+  is removed from the reader; a package still carrying a `synth` block
+  gets a migration hint in the manifest-not-found error. Decided ahead of
+  the tutorial and template-repository work, which freezes the convention
+  publicly.
 
 ## Release caveat (cli-v0.1.0)
 

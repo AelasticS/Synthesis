@@ -10,7 +10,13 @@ overall version history.
 
 ## [Unreleased]
 
-Nothing yet.
+### Changed
+
+- **CLI (breaking): `synth.json` is the only transformation manifest
+  location.** The fallback that read a `synth` object from `package.json`
+  is removed. A package that still carries a `synth` block fails
+  manifest loading with a migration hint pointing at `synth.json`.
+  Decision recorded in `design/engine-follow-ups.md`.
 
 ## [cli-v0.1.0] - 2026-08-28
 
