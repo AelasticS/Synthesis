@@ -37,16 +37,16 @@ const model = approval.render(new Context())
 
 The JSX expression is a tree of unevaluated element descriptions.
 `render()` evaluates it: each tag creates a typed model element, nesting
-becomes association, and the result is the model — a graph of
-interconnected, typed elements:
+becomes association, and the result is the model — here, an approval
+process in which *Write* is followed by two parallel approvals:
 
 ```mermaid
-graph TD
-    P["Process “Approval”"] --> S["Sequence"]
-    S --> W["Task “Write”"]
-    S --> PA["Parallel"]
-    PA --> A1["Task “Approve 1”"]
-    PA --> A2["Task “Approve 2”"]
+flowchart LR
+    S([Start]) --> W[Write]
+    W --> A1[Approve 1]
+    W --> A2[Approve 2]
+    A1 --> E([End])
+    A2 --> E
 ```
 
 Expression and value are different things, and keeping them apart is what
@@ -114,26 +114,31 @@ const Approval = ({ doc, approvers, parallel }: IApprovalConfig) => {
 
 Two instantiations, two structurally different models from the same
 definition — different element counts, different topology, different
-property values:
+property values.
+
+`<Approval doc="Contract" approvers={3} parallel={true} />` produces a
+process with three parallel approvals:
 
 ```mermaid
-graph TD
-    subgraph A["Approval doc=Contract approvers=3 parallel=true"]
-        P1["Process “Contract Approval”"] --> S1["Sequence"]
-        S1 --> W1["Task “Write Contract”"]
-        S1 --> PL["Parallel"]
-        PL --> A1["Task “Approve Contract 1”"]
-        PL --> A2["Task “Approve Contract 2”"]
-        PL --> A3["Task “Approve Contract 3”"]
-    end
-    subgraph B["Approval doc=Invoice approvers=2 parallel=false"]
-        P2["Process “Invoice Approval”"] --> S2["Sequence"]
-        S2 --> W2["Task “Write Invoice”"]
-        S2 --> SQ["Sequence"]
-        SQ --> B1["Task “Approve Invoice 1”"]
-        SQ --> B2["Task “Approve Invoice 2”"]
-    end
-    A2 ~~~ P2
+flowchart LR
+    S1([Start]) --> W1[Write Contract]
+    W1 --> C1[Approve Contract 1]
+    W1 --> C2[Approve Contract 2]
+    W1 --> C3[Approve Contract 3]
+    C1 --> E1([End])
+    C2 --> E1
+    C3 --> E1
+```
+
+`<Approval doc="Invoice" approvers={2} parallel={false} />` produces a
+process with two sequential approvals:
+
+```mermaid
+flowchart LR
+    S2([Start]) --> W2[Write Invoice]
+    W2 --> I1[Approve Invoice 1]
+    I1 --> I2[Approve Invoice 2]
+    I2 --> E2([End])
 ```
 
 An expression with no parameters and no computation is a *model literal* —
