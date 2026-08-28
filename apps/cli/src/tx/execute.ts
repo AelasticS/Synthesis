@@ -98,6 +98,49 @@ function buildModelModule(jsx: string, tags: string[], componentsSpec: string, h
   )
 }
 
+/**
+ * The CLI flag values (flag-name-keyed) both run surfaces — `transformation
+ * run` and `pipeline run` — parse into and feed to `executeRun`. One shared
+ * shape so the two commands cannot drift. `in` is optional because
+ * `pipeline run` re-checks it with its own message; `save-as` exists only
+ * on `transformation run` and stays undefined for pipelines.
+ */
+export interface RunSurfaceFlags {
+  in?: string
+  out?: string
+  'out-dir'?: string
+  config?: string
+  'save-config'?: string
+  'save-as'?: string
+  'default-configs': boolean
+  'keep-intermediates': boolean
+  overwrite: boolean
+  json?: boolean
+  quiet?: boolean
+  verbose?: boolean
+}
+
+/**
+ * Indexes of the chain steps that would run on GENERATED DEFAULT
+ * configurations: every decision-based step not covered by `--config`
+ * (which binds to step 1 only). The single owner of the coverage
+ * judgment — the execution core's consent gate and the interactive
+ * consent picker both read it, so they cannot disagree about which
+ * steps still need the `--default-configs` consent.
+ */
+export function uncoveredDecisionSteps(
+  steps: ReadonlyArray<{ manifest: TxManifest }>,
+  config: string | undefined
+): number[] {
+  const uncovered: number[] = []
+  for (const [index, step] of steps.entries()) {
+    if (step.manifest.variability && !(index === 0 && config !== undefined)) {
+      uncovered.push(index)
+    }
+  }
+  return uncovered
+}
+
 export interface ExecuteRequest {
   workspaceConfig: WorkspaceConfig
   /** Workspace models directory. */
@@ -162,14 +205,12 @@ export async function executeRun(request: ExecuteRequest): Promise<void> {
 
   // 1. Resolve every transformation and its manifest (shared with the
   // static authoring path), and derive each step's configuration source
-  // (--config covers step 1 only)
-  const steps: Step[] = (await resolveChainSteps(workspaceConfig, request.txNames)).map((step, index) => ({
+  // from the shared coverage judgment (--config covers step 1 only)
+  const resolvedSteps = await resolveChainSteps(workspaceConfig, request.txNames)
+  const uncoveredIndexes = new Set(uncoveredDecisionSteps(resolvedSteps, request.config))
+  const steps: Step[] = resolvedSteps.map((step, index) => ({
     ...step,
-    configSource: step.manifest.variability
-      ? index === 0 && request.config !== undefined
-        ? 'explicit'
-        : 'defaults'
-      : 'none'
+    configSource: step.manifest.variability ? (uncoveredIndexes.has(index) ? 'defaults' : 'explicit') : 'none'
   }))
   const stepCount = steps.length
   const multi = stepCount > 1

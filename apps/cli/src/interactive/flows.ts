@@ -10,23 +10,30 @@
  *
  * The prompter is injected (tests script it; the commands pass the
  * @inquirer/prompts implementation), candidates come from the candidate
- * provider (headers + manifests only), and a user abort is a typed
- * `FlowAborted` carrying the exit code. A picker choice IS explicit
- * consent: choosing "generate defaults" is the interactive form of
- * `--default-configs`, per the uniform configuration policy.
+ * provider (headers + manifests only — the models tree is scanned ONCE per
+ * flow and filtered in memory), and a user abort is a typed `FlowAborted`
+ * carrying the exit code. A picker choice IS explicit consent: choosing
+ * "generate defaults" is the interactive form of `--default-configs`, per
+ * the uniform configuration policy — and which steps still need that
+ * consent is the execution core's own judgment (`uncoveredDecisionSteps`),
+ * never re-derived here.
  */
 
 import { existsSync } from 'node:fs'
-import { basename, isAbsolute, join } from 'node:path'
+import { readFile } from 'node:fs/promises'
+import { isAbsolute, join } from 'node:path'
 
 import {
-  configsFor,
+  filterConfigsFor,
+  filterModelsForMetamodel,
   installedTransformations,
-  modelsForMetamodel,
+  modelHeaders,
   pipelines
 } from '../candidates/provider.js'
-import type { ModelCandidate, TxCandidate } from '../candidates/provider.js'
+import type { HeaderedModel, ModelCandidate, TxCandidate } from '../candidates/provider.js'
 import type { WorkspaceConfig } from '../config/index.js'
+import { parseSynthHeader } from '../models/header.js'
+import { defaultImportRef } from '../models/import-core.js'
 import { errorMessage } from '../support/errors.js'
 import { EXIT_CODES } from '../support/exit-codes.js'
 import type { Prompter, PromptChoice } from '../support/interactive.js'
@@ -34,7 +41,9 @@ import { normalizeRef, refToModelPath } from '../support/refs.js'
 import { resolveChainSteps } from '../tx/chain.js'
 import type { ChainStep } from '../tx/chain.js'
 import { ExecuteError } from '../tx/execute-error.js'
+import { uncoveredDecisionSteps } from '../tx/execute.js'
 import { resolveInstalledTx, TxResolveError } from '../tx/load.js'
+import type { TxManifest } from '../tx/manifest.js'
 
 /** The user (or an empty candidate set) ended the flow; `exit` is the CLI exit code. */
 export class FlowAborted extends ExecuteError {}
@@ -70,12 +79,50 @@ function modelChoice(candidate: ModelCandidate): PromptChoice<string> {
   }
 }
 
+/** The one defaults-consent choice every consent picker offers. */
+const DEFAULTS_CHOICE: PromptChoice<'defaults'> = {
+  name: 'Generate default configurations for this run (--default-configs)',
+  value: 'defaults',
+  description: 'Every decision falls to its declared default; each choice is announced.'
+}
+
+const ABORT_CHOICE: PromptChoice<'abort'> = { name: 'Abort', value: 'abort' }
+
+/** The uniform consent refusal: identical wording and exit everywhere. */
+function consentAborted(): never {
+  throw new FlowAborted(
+    EXIT_CODES.VALIDATION_FAILURE,
+    'Aborted: decisions are never applied without explicit consent.'
+  )
+}
+
+function refExists(modelsDir: string, ref: string): boolean {
+  try {
+    return existsSync(refToModelPath(modelsDir, ref))
+  } catch {
+    return false
+  }
+}
+
+/** Header kind of a .tsx file, or undefined when it has no parseable header. */
+async function headerKindOf(path: string): Promise<string | undefined> {
+  try {
+    return parseSynthHeader(await readFile(path, 'utf-8')).header?.kind
+  } catch {
+    return undefined
+  }
+}
+
 /**
  * The import offer: when `raw` is not an existing workspace ref but names
- * an existing .tsx file, offer to import it (target ref defaults to the
- * current namespace + file basename) and return the imported ref. In
- * every other case — including a declined offer — `raw` is returned
- * unchanged, so the downstream checks fail exactly as they always did.
+ * an existing .tsx file, offer to import it and return the imported ref.
+ * The flow never dead-ends while a usable model exists: when the
+ * workspace already holds a model under the file's default ref (current
+ * namespace + basename — the shared `defaultImportRef` policy), using that
+ * model is offered up front; a target ref that turns out to be taken
+ * offers the existing model too. In every other case — including a
+ * declined offer — `raw` is returned unchanged, so the downstream checks
+ * fail exactly as they always did.
  */
 export async function offerImportForPath(deps: FlowDeps, raw: string): Promise<string> {
   try {
@@ -92,26 +139,101 @@ export async function offerImportForPath(deps: FlowDeps, raw: string): Promise<s
   if (!existsSync(sourcePath)) {
     return raw
   }
-  const wantsImport = await deps.prompter.confirm(
-    `'${raw}' is not a workspace ref, but it names an existing .tsx file. Import it into the workspace first?`,
-    true
-  )
-  if (!wantsImport) {
-    return raw
-  }
-  const namespace = deps.workspaceConfig.currentNamespace
-  const suggested = namespace ? `${namespace}/${basename(sourcePath, '.tsx')}` : undefined
-  const answer = (await deps.prompter.input('Workspace ref for the imported model', suggested)).trim()
-  if (answer === '') {
-    throw new FlowAborted(EXIT_CODES.FAILURE, 'Aborted: no workspace ref given for the import.')
-  }
-  let ref: string
+
+  const suggestedRaw = defaultImportRef(deps.workspaceConfig, sourcePath)
+  let suggested: string | undefined
   try {
-    ref = normalizeRef(answer)
-  } catch (err) {
-    throw new FlowAborted(EXIT_CODES.FAILURE, errorMessage(err), { cause: err })
+    suggested = suggestedRaw === undefined ? undefined : normalizeRef(suggestedRaw)
+  } catch {
+    suggested = undefined
   }
-  await deps.importModel(sourcePath, ref)
+  const suggestedExists = suggested !== undefined && refExists(deps.modelsDir, suggested)
+
+  if (suggestedExists) {
+    // The workspace already holds a model under the file's default ref:
+    // using it must be on offer — an import that can only collide is a
+    // dead end this select avoids.
+    const picked = await deps.prompter.select(
+      `'${raw}' is not a workspace ref, but it names a .tsx file — and the workspace already has a model at '${suggested}'. How should this run proceed?`,
+      [
+        { name: `Use the existing workspace model ${suggested}`, value: 'existing' as const },
+        { name: 'Import the file under a different ref', value: 'import' as const },
+        ABORT_CHOICE
+      ]
+    )
+    if (picked === 'abort') {
+      throw new FlowAborted(EXIT_CODES.FAILURE, 'Aborted.')
+    }
+    if (picked === 'existing') {
+      return suggested as string
+    }
+  } else {
+    const wantsImport = await deps.prompter.confirm(
+      `'${raw}' is not a workspace ref, but it names an existing .tsx file. Import it into the workspace first?`,
+      true
+    )
+    if (!wantsImport) {
+      return raw
+    }
+  }
+
+  // Ask for the target ref; a ref that is already taken is never a dead
+  // end — the existing model is offered instead.
+  let ref: string
+  for (;;) {
+    const answer = (
+      await deps.prompter.input('Workspace ref for the imported model', suggestedExists ? undefined : suggested)
+    ).trim()
+    if (answer === '') {
+      throw new FlowAborted(EXIT_CODES.FAILURE, 'Aborted: no workspace ref given for the import.')
+    }
+    try {
+      ref = normalizeRef(answer)
+    } catch (err) {
+      throw new FlowAborted(EXIT_CODES.FAILURE, errorMessage(err), { cause: err })
+    }
+    if (!refExists(deps.modelsDir, ref)) {
+      break
+    }
+    const picked = await deps.prompter.select(`Model already exists: ${ref}. How should this run proceed?`, [
+      { name: `Use the existing workspace model ${ref} (no import)`, value: 'existing' as const },
+      { name: 'Import under a different ref', value: 'retry' as const },
+      ABORT_CHOICE
+    ])
+    if (picked === 'existing') {
+      return ref
+    }
+    if (picked === 'abort') {
+      throw new FlowAborted(EXIT_CODES.FAILURE, 'Aborted.')
+    }
+  }
+
+  try {
+    await deps.importModel(sourcePath, ref)
+  } catch (err) {
+    // A usable model must never be lost to a failed import: when the
+    // target ref exists after all (e.g. written concurrently), offer it.
+    if (refExists(deps.modelsDir, ref)) {
+      const useExisting = await deps.prompter.confirm(
+        `Import failed (${errorMessage(err)}), but the workspace has a model at ${ref}. Use the existing model?`,
+        true
+      )
+      if (useExisting) {
+        return ref
+      }
+    }
+    // A configuration model renders only with its transformation's
+    // context, which the inline offer cannot provide — name the command
+    // that can.
+    if ((await headerKindOf(sourcePath)) === 'configuration-model') {
+      throw new FlowAborted(
+        err instanceof ExecuteError ? err.exit : EXIT_CODES.VALIDATION_FAILURE,
+        `${errorMessage(err)}\nConfiguration models import with their transformation's context: synth model import ${raw} --as ${ref} --tx <transformation>.`,
+        { cause: err }
+      )
+    }
+    throw err
+  }
   deps.info(`Imported ${ref}`)
   return ref
 }
@@ -123,6 +245,11 @@ export interface RunFlowInput {
   config?: string
   defaultConfigs: boolean
   outDir?: string
+  /**
+   * --save-config as typed. It is rejected next to --config at parse time,
+   * so the consent picker must never assemble that combination.
+   */
+  saveConfig?: string
 }
 
 export interface RunFlowResult {
@@ -150,17 +277,10 @@ async function consentForLaterSteps(deps: FlowDeps, steps: ChainStep[], indexes:
   const many = indexes.length > 1
   const picked = await deps.prompter.select(
     `${listLabels(steps, indexes)} ${many ? 'are' : 'is'} decision-based; a model produced mid-run cannot take an explicit configuration. Generate default configurations for ${many ? 'these steps' : 'this step'}?`,
-    [
-      {
-        name: 'Generate default configurations for this run (--default-configs)',
-        value: 'defaults',
-        description: 'Every decision falls to its declared default; each choice is announced.'
-      },
-      { name: 'Abort', value: 'abort' }
-    ]
+    [DEFAULTS_CHOICE, ABORT_CHOICE]
   )
   if (picked === 'abort') {
-    throw new FlowAborted(EXIT_CODES.VALIDATION_FAILURE, 'Aborted: decisions are never applied without explicit consent.')
+    consentAborted()
   }
 }
 
@@ -176,7 +296,15 @@ export async function completeRunRequest(deps: FlowDeps, input: RunFlowInput): P
   let txNames = [...input.txNames]
   let { config, defaultConfigs, outDir } = input
 
-  // 1. The transformation (only `transformation run` can arrive without one)
+  // One models-tree scan serves the --in picker AND the configuration
+  // picker; the filters run in memory.
+  let scanned: HeaderedModel[] | undefined
+  const scan = async (): Promise<HeaderedModel[]> => (scanned ??= await modelHeaders(deps.modelsDir))
+
+  // 1. The transformation (only `transformation run` can arrive without
+  // one); a picked candidate already carries its manifest, so the steps
+  // need no second resolution.
+  let steps: ChainStep[]
   if (txNames.length === 0) {
     const installed = await installedTransformations(deps.workspaceConfig)
     if (installed.length === 0) {
@@ -185,12 +313,16 @@ export async function completeRunRequest(deps: FlowDeps, input: RunFlowInput): P
         `No transformations installed. Use 'synth transformation install' to install one.`
       )
     }
-    txNames = [await deps.prompter.search('Select a transformation to run', installed.map(txChoice))]
+    const picked = await deps.prompter.search('Select a transformation to run', installed.map(txChoice))
+    const candidate = installed.find((entry) => entry.name === picked) as TxCandidate
+    txNames = [candidate.name]
+    steps = [{ txName: candidate.name, packageDir: candidate.packageDir, manifest: candidate.manifest }]
+  } else {
+    // 2. Resolve the steps from the manifests (same resolution the
+    // execution core performs; an unknown name fails here exactly as it
+    // would there)
+    steps = await resolveChainSteps(deps.workspaceConfig, txNames)
   }
-
-  // 2. Resolve the steps from the manifests (same resolution the execution
-  // core performs; an unknown name fails here exactly as it would there)
-  const steps = await resolveChainSteps(deps.workspaceConfig, txNames)
   const first = steps[0]
   const last = steps[steps.length - 1]
 
@@ -198,7 +330,7 @@ export async function completeRunRequest(deps: FlowDeps, input: RunFlowInput): P
   // offer to import a .tsx file the user pointed --in at
   let inRef = input.inRef
   if (inRef === undefined) {
-    const models = await modelsForMetamodel(deps.modelsDir, first.manifest.source.metamodel)
+    const models = filterModelsForMetamodel(await scan(), first.manifest.source.metamodel)
     if (models.length === 0) {
       throw new FlowAborted(
         EXIT_CODES.NOT_FOUND,
@@ -214,14 +346,16 @@ export async function completeRunRequest(deps: FlowDeps, input: RunFlowInput): P
   }
 
   // 4. Configuration consent, per the uniform policy: --config covers step
-  // 1 only; every other decision-based step needs the defaults consent. A
-  // picker choice IS that consent.
+  // 1 only; every other decision-based step needs the defaults consent
+  // (the execution core's own coverage judgment). A picker choice IS that
+  // consent.
   if (!defaultConfigs) {
-    const uncovered = steps
-      .map((step, index) => index)
-      .filter((index) => steps[index].manifest.variability && !(index === 0 && config !== undefined))
+    const uncovered = uncoveredDecisionSteps(steps, config)
     if (uncovered.length > 0 && uncovered[0] === 0) {
-      const existingConfigs = await configsFor(deps.modelsDir, first.manifest.name, inRef)
+      // --save-config forbids --config at parse time; with it on the line
+      // the defaults consent is the only lawful choice to assemble.
+      const existingConfigs =
+        input.saveConfig === undefined ? filterConfigsFor(await scan(), first.manifest.name, inRef) : []
       const choices: PromptChoice<'existing' | 'defaults' | 'abort'>[] = []
       if (existingConfigs.length > 0) {
         choices.push({
@@ -231,22 +365,20 @@ export async function completeRunRequest(deps: FlowDeps, input: RunFlowInput): P
         })
       }
       choices.push(
-        {
-          name: 'Generate default configurations for this run (--default-configs)',
-          value: 'defaults',
-          description: 'Every decision falls to its declared default; each choice is announced.'
-        },
-        { name: 'Abort', value: 'abort' }
+        input.saveConfig === undefined
+          ? DEFAULTS_CHOICE
+          : {
+              ...DEFAULTS_CHOICE,
+              name: 'Generate default configurations for this run (--default-configs, required by --save-config)'
+            },
+        ABORT_CHOICE
       )
       const picked = await deps.prompter.select(
         `${stepLabel(steps, 0)} is decision-based and no configuration was given. How should its decisions be made?`,
         choices
       )
       if (picked === 'abort') {
-        throw new FlowAborted(
-          EXIT_CODES.VALIDATION_FAILURE,
-          'Aborted: decisions are never applied without explicit consent.'
-        )
+        consentAborted()
       }
       if (picked === 'defaults') {
         defaultConfigs = true
@@ -320,13 +452,17 @@ export interface ConfigInitFlowResult {
 /**
  * Complete a `config init` request: pick a decision-based transformation
  * when none was named, then pick (or import) the model the configuration
- * is for, filtered by the transformation's source metamodel.
+ * is for, filtered by the transformation's source metamodel. An
+ * explicitly named transformation is checked for variability BEFORE any
+ * --for prompt — the flow never asks for an answer the shared body would
+ * discard.
  */
 export async function completeConfigInitRequest(
   deps: FlowDeps,
   input: ConfigInitFlowInput
 ): Promise<ConfigInitFlowResult> {
   let txName = input.txName
+  let manifest: TxManifest | undefined
   if (txName === undefined) {
     const decisionBased = (await installedTransformations(deps.workspaceConfig)).filter(
       (candidate) => candidate.variability
@@ -338,27 +474,38 @@ export async function completeConfigInitRequest(
       )
     }
     txName = await deps.prompter.search('Select the transformation to configure', decisionBased.map(txChoice))
+    manifest = decisionBased.find((candidate) => candidate.name === txName)?.manifest
   }
 
   let forRef = input.forRef
   if (forRef === undefined) {
-    // The non-interactive path resolves the transformation itself; resolve
-    // here only to learn the source metamodel for the model picker.
-    let sourceMetamodel: string
-    try {
-      sourceMetamodel = (await resolveInstalledTx(deps.workspaceConfig, txName)).manifest.source.metamodel
-    } catch (err) {
+    if (manifest === undefined) {
+      // Explicitly named transformation: the non-interactive path resolves
+      // it too; resolve here to learn variability and the source metamodel
+      // BEFORE any prompt.
+      try {
+        ;({ manifest } = await resolveInstalledTx(deps.workspaceConfig, txName))
+      } catch (err) {
+        throw new FlowAborted(
+          err instanceof TxResolveError ? err.exit : EXIT_CODES.FAILURE,
+          errorMessage(err),
+          { cause: err }
+        )
+      }
+    }
+    if (!manifest.variability) {
+      // Same message and exit as the shared body — just BEFORE the --for
+      // prompt whose answer it would discard.
       throw new FlowAborted(
-        err instanceof TxResolveError ? err.exit : EXIT_CODES.FAILURE,
-        errorMessage(err),
-        { cause: err }
+        EXIT_CODES.FAILURE,
+        `Transformation '${manifest.name}' is not decision-based (its manifest declares no decision/binding model parts); there is nothing to configure.`
       )
     }
-    const models = await modelsForMetamodel(deps.modelsDir, sourceMetamodel)
+    const models = filterModelsForMetamodel(await modelHeaders(deps.modelsDir), manifest.source.metamodel)
     if (models.length === 0) {
       throw new FlowAborted(
         EXIT_CODES.NOT_FOUND,
-        `No models for metamodel '${sourceMetamodel}' found in the workspace. Import one with 'synth model import <file> --as <namespace>/<name>'.`
+        `No models for metamodel '${manifest.source.metamodel}' found in the workspace. Import one with 'synth model import <file> --as <namespace>/<name>'.`
       )
     }
     forRef = await deps.prompter.search(

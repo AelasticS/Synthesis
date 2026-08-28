@@ -7,6 +7,9 @@
  * Contract (stable — the shell scripts depend on it):
  *   - Input: the command-line words AFTER the program name, in order, the
  *     LAST word being the one under the cursor ('' when a new word starts).
+ *     The last word may arrive in the single-token `--flag=partial` form
+ *     (bash reassembles its '='-split words; zsh never splits) — it
+ *     completes exactly like `--flag partial`.
  *   - Output: newline-separated candidate values for that position,
  *     filtered by the partial word; nothing else.
  *   - Values only: command names and flag names are the base completion's
@@ -14,6 +17,13 @@
  *     any partial starting with '-'), it prints nothing.
  *   - It NEVER errors and never blocks on the engine: candidates come from
  *     the candidate provider (manifests, headers, pipeline files).
+ *
+ * Command knowledge (which flags take values, which alias ids exist) is
+ * derived from the loaded oclif config — never hand-maintained. Global
+ * flags typed before the topic (`synth -q tx run <TAB>`) are skipped when
+ * resolving the command, and a `--workspace`/`--ns` override anywhere on
+ * the line resolves the candidates from THAT workspace, exactly like the
+ * command being completed would.
  *
  * Completed positions: transformation names after `transformation run`
  * (chain-aware from the second positional on), after `transformation
@@ -27,9 +37,11 @@
  * `ns`) complete like their canonical topics.
  */
 
-import { getModelsPath, getPipelinesPath } from '../config/index.js'
+import { expandPath, getModelsPath, getPipelinesPath } from '../config/index.js'
 import type { WorkspaceConfig } from '../config/index.js'
-import { loadTxManifest } from '../tx/manifest.js'
+import { readPipelineFile } from '../pipelines/store.js'
+import { resolveInstalledTx } from '../tx/load.js'
+import type { TxManifest } from '../tx/manifest.js'
 import {
   allModels,
   chainNext,
@@ -40,39 +52,57 @@ import {
   pipelines
 } from './provider.js'
 
-const TOPIC_ALIASES: Record<string, string> = { tx: 'transformation', pl: 'pipeline', ns: 'namespace' }
-
-/** Global value-taking flags every command accepts. */
-const BASE_VALUE_FLAGS = ['--workspace', '--ns']
+/**
+ * What the completion engine needs to know about one CLI command, derived
+ * by the caller from the loaded oclif config (`this.config.commands`):
+ * canonical id and alias ids in space form ('transformation run',
+ * 'tx run'), and the '--'-prefixed names of its value-taking flags.
+ */
+export interface CompletionCommandSpec {
+  id: string
+  aliases: string[]
+  valueFlags: string[]
+}
 
 /**
- * Value-taking flags per command — needed to tell a flag's value apart
- * from a positional when walking the words. Commands not listed complete
- * no positionals here; `--ns` still completes for them.
+ * Global value-taking flags every command accepts (the base flags). Needed
+ * even before a command is resolved: for skipping leading globals and for
+ * completing `--ns` on a bare `synth --ns <TAB>`.
  */
-const VALUE_FLAGS: Record<string, string[]> = {
-  'transformation run': ['--in', '--out', '--out-dir', '--config', '--save-config', '--save-as'],
-  'pipeline run': ['--in', '--out', '--out-dir', '--config', '--save-config'],
-  'pipeline mk': ['--description'],
-  'pipeline show': [],
-  'pipeline rm': [],
-  'pipeline edit': [],
-  'config init': ['--for', '--out'],
-  'config show': ['--tx'],
-  'config rm': [],
-  'config edit': [],
-  'model show': [],
-  'model rm': [],
-  'model validate': ['--against', '--tx'],
-  'model export': ['--to'],
-  'transformation show': [],
-  'transformation uninstall': [],
-  'namespace rm': [],
-  cd: []
+const GLOBAL_VALUE_FLAGS = new Set(['--workspace', '--ns'])
+
+interface ResolvedCommand {
+  /** Canonical id in space form — what the position logic switches on. */
+  id: string
+  valueFlags: Set<string>
+}
+
+/**
+ * Every id and alias id mapped to its command's completion knowledge.
+ * oclif lists alias STUB entries too (their id appears in their own alias
+ * list); those are skipped, and canonical ids always win over alias keys.
+ */
+function commandTable(commands: readonly CompletionCommandSpec[]): Map<string, ResolvedCommand> {
+  const table = new Map<string, ResolvedCommand>()
+  const real = commands.filter((command) => !command.aliases.includes(command.id))
+  for (const command of real) {
+    table.set(command.id, {
+      id: command.id,
+      valueFlags: new Set([...GLOBAL_VALUE_FLAGS, ...command.valueFlags])
+    })
+  }
+  for (const command of real) {
+    for (const alias of command.aliases) {
+      if (!table.has(alias)) {
+        table.set(alias, table.get(command.id) as ResolvedCommand)
+      }
+    }
+  }
+  return table
 }
 
 /** The positional tokens among `tokens`, skipping flags and their values. */
-function positionalsOf(tokens: string[], valueFlags: Set<string>): string[] {
+function positionalsOf(tokens: string[], valueFlags: ReadonlySet<string>): string[] {
   const out: string[] = []
   for (let i = 0; i < tokens.length; i++) {
     const token = tokens[i]
@@ -103,33 +133,42 @@ function flagValueOf(tokens: string[], flag: string): string | undefined {
   return undefined
 }
 
-/** Source metamodel of an installed transformation, or undefined. */
-async function sourceMetamodelOf(config: WorkspaceConfig, txName: string | undefined): Promise<string | undefined> {
+/**
+ * The installed transformation's manifest, tolerantly (assistance, not a
+ * gate): one lookup serves both the source metamodel (--in/--for filters)
+ * and the manifest name (`generatedBy.tx` in --config filters).
+ */
+async function installedManifestOf(
+  config: WorkspaceConfig,
+  txName: string | undefined
+): Promise<TxManifest | undefined> {
   if (txName === undefined) {
     return undefined
   }
-  const entry = config.transformations[txName]
-  if (entry === undefined) {
-    return undefined
-  }
   try {
-    return (await loadTxManifest(entry.path)).source.metamodel
+    return (await resolveInstalledTx(config, txName)).manifest
   } catch {
     return undefined
   }
 }
 
-/** Manifest name of an installed transformation (stamped into generatedBy.tx). */
-async function manifestNameOf(config: WorkspaceConfig, txName: string | undefined): Promise<string | undefined> {
-  if (txName === undefined) {
-    return undefined
-  }
-  const entry = config.transformations[txName]
-  if (entry === undefined) {
-    return undefined
+/**
+ * The transformation whose manifest governs `--in`/`--config` at this
+ * position: the first positional for `transformation run`, the named
+ * pipeline's first step for `pipeline run` (ONE lenient file read — never
+ * a directory scan).
+ */
+async function stepOneTxOf(
+  commandId: string,
+  positionals: string[],
+  pipelinesDir: string
+): Promise<string | undefined> {
+  const first = positionals[0]
+  if (commandId !== 'pipeline run' || first === undefined) {
+    return first
   }
   try {
-    return (await loadTxManifest(entry.path)).name
+    return (await readPipelineFile(pipelinesDir, first)).pipeline?.steps[0]
   } catch {
     return undefined
   }
@@ -139,24 +178,62 @@ async function manifestNameOf(config: WorkspaceConfig, txName: string | undefine
  * Candidate values for the position the last word marks. Unknown context
  * yields an empty list — never an error.
  */
-export async function completionCandidates(config: WorkspaceConfig, words: string[]): Promise<string[]> {
+export async function completionCandidates(
+  config: WorkspaceConfig,
+  commands: readonly CompletionCommandSpec[],
+  words: string[]
+): Promise<string[]> {
   if (words.length === 0) {
     return []
   }
-  const partial = words[words.length - 1]
+  let partial = words[words.length - 1]
+  let context = words.slice(0, -1)
+
+  // The single-token `--flag=partial` form splits into flag + value here,
+  // so both spellings take the identical path below.
+  const eq = partial.startsWith('--') ? partial.indexOf('=') : -1
+  if (eq > 0) {
+    context = [...context, partial.slice(0, eq)]
+    partial = partial.slice(eq + 1)
+  }
   if (partial.startsWith('-')) {
     return [] // flag names are the base completion's job
   }
-  const context = words.slice(0, -1)
+
+  // Honor a --workspace/--ns override typed anywhere on the line: resolve
+  // the candidates from THAT workspace, exactly like the command itself.
+  const workspaceOverride = flagValueOf(context, '--workspace')
+  const nsOverride = flagValueOf(context, '--ns')
+  if (workspaceOverride !== undefined || nsOverride !== undefined) {
+    config = {
+      ...config,
+      ...(workspaceOverride !== undefined ? { workspace: expandPath(workspaceOverride) } : {}),
+      ...(nsOverride !== undefined ? { currentNamespace: nsOverride } : {})
+    }
+  }
   const modelsDir = getModelsPath(config)
   const pipelinesDir = getPipelinesPath(config)
 
-  // Resolve the command: a canonical or aliased topic + verb, or `cd`.
-  const topic = context[0] === undefined ? undefined : (TOPIC_ALIASES[context[0]] ?? context[0])
-  const isCd = topic === 'cd'
-  const commandKey = isCd ? 'cd' : topic !== undefined && context[1] !== undefined ? `${topic} ${context[1]}` : undefined
-  const rest = isCd ? context.slice(1) : context.slice(2)
-  const valueFlags = new Set([...BASE_VALUE_FLAGS, ...(commandKey !== undefined ? (VALUE_FLAGS[commandKey] ?? []) : [])])
+  // Resolve the command from the first tokens that are not global flags
+  // (or their values): `synth -q tx run <TAB>` completes like
+  // `synth tx run <TAB>`.
+  let start = 0
+  while (start < context.length && context[start].startsWith('-')) {
+    start += !context[start].includes('=') && GLOBAL_VALUE_FLAGS.has(context[start]) ? 2 : 1
+  }
+  const table = commandTable(commands)
+  const topic = context[start]
+  const verb = context[start + 1]
+  let command: ResolvedCommand | undefined
+  let rest: string[] = []
+  if (topic !== undefined && verb !== undefined && table.has(`${topic} ${verb}`)) {
+    command = table.get(`${topic} ${verb}`)
+    rest = context.slice(start + 2)
+  } else if (topic !== undefined && table.has(topic)) {
+    command = table.get(topic)
+    rest = context.slice(start + 1)
+  }
+  const valueFlags = command?.valueFlags ?? GLOBAL_VALUE_FLAGS
 
   const finish = (candidates: string[]): string[] =>
     [...new Set(candidates)].filter((candidate) => candidate.startsWith(partial))
@@ -167,41 +244,32 @@ export async function completionCandidates(config: WorkspaceConfig, words: strin
     if (previous === '--ns') {
       return finish(await namespaces(modelsDir))
     }
-    if (commandKey === undefined) {
+    if (command === undefined) {
       return []
     }
     const positionals = positionalsOf(rest, valueFlags)
-    if (previous === '--in' && (commandKey === 'transformation run' || commandKey === 'pipeline run')) {
-      let txName: string | undefined = positionals[0]
-      if (commandKey === 'pipeline run' && txName !== undefined) {
-        txName = (await pipelines(pipelinesDir)).find((candidate) => candidate.name === positionals[0])?.steps[0]
-      }
-      const metamodel = await sourceMetamodelOf(config, txName)
-      return finish((await modelsForMetamodel(modelsDir, metamodel)).map((candidate) => candidate.ref))
+    if (previous === '--in' && (command.id === 'transformation run' || command.id === 'pipeline run')) {
+      const manifest = await installedManifestOf(config, await stepOneTxOf(command.id, positionals, pipelinesDir))
+      return finish((await modelsForMetamodel(modelsDir, manifest?.source.metamodel)).map((candidate) => candidate.ref))
     }
-    if (previous === '--config' && (commandKey === 'transformation run' || commandKey === 'pipeline run')) {
-      let txName: string | undefined = positionals[0]
-      if (commandKey === 'pipeline run' && txName !== undefined) {
-        txName = (await pipelines(pipelinesDir)).find((candidate) => candidate.name === positionals[0])?.steps[0]
-      }
+    if (previous === '--config' && (command.id === 'transformation run' || command.id === 'pipeline run')) {
+      const manifest = await installedManifestOf(config, await stepOneTxOf(command.id, positionals, pipelinesDir))
       const inRef = flagValueOf(rest, '--in')
-      return finish(
-        (await configsFor(modelsDir, await manifestNameOf(config, txName), inRef)).map((candidate) => candidate.ref)
-      )
+      return finish((await configsFor(modelsDir, manifest?.name, inRef)).map((candidate) => candidate.ref))
     }
-    if (previous === '--for' && commandKey === 'config init') {
-      const metamodel = await sourceMetamodelOf(config, positionals[0])
-      return finish((await modelsForMetamodel(modelsDir, metamodel)).map((candidate) => candidate.ref))
+    if (previous === '--for' && command.id === 'config init') {
+      const manifest = await installedManifestOf(config, positionals[0])
+      return finish((await modelsForMetamodel(modelsDir, manifest?.source.metamodel)).map((candidate) => candidate.ref))
     }
     return [] // a value flag with free-form values (paths, new refs, names)
   }
 
-  if (commandKey === undefined) {
+  if (command === undefined) {
     return []
   }
   const positionals = positionalsOf(rest, valueFlags)
 
-  switch (commandKey) {
+  switch (command.id) {
     case 'transformation run': {
       // First positional: every installed transformation; later ones: only
       // chain-compatible continuations of the PREVIOUS step.

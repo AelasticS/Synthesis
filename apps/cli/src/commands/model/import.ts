@@ -1,12 +1,8 @@
-import { existsSync } from 'node:fs'
-import { basename, isAbsolute, join } from 'node:path'
+import { isAbsolute, join } from 'node:path'
 import { Args, Flags } from '@oclif/core'
 
 import { BaseCommand } from '../../base/base-command.js'
 import { importModelFile, ModelImportError } from '../../models/import-core.js'
-import { errorMessage } from '../../support/errors.js'
-import { normalizeRef } from '../../support/refs.js'
-import { EXIT_CODES } from '../../support/exit-codes.js'
 
 export default class ModelImport extends BaseCommand {
   static override description = `Validate a .tsx model file and copy it into the workspace.
@@ -54,40 +50,20 @@ Configuration models reference their transformation's decision/binding models an
     const json = Boolean(flags.json)
 
     const sourcePath = isAbsolute(args.file) ? args.file : join(this.savedPwd, args.file)
-    if (!existsSync(sourcePath)) {
-      this.jsonAwareFail(json, `Source file not found: ${sourcePath}`, EXIT_CODES.NOT_FOUND)
-    }
-    if (!sourcePath.endsWith('.tsx')) {
-      this.jsonAwareFail(
-        json,
-        `Source file must be a .tsx model module: ${sourcePath}`,
-        EXIT_CODES.FAILURE
-      )
-    }
 
-    // Determine the target ref
+    // The shared machinery does everything — source-file checks, target-ref
+    // resolution (--as, or the shared default policy: current namespace +
+    // file basename), validation render (the gate), header stamping,
+    // dependency check, copy into the namespace tree. The catch reports
+    // its message and exit code verbatim.
     let ref: string
-    try {
-      if (flags.as) {
-        ref = normalizeRef(flags.as)
-      } else {
-        if (!this.workspaceConfig.currentNamespace) {
-          this.jsonAwareFail(json, 'No namespace set. Use --as or set a current namespace.', EXIT_CODES.FAILURE)
-        }
-        ref = normalizeRef(`${this.workspaceConfig.currentNamespace}/${basename(sourcePath, '.tsx')}`)
-      }
-    } catch (err) {
-      this.jsonAwareFail(json, errorMessage(err), EXIT_CODES.FAILURE)
-    }
-
-    // The shared machinery does the rest: validation render (the gate),
-    // header stamping, dependency check, copy into the namespace tree.
     let destPath: string
     try {
-      ;({ destPath } = await importModelFile({
+      ;({ ref, destPath } = await importModelFile({
         workspaceConfig: this.workspaceConfig,
         sourcePath,
-        ref,
+        // `--as ""` falls back to the default policy, exactly as before
+        ref: flags.as || undefined,
         tx: flags.tx,
         author: flags.author,
         description: flags.description,

@@ -34,6 +34,17 @@ export interface Prompter {
 }
 
 /**
+ * Whether the environment declares itself CI: a set, TRUTHY `CI` value.
+ * `CI=false`, `CI=0`, and `CI=` (empty) explicitly opt back IN to
+ * interactivity — some tools export CI unconditionally, and a falsy value
+ * in a real TTY means "not CI".
+ */
+function isCiEnvironment(): boolean {
+  const value = process.env.CI
+  return value !== undefined && value !== '' && value !== 'false' && value !== '0'
+}
+
+/**
  * Whether this invocation may prompt: real TTYs on both ends, human output
  * mode, and not CI. `json`/`quiet` come from the command's parsed flags.
  */
@@ -43,7 +54,7 @@ export function isInteractiveSession(flags: { json?: boolean; quiet?: boolean })
     Boolean(process.stdout.isTTY) &&
     !flags.json &&
     !flags.quiet &&
-    process.env.CI === undefined
+    !isCiEnvironment()
   )
 }
 

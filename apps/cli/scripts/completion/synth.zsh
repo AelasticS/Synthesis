@@ -27,13 +27,20 @@
 _synth_dynamic() {
   # $words[1] is 'synth'; pass words 2..CURRENT — up to AND INCLUDING the
   # word under the cursor ('' when a new word is being started) — the
-  # `synth completions` contract.
+  # `synth completions` contract. Zsh keeps '--flag=partial' as ONE word,
+  # which the CLI understands as-is.
   local -a cli_words
   cli_words=("${(@)words[2,CURRENT]}")
 
   local -a values
   values=("${(@f)$(synth completions -- "${cli_words[@]}" 2>/dev/null)}")
   if (( ${#values[@]} )) && [[ -n "${values[1]}" ]]; then
+    # For a '--flag=partial' word, only the part after the first '=' is
+    # being completed: move '--flag=' into the ignored prefix so the
+    # inserted candidate does not replace the flag itself.
+    if [[ "${words[CURRENT]}" == -*=* ]]; then
+      compset -P '1*='
+    fi
     compadd -- "${values[@]}"
     return 0
   fi

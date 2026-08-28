@@ -9,13 +9,13 @@
 
 import { existsSync } from 'node:fs'
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
-import { dirname } from 'node:path'
+import { basename, dirname } from 'node:path'
 
 import { getModelsPath } from '../config/index.js'
 import type { WorkspaceConfig } from '../config/index.js'
 import { errorMessage } from '../support/errors.js'
 import { EXIT_CODES } from '../support/exit-codes.js'
-import { findMissingReferences, refToModelPath } from '../support/refs.js'
+import { findMissingReferences, normalizeRef, refToModelPath } from '../support/refs.js'
 import { EngineOutputBuffer } from '../tx/engine-output.js'
 import { ExecuteError } from '../tx/execute-error.js'
 import { GateRenderError, renderForGate, TxResolveError } from '../tx/load.js'
@@ -28,12 +28,30 @@ import { stampModelText } from './stamp.js'
  */
 export class ModelImportError extends ExecuteError {}
 
+/**
+ * The default-ref policy for importing a file: current namespace + file
+ * basename, UN-normalized (callers decide how to report an invalid
+ * result), or undefined when no namespace is set. `model import` without
+ * --as and the interactive import offer share this single policy.
+ */
+export function defaultImportRef(
+  workspaceConfig: Pick<WorkspaceConfig, 'currentNamespace'>,
+  sourcePath: string
+): string | undefined {
+  const namespace = workspaceConfig.currentNamespace
+  return namespace ? `${namespace}/${basename(sourcePath, '.tsx')}` : undefined
+}
+
 export interface ImportModelOptions {
   workspaceConfig: WorkspaceConfig
   /** Absolute path of the source .tsx file. */
   sourcePath: string
-  /** Normalized target ref, already chosen by the caller. */
-  ref: string
+  /**
+   * Target ref as requested (e.g. --as), normalized here — AFTER the
+   * source-file checks, so their errors keep precedence. When omitted,
+   * the shared default policy (`defaultImportRef`) applies.
+   */
+  ref?: string
   /** Installed transformation providing the render context (configuration models). */
   tx?: string
   author?: string
@@ -59,13 +77,26 @@ export interface ImportedModel {
  * message and exit code `model import` reports.
  */
 export async function importModelFile(options: ImportModelOptions): Promise<ImportedModel> {
-  const { workspaceConfig, sourcePath, ref } = options
+  const { workspaceConfig, sourcePath } = options
 
   if (!existsSync(sourcePath)) {
     throw new ModelImportError(EXIT_CODES.NOT_FOUND, `Source file not found: ${sourcePath}`)
   }
   if (!sourcePath.endsWith('.tsx')) {
     throw new ModelImportError(EXIT_CODES.FAILURE, `Source file must be a .tsx model module: ${sourcePath}`)
+  }
+
+  // Resolve the target ref only now — the file's own problems outrank a
+  // ref problem, whether the ref was requested or defaulted.
+  const requested = options.ref ?? defaultImportRef(workspaceConfig, sourcePath)
+  if (requested === undefined) {
+    throw new ModelImportError(EXIT_CODES.FAILURE, 'No namespace set. Use --as or set a current namespace.')
+  }
+  let ref: string
+  try {
+    ref = normalizeRef(requested)
+  } catch (err) {
+    throw new ModelImportError(EXIT_CODES.FAILURE, errorMessage(err), { cause: err })
   }
 
   const modelsDir = getModelsPath(workspaceConfig)

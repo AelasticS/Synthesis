@@ -7,12 +7,22 @@ import {
   getWorkspacePath,
   getCurrentNamespacePath,
   getModelsPath,
+  getPipelinesPath,
   expandPath,
   isWorkspaceInitialized
 } from '../config/index.js'
+import type { FlowDeps } from '../interactive/flows.js'
 import { errorMessage } from '../support/errors.js'
 import { EXIT_CODES } from '../support/exit-codes.js'
+import { isPromptCancel } from '../support/interactive.js'
 import { ExecuteError } from '../tx/execute-error.js'
+
+/** What `parseRelaxed` returns: everything optional, nothing validated away. */
+export interface RelaxedParseResult<F extends object> {
+  argv: unknown[]
+  args: Record<string, string | undefined>
+  flags: F & { json?: boolean; quiet?: boolean; verbose?: boolean }
+}
 
 /**
  * Base command class for all synth commands.
@@ -47,16 +57,6 @@ export abstract class BaseCommand<T extends typeof Command = typeof Command> ext
     })
   } as const
 
-  /**
-   * Commands that rescue missing required values interactively (pickers in
-   * a TTY session) set this: a failing spec parse here in run() is then
-   * NOT fatal — the command's own parse in execute() re-throws the
-   * identical error on the non-interactive path, or the interactive flow
-   * fills the missing value. Every other command keeps the fail-fast
-   * behavior unchanged.
-   */
-  protected static deferParseErrors = false
-
   protected workspaceConfig!: WorkspaceConfig
   protected savedPwd!: string
 
@@ -74,26 +74,20 @@ export abstract class BaseCommand<T extends typeof Command = typeof Command> ext
     this.savedPwd = process.cwd()
     this.workspaceConfig = await loadConfig()
 
-    // Apply --workspace override if provided
+    // Recover the global overrides TOLERANTLY (base flags only, nothing
+    // strict, nothing required): a spec violation is reported by
+    // execute()'s own strict parse with the exact oclif message — run()
+    // itself must never fail a command line first.
     let flags: { workspace?: string; ns?: string }
     try {
-      ;({ flags } = await this.parse(this.constructor as typeof BaseCommand))
-    } catch (err) {
-      if (!(this.constructor as typeof BaseCommand).deferParseErrors) {
-        throw err
-      }
-      // Recover the global overrides tolerantly so --workspace/--ns still
-      // apply; execute()'s own parse reproduces (or rescues) the error.
-      try {
-        ;({ flags } = (await this.parse({
-          flags: {},
-          baseFlags: BaseCommand.baseFlags,
-          args: {},
-          strict: false
-        })) as { flags: { workspace?: string; ns?: string } })
-      } catch {
-        flags = {}
-      }
+      ;({ flags } = (await this.parse({
+        flags: {},
+        baseFlags: BaseCommand.baseFlags,
+        args: {},
+        strict: false
+      })) as { flags: { workspace?: string; ns?: string } })
+    } catch {
+      flags = {}
     }
     if (flags.workspace) {
       this.workspaceConfig.workspace = expandPath(flags.workspace)
@@ -148,6 +142,65 @@ export abstract class BaseCommand<T extends typeof Command = typeof Command> ext
       this.jsonAwareFail(json, err.message, err.exit)
     }
     this.jsonAwareFail(json, errorMessage(err), EXIT_CODES.FAILURE)
+  }
+
+  /**
+   * Parse against a RELAXED twin of this command's own spec — the same
+   * flags and args with nothing required — to see what IS present before
+   * deciding between the interactive flow and the strict re-parse. Every
+   * non-presence validation (unknown flags, exclusive pairs, value
+   * parsing) still applies, so the relaxed parse fails exactly where the
+   * strict one would; only MISSING values pass through, to be rescued by
+   * a picker or re-reported by the strict parse in execute().
+   */
+  protected async parseRelaxed<F extends object = Record<string, unknown>>(): Promise<RelaxedParseResult<F>> {
+    const ctor = this.constructor as typeof Command
+    const relax = <T extends Record<string, unknown>>(spec: T | undefined): T =>
+      Object.fromEntries(
+        Object.entries(spec ?? {}).map(([name, definition]) => [
+          name,
+          { ...(definition as Record<string, unknown>), required: false }
+        ])
+      ) as T
+    return (await this.parse({
+      flags: relax(ctor.flags),
+      baseFlags: BaseCommand.baseFlags,
+      args: relax(ctor.args),
+      strict: ctor.strict
+    })) as unknown as RelaxedParseResult<F>
+  }
+
+  /**
+   * Run an interactive picker flow with the standard dependencies and the
+   * uniform failure mapping: a prompt cancel (ctrl+c) becomes a clean
+   * 'Aborted.' with exit 130, every other failure goes through
+   * failFromExecuteError. The prompt implementation and the import
+   * machinery load lazily — non-interactive invocations never pay for
+   * them. `verbose` threads into the import gate so engine output passes
+   * through when asked for.
+   */
+  protected async runInteractiveFlow<T>(verbose: boolean, flow: (deps: FlowDeps) => Promise<T>): Promise<T> {
+    const { makeInquirerPrompter } = await import('../support/interactive.js')
+    const { importModelFile } = await import('../models/import-core.js')
+    const deps: FlowDeps = {
+      prompter: await makeInquirerPrompter(),
+      workspaceConfig: this.workspaceConfig,
+      modelsDir: getModelsPath(this.workspaceConfig),
+      pipelinesDir: getPipelinesPath(this.workspaceConfig),
+      invokedFrom: this.savedPwd,
+      importModel: async (sourcePath, ref) => {
+        await importModelFile({ workspaceConfig: this.workspaceConfig, sourcePath, ref, verbose })
+      },
+      info: (line) => this.log(line)
+    }
+    try {
+      return await flow(deps)
+    } catch (err) {
+      if (isPromptCancel(err)) {
+        this.error('Aborted.', { exit: 130 })
+      }
+      this.failFromExecuteError(false, err)
+    }
   }
 
   /**

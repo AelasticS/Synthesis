@@ -2,7 +2,6 @@ import { Args, Flags } from '@oclif/core'
 
 import { BaseCommand } from '../../base/base-command.js'
 import { getModelsPath, getPipelinesPath } from '../../config/index.js'
-import { importModelFile } from '../../models/import-core.js'
 import {
   newPipelineNameProblem,
   pipelineFileExists,
@@ -11,32 +10,12 @@ import {
 } from '../../pipelines/store.js'
 import type { PipelineDefinition } from '../../pipelines/store.js'
 import { EXIT_CODES } from '../../support/exit-codes.js'
-import { isInteractiveSession, isPromptCancel } from '../../support/interactive.js'
-import type { RunFlowResult } from '../../interactive/flows.js'
+import { isInteractiveSession } from '../../support/interactive.js'
 import { executeRun } from '../../tx/execute.js'
-
-/** The parsed values the shared body runs on — identical for both paths. */
-interface RunFlags {
-  in: string
-  out?: string
-  'out-dir'?: string
-  config?: string
-  'save-config'?: string
-  'save-as'?: string
-  'default-configs': boolean
-  'keep-intermediates': boolean
-  overwrite: boolean
-  json?: boolean
-  quiet?: boolean
-  verbose?: boolean
-}
+import type { RunSurfaceFlags } from '../../tx/execute.js'
 
 export default class TransformationRun extends BaseCommand {
   static override aliases = ['tx:run']
-
-  // Missing required values are rescued by pickers in a TTY session; the
-  // non-interactive path re-parses strictly and reproduces today's errors.
-  protected static override deferParseErrors = true
 
   static override description = `Run one transformation, or a chain of transformations, on a workspace model.
 
@@ -102,18 +81,11 @@ With one transformation: an m2m result is written back into the workspace as a m
     })
   }
 
-  // Relaxed twin of the spec — same flags and variadic positionals, nothing
-  // required — used to see what IS present before deciding between the
-  // interactive flow and the strict re-parse.
-  private static readonly relaxedSpec = {
-    flags: { ...TransformationRun.flags, in: Flags.string({ description: 'Source model ref the first step transforms.' }) },
-    baseFlags: BaseCommand.baseFlags,
-    args: { tx: Args.string({ description: 'Installed transformation(s) to run in order.', required: false }) },
-    strict: false
-  }
-
   public async execute(): Promise<void> {
-    const relaxed = await this.parse(TransformationRun.relaxedSpec)
+    // The relaxed twin of the spec (derived generically in the base class)
+    // shows what IS present before deciding between the interactive flow
+    // and the strict re-parse.
+    const relaxed = await this.parseRelaxed<RunSurfaceFlags>()
     if (!isInteractiveSession(relaxed.flags)) {
       // Non-interactive: the strict parse reproduces today's errors exactly.
       const { argv, flags } = await this.parse(TransformationRun)
@@ -121,37 +93,18 @@ With one transformation: an m2m result is written back into the workspace as a m
       return
     }
 
-    const flags = relaxed.flags as Omit<RunFlags, 'in'> & { in?: string }
+    const flags = relaxed.flags
     const { completeRunRequest } = await import('../../interactive/flows.js')
-    const { makeInquirerPrompter } = await import('../../support/interactive.js')
-    let completed: RunFlowResult
-    try {
-      completed = await completeRunRequest(
-        {
-          prompter: await makeInquirerPrompter(),
-          workspaceConfig: this.workspaceConfig,
-          modelsDir: getModelsPath(this.workspaceConfig),
-          pipelinesDir: getPipelinesPath(this.workspaceConfig),
-          invokedFrom: this.savedPwd,
-          importModel: async (sourcePath, ref) => {
-            await importModelFile({ workspaceConfig: this.workspaceConfig, sourcePath, ref })
-          },
-          info: (line) => this.log(line)
-        },
-        {
-          txNames: relaxed.argv.map(String),
-          inRef: flags.in,
-          config: flags.config,
-          defaultConfigs: flags['default-configs'],
-          outDir: flags['out-dir']
-        }
-      )
-    } catch (err) {
-      if (isPromptCancel(err)) {
-        this.error('Aborted.', { exit: 130 })
-      }
-      this.failFromExecuteError(false, err)
-    }
+    const completed = await this.runInteractiveFlow(Boolean(flags.verbose), (deps) =>
+      completeRunRequest(deps, {
+        txNames: relaxed.argv.map(String),
+        inRef: flags.in,
+        config: flags.config,
+        defaultConfigs: flags['default-configs'],
+        outDir: flags['out-dir'],
+        saveConfig: flags['save-config']
+      })
+    )
     await this.runParsed(completed.txNames, {
       ...flags,
       in: completed.inRef,
@@ -161,7 +114,7 @@ With one transformation: an m2m result is written back into the workspace as a m
     })
   }
 
-  private async runParsed(txNames: string[], flags: RunFlags): Promise<void> {
+  private async runParsed(txNames: string[], flags: RunSurfaceFlags & { in: string }): Promise<void> {
     const json = Boolean(flags.json)
     const pipelinesDir = getPipelinesPath(this.workspaceConfig)
 

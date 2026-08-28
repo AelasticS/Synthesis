@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url'
 
 import type { WorkspaceConfig } from '../../config/index.js'
 import type { Prompter, PromptChoice } from '../../support/interactive.js'
+import { ExecuteError } from '../../tx/execute-error.js'
 import { completeConfigInitRequest, completeRunRequest, FlowAborted, pickPipelineName } from '../flows.js'
 import type { FlowDeps } from '../flows.js'
 
@@ -137,6 +138,15 @@ beforeAll(() => {
   writeFileSync(join(pipelinesDir, 'broken.json'), JSON.stringify({ steps: 'nope' }))
 
   writeFileSync(join(invokedFrom, 'newcomer.tsx'), 'export default () => null\n')
+  // Same stem as the existing workspace model com.example/persons — the
+  // import offer must surface that model instead of dead-ending.
+  writeFileSync(join(invokedFrom, 'persons.tsx'), 'export default () => null\n')
+  // A configuration model FILE: its inline import can never succeed
+  // (no --tx context), so the failure must name `model import --tx`.
+  writeFileSync(
+    join(invokedFrom, 'cfg.tsx'),
+    header(`  kind: 'configuration-model',\n  metamodel: 'cfg-mm',\n  references: {},\n  generatedBy: null`)
+  )
 })
 
 afterAll(() => {
@@ -289,6 +299,84 @@ describe('completeRunRequest', () => {
       completeRunRequest(deps, { txNames: ['no-such-tx'], inRef: 'com.example/persons', defaultConfigs: false })
     ).rejects.toMatchObject({ exit: 3, message: expect.stringContaining('Transformation not found: no-such-tx') })
   })
+
+  it('offers the existing workspace model when the .tsx default ref already exists', async () => {
+    // ./persons.tsx would import as com.example/persons — which exists.
+    const deps = makeDeps(['existing', 'defaults'])
+    const result = await completeRunRequest(deps, {
+      txNames: ['eer-to-relational'],
+      inRef: './persons.tsx',
+      defaultConfigs: false
+    })
+    const offer = deps.prompter.calls[0]
+    expect(offer.type).toBe('select')
+    expect(offer.message).toContain(`already has a model at 'com.example/persons'`)
+    expect(offer.choices?.map((choice) => choice.value)).toEqual(['existing', 'import', 'abort'])
+    expect(deps.imported).toEqual([])
+    expect(result.inRef).toBe('com.example/persons')
+  })
+
+  it('imports under a different ref when the user chooses to, despite the existing default', async () => {
+    const deps = makeDeps(['import', 'com.example/persons2', 'defaults'])
+    const result = await completeRunRequest(deps, {
+      txNames: ['eer-to-relational'],
+      inRef: './persons.tsx',
+      defaultConfigs: false
+    })
+    const refPrompt = deps.prompter.calls[1]
+    expect(refPrompt.type).toBe('input')
+    // No default offered: the derived one is exactly the taken ref
+    expect(refPrompt.defaultValue).toBeUndefined()
+    expect(deps.imported).toEqual([{ sourcePath: join(invokedFrom, 'persons.tsx'), ref: 'com.example/persons2' }])
+    expect(result.inRef).toBe('com.example/persons2')
+  })
+
+  it('offers the existing model when the typed target ref is already taken (no dead end)', async () => {
+    const deps = makeDeps([true, 'com.example/persons-rel', 'existing', 'defaults'])
+    const result = await completeRunRequest(deps, {
+      txNames: ['eer-to-relational'],
+      inRef: './newcomer.tsx',
+      defaultConfigs: false
+    })
+    const collision = deps.prompter.calls[2]
+    expect(collision.type).toBe('select')
+    expect(collision.message).toContain('Model already exists: com.example/persons-rel')
+    expect(collision.choices?.map((choice) => choice.value)).toEqual(['existing', 'retry', 'abort'])
+    expect(deps.imported).toEqual([])
+    expect(result.inRef).toBe('com.example/persons-rel')
+  })
+
+  it('names model import --tx when importing a configuration-model file fails', async () => {
+    const deps = makeDeps([true, 'com.example/cfg-import'])
+    deps.importModel = async () => {
+      throw new ExecuteError(2, 'Import rejected: boom')
+    }
+    await expect(
+      completeRunRequest(deps, { txNames: ['eer-to-relational'], inRef: './cfg.tsx', defaultConfigs: false })
+    ).rejects.toMatchObject({
+      exit: 2,
+      message: expect.stringContaining(
+        `synth model import ./cfg.tsx --as com.example/cfg-import --tx <transformation>`
+      )
+    })
+  })
+
+  it('offers only the defaults consent when --save-config is on the line', async () => {
+    // com.example/persons-cfg WOULD fit, but --config next to --save-config
+    // is rejected at parse time — the picker must never assemble it.
+    const deps = makeDeps(['defaults'])
+    const result = await completeRunRequest(deps, {
+      txNames: ['eer-to-relational'],
+      inRef: 'com.example/persons',
+      defaultConfigs: false,
+      saveConfig: 'com.example/persons-cfg-out'
+    })
+    const consentPrompt = deps.prompter.calls[0]
+    expect(consentPrompt.choices?.map((choice) => choice.value)).toEqual(['defaults', 'abort'])
+    expect(consentPrompt.choices?.[0].name).toContain('required by --save-config')
+    expect(result.defaultConfigs).toBe(true)
+    expect(result.config).toBeUndefined()
+  })
 })
 
 describe('pickPipelineName', () => {
@@ -341,5 +429,15 @@ describe('completeConfigInitRequest', () => {
     })
     expect(deps.prompter.calls).toEqual([])
     expect(result).toEqual({ txName: 'eer-to-relational', forRef: 'com.example/persons' })
+  })
+
+  it('fails a non-decision-based transformation BEFORE prompting for --for', async () => {
+    const deps = makeDeps([])
+    await expect(completeConfigInitRequest(deps, { txName: 'rel-copy' })).rejects.toMatchObject({
+      exit: 1,
+      message: expect.stringContaining('is not decision-based')
+    })
+    // The whole point: the --for answer would be discarded, so it is never asked
+    expect(deps.prompter.calls).toEqual([])
   })
 })

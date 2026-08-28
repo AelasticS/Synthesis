@@ -13,7 +13,8 @@
     "/bin",
     "/lib",
     "/oclif.manifest.json",
-    "/npm-shrinkwrap.json"
+    "/npm-shrinkwrap.json",
+    "/scripts/completion"
   ],
   "engines": {
     "node": ">=22.0.0"

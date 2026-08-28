@@ -2,13 +2,11 @@ import { Args, Flags } from '@oclif/core'
 import { ModelStore } from '@synthesis/engine'
 
 import { BaseCommand } from '../../base/base-command.js'
-import { getModelsPath, getPipelinesPath } from '../../config/index.js'
-import { importModelFile } from '../../models/import-core.js'
+import { getModelsPath } from '../../config/index.js'
 import { ModelClosureError, renderModel, renderReferenceClosure } from '../../models/loader.js'
 import { errorMessage } from '../../support/errors.js'
 import { EXIT_CODES } from '../../support/exit-codes.js'
-import { isInteractiveSession, isPromptCancel } from '../../support/interactive.js'
-import type { ConfigInitFlowResult } from '../../interactive/flows.js'
+import { isInteractiveSession } from '../../support/interactive.js'
 import {
   DefaultConfigError,
   generateAndPersistDefaultConfig,
@@ -37,10 +35,6 @@ interface InitFlags {
 }
 
 export default class ConfigInit extends BaseCommand {
-  // Missing required values are rescued by pickers in a TTY session; the
-  // non-interactive path re-parses strictly and reproduces today's errors.
-  protected static override deferParseErrors = true
-
   static override description = `Generate the default configuration model for a transformation on a model.
 
 Runs the transformation's default-configuration generation (one default choice per issue its binding model attaches, global and per-element) against the model named with --for and saves the result as an editable configuration model in the workspace — the same generation 'transformation run --default-configs' accepts in memory. Edit the saved file to steer the transformation, then pass it to 'transformation run --config'. In a terminal session, a missing transformation opens a picker over the installed decision-based transformations and a missing --for over the models matching its source metamodel; piped, scripted, --json, --quiet, and CI invocations never prompt. Exit codes: 2 for a source-metamodel mismatch or a result that fails the import gate, 3 for an unknown transformation or missing model.`
@@ -71,19 +65,11 @@ Runs the transformation's default-configuration generation (one default choice p
     })
   }
 
-  // Relaxed twin of the spec — tx and --for not required — used to see what
-  // IS present before deciding between the interactive flow and the strict
-  // re-parse.
-  private static readonly relaxedSpec = {
-    flags: { ...ConfigInit.flags, for: Flags.string({ description: 'Model ref this configuration applies to.' }) },
-    baseFlags: BaseCommand.baseFlags,
-    args: {
-      tx: Args.string({ description: 'Installed transformation to create a configuration for.', required: false })
-    }
-  }
-
   public async execute(): Promise<void> {
-    const relaxed = await this.parse(ConfigInit.relaxedSpec)
+    // The relaxed twin of the spec (derived generically in the base class)
+    // shows what IS present before deciding between the interactive flow
+    // and the strict re-parse.
+    const relaxed = await this.parseRelaxed<InitFlags & { for?: string }>()
     if (!isInteractiveSession(relaxed.flags)) {
       // Non-interactive: the strict parse reproduces today's errors exactly.
       const { args, flags } = await this.parse(ConfigInit)
@@ -91,34 +77,15 @@ Runs the transformation's default-configuration generation (one default choice p
       return
     }
 
+    const flags = relaxed.flags
     const { completeConfigInitRequest } = await import('../../interactive/flows.js')
-    const { makeInquirerPrompter } = await import('../../support/interactive.js')
-    let completed: ConfigInitFlowResult
-    try {
-      completed = await completeConfigInitRequest(
-        {
-          prompter: await makeInquirerPrompter(),
-          workspaceConfig: this.workspaceConfig,
-          modelsDir: getModelsPath(this.workspaceConfig),
-          pipelinesDir: getPipelinesPath(this.workspaceConfig),
-          invokedFrom: this.savedPwd,
-          importModel: async (sourcePath, ref) => {
-            await importModelFile({ workspaceConfig: this.workspaceConfig, sourcePath, ref })
-          },
-          info: (line) => this.log(line)
-        },
-        {
-          txName: relaxed.args.tx !== undefined ? String(relaxed.args.tx) : undefined,
-          forRef: relaxed.flags.for
-        }
-      )
-    } catch (err) {
-      if (isPromptCancel(err)) {
-        this.error('Aborted.', { exit: 130 })
-      }
-      this.failFromExecuteError(false, err)
-    }
-    await this.runParsed(completed.txName, completed.forRef, relaxed.flags)
+    const completed = await this.runInteractiveFlow(Boolean(flags.verbose), (deps) =>
+      completeConfigInitRequest(deps, {
+        txName: relaxed.args.tx,
+        forRef: flags.for
+      })
+    )
+    await this.runParsed(completed.txName, completed.forRef, flags)
   }
 
   private async runParsed(tx: string, forRef: string, flags: InitFlags): Promise<void> {

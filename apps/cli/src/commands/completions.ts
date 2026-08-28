@@ -26,7 +26,16 @@ Usage: synth completions -- <words...> — the words after the program name, the
     const { argv } = await this.parse(Completions)
     let candidates: string[]
     try {
-      candidates = await completionCandidates(this.workspaceConfig, argv.map(String))
+      // The completion engine's command knowledge (alias ids, value-taking
+      // flags) comes from the loaded oclif config — never hand-maintained.
+      const commands = this.config.commands.map((command) => ({
+        id: command.id.replaceAll(':', ' '),
+        aliases: (command.aliases ?? []).map((alias) => alias.replaceAll(':', ' ')),
+        valueFlags: Object.entries(command.flags ?? {})
+          .filter(([, flag]) => flag.type === 'option')
+          .map(([name]) => `--${name}`)
+      }))
+      candidates = await completionCandidates(this.workspaceConfig, commands, argv.map(String))
     } catch {
       // Completion assists; it never errors. No candidates, exit 0.
       candidates = []

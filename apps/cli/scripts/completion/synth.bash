@@ -29,14 +29,47 @@ _synth_dynamic_autocomplete() {
 
   # Words after the program name up to AND INCLUDING the word under the
   # cursor ('' when a new word is being started) — the `synth completions`
-  # contract.
-  local -a words=("${COMP_WORDS[@]:1:COMP_CWORD}")
+  # contract. Bash splits words at '=' (COMP_WORDBREAKS), turning
+  # '--in=com' into the three tokens '--in', '=', 'com': reassemble them
+  # so the CLI sees the single-token '--flag=partial' form it understands.
+  local -a words=()
+  local i w last
+  for ((i = 1; i <= COMP_CWORD; i++)); do
+    w="${COMP_WORDS[i]}"
+    if ((${#words[@]} > 0)); then
+      last="${words[${#words[@]}-1]}"
+      if [[ "$w" == "=" && "$last" == --* ]]; then
+        words[${#words[@]}-1]="$last="
+        continue
+      fi
+      if [[ "$last" == --*= ]]; then
+        words[${#words[@]}-1]="$last$w"
+        continue
+      fi
+    fi
+    words+=("$w")
+  done
+
+  # Bash replaces only the region after the '=' wordbreak, so filter with
+  # that part. When '=' is NOT in COMP_WORDBREAKS (custom setups), the
+  # whole '--flag=partial' word is replaced instead — candidates must then
+  # carry the '--flag=' prefix back.
+  local prefix=""
+  if [[ "$cur" == "=" ]]; then
+    cur=""
+  elif [[ "$cur" == --*=* ]]; then
+    prefix="${cur%%=*}="
+    cur="${cur#*=}"
+  fi
 
   local values
   values="$(synth completions -- "${words[@]}" 2>/dev/null)"
   if [[ -n "$values" ]]; then
     local IFS=$'\n'
     COMPREPLY=($(compgen -W "$values" -- "$cur"))
+    if [[ -n "$prefix" ]] && ((${#COMPREPLY[@]} > 0)); then
+      COMPREPLY=("${COMPREPLY[@]/#/$prefix}")
+    fi
     return 0
   fi
 

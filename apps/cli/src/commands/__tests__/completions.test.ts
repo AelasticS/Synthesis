@@ -18,6 +18,7 @@ const EER = '@synthesis/standard-metamodels/eer'
 const REL = '@synthesis/standard-metamodels/relational'
 
 let testHome: string
+let otherWorkspace: string
 
 const complete = (words: string[]) => runCli(['completions', '--', ...words], { home: testHome })
 // The word under the cursor when a NEW word is being started
@@ -68,6 +69,14 @@ beforeAll(() => {
   writeFileSync(
     join(pipelinesDir, 'gen-sql.json'),
     JSON.stringify({ name: 'gen-sql', steps: ['eer-to-relational', 'rel-to-sql-ddl'], description: '', createdAt: '', modifiedAt: '' })
+  )
+
+  // A second workspace with its own (EER) model, for --workspace overrides
+  otherWorkspace = join(testHome, 'other-ws')
+  mkdirSync(join(otherWorkspace, 'models', 'other', 'ns'), { recursive: true })
+  writeFileSync(
+    join(otherWorkspace, 'models', 'other', 'ns', 'widget.tsx'),
+    header(`  kind: 'model',\n  metamodel: '${EER}',\n  references: {},\n  generatedBy: null`)
   )
 })
 
@@ -168,6 +177,33 @@ describe('pipeline and namespace positions', () => {
     expect(lines(nsRm.stdout)).toEqual(['com.example'])
     const nsFlag = await complete(['model', 'ls', '--ns', EMPTY])
     expect(lines(nsFlag.stdout)).toEqual(['com', 'com.example'])
+  })
+})
+
+describe('global flags and the --flag= form', () => {
+  it('completes the single-token --in=<partial> form like --in <partial>', async () => {
+    // Bash reassembles its '='-split words into this form; zsh never splits
+    const { stdout, code } = await complete(['tx', 'run', 'eer-to-relational', '--in=com.ex'])
+    expect(code).toBe(0)
+    expect(lines(stdout)).toEqual(['com.example/persons'])
+    const empty = await complete(['tx', 'run', 'eer-to-relational', '--in='])
+    expect(lines(empty.stdout)).toEqual(['com.example/persons'])
+  })
+
+  it('skips leading global flags (and their values) when resolving the command', async () => {
+    const short = await complete(['-q', 'tx', 'run', 'e'])
+    expect(lines(short.stdout)).toEqual(['eer-to-relational'])
+    const nsFirst = await complete(['--ns', 'com.example', 'model', 'show', 'com.example/persons-r'])
+    expect(lines(nsFirst.stdout)).toEqual(['com.example/persons-rel'])
+  })
+
+  it('resolves candidates from a --workspace override on the line', async () => {
+    const trailing = await complete(['model', 'show', '--workspace', otherWorkspace, EMPTY])
+    expect(lines(trailing.stdout)).toEqual(['other.ns/widget'])
+    // Leading position, combined with a metamodel-filtered --in: the models
+    // come from the override, the transformations from the global config
+    const leading = await complete(['--workspace', otherWorkspace, 'tx', 'run', 'eer-to-relational', '--in', EMPTY])
+    expect(lines(leading.stdout)).toEqual(['other.ns/widget'])
   })
 })
 
