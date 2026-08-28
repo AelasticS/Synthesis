@@ -49,7 +49,7 @@ export interface DecisionModelIndex {
  * (issue.options stays empty and option.ParentIssue is unset), but the
  * model's elements[] preserves document order: every Option follows the
  * Issue that declared it. Ownership is therefore keyed by (issue, option)
- * with document order as the attribution mechanism — an option name used
+ * with document order as the attribution mechanism; an option name used
  * by two issues is ambiguous and reported as a warning. Interim until the
  * engine materializes the containment link; then this reconstruction (and
  * the ambiguity) disappears.
@@ -164,7 +164,7 @@ export interface ConfigStructureResult {
   warnings: string[]
   /**
    * Uncovered slots whose default choices must be materialized into the
-   * rendered configuration model before the transformation runs — the
+   * rendered configuration model before the transformation runs: the
    * engine's Option() evaluation has no fallback of its own, so an
    * announced default that is not present as a real Choice would silently
    * apply nothing.
@@ -205,7 +205,7 @@ interface RawBinding {
 
 /**
  * The (issue, element) slots the binding model attaches to this input
- * model — exactly the element choices `SourceModelToDefaultConfigurationModel`
+ * model, exactly the element choices `SourceModelToDefaultConfigurationModel`
  * would generate: a binding matches an element when the element's type name
  * equals the binding's declared element name and the optional condition
  * accepts it (`new Function(condition)()` yields the predicate; a
@@ -274,10 +274,10 @@ const formatCovers = (covers: Cover[]): string =>
  * Structural validation of an explicit configuration model, after it has
  * rendered into the run's store: every choice's selectedOption must be an
  * option of the transformation's decision model, every ElementDecision must
- * point at an element of the input model (nested elements included — their
+ * point at an element of the input model (nested elements included; their
  * paths extend the model path), each (issue, element?) slot may be covered
  * at most once, and every slot no choice covers falls back to the issue's
- * default option — which the caller must then materialize (see
+ * default option, which the caller must then materialize (see
  * `uncoveredDefaults`). An uncovered slot without a default option is an
  * error: the engine would have nothing to apply.
  */
@@ -391,7 +391,7 @@ export function validateConfigStructure(
     if (global !== undefined && global.length > 0) {
       for (const entry of byElement.values()) {
         errors.push(
-          `issue '${issueName}' is covered both globally (${formatCovers(global)}) and for element '${entry.label}' (${formatCovers(entry.covers)}); the engine cannot prioritize between them — remove one`
+          `issue '${issueName}' is covered both globally (${formatCovers(global)}) and for element '${entry.label}' (${formatCovers(entry.covers)}); the engine cannot prioritize between them: remove one`
         )
       }
     }

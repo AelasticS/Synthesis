@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # =============================================================================
-# synth CLI smoke tests — end-to-end scenarios through the real binary.
+# synth CLI smoke tests: end-to-end scenarios through the real binary.
 #
 # Run:  rushx smoke          (from apps/cli)
 #   or: bash scripts/smoke-test.sh
@@ -46,7 +46,7 @@ run() {
 }
 
 # =============================================================================
-# Phase 1 — workspace and model management
+# Phase 1: workspace and model management
 # The workspace is created, a model enters through the import gate, header
 # metadata is visible everywhere, doctor guards integrity, and deletion is
 # protected by the reverse-dependency graph (RESTRICT / --cascade).
@@ -76,7 +76,7 @@ run "exported model reimports cleanly"    0 "Imported"             model import 
 run "round-tripped model validates"       0 "is valid"             model validate com.example/persons-copy
 
 # =============================================================================
-# Phase 2 — transformation execution (tx install / show / run)
+# Phase 2: transformation execution (tx install / show / run)
 # Manifest-driven install; decisions are never applied without explicit
 # consent (--default-configs), then M2M execution with announced default
 # decisions and a provenance-stamped output model that passes the import
@@ -98,7 +98,7 @@ run "metamodel mismatch is rejected"      2 "mismatch"             tx run rel-to
 run "unknown transformation exits 3"      3 -                      tx run no-such-tx --in com.example/persons
 
 # =============================================================================
-# Phase 3 — configuration flow (config init / edit / tx run --config)
+# Phase 3: configuration flow (config init / edit / tx run --config)
 # Defaults are generated as an editable workspace model; edited choices steer
 # the transformation; partial configs get real (announced AND applied)
 # defaults; save-config cannot clobber the input model.
@@ -114,7 +114,7 @@ sed -i "s/SnakeCase/CamelCase/g" "$MODELS/com/example/persons-cfg.tsx"
 run "tx run --config applies edited choice" 0 "CamelCase"          tx run eer-to-relational --in com.example/persons --config com.example/persons-cfg --out com.example/rel-camel
 grep -q 'name="personId"' "$MODELS/com/example/rel-camel.tsx" && ok "output uses CamelCase columns" || bad "output uses CamelCase columns"
 
-# Partial config: delete a whole choice — the default must be announced AND applied
+# Partial config: delete a whole choice; the default must be announced AND applied
 run "second config for partial test"      0 "cfg-partial"          config init eer-to-relational --for com.example/persons --out com.example/cfg-partial
 python3 - "$MODELS/com/example/cfg-partial.tsx" <<'EOF'
 import re, sys
@@ -132,7 +132,7 @@ run "save-config cannot clobber the input" 1 "overwrite the input model" tx run 
 run "doctor clean at the end"             0 "0 errors"             doctor
 
 # =============================================================================
-# Phase 4 — chaining `transformation run` (invoked here via its `tx` alias)
+# Phase 4: chaining `transformation run` (invoked here via its `tx` alias)
 # One execution core behind every run surface: chains hand the result model
 # to the next step in memory, are type-checked from manifests up front,
 # apply the uniform explicit-consent policy (--config binds to step 1 only,
@@ -163,8 +163,8 @@ grep -q 'CREATE TABLE "person"' "$WORK/chain-quoted"/*.sql && ok "DDL identifier
 grep -q 'REFERENCES "organization"' "$WORK/chain-quoted"/*.sql && ok "quoted FK REFERENCES matches the quoted table name" || bad "quoted FK REFERENCES matches the quoted table name"
 
 # =============================================================================
-# Phase 5 — pipelines + command-surface purity
-# A pipeline is a NAMED PROCESS — steps only, stored as plain JSON at
+# Phase 5: pipelines + command-surface purity
+# A pipeline is a NAMED PROCESS: steps only, stored as plain JSON at
 # pipelines/<name>.json, no data bindings. `pipeline mk` authors one with
 # static, manifest-driven validation (nothing executes); `pipeline run
 # <name> --in <ref>` runs it through the full normal pre-flight with the
@@ -199,10 +199,10 @@ run "pipeline show now exits 3"            3 -                     pipeline show
 run "tx uninstall works after pipeline rm" 0 "Uninstalled"         tx uninstall rel-to-sql-ddl
 
 # =============================================================================
-# Phase 6 — interactive layer (non-TTY contract + dynamic completion)
+# Phase 6: interactive layer (non-TTY contract + dynamic completion)
 # Prompts appear ONLY in a real TTY session (stdin+stdout TTYs, no --json,
 # no --quiet, not CI); this script's invocations capture stdout, so every
-# command below takes the unchanged non-interactive path — the strict
+# command below takes the unchanged non-interactive path; the strict
 # errors must stay exactly what they always were. The hidden
 # `synth completions -- <words...>` command is the machine contract behind
 # the shipped shell scripts (scripts/completion/synth.bash|zsh): it prints

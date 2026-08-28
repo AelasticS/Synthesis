@@ -7,7 +7,7 @@ import { runCli } from '../../test-utils/run-cli.js'
 
 // `transformation run` is the execution verb: one name runs a single
 // transformation, several names form an ad-hoc chain with in-memory
-// hand-off between the steps. `tx run` is the typing alias — most tests
+// hand-off between the steps. `tx run` is the typing alias; most tests
 // here use it (proving the alias), one uses the canonical form.
 const packageRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../../..')
 const fixturesDir = join(packageRoot, 'src/tx/__tests__/fixtures')
@@ -44,7 +44,7 @@ afterAll(() => {
 describe('chain pre-flight', () => {
   it('aborts a chain whose FIRST step is uncovered, teaching --config AND --default-configs', async () => {
     // Step 1's input model exists in the workspace, so an explicit
-    // configuration IS possible — the message must teach it, not claim the
+    // configuration IS possible, so the message must teach it, not claim the
     // model is produced mid-run.
     const { code, stderr } = await run([
       'tx', 'run', 'eer-to-relational', 'rel-to-sql-ddl', '--in', 'com.example/persons', '--out-dir', join(tempDir, 'never')
@@ -286,7 +286,7 @@ describe('chain execution', () => {
 
 describe('chain pre-flight ref collisions (claimed-refs check)', () => {
   // rel-copy is endogenous (relational -> relational), so chaining it with
-  // itself derives IDENTICAL intermediate and final refs — exactly the
+  // itself derives IDENTICAL intermediate and final refs: exactly the
   // collision the pre-flight check must catch before any engine work.
   beforeAll(async () => {
     await run(['model', 'import', personsFixture, '--as', 'com.example/collide'])

@@ -9,7 +9,7 @@ import { runCli } from '../../test-utils/run-cli.js'
 // shipped shell completion scripts: newline-separated candidate VALUES for
 // the position the last word marks, empty output + exit 0 for anything it
 // cannot complete. The workspace here is synthesized on disk (config.json
-// written directly, header-only model files, raw pipeline JSON) — the
+// written directly, header-only model files, raw pipeline JSON); the
 // command must answer from manifests and headers alone, fast, no engine.
 const packageRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../../..')
 const fixturesDir = join(packageRoot, 'src/tx/__tests__/fixtures')

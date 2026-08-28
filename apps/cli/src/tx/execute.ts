@@ -83,7 +83,7 @@ export function sanitizeTxName(name: string): string {
 }
 
 /**
- * Wrap serialized JSX into a complete workspace model module — the same
+ * Wrap serialized JSX into a complete workspace model module: the same
  * shape `model import` accepts, so the import gate applies unchanged.
  */
 function buildModelModule(jsx: string, tags: string[], componentsSpec: string, header: SynthHeader): string {
@@ -99,8 +99,8 @@ function buildModelModule(jsx: string, tags: string[], componentsSpec: string, h
 }
 
 /**
- * The CLI flag values (flag-name-keyed) both run surfaces — `transformation
- * run` and `pipeline run` — parse into and feed to `executeRun`. One shared
+ * The CLI flag values (flag-name-keyed) both run surfaces, `transformation
+ * run` and `pipeline run`, parse into and feed to `executeRun`. One shared
  * shape so the two commands cannot drift. `in` is optional because
  * `pipeline run` re-checks it with its own message; `save-as` exists only
  * on `transformation run` and stays undefined for pipelines.
@@ -124,7 +124,7 @@ export interface RunSurfaceFlags {
  * Indexes of the chain steps that would run on GENERATED DEFAULT
  * configurations: every decision-based step not covered by `--config`
  * (which binds to step 1 only). The single owner of the coverage
- * judgment — the execution core's consent gate and the interactive
+ * judgment: the execution core's consent gate and the interactive
  * consent picker both read it, so they cannot disagree about which
  * steps still need the `--default-configs` consent.
  */
@@ -167,10 +167,10 @@ export interface ExecuteRequest {
 
 /**
  * How a step's configuration is sourced, resolved ONCE in pre-flight:
- *   'explicit' — step 1 running on the model named with --config;
- *   'defaults' — decision-based step running on generated defaults
+ *   'explicit':  step 1 running on the model named with --config;
+ *   'defaults':  decision-based step running on generated defaults
  *                (valid only with the --default-configs consent);
- *   'none'     — the transformation declares no decisions.
+ *   'none':      the transformation declares no decisions.
  * The consent gate, the execution branch, the --save-config write, and the
  * provenance all read this field instead of re-deriving the coverage.
  */
@@ -229,13 +229,13 @@ export async function executeRun(request: ExecuteRequest): Promise<void> {
   if (last.manifest.kind === 'm2m' && request.outDir !== undefined) {
     fail(
       EXIT_CODES.FAILURE,
-      `--out-dir is only valid when the ${multi ? 'last step' : 'transformation'} is m2t; '${last.manifest.name}' is m2m — use --out <ref>.`
+      `--out-dir is only valid when the ${multi ? 'last step' : 'transformation'} is m2t; '${last.manifest.name}' is m2m. Use --out <ref>.`
     )
   }
   if (last.manifest.kind === 'm2t' && request.out !== undefined) {
     fail(
       EXIT_CODES.FAILURE,
-      `--out is only valid when the ${multi ? 'last step' : 'transformation'} is m2m; '${last.manifest.name}' is m2t — use --out-dir <dir>.`
+      `--out is only valid when the ${multi ? 'last step' : 'transformation'} is m2m; '${last.manifest.name}' is m2t. Use --out-dir <dir>.`
     )
   }
   if (last.manifest.kind === 'm2t' && request.outDir === undefined) {
@@ -311,7 +311,7 @@ export async function executeRun(request: ExecuteRequest): Promise<void> {
   const inRef = source.ref
 
   // 6. Consent gate: every decision-based step must be covered by --config
-  // (step 1 only) or --default-configs — BEFORE any engine work. The
+  // (step 1 only) or --default-configs, BEFORE any engine work. The
   // message depends on WHICH step is uncovered: step 1's input model
   // exists in the workspace, so an explicit configuration is possible and
   // is taught; only a later step's input is produced mid-run.
@@ -413,8 +413,8 @@ export async function executeRun(request: ExecuteRequest): Promise<void> {
     }
   }
 
-  // 10. Every ref the run will write — kept intermediates, the final --out
-  // target, the --save-config target — and the --in ref must be pairwise
+  // 10. Every ref the run will write (kept intermediates, the final --out
+  // target, the --save-config target) and the --in ref must be pairwise
   // distinct: a duplicate would make the run overwrite its own input or
   // one of its own outputs. Checked here, before any engine work.
   const claimedRefs = new Map<string, string>()
@@ -477,7 +477,7 @@ export async function executeRun(request: ExecuteRequest): Promise<void> {
 
   /**
    * Write an m2m result as a workspace model with provenance header via the
-   * gated temp-file path — used for the final m2m result and for every
+   * gated temp-file path, used for the final m2m result and for every
    * --keep-intermediates intermediate. The CLI never leaves behind a model
    * `model import` would reject, and never destroys an existing target on
    * failure.
@@ -652,7 +652,7 @@ export async function executeRun(request: ExecuteRequest): Promise<void> {
             // The configuration's own header closure renders first (helper
             // models a hand-written configuration references); the input
             // model and the configuration itself are already in the store
-            // or about to render — excluded like renderModelClosure's root.
+            // or about to render, excluded like renderModelClosure's root.
             await renderReferenceClosure(modelsDir, config.header.references, store, config.ref, [inRef, config.ref])
             ;({ root: configModel } = await renderModel(config.path, store))
           })
@@ -679,7 +679,7 @@ export async function executeRun(request: ExecuteRequest): Promise<void> {
         }
         decisions = structure.announcements
         // Every announced '(default)' must exist as a real Choice in the
-        // model the transformation receives — the engine applies nothing
+        // model the transformation receives; the engine applies nothing
         // for a slot without one.
         if (structure.uncoveredDefaults.length > 0) {
           await step('Failed to apply the default choices for uncovered issues', () =>

@@ -1,8 +1,8 @@
 /**
  * Opening a file in the user's editor, shared by `config edit` and
  * `pipeline edit`. `$EDITOR` may legitimately carry arguments (e.g.
- * `code --wait`, `emacs -nw`): the value is split on whitespace — first
- * token the binary, the rest its arguments — and the file is appended.
+ * `code --wait`, `emacs -nw`): the value is split on whitespace (first
+ * token the binary, the rest its arguments) and the file is appended.
  * Passing the whole value to spawn as one binary name would break every
  * such editor.
  */

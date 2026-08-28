@@ -1,8 +1,8 @@
 /**
  * The interactive picker flows: given a partially specified request and a
- * `Prompter`, fill in what is missing — the transformation, the source
+ * `Prompter`, fill in what is missing (the transformation, the source
  * model, the configuration consent, the m2t output directory, the
- * pipeline name, `config init`'s subject — and return the completed
+ * pipeline name, `config init`'s subject) and return the completed
  * request. The flows never print results and never execute anything: the
  * commands feed the completed values into the SAME shared bodies the
  * non-interactive paths use, so a picked value and a typed value take the
@@ -10,11 +10,11 @@
  *
  * The prompter is injected (tests script it; the commands pass the
  * @inquirer/prompts implementation), candidates come from the candidate
- * provider (headers + manifests only — the models tree is scanned ONCE per
+ * provider (headers + manifests only; the models tree is scanned ONCE per
  * flow and filtered in memory), and a user abort is a typed `FlowAborted`
  * carrying the exit code. A picker choice IS explicit consent: choosing
  * "generate defaults" is the interactive form of `--default-configs`, per
- * the uniform configuration policy — and which steps still need that
+ * the uniform configuration policy, and which steps still need that
  * consent is the execution core's own judgment (`uncoveredDecisionSteps`),
  * never re-derived here.
  */
@@ -67,7 +67,7 @@ function txChoice(candidate: TxCandidate): PromptChoice<string> {
   return {
     name: candidate.name,
     value: candidate.name,
-    description: candidate.description === '' ? arrow : `${arrow} — ${candidate.description}`
+    description: candidate.description === '' ? arrow : `${arrow} (${candidate.description})`
   }
 }
 
@@ -118,10 +118,10 @@ async function headerKindOf(path: string): Promise<string | undefined> {
  * an existing .tsx file, offer to import it and return the imported ref.
  * The flow never dead-ends while a usable model exists: when the
  * workspace already holds a model under the file's default ref (current
- * namespace + basename — the shared `defaultImportRef` policy), using that
+ * namespace + basename, the shared `defaultImportRef` policy), using that
  * model is offered up front; a target ref that turns out to be taken
- * offers the existing model too. In every other case — including a
- * declined offer — `raw` is returned unchanged, so the downstream checks
+ * offers the existing model too. In every other case, including a
+ * declined offer, `raw` is returned unchanged, so the downstream checks
  * fail exactly as they always did.
  */
 export async function offerImportForPath(deps: FlowDeps, raw: string): Promise<string> {
@@ -151,10 +151,10 @@ export async function offerImportForPath(deps: FlowDeps, raw: string): Promise<s
 
   if (suggestedExists) {
     // The workspace already holds a model under the file's default ref:
-    // using it must be on offer — an import that can only collide is a
+    // using it must be on offer: an import that can only collide is a
     // dead end this select avoids.
     const picked = await deps.prompter.select(
-      `'${raw}' is not a workspace ref, but it names a .tsx file — and the workspace already has a model at '${suggested}'. How should this run proceed?`,
+      `'${raw}' is not a workspace ref, but it names a .tsx file, and the workspace already has a model at '${suggested}'. How should this run proceed?`,
       [
         { name: `Use the existing workspace model ${suggested}`, value: 'existing' as const },
         { name: 'Import the file under a different ref', value: 'import' as const },
@@ -178,7 +178,7 @@ export async function offerImportForPath(deps: FlowDeps, raw: string): Promise<s
   }
 
   // Ask for the target ref; a ref that is already taken is never a dead
-  // end — the existing model is offered instead.
+  // end; the existing model is offered instead.
   let ref: string
   for (;;) {
     const answer = (
@@ -223,7 +223,7 @@ export async function offerImportForPath(deps: FlowDeps, raw: string): Promise<s
       }
     }
     // A configuration model renders only with its transformation's
-    // context, which the inline offer cannot provide — name the command
+    // context, which the inline offer cannot provide: name the command
     // that can.
     if ((await headerKindOf(sourcePath)) === 'configuration-model') {
       throw new FlowAborted(
@@ -286,7 +286,7 @@ async function consentForLaterSteps(deps: FlowDeps, steps: ChainStep[], indexes:
 
 /**
  * Complete a `transformation run`/`pipeline run` request: pick the
- * transformation when none was named (single step — chains are typed, not
+ * transformation when none was named (single step; chains are typed, not
  * picked), pick or import the source model, settle the configuration
  * consent per the uniform policy, and ask for --out-dir when the last
  * step is m2t. Returns the completed request; throws FlowAborted (or a
@@ -415,7 +415,7 @@ export async function completeRunRequest(deps: FlowDeps, input: RunFlowInput): P
 }
 
 /**
- * Pick a saved pipeline by name (schema-valid ones only — a broken file
+ * Pick a saved pipeline by name (schema-valid ones only; a broken file
  * cannot run and has `pipeline edit` as its repair path).
  */
 export async function pickPipelineName(deps: FlowDeps): Promise<string> {
@@ -434,7 +434,7 @@ export async function pickPipelineName(deps: FlowDeps): Promise<string> {
       description:
         candidate.description === ''
           ? candidate.steps.join(' -> ')
-          : `${candidate.steps.join(' -> ')} — ${candidate.description}`
+          : `${candidate.steps.join(' -> ')} (${candidate.description})`
     }))
   )
 }
@@ -454,7 +454,7 @@ export interface ConfigInitFlowResult {
  * when none was named, then pick (or import) the model the configuration
  * is for, filtered by the transformation's source metamodel. An
  * explicitly named transformation is checked for variability BEFORE any
- * --for prompt — the flow never asks for an answer the shared body would
+ * --for prompt; the flow never asks for an answer the shared body would
  * discard.
  */
 export async function completeConfigInitRequest(
@@ -494,7 +494,7 @@ export async function completeConfigInitRequest(
       }
     }
     if (!manifest.variability) {
-      // Same message and exit as the shared body — just BEFORE the --for
+      // Same message and exit as the shared body, just BEFORE the --for
       // prompt whose answer it would discard.
       throw new FlowAborted(
         EXIT_CODES.FAILURE,

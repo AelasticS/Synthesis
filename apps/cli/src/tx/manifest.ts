@@ -5,7 +5,7 @@
  * loading any code. The manifest lives in one of two places (the final
  * location is deliberately still open, see design/cli-execution §6):
  *
- *   1. a `synth.json` file at the package root — takes precedence
+ *   1. a `synth.json` file at the package root (takes precedence)
  *   2. a `synth` object inside the package's `package.json`
  *
  * `entry` and every `parts` module specifier may be either a
@@ -35,7 +35,7 @@ export interface TxPartRef {
 
 /**
  * Modules of the transformation package itself, rendered into the store
- * before execution — in this order: metamodels, decisionModel,
+ * before execution, in this order: metamodels, decisionModel,
  * bindingModel. These ship WITH the transformation; they are not
  * workspace models.
  */
@@ -61,7 +61,7 @@ export interface TxManifest {
     metamodel: string
     /**
      * Import specifier of the JSX component module of the target
-     * metamodel — needed to wrap M2M output into a workspace model file.
+     * metamodel, needed to wrap M2M output into a workspace model file.
      */
     components?: string
   }
@@ -105,7 +105,7 @@ async function readJsonFile(path: string): Promise<Record<string, unknown>> {
 /**
  * A specifier like `lib/transformation.js` is neither package-relative
  * (`./lib/...`) nor a scoped package; when it names an existing file under
- * the package directory, the author meant the package-relative form —
+ * the package directory, the author meant the package-relative form:
  * normalize it so execution-time resolution imports the packaged file
  * instead of attempting a bare-package lookup.
  */
@@ -122,7 +122,7 @@ function normalizeModuleSpecifier(spec: string, packageDir: string): string {
 /**
  * Load and validate the transformation manifest of a package directory,
  * together with the npm metadata (description/author/license) of its
- * package.json — one read serves both.
+ * package.json; one read serves both.
  *
  * Reads `synth.json` at the package root when present, otherwise the
  * `synth` object in `package.json`. Throws with a precise message (which

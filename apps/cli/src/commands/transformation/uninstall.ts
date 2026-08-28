@@ -14,7 +14,7 @@ export default class TransformationUninstall extends BaseCommand {
 
   static override description = `Remove an installed transformation.
 
-Refused while any saved pipeline lists the transformation as a step (running the pipeline would break); update those pipelines or delete them with 'synth pipeline rm' first — there is no cascade. An invalid pipeline file still protects its steps: its step list is read best-effort, because repairing the file with 'synth pipeline edit' must stay possible.`
+Refused while any saved pipeline lists the transformation as a step (running the pipeline would break); update those pipelines or delete them with 'synth pipeline rm' first, as there is no cascade. An invalid pipeline file still protects its steps: its step list is read best-effort, because repairing the file with 'synth pipeline edit' must stay possible.`
 
   static override examples = ['<%= config.bin %> <%= command.id %> eer-to-relational']
 
@@ -31,7 +31,7 @@ Refused while any saved pipeline lists the transformation as a step (running the
     const json = Boolean(flags.json)
 
     // 1. Existence first: uninstalling something that is not installed is
-    // a missing resource (exit 3) — no pipeline scan for a phantom.
+    // a missing resource (exit 3); no pipeline scan for a phantom.
     const configEntry = this.workspaceConfig.transformations[txName]
     const txPath = configEntry !== undefined ? configEntry.path : join(getTransformationsPath(this.workspaceConfig), txName)
     if (!existsSync(txPath)) {
@@ -43,13 +43,13 @@ Refused while any saved pipeline lists the transformation as a step (running the
     }
 
     // 2. Deletion guard: uninstalling a step of a saved pipeline would
-    // break the pipeline. The scan is lenient — an invalid pipeline file
+    // break the pipeline. The scan is lenient: an invalid pipeline file
     // still names its steps.
     const dependents = await findPipelinesUsingTx(getPipelinesPath(this.workspaceConfig), txName)
     if (dependents.length > 0) {
       this.jsonAwareFail(
         json,
-        `Cannot uninstall '${txName}' — ${dependents.length} saved pipeline(s) use it as a step: ${dependents.join(', ')}. ` +
+        `Cannot uninstall '${txName}'; ${dependents.length} saved pipeline(s) use it as a step: ${dependents.join(', ')}. ` +
           `Update them or delete them with 'synth pipeline rm' first.`,
         EXIT_CODES.VALIDATION_FAILURE
       )

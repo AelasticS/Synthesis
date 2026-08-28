@@ -28,7 +28,7 @@ const flatten = (text: string): string => text.replace(/·?\s*\n\s*›?\s*/g, ' 
 
 const configPath = (name: string) => join(modelsDir, 'com', 'example', `${name}.tsx`)
 
-/** The serialized model body — everything from 'export default' on. */
+/** The serialized model body: everything from 'export default' on. */
 const modelBody = (path: string): string => {
   const text = readFileSync(path, 'utf-8')
   return text.slice(text.indexOf('export default'))

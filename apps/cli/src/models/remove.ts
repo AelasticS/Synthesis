@@ -1,6 +1,6 @@
 /**
  * Model removal shared by `model rm` and `config rm`: the deletion mirror
- * of the import gate — the CLI never leaves dangling references. Either
+ * of the import gate: the CLI never leaves dangling references. Either
  * nothing depends on the target, or the whole reverse-dependency closure
  * goes with it (--cascade).
  */
@@ -17,7 +17,7 @@ export class DanglingDependentsError extends Error {
     dependentCount: number
   ) {
     super(
-      `Cannot remove ${ref} — ${dependentCount} dependent model(s) would be left dangling:\n` +
+      `Cannot remove ${ref}: ${dependentCount} dependent model(s) would be left dangling:\n` +
         `${tree.join('\n')}\n` +
         'Remove or update them first, or pass --cascade to delete all of the above together.'
     )
@@ -34,7 +34,7 @@ export interface ModelRemoval {
 }
 
 /**
- * Delete a model (the ref must exist — callers gate on that) together with
+ * Delete a model (the ref must exist; callers gate on that) together with
  * its reverse-dependency closure when `cascade` is set. Refuses with
  * DanglingDependentsError when dependents exist and cascade is off.
  * Saved pipelines never block model removal: a pipeline stores only its

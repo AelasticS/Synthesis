@@ -2,7 +2,7 @@
  * The model-import machinery, callable without a subprocess: validation
  * render (the gate), header stamping, dependency check, and the copy into
  * the namespace tree. `model import` is a thin shell over this, and the
- * interactive import offer ("--in names a .tsx file — import it first?")
+ * interactive import offer ("--in names a .tsx file; import it first?")
  * reuses it directly, so the two paths cannot drift: every message and
  * exit code lives here exactly once.
  */
@@ -47,7 +47,7 @@ export interface ImportModelOptions {
   /** Absolute path of the source .tsx file. */
   sourcePath: string
   /**
-   * Target ref as requested (e.g. --as), normalized here — AFTER the
+   * Target ref as requested (e.g. --as), normalized here, AFTER the
    * source-file checks, so their errors keep precedence. When omitted,
    * the shared default policy (`defaultImportRef`) applies.
    */
@@ -86,7 +86,7 @@ export async function importModelFile(options: ImportModelOptions): Promise<Impo
     throw new ModelImportError(EXIT_CODES.FAILURE, `Source file must be a .tsx model module: ${sourcePath}`)
   }
 
-  // Resolve the target ref only now — the file's own problems outrank a
+  // Resolve the target ref only now: the file's own problems outrank a
   // ref problem, whether the ref was requested or defaulted.
   const requested = options.ref ?? defaultImportRef(workspaceConfig, sourcePath)
   if (requested === undefined) {
@@ -105,7 +105,7 @@ export async function importModelFile(options: ImportModelOptions): Promise<Impo
   // Validation gate: the model must transpile, import, and render into a
   // throwaway store before anything is copied into the workspace. With
   // --tx, the installed transformation's parts render into the store
-  // first — the context configuration models need.
+  // first: the context configuration models need.
   let moduleHeader: unknown
   const buffer = new EngineOutputBuffer(!options.verbose)
   try {
@@ -120,7 +120,7 @@ export async function importModelFile(options: ImportModelOptions): Promise<Impo
     if (err instanceof GateRenderError) {
       const prefix =
         err.missingRef !== undefined
-          ? `Import rejected: missing dependency '${err.missingRef}' — `
+          ? `Import rejected: missing dependency '${err.missingRef}'; `
           : 'Import rejected: '
       throw new ModelImportError(EXIT_CODES.VALIDATION_FAILURE, `${prefix}${err.message}${err.hint}`, { cause: err })
     }
@@ -137,7 +137,7 @@ export async function importModelFile(options: ImportModelOptions): Promise<Impo
   for (const { key, target } of findMissingReferences(modelsDir, header.references)) {
     throw new ModelImportError(
       EXIT_CODES.VALIDATION_FAILURE,
-      `Import rejected: missing dependency — header reference '${key}' -> '${target}' is not in the workspace. Import it first.`
+      `Import rejected: missing dependency. Header reference '${key}' -> '${target}' is not in the workspace. Import it first.`
     )
   }
 

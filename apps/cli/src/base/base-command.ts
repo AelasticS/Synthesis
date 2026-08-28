@@ -76,7 +76,7 @@ export abstract class BaseCommand<T extends typeof Command = typeof Command> ext
 
     // Recover the global overrides TOLERANTLY (base flags only, nothing
     // strict, nothing required): a spec violation is reported by
-    // execute()'s own strict parse with the exact oclif message — run()
+    // execute()'s own strict parse with the exact oclif message; run()
     // itself must never fail a command line first.
     let flags: { workspace?: string; ns?: string }
     try {
@@ -145,8 +145,8 @@ export abstract class BaseCommand<T extends typeof Command = typeof Command> ext
   }
 
   /**
-   * Parse against a RELAXED twin of this command's own spec — the same
-   * flags and args with nothing required — to see what IS present before
+   * Parse against a RELAXED twin of this command's own spec (the same
+   * flags and args with nothing required) to see what IS present before
    * deciding between the interactive flow and the strict re-parse. Every
    * non-presence validation (unknown flags, exclusive pairs, value
    * parsing) still applies, so the relaxed parse fails exactly where the
@@ -175,7 +175,7 @@ export abstract class BaseCommand<T extends typeof Command = typeof Command> ext
    * uniform failure mapping: a prompt cancel (ctrl+c) becomes a clean
    * 'Aborted.' with exit 130, every other failure goes through
    * failFromExecuteError. The prompt implementation and the import
-   * machinery load lazily — non-interactive invocations never pay for
+   * machinery load lazily, so non-interactive invocations never pay for
    * them. `verbose` threads into the import gate so engine output passes
    * through when asked for.
    */

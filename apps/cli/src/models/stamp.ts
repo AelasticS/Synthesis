@@ -118,8 +118,8 @@ export interface GeneratedHeaderOptions {
 /**
  * Header for a model file the CLI generates itself (e.g. a `transformation run` m2m
  * result). Owns the same defaults stampModelText applies to imported
- * files — author from git config falling back to 'unknown', version
- * '0.1.0', fresh dates, empty tags/custom, null license — so generated
+ * files (author from git config falling back to 'unknown', version
+ * '0.1.0', fresh dates, empty tags/custom, null license) so generated
  * and imported headers cannot derive differently.
  */
 export async function makeGeneratedHeader(options: GeneratedHeaderOptions): Promise<SynthHeader> {

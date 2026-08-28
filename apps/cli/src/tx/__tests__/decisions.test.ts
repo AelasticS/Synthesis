@@ -35,7 +35,7 @@ const el = (type: string, name: string, extra: Record<string, unknown> = {}): Fa
   ...extra
 })
 
-// Decision model: elements[] in document order — each Issue followed by its
+// Decision model: elements[] in document order, each Issue followed by its
 // Options (the rendered graph does not materialize the containment).
 const namingIssue = el('ModelIssue', 'NamingConvention')
 const camelCase = el('Option', 'CamelCase', { isDefault: false })
@@ -53,7 +53,7 @@ const decisionModel = {
 }
 
 // Input model: two flat attributes and one nested attribute (hierarchical
-// path below the model path — the engine nests element paths by container).
+// path below the model path; the engine nests element paths by container).
 const inputPath = '//www.aelastics.org/Input'
 const attr = (name: string, path: string = inputPath): FakeElement =>
   ({ __type: 'Attribute', id: String(nextId++), name, path })

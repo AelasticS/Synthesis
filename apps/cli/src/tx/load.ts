@@ -112,7 +112,7 @@ export interface ResolvedSourceModel {
 /**
  * Resolve the source model a transformation is applied to: normalize the
  * ref, find the file, parse the `$synth` header (a malformed header is a
- * broken declaration, not a missing one — the gate cannot be silently
+ * broken declaration, not a missing one; the gate cannot be silently
  * skipped), and gate the declared metamodel against the manifest. Shared
  * by `transformation run --in` and `config init --for` so checks, wording, and exit
  * codes cannot drift.
@@ -158,7 +158,7 @@ export interface TxParts {
 /**
  * Render a transformation package's own parts into the store, in manifest
  * order: metamodels, decisionModel, bindingModel. These ship WITH the
- * package — they are not workspace models. Every part failure names the
+ * package; they are not workspace models. Every part failure names the
  * manifest field and module it came from.
  */
 export async function renderTxParts(
@@ -203,7 +203,7 @@ export interface RenderedModelWithTxContext extends RenderedModel {
  * is given) the reference closure from the file's own `$synth` header, and
  * finally the file itself. This is the render gate for configuration
  * models, whose `$refByName` references reach into the transformation's
- * decision/binding models and into the source model they configure — a
+ * decision/binding models and into the source model they configure; a
  * plain renderModel of such a file can never resolve them.
  *
  * A caller that already loaded the package manifest passes it to skip the
@@ -296,7 +296,7 @@ export async function renderForGate(
     }
     const hint =
       txPackageDir === undefined && kind === 'configuration-model'
-        ? ` Hint: configuration models render only with their transformation's context — pass --tx <name> (e.g. the transformation named in the header's generatedBy).`
+        ? ` Hint: configuration models render only with their transformation's context; pass --tx <name> (e.g. the transformation named in the header's generatedBy).`
         : ''
     const dangling = DANGLING_REF_RE.exec(message)
     throw new GateRenderError(message, hint, dangling?.[1], { cause: err })

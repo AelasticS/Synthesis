@@ -95,7 +95,7 @@ export default class TransformationInstall extends BaseCommand {
     await cp(sourcePath, destPath, { recursive: true })
 
     // Update config. Kind and variability are manifest facts, re-read from
-    // the manifest whenever needed — the config records only install state.
+    // the manifest whenever needed; the config records only install state.
     this.workspaceConfig.transformations[name] = {
       version,
       path: destPath,

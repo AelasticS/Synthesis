@@ -7,7 +7,7 @@ import { importModelFile, ModelImportError } from '../../models/import-core.js'
 export default class ModelImport extends BaseCommand {
   static override description = `Validate a .tsx model file and copy it into the workspace.
 
-Configuration models reference their transformation's decision/binding models and the source model they configure; pass --tx <name> so the validation render pre-loads the installed transformation's parts (and the file's header references) — without it such a file cannot render.`
+Configuration models reference their transformation's decision/binding models and the source model they configure; pass --tx <name> so the validation render pre-loads the installed transformation's parts (and the file's header references); without it such a file cannot render.`
 
   static override examples = [
     '<%= config.bin %> <%= command.id %> ./persons.tsx',
@@ -51,7 +51,7 @@ Configuration models reference their transformation's decision/binding models an
 
     const sourcePath = isAbsolute(args.file) ? args.file : join(this.savedPwd, args.file)
 
-    // The shared machinery does everything — source-file checks, target-ref
+    // The shared machinery does everything: source-file checks, target-ref
     // resolution (--as, or the shared default policy: current namespace +
     // file basename), validation render (the gate), header stamping,
     // dependency check, copy into the namespace tree. The catch reports

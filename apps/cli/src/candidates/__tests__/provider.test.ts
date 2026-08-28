@@ -15,8 +15,8 @@ import {
 } from '../provider.js'
 
 // The provider must answer from manifests, headers, and pipeline files
-// alone — so the fixture workspace is SYNTHESIZED on disk: header-only
-// model files (never renderable — proving nothing renders), the real
+// alone, so the fixture workspace is SYNTHESIZED on disk: header-only
+// model files (never renderable, proving nothing renders), the real
 // installable fixture packages for manifests, and raw pipeline JSON.
 const packageRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../../..')
 const fixturesDir = join(packageRoot, 'src/tx/__tests__/fixtures')
@@ -102,7 +102,7 @@ afterAll(() => {
 })
 
 describe('installedTransformations', () => {
-  it('lists every readable manifest with kind, metamodels, variability, description — broken entries skipped', async () => {
+  it('lists every readable manifest with kind, metamodels, variability, description; broken entries skipped', async () => {
     const list = await installedTransformations(config)
     expect(list.map((tx) => tx.name)).toEqual(['eer-to-relational', 'rel-copy', 'rel-to-sql-ddl'])
     const eer = list[0]

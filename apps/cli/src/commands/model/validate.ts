@@ -64,7 +64,7 @@ Configuration models reference their transformation's decision/binding models; p
     // Real structural validation: transpile, import, and render into a
     // throwaway store; any failure is the model's failure. With --tx, the
     // installed transformation's parts (and the header's reference closure)
-    // render first — the context configuration models need.
+    // render first, providing the context configuration models need.
     const buffer = new EngineOutputBuffer(!flags.verbose)
     try {
       await buffer.run(() => renderForGate(this.workspaceConfig, modelPath, flags.tx, modelsDir))

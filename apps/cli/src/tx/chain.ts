@@ -48,7 +48,7 @@ export interface ChainProblem {
 }
 
 /**
- * Structural chain checks from manifests alone — no engine work, no
+ * Structural chain checks from manifests alone, no engine work, no
  * model access: text is terminal (only the last step may be m2t), and
  * step N's target metamodel must equal step N+1's source metamodel (the
  * incompatible pair is named). Returns every problem; execution fails on

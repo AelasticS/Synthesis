@@ -233,7 +233,7 @@ export default class Doctor extends BaseCommand {
       })
     }
 
-    // Check 9: every saved pipeline is runnable — the same static checks
+    // Check 9: every saved pipeline is runnable, per the same static checks
     // as `pipeline mk`: the file parses against the process-only schema,
     // every step is installed, and the chain type-checks from the
     // manifests. (Pipelines store no data bindings, so there is nothing

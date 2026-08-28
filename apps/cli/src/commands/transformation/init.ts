@@ -56,7 +56,7 @@ export default class TransformationInit extends BaseCommand {
     }
     await writeFile(join(projectDir, 'package.json'), JSON.stringify(packageJson, null, 2) + '\n')
 
-    // Create synth.json — the manifest 'transformation install' validates. The scaffold
+    // Create synth.json, the manifest that 'transformation install' validates. The scaffold
     // is installable as-is; the metamodel placeholders are for the author
     // to replace.
     const synthJson = {
@@ -90,7 +90,7 @@ export default class TransformationInit extends BaseCommand {
     await writeFile(join(projectDir, 'tsconfig.json'), JSON.stringify(tsconfig, null, 2) + '\n')
 
     // Create src/index.ts template. The exported class name must match
-    // synth.json's exportName — 'transformation run' loads exactly that export.
+    // synth.json's exportName; 'transformation run' loads exactly that export.
     const indexTs = `/**
  * Synthesis transformation: ${projectName}
  *

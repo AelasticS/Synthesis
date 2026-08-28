@@ -1,4 +1,4 @@
-# synth — dynamic bash completion (values: transformation names, model and
+# synth: dynamic bash completion (values: transformation names, model and
 # configuration refs, pipeline names, namespaces).
 #
 # How it works: on TAB this wrapper asks the CLI itself for the candidate
@@ -7,7 +7,7 @@
 # headers). When the CLI has no value candidates for the position, the
 # wrapper falls back to the command/flag completion that
 # @oclif/plugin-autocomplete generates (`_synth_autocomplete`), when that
-# is loaded — and to bash's default (filename) completion otherwise.
+# is loaded, and to bash's default (filename) completion otherwise.
 #
 # One-time setup, in this order in ~/.bashrc:
 #
@@ -28,7 +28,7 @@ _synth_dynamic_autocomplete() {
   local cur="${COMP_WORDS[COMP_CWORD]}"
 
   # Words after the program name up to AND INCLUDING the word under the
-  # cursor ('' when a new word is being started) — the `synth completions`
+  # cursor ('' when a new word is being started): the `synth completions`
   # contract. Bash splits words at '=' (COMP_WORDBREAKS), turning
   # '--in=com' into the three tokens '--in', '=', 'com': reassemble them
   # so the CLI sees the single-token '--flag=partial' form it understands.
@@ -52,7 +52,7 @@ _synth_dynamic_autocomplete() {
 
   # Bash replaces only the region after the '=' wordbreak, so filter with
   # that part. When '=' is NOT in COMP_WORDBREAKS (custom setups), the
-  # whole '--flag=partial' word is replaced instead — candidates must then
+  # whole '--flag=partial' word is replaced instead; candidates must then
   # carry the '--flag=' prefix back.
   local prefix=""
   if [[ "$cur" == "=" ]]; then
@@ -83,5 +83,5 @@ _synth_dynamic_autocomplete() {
 }
 
 # -o default: when neither source produces candidates, fall back to
-# readline's default (filename) completion — e.g. for --out-dir values.
+# readline's default (filename) completion, e.g. for --out-dir values.
 complete -o default -F _synth_dynamic_autocomplete synth

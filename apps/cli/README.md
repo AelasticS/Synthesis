@@ -203,8 +203,8 @@ DESCRIPTION
 
   Runs the transformation's default-configuration generation (one default choice per issue its binding model attaches,
   global and per-element) against the model named with --for and saves the result as an editable configuration model in
-  the workspace — the same generation 'transformation run --default-configs' accepts in memory. Edit the saved file to
-  steer the transformation, then pass it to 'transformation run --config'. In a terminal session, a missing
+  the workspace; this is the same generation 'transformation run --default-configs' accepts in memory. Edit the saved
+  file to steer the transformation, then pass it to 'transformation run --config'. In a terminal session, a missing
   transformation opens a picker over the installed decision-based transformations and a missing --for over the models
   matching its source metamodel; piped, scripted, --json, --quiet, and CI invocations never prompt. Exit codes: 2 for a
   source-metamodel mismatch or a result that fails the import gate, 3 for an unknown transformation or missing model.
@@ -525,7 +525,7 @@ DESCRIPTION
 
   Configuration models reference their transformation's decision/binding models and the source model they configure;
   pass --tx <name> so the validation render pre-loads the installed transformation's parts (and the file's header
-  references) — without it such a file cannot render.
+  references); without it such a file cannot render.
 
 EXAMPLES
   $ synth model import ./persons.tsx
@@ -851,9 +851,9 @@ GLOBAL FLAGS
 DESCRIPTION
   Open a saved pipeline in $EDITOR.
 
-  After the editor closes, the file is validated like 'pipeline mk' validates a new pipeline — schema (process-only
-  fields), every step installed, chain type compatibility — and every problem is reported as a warning ('pipeline run
-  <name>' would refuse until they are fixed).
+  After the editor closes, the file is validated like 'pipeline mk' validates a new pipeline: schema (process-only
+  fields), every step installed, chain type compatibility. Every problem is reported as a warning ('pipeline run <name>'
+  would refuse until they are fixed).
 
 ALIASES
   $ synth pl edit
@@ -916,12 +916,12 @@ GLOBAL FLAGS
 DESCRIPTION
   Create a saved pipeline from an ordered list of installed transformations.
 
-  Validation is static — nothing is executed: the name must be a valid segment and must not shadow an installed
+  Validation is static (nothing is executed): the name must be a valid segment and must not shadow an installed
   transformation, every step must be installed, the chain must type-check from the manifests (step N's target metamodel
-  equals step N+1's source metamodel), and only the last step may be m2t. A pipeline stores the process only (its steps)
-  — no input model, no configuration, no consent flags; every 'pipeline run' names its own data explicitly. An existing
-  pipeline is only replaced with --overwrite (createdAt survives). Exit codes: 2 for a chain type mismatch, 3 for a step
-  that is not installed.
+  equals step N+1's source metamodel), and only the last step may be m2t. A pipeline stores the process only (its
+  steps): no input model, no configuration, no consent flags; every 'pipeline run' names its own data explicitly. An
+  existing pipeline is only replaced with --overwrite (createdAt survives). Exit codes: 2 for a chain type mismatch, 3
+  for a step that is not installed.
 
 ALIASES
   $ synth pl mk
@@ -980,7 +980,7 @@ FLAGS
   --config=<value>       Configuration model ref for step 1 (decision-based only; later steps take --default-configs).
   --default-configs      Explicitly accept generated default configurations for every decision-based step not covered by
                          --config.
-  --in=<value>           Source model ref the first step transforms (always required — a pipeline stores no data
+  --in=<value>           Source model ref the first step transforms (always required; a pipeline stores no data
                          bindings).
   --keep-intermediates   Also write every intermediate step result as a workspace model
                          ('<namespace>/<name>-<step-tx>').
@@ -1001,11 +1001,11 @@ GLOBAL FLAGS
 DESCRIPTION
   Run a saved pipeline on a workspace model.
 
-  A pipeline stores only the process — its transformation steps. Every run names its own data explicitly, exactly like
+  A pipeline stores only the process: its transformation steps. Every run names its own data explicitly, exactly like
   'transformation run' with the same steps: --in is always required, output goes to --out (last step m2m; default
   '<namespace>/<name>-<last-tx>' derived from --in) or --out-dir (last step m2t), and configuration consent follows the
   normal policy (--config binds to step 1 only; every other decision-based step requires --default-configs, otherwise
-  the run aborts before any engine work). The full pre-flight applies — a pipeline is convenience, never a bypass. In a
+  the run aborts before any engine work). The full pre-flight applies; a pipeline is convenience, never a bypass. In a
   terminal session, missing values are asked for interactively: no name opens a picker over the saved pipelines, a
   missing --in over the models matching step 1's source metamodel, an unconsented decision-based step offers
   --config/--default-configs explicitly, and a missing --out-dir is prompted for. Piped, scripted, --json, --quiet, and
@@ -1073,9 +1073,9 @@ GLOBAL FLAGS
 DESCRIPTION
   Open a saved pipeline in $EDITOR.
 
-  After the editor closes, the file is validated like 'pipeline mk' validates a new pipeline — schema (process-only
-  fields), every step installed, chain type compatibility — and every problem is reported as a warning ('pipeline run
-  <name>' would refuse until they are fixed).
+  After the editor closes, the file is validated like 'pipeline mk' validates a new pipeline: schema (process-only
+  fields), every step installed, chain type compatibility. Every problem is reported as a warning ('pipeline run <name>'
+  would refuse until they are fixed).
 
 ALIASES
   $ synth pl edit
@@ -1138,12 +1138,12 @@ GLOBAL FLAGS
 DESCRIPTION
   Create a saved pipeline from an ordered list of installed transformations.
 
-  Validation is static — nothing is executed: the name must be a valid segment and must not shadow an installed
+  Validation is static (nothing is executed): the name must be a valid segment and must not shadow an installed
   transformation, every step must be installed, the chain must type-check from the manifests (step N's target metamodel
-  equals step N+1's source metamodel), and only the last step may be m2t. A pipeline stores the process only (its steps)
-  — no input model, no configuration, no consent flags; every 'pipeline run' names its own data explicitly. An existing
-  pipeline is only replaced with --overwrite (createdAt survives). Exit codes: 2 for a chain type mismatch, 3 for a step
-  that is not installed.
+  equals step N+1's source metamodel), and only the last step may be m2t. A pipeline stores the process only (its
+  steps): no input model, no configuration, no consent flags; every 'pipeline run' names its own data explicitly. An
+  existing pipeline is only replaced with --overwrite (createdAt survives). Exit codes: 2 for a chain type mismatch, 3
+  for a step that is not installed.
 
 ALIASES
   $ synth pl mk
@@ -1202,7 +1202,7 @@ FLAGS
   --config=<value>       Configuration model ref for step 1 (decision-based only; later steps take --default-configs).
   --default-configs      Explicitly accept generated default configurations for every decision-based step not covered by
                          --config.
-  --in=<value>           Source model ref the first step transforms (always required — a pipeline stores no data
+  --in=<value>           Source model ref the first step transforms (always required; a pipeline stores no data
                          bindings).
   --keep-intermediates   Also write every intermediate step result as a workspace model
                          ('<namespace>/<name>-<step-tx>').
@@ -1223,11 +1223,11 @@ GLOBAL FLAGS
 DESCRIPTION
   Run a saved pipeline on a workspace model.
 
-  A pipeline stores only the process — its transformation steps. Every run names its own data explicitly, exactly like
+  A pipeline stores only the process: its transformation steps. Every run names its own data explicitly, exactly like
   'transformation run' with the same steps: --in is always required, output goes to --out (last step m2m; default
   '<namespace>/<name>-<last-tx>' derived from --in) or --out-dir (last step m2t), and configuration consent follows the
   normal policy (--config binds to step 1 only; every other decision-based step requires --default-configs, otherwise
-  the run aborts before any engine work). The full pre-flight applies — a pipeline is convenience, never a bypass. In a
+  the run aborts before any engine work). The full pre-flight applies; a pipeline is convenience, never a bypass. In a
   terminal session, missing values are asked for interactively: no name opens a picker over the saved pipelines, a
   missing --in over the models matching step 1's source metamodel, an unconsented decision-based step offers
   --config/--default-configs explicitly, and a missing --out-dir is prompted for. Piped, scripted, --json, --quiet, and
@@ -1784,10 +1784,10 @@ DESCRIPTION
   metamodel must equal step N+1's source metamodel), and only the last step may be m2t (text is terminal; it requires
   --out-dir). Pass --keep-intermediates to also persist every intermediate result as a workspace model at
   '<namespace>/<name>-<step-tx>'. Configuration consent is explicit everywhere: --config binds to step 1 only, and every
-  other decision-based step (and step 1 without --config) requires --default-configs — without it the run aborts before
+  other decision-based step (and step 1 without --config) requires --default-configs; without it the run aborts before
   any engine work. --save-config persists the generated default configuration (single step, only together with
   --default-configs); for chains, run stepwise with 'transformation run' and 'config init'. After a successful run,
-  --save-as <name> saves the steps as a pipeline at pipelines/<name>.json — the process only, no data bindings —
+  --save-as <name> saves the steps as a pipeline at pipelines/<name>.json (the process only, no data bindings),
   replayable with 'synth pipeline run <name> --in <ref>'. In a terminal session, missing values are asked for
   interactively: no transformation opens a picker over the installed transformations, a missing --in over the models
   matching the source metamodel, an unconsented decision-based step offers --config/--default-configs explicitly, and a
@@ -1881,8 +1881,8 @@ DESCRIPTION
   Remove an installed transformation.
 
   Refused while any saved pipeline lists the transformation as a step (running the pipeline would break); update those
-  pipelines or delete them with 'synth pipeline rm' first — there is no cascade. An invalid pipeline file still protects
-  its steps: its step list is read best-effort, because repairing the file with 'synth pipeline edit' must stay
+  pipelines or delete them with 'synth pipeline rm' first, as there is no cascade. An invalid pipeline file still
+  protects its steps: its step list is read best-effort, because repairing the file with 'synth pipeline edit' must stay
   possible.
 
 ALIASES
@@ -2112,10 +2112,10 @@ DESCRIPTION
   metamodel must equal step N+1's source metamodel), and only the last step may be m2t (text is terminal; it requires
   --out-dir). Pass --keep-intermediates to also persist every intermediate result as a workspace model at
   '<namespace>/<name>-<step-tx>'. Configuration consent is explicit everywhere: --config binds to step 1 only, and every
-  other decision-based step (and step 1 without --config) requires --default-configs — without it the run aborts before
+  other decision-based step (and step 1 without --config) requires --default-configs; without it the run aborts before
   any engine work. --save-config persists the generated default configuration (single step, only together with
   --default-configs); for chains, run stepwise with 'transformation run' and 'config init'. After a successful run,
-  --save-as <name> saves the steps as a pipeline at pipelines/<name>.json — the process only, no data bindings —
+  --save-as <name> saves the steps as a pipeline at pipelines/<name>.json (the process only, no data bindings),
   replayable with 'synth pipeline run <name> --in <ref>'. In a terminal session, missing values are asked for
   interactively: no transformation opens a picker over the installed transformations, a missing --in over the models
   matching the source metamodel, an unconsented decision-based step offers --config/--default-configs explicitly, and a
@@ -2209,8 +2209,8 @@ DESCRIPTION
   Remove an installed transformation.
 
   Refused while any saved pipeline lists the transformation as a step (running the pipeline would break); update those
-  pipelines or delete them with 'synth pipeline rm' first — there is no cascade. An invalid pipeline file still protects
-  its steps: its step list is read best-effort, because repairing the file with 'synth pipeline edit' must stay
+  pipelines or delete them with 'synth pipeline rm' first, as there is no cascade. An invalid pipeline file still
+  protects its steps: its step list is read best-effort, because repairing the file with 'synth pipeline edit' must stay
   possible.
 
 ALIASES

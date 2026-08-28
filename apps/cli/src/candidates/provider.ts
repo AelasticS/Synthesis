@@ -1,6 +1,6 @@
 /**
  * Candidate provider: answers "which values are valid here?" for the
- * interactive pickers and the dynamic shell completion — from manifests,
+ * interactive pickers and the dynamic shell completion, from manifests,
  * `$synth` headers, and pipeline files ONLY. Nothing here transpiles,
  * imports, or renders a model, and nothing touches the engine: every
  * function is a couple of small file reads plus the static header parse,
@@ -8,9 +8,9 @@
  * models-tree scan can serve several filters).
  *
  * Tolerance policy: a candidate list is assistance, not a gate. Entries
- * that cannot be judged — an installed transformation whose package or
+ * that cannot be judged (an installed transformation whose package or
  * manifest is broken, a model file that is unreadable or has no parseable
- * header, a pipeline file that violates the schema — are silently skipped;
+ * header, a pipeline file that violates the schema) are silently skipped;
  * the honest errors still come from the commands that actually use the
  * value (`doctor` reports the broken files).
  */
@@ -28,7 +28,7 @@ import type { TxKind, TxManifest } from '../tx/manifest.js'
 
 /** One installed transformation, as the pickers and completion present it. */
 export interface TxCandidate {
-  /** Name the workspace knows it by — what the user types. */
+  /** Name the workspace knows it by: what the user types. */
   name: string
   kind: TxKind
   sourceMetamodel: string
@@ -60,7 +60,7 @@ export interface PipelineCandidate {
 /**
  * Every installed transformation with a readable manifest, sorted by name.
  * Broken entries (vanished package, invalid manifest) are skipped. The
- * manifests load in parallel — one batch, not one await per entry.
+ * manifests load in parallel: one batch, not one await per entry.
  */
 export async function installedTransformations(config: WorkspaceConfig): Promise<TxCandidate[]> {
   const loaded = await Promise.all(
@@ -89,7 +89,7 @@ export async function installedTransformations(config: WorkspaceConfig): Promise
 
 /**
  * The transformations that can FOLLOW `previousTx` in a chain, judged by
- * `chainStructureProblems` — the single owner of chain compatibility (text
+ * `chainStructureProblems`, the single owner of chain compatibility (text
  * is terminal, and the target metamodel must equal the next step's source
  * metamodel). An unknown or broken `previousTx` yields an empty list.
  */
@@ -115,7 +115,7 @@ async function readHeader(path: string): Promise<SynthHeader | null> {
   return parseSynthHeader(text).header
 }
 
-/** One workspace model file with its parsed header — the raw material the filters below run on. */
+/** One workspace model file with its parsed header: the raw material the filters below run on. */
 export interface HeaderedModel {
   ref: string
   header: SynthHeader
@@ -148,7 +148,7 @@ const toCandidate = ({ ref, header }: HeaderedModel): ModelCandidate => ({
 /**
  * Workspace models a transformation can run on: header kind 'model',
  * optionally filtered to a source metamodel. A model declaring an EMPTY
- * metamodel is included even under a filter — the run gate accepts it
+ * metamodel is included even under a filter; the run gate accepts it
  * (only a CONFLICTING declaration is a mismatch), so completion must not
  * hide what would run.
  */
@@ -177,7 +177,7 @@ export async function allModels(modelsDir: string): Promise<ModelCandidate[]> {
  * by `txName` (the MANIFEST name recorded in `generatedBy.tx`) and to
  * those declaring `references.sourceModel === sourceModelRef`. A
  * hand-written configuration without a `generatedBy` stamp passes the tx
- * filter — `transformation run --config` accepts it too (with a warning),
+ * filter; `transformation run --config` accepts it too (with a warning),
  * so completion must not hide it.
  */
 export function filterConfigsFor(
@@ -229,7 +229,7 @@ export async function configsFor(
 
 /**
  * Saved pipelines, leniently: every `pipelines/*.json` stem is a candidate
- * (schema-invalid files with empty steps and description — `pipeline
+ * (schema-invalid files with empty steps and description; `pipeline
  * show`/`rm`/`edit` address them too). Sorted by name.
  */
 export async function pipelines(pipelinesDir: string): Promise<PipelineCandidate[]> {

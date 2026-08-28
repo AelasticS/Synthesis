@@ -17,7 +17,7 @@ export default class PipelineMk extends BaseCommand {
 
   static override description = `Create a saved pipeline from an ordered list of installed transformations.
 
-Validation is static — nothing is executed: the name must be a valid segment and must not shadow an installed transformation, every step must be installed, the chain must type-check from the manifests (step N's target metamodel equals step N+1's source metamodel), and only the last step may be m2t. A pipeline stores the process only (its steps) — no input model, no configuration, no consent flags; every 'pipeline run' names its own data explicitly. An existing pipeline is only replaced with --overwrite (createdAt survives). Exit codes: 2 for a chain type mismatch, 3 for a step that is not installed.`
+Validation is static (nothing is executed): the name must be a valid segment and must not shadow an installed transformation, every step must be installed, the chain must type-check from the manifests (step N's target metamodel equals step N+1's source metamodel), and only the last step may be m2t. A pipeline stores the process only (its steps): no input model, no configuration, no consent flags; every 'pipeline run' names its own data explicitly. An existing pipeline is only replaced with --overwrite (createdAt survives). Exit codes: 2 for a chain type mismatch, 3 for a step that is not installed.`
 
   static override examples = [
     '<%= config.bin %> <%= command.id %> gen-sql eer-to-relational rel-to-sql-ddl',

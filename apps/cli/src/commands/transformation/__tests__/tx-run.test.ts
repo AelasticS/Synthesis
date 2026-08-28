@@ -537,7 +537,7 @@ describe('tx run --config with deleted choices (default materialization)', () =>
 
   it('renders the configuration with its own header reference closure (helper models)', async () => {
     // A hand-edited configuration referencing a helper workspace model:
-    // validate/show already load the header closure — tx run must too.
+    // validate/show already load the header closure, so tx run must too.
     const helper = [
       '/** @jsx createExprNode */',
       '',

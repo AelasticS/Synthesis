@@ -106,7 +106,7 @@ export function namespaceToDir(modelsDir: string, namespace: string): string {
 }
 
 /**
- * `<modelsDir>/com/example/persons.tsx` -> `com.example/persons` — the
+ * `<modelsDir>/com/example/persons.tsx` -> `com.example/persons`, the
  * inverse of `refToModelPath`. Returns null when the path is not an
  * addressable model file inside the nested tree (outside the tree, at the
  * tree root, or with segments the ref grammar cannot express).
@@ -269,7 +269,7 @@ export interface DependencyGraph {
 
 /**
  * The full reverse-dependency closure of the given roots: every model
- * that would be left dangling — directly or transitively — if the roots
+ * that would be left dangling, directly or transitively, if the roots
  * were deleted. One header scan over the workspace builds the reverse
  * adjacency; models with unreadable/unparseable headers are skipped
  * (doctor reports those separately).

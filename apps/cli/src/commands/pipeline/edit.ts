@@ -13,7 +13,7 @@ export default class PipelineEdit extends BaseCommand {
 
   static override description = `Open a saved pipeline in $EDITOR.
 
-After the editor closes, the file is validated like 'pipeline mk' validates a new pipeline — schema (process-only fields), every step installed, chain type compatibility — and every problem is reported as a warning ('pipeline run <name>' would refuse until they are fixed).`
+After the editor closes, the file is validated like 'pipeline mk' validates a new pipeline: schema (process-only fields), every step installed, chain type compatibility. Every problem is reported as a warning ('pipeline run <name>' would refuse until they are fixed).`
 
   static override examples = ['<%= config.bin %> <%= command.id %> gen-sql']
 
@@ -36,7 +36,7 @@ After the editor closes, the file is validated like 'pipeline mk' validates a ne
     }
     await openInEditor(pipelinePath(pipelinesDir, args.name))
 
-    // Re-validate what the editor left behind — the same static checks as
+    // Re-validate what the editor left behind: the same static checks as
     // `pipeline mk`. Problems are warnings (the file stays as edited);
     // `pipeline run` is what enforces them.
     const problems: string[] = []
