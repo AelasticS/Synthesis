@@ -375,6 +375,22 @@
     {
       "packageName": "@synthesis/cli",
       "projectFolder": "apps/cli"
+    },
+    {
+      "packageName": "rel-copy",
+      "projectFolder": "examples/rel-copy"
+    },
+    {
+      "packageName": "eer-to-relational",
+      "projectFolder": "examples/eer-to-relational"
+    },
+    {
+      "packageName": "rel-to-sql-ddl",
+      "projectFolder": "examples/rel-to-sql-ddl"
+    },
+    {
+      "packageName": "transformation-template",
+      "projectFolder": "templates/transformation-template"
     }
 
     // {

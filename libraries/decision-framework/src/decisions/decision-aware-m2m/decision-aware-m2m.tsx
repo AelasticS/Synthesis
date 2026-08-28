@@ -138,14 +138,24 @@ export abstract class DecisionAwareM2M<
       const r = raw as DecisionAwareRawTraceEntryData
       const sourceElementNamespace = r.sourceModelElement.path
 
-      const targetElements = r.jsxElements.map((jsx) => {
+      const targetElements = r.jsxElements.flatMap((jsx) => {
         let resolved = jsx
         while (resolved.isAbstract && resolved.subElement) {
           resolved = resolved.subElement
         }
-        return (
-          <TargetElement $refByName={`${targetElementNamespace}/${resolved.props.name}`} />
-        )
+        // A rule may return a reference node ($refByName) that grafts
+        // children into an existing element; it has no `name` prop, so
+        // the trace target is the referenced element itself. Skip the
+        // target entirely when neither name is present: an absent trace
+        // target is recoverable, a dangling reference fails the render
+        // of the whole trace model.
+        const props = resolved.props as { name?: string; $refByName?: string }
+        const name = props.name ?? props.$refByName
+        if (name === undefined) {
+          return []
+        }
+        const ref = String(name).startsWith("//") ? String(name) : `${targetElementNamespace}/${name}`
+        return [<TargetElement $refByName={ref} />]
       })
 
       if (r.ruleType === "VariabilityPoint") {

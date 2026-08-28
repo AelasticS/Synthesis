@@ -135,6 +135,69 @@ importers:
         specifier: ~5.9.3
         version: 5.9.3
 
+  ../../examples/eer-to-relational:
+    dependencies:
+      '@synthesis/decision-framework':
+        specifier: workspace:*
+        version: link:../../libraries/decision-framework
+      '@synthesis/engine':
+        specifier: workspace:*
+        version: link:../../libraries/engine
+      '@synthesis/jsx-runtime':
+        specifier: workspace:*
+        version: link:../../libraries/jsx-runtime
+      '@synthesis/standard-metamodels':
+        specifier: workspace:*
+        version: link:../../libraries/standard-metamodels
+    devDependencies:
+      '@synthesis/cli':
+        specifier: workspace:*
+        version: link:../../apps/cli
+      typescript:
+        specifier: ~5.9.3
+        version: 5.9.3
+
+  ../../examples/rel-copy:
+    dependencies:
+      '@synthesis/engine':
+        specifier: workspace:*
+        version: link:../../libraries/engine
+      '@synthesis/jsx-runtime':
+        specifier: workspace:*
+        version: link:../../libraries/jsx-runtime
+      '@synthesis/standard-metamodels':
+        specifier: workspace:*
+        version: link:../../libraries/standard-metamodels
+    devDependencies:
+      '@synthesis/cli':
+        specifier: workspace:*
+        version: link:../../apps/cli
+      typescript:
+        specifier: ~5.9.3
+        version: 5.9.3
+
+  ../../examples/rel-to-sql-ddl:
+    dependencies:
+      '@synthesis/decision-framework':
+        specifier: workspace:*
+        version: link:../../libraries/decision-framework
+      '@synthesis/engine':
+        specifier: workspace:*
+        version: link:../../libraries/engine
+      '@synthesis/jsx-runtime':
+        specifier: workspace:*
+        version: link:../../libraries/jsx-runtime
+      '@synthesis/standard-metamodels':
+        specifier: workspace:*
+        version: link:../../libraries/standard-metamodels
+    devDependencies:
+      '@synthesis/cli':
+        specifier: workspace:*
+        version: link:../../apps/cli
+      typescript:
+        specifier: ~5.9.3
+        version: 5.9.3
+
   ../../libraries/aelastics-result:
     devDependencies:
       '@rushstack/eslint-config':
@@ -533,6 +596,25 @@ importers:
       tslib:
         specifier: ^2.6.0
         version: 2.8.1
+      typescript:
+        specifier: ~5.9.3
+        version: 5.9.3
+
+  ../../templates/transformation-template:
+    dependencies:
+      '@synthesis/engine':
+        specifier: workspace:*
+        version: link:../../libraries/engine
+      '@synthesis/jsx-runtime':
+        specifier: workspace:*
+        version: link:../../libraries/jsx-runtime
+      '@synthesis/standard-metamodels':
+        specifier: workspace:*
+        version: link:../../libraries/standard-metamodels
+    devDependencies:
+      '@synthesis/cli':
+        specifier: workspace:*
+        version: link:../../apps/cli
       typescript:
         specifier: ~5.9.3
         version: 5.9.3

@@ -1,0 +1,22 @@
+# CI for the extracted, standalone template repository. Inside the
+# Synthesis monorepo this file is inert (only root .github/workflows
+# run); it becomes active when the template is used as its own
+# repository, where dependencies install from npm.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build-and-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm install
+      - run: npm run build
+      - run: npm test
