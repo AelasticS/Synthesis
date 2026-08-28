@@ -25,7 +25,7 @@ Text generation (m2t)
 
 | Example | Kind | Shows | Status |
 | --- | --- | --- | --- |
-| rel-to-sql-ddl | m2t | Decision-based SQL DDL generation | planned (graduating from CLI fixture) |
+| [rel-to-sql-ddl](./rel-to-sql-ddl/) | m2t | Decision-based SQL DDL generation | available |
 | eer-to-markdown-docs | m2t | Markdown documentation from any EER model | planned |
 | eer-to-mermaid-er | m2t | Mermaid `erDiagram` source from an EER model | planned |
 | types-to-typescript | m2t | types-metamodel → TypeScript declarations | planned |
