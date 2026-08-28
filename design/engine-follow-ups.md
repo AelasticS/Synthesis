@@ -58,3 +58,15 @@ workarounds for all of them; none blocks the cli-v0.1.0 release.
   precedence), the docs state the implemented truth, and `tx init`
   scaffolds `synth.json`. Decide before publishing transformation-authoring
   guidance more widely.
+
+## Release caveat (cli-v0.1.0)
+
+- **Cross-platform tarballs and esbuild**: `oclif pack` installs
+  production dependencies once on the build machine and copies them into
+  every platform tarball. esbuild ships a platform-specific binary, so
+  only tarballs matching the build platform (ubuntu runner → linux) are
+  fully functional; darwin/win32 tarballs carry the linux esbuild binary
+  and model loading would fail there. Before advertising non-Linux
+  tarballs, make the pack step install the per-target esbuild binary
+  (esbuild's `@esbuild/<platform>` optional packages) into each target
+  workspace, and smoke-test on the target OS.

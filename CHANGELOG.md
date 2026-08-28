@@ -10,6 +10,10 @@ overall version history.
 
 ## [Unreleased]
 
+Nothing yet.
+
+## [cli-v0.1.0] - 2026-08-28
+
 ### Added
 
 - **The `synth` CLI executes transformations end to end.** The former stub
@@ -188,4 +192,5 @@ overall version history.
   regenerates the manifest, so the git-committed copies were never the
   consumed artifacts — only noise in diffs.
 
-[Unreleased]: https://github.com/AelasticS/Synthesis/compare/8b82ae4..HEAD
+[Unreleased]: https://github.com/AelasticS/Synthesis/compare/cli-v0.1.0..HEAD
+[cli-v0.1.0]: https://github.com/AelasticS/Synthesis/compare/8b82ae4..cli-v0.1.0
