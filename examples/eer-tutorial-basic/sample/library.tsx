@@ -3,12 +3,12 @@
 import { createExprNode } from '@synthesis/jsx-runtime'
 import type { ExprNode } from '@synthesis/jsx-runtime'
 import type { ModelStore } from '@synthesis/engine'
-import { EERSchema, Entity, Attribute, Domain, Relationship, Role } from '@synthesis/standard-metamodels/eer-tutorial'
-import type * as em from '@synthesis/standard-metamodels/eer-tutorial/model'
+import { EERSchema, Entity, Attribute, Domain, Relationship, Role } from '@synthesis/standard-metamodels/eer-tutorial/basic'
+import type * as em from '@synthesis/standard-metamodels/eer-tutorial/basic/model'
 
 export const $synth = {
   kind: 'model',
-  metamodel: '@synthesis/standard-metamodels/eer-tutorial',
+  metamodel: '@synthesis/standard-metamodels/eer-tutorial/basic',
   author: 'Sinisa Neskovic',
   version: '0.1.0',
   description: 'Sample EER schema for tutorial Part 1: one 1:N and one M:N relationship'

@@ -6,13 +6,13 @@
  * columns typed by their domains, and relationships are mapped by one
  * plain conditional: M:N becomes a join table, everything else becomes
  * a foreign key on the N side. Later tutorial parts dissolve exactly
- * this conditional into specialized and decision-based rules.
+ * this conditional into specialized and configuration-based rules.
  */
 import { createExprNode } from '@synthesis/jsx-runtime'
 import type { ExprNode } from '@synthesis/jsx-runtime'
 import { abstractM2M } from '@synthesis/engine'
 import type { ModelStore } from '@synthesis/engine'
-import * as em from '@synthesis/standard-metamodels/eer-tutorial/model'
+import * as em from '@synthesis/standard-metamodels/eer-tutorial/basic/model'
 import * as rmT from '@synthesis/standard-metamodels/relational/model-legacy'
 import { RelSchema, Table, Column } from '@synthesis/standard-metamodels/relational/components-legacy'
 
@@ -58,7 +58,7 @@ export class EER2RelBasicTransformation extends abstractM2M<em.IEERSchema, rmT.I
   // The fixed relationship logic of Part 1: one conditional decides the
   // mapping. Part 2 turns rule variants into type-dispatched
   // specializations, and Part 3 turns the genuinely open case into a
-  // configured decision.
+  // configuration-based rule.
   relationshipToStructure(rel: em.IRelationship): ExprNode<rmT.ITable> {
     const [role1, role2] = rel.roles
     if (role1.ub === 'M' && role2.ub === 'M') {

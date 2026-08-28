@@ -3,7 +3,7 @@
   "entry": "./dist/transformation.js",
   "exportName": "EER2RelBasicTransformation",
   "source": {
-    "metamodel": "@synthesis/standard-metamodels/eer-tutorial"
+    "metamodel": "@synthesis/standard-metamodels/eer-tutorial/basic"
   },
   "target": {
     "metamodel": "@synthesis/standard-metamodels/relational",

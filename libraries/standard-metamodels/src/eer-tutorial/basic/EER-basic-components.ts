@@ -1,4 +1,4 @@
-import * as e from "./EER-tutorial.meta.model.type"
+import * as e from "./EER-basic.meta.model.type"
 import {
   CpxTemplate,
   ExprNode,
@@ -15,14 +15,6 @@ export const EERSchema: CpxTemplate<IModelProps, e.IEERSchema> = (props) => {
 
 export const Entity: Template<e.IEntity> = (props) => {
   return new ExprNode(e.Entity, props, undefined)
-}
-
-export const Kernel: Template<e.IKernel> = (props) => {
-  return new ExprNode(e.Kernel, props, undefined)
-}
-
-export const Weak: Template<e.IWeak> = (props) => {
-  return new ExprNode(e.Weak, props, undefined)
 }
 
 export const Attribute: Template<e.IAttribute> = (props) => {

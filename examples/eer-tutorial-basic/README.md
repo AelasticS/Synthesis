@@ -8,13 +8,14 @@ to relational transformation with fixed logic and no decorators:
 - Relationships are mapped by one plain conditional: M:N becomes a join
   table, everything else becomes a foreign key on the N side. Later
   tutorial parts dissolve exactly this conditional: Part 2 into
-  type-dispatched specializations, Part 3 into configured decisions.
+  type-dispatched specializations, Part 3 into configuration-based
+  rules.
 
-The source metamodel is the simplified tutorial metamodel
-(`@synthesis/standard-metamodels/eer-tutorial`): entities, attributes
-over domains, and binary relationships with cardinality roles. The
-tutorial authors this metamodel step by step; the shipped module is the
-answer key.
+The source metamodel is the basic tutorial metamodel
+(`@synthesis/standard-metamodels/eer-tutorial/basic`): entities,
+attributes over domains, and binary relationships with cardinality
+roles. The tutorial authors this metamodel step by step; the shipped
+module is the answer key.
 
 ## Try it
 

@@ -25,17 +25,29 @@
       "types": "./lib/eer/EER.meta.model.type.d.ts",
       "default": "./lib/eer/EER.meta.model.type.js"
     },
-    "./eer-tutorial": {
-      "types": "./lib/eer-tutorial/index.d.ts",
-      "default": "./lib/eer-tutorial/index.js"
+    "./eer-tutorial/basic": {
+      "types": "./lib/eer-tutorial/basic/index.d.ts",
+      "default": "./lib/eer-tutorial/basic/index.js"
     },
-    "./eer-tutorial/model": {
-      "types": "./lib/eer-tutorial/EER-tutorial.meta.model.type.d.ts",
-      "default": "./lib/eer-tutorial/EER-tutorial.meta.model.type.js"
+    "./eer-tutorial/basic/model": {
+      "types": "./lib/eer-tutorial/basic/EER-basic.meta.model.type.d.ts",
+      "default": "./lib/eer-tutorial/basic/EER-basic.meta.model.type.js"
     },
-    "./eer-tutorial/components": {
-      "types": "./lib/eer-tutorial/EER-tutorial-components.d.ts",
-      "default": "./lib/eer-tutorial/EER-tutorial-components.js"
+    "./eer-tutorial/basic/components": {
+      "types": "./lib/eer-tutorial/basic/EER-basic-components.d.ts",
+      "default": "./lib/eer-tutorial/basic/EER-basic-components.js"
+    },
+    "./eer-tutorial/advanced": {
+      "types": "./lib/eer-tutorial/advanced/index.d.ts",
+      "default": "./lib/eer-tutorial/advanced/index.js"
+    },
+    "./eer-tutorial/advanced/model": {
+      "types": "./lib/eer-tutorial/advanced/EER-advanced.meta.model.type.d.ts",
+      "default": "./lib/eer-tutorial/advanced/EER-advanced.meta.model.type.js"
+    },
+    "./eer-tutorial/advanced/components": {
+      "types": "./lib/eer-tutorial/advanced/EER-advanced-components.d.ts",
+      "default": "./lib/eer-tutorial/advanced/EER-advanced-components.js"
     },
     "./relational": {
       "types": "./lib/relational/index.d.ts",

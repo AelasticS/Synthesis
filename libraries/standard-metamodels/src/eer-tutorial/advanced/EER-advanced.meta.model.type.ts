@@ -1,30 +1,30 @@
 /*
- * Simplified EER metamodel for the developer-guide tutorial. It carries
- * exactly the concepts the tutorial needs and nothing else: entities
- * with attributes over domains, binary relationships with cardinality
- * roles, and the Kernel/Weak entity subtypes that tutorial Part 2 uses
- * to teach rule specialization. Aggregations, subtyping hierarchies,
- * and integrity rules live in the full `eer` metamodel.
+ * Advanced tutorial EER metamodel (model-to-model tutorial, Part 2 and
+ * later). A complete, standalone stage: everything the basic stage has
+ * (entities with attributes over domains, binary relationships with
+ * cardinality roles) plus the Kernel and Weak entity subtypes that the
+ * specialization part dispatches on. Aggregations, subtyping
+ * hierarchies, and integrity rules live in the full `eer` metamodel.
  */
 import * as t from "@aelastics/types"
 
 import { ModelElement, Model } from "@synthesis/metamodel-core"
 
-export const EERTutorial_TypeSchema = t.schema("EERTutorialSchema")
+export const EERTutorialAdvanced_TypeSchema = t.schema("EERTutorialAdvancedSchema")
 
-export const EERSchema = t.subtype(Model, {}, "EERSchema", EERTutorial_TypeSchema)
+export const EERSchema = t.subtype(Model, {}, "EERSchema", EERTutorialAdvanced_TypeSchema)
 
-export const Domain = t.subtype(ModelElement, {}, "Domain", EERTutorial_TypeSchema)
+export const Domain = t.subtype(ModelElement, {}, "Domain", EERTutorialAdvanced_TypeSchema)
 
 export const Attribute = t.subtype(
   ModelElement,
   {
     attrDomain: Domain,
-    attrEntity: t.link(EERTutorial_TypeSchema, "Entity"),
+    attrEntity: t.link(EERTutorialAdvanced_TypeSchema, "Entity"),
     isKey: t.boolean,
   },
   "Attribute",
-  EERTutorial_TypeSchema
+  EERTutorialAdvanced_TypeSchema
 )
 
 export const Entity = t.subtype(
@@ -33,16 +33,15 @@ export const Entity = t.subtype(
     attributes: t.arrayOf(Attribute),
   },
   "Entity",
-  EERTutorial_TypeSchema
+  EERTutorialAdvanced_TypeSchema
 )
 
 t.inverseProps(Attribute, "attrEntity", Entity, "attributes")
 
-// Introduced in tutorial Part 2: specialization of the Entity2Table rule
-// dispatches on these subtypes.
-export const Kernel = t.subtype(Entity, {}, "Kernel", EERTutorial_TypeSchema)
+// The specialization part dispatches Entity2Table on these subtypes.
+export const Kernel = t.subtype(Entity, {}, "Kernel", EERTutorialAdvanced_TypeSchema)
 
-export const Weak = t.subtype(Entity, {}, "Weak", EERTutorial_TypeSchema)
+export const Weak = t.subtype(Entity, {}, "Weak", EERTutorialAdvanced_TypeSchema)
 
 export const Mapping = t.subtype(
   ModelElement,
@@ -52,16 +51,16 @@ export const Mapping = t.subtype(
     ub: t.string.derive().oneOf(["1", "M"]),
   },
   "Mapping",
-  EERTutorial_TypeSchema
+  EERTutorialAdvanced_TypeSchema
 )
 
 export const OrdinaryMapping = t.subtype(
   Mapping,
   {
-    relationship: t.link(EERTutorial_TypeSchema, "Relationship", "relationship"),
+    relationship: t.link(EERTutorialAdvanced_TypeSchema, "Relationship", "relationship"),
   },
   "OrdinaryMapping",
-  EERTutorial_TypeSchema
+  EERTutorialAdvanced_TypeSchema
 )
 
 export const Relationship = t.subtype(
@@ -70,7 +69,7 @@ export const Relationship = t.subtype(
     roles: t.arrayOf(OrdinaryMapping),
   },
   "Relationship",
-  EERTutorial_TypeSchema
+  EERTutorialAdvanced_TypeSchema
 )
 
 export type IEERSchema = t.TypeOf<typeof EERSchema>
