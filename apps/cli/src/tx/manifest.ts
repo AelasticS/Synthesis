@@ -2,11 +2,10 @@
  * Transformation manifest reader.
  *
  * A transformation package declares what the CLI needs to know without
- * loading any code. The manifest lives in one of two places (the final
- * location is deliberately still open, see design/cli-execution §6):
- *
- *   1. a `synth.json` file at the package root — takes precedence
- *   2. a `synth` object inside the package's `package.json`
+ * loading any code. The manifest is a `synth.json` file at the package
+ * root — the only supported location. (An earlier fallback that read a
+ * `synth` object from `package.json` was retired when the convention was
+ * frozen for publication; see design/engine-follow-ups.md.)
  *
  * `entry` and every `parts` module specifier may be either a
  * package-relative path (`./lib/transformation.js`) or a bare package
@@ -124,10 +123,9 @@ function normalizeModuleSpecifier(spec: string, packageDir: string): string {
  * together with the npm metadata (description/author/license) of its
  * package.json — one read serves both.
  *
- * Reads `synth.json` at the package root when present, otherwise the
- * `synth` object in `package.json`. Throws with a precise message (which
- * file, which field) when neither source exists or a required field is
- * missing or malformed.
+ * Reads `synth.json` at the package root. Throws with a precise message
+ * (which file, which field) when the file is absent or a required field
+ * is missing or malformed.
  */
 export async function loadTxManifestWithMeta(
   packageDir: string
@@ -141,23 +139,18 @@ export async function loadTxManifestWithMeta(
   const pkg = await readJsonFile(pkgJsonPath)
 
   const synthJsonPath = join(packageDir, SYNTH_MANIFEST_FILENAME)
-  let raw: Record<string, unknown>
-  let manifestFile: string
-  let fromSynthJson: boolean
-
-  if (existsSync(synthJsonPath)) {
-    raw = await readJsonFile(synthJsonPath)
-    manifestFile = synthJsonPath
-    fromSynthJson = true
-  } else if (isRecord(pkg.synth)) {
-    raw = pkg.synth
-    manifestFile = `${pkgJsonPath} ("synth" block)`
-    fromSynthJson = false
-  } else {
+  if (!existsSync(synthJsonPath)) {
+    // A "synth" object in package.json was an earlier manifest location;
+    // give migrating authors a pointer instead of a bare not-found.
+    const retiredHint = isRecord(pkg.synth)
+      ? ` (The "synth" object in its package.json is not read: that location was retired — move the manifest into ${SYNTH_MANIFEST_FILENAME}.)`
+      : ''
     throw new ManifestError(
-      `No transformation manifest found in '${packageDir}': expected a '${SYNTH_MANIFEST_FILENAME}' file at the package root or a "synth" object in package.json.`
+      `No transformation manifest found in '${packageDir}': expected a '${SYNTH_MANIFEST_FILENAME}' file at the package root.${retiredHint}`
     )
   }
+  const raw = await readJsonFile(synthJsonPath)
+  const manifestFile = synthJsonPath
 
   const fail = (field: string, problem: string): never => {
     throw new ManifestError(`Invalid transformation manifest in '${manifestFile}': field '${field}' ${problem}.`)
@@ -167,9 +160,7 @@ export async function loadTxManifestWithMeta(
   const name = isNonEmptyString(raw.name) ? raw.name : pkg.name
   if (!isNonEmptyString(name)) {
     throw new ManifestError(
-      `Invalid transformation manifest in '${pkgJsonPath}': field 'name' is required (set "name" in package.json${
-        fromSynthJson ? ` or override it in ${SYNTH_MANIFEST_FILENAME}` : ''
-      }).`
+      `Invalid transformation manifest in '${pkgJsonPath}': field 'name' is required (set "name" in package.json or override it in ${SYNTH_MANIFEST_FILENAME}).`
     )
   }
   const version = pkg.version

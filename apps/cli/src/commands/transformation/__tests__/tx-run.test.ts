@@ -60,18 +60,15 @@ describe('tx run errors', () => {
     // from under the workspace config.
     const ghostDir = join(tempDir, 'ghost-tx')
     mkdirSync(ghostDir, { recursive: true })
+    writeFileSync(join(ghostDir, 'package.json'), JSON.stringify({ name: 'ghost-tx', version: '1.0.0' }))
     writeFileSync(
-      join(ghostDir, 'package.json'),
+      join(ghostDir, 'synth.json'),
       JSON.stringify({
-        name: 'ghost-tx',
-        version: '1.0.0',
-        synth: {
-          kind: 'm2m',
-          entry: './lib/transformation.js',
-          exportName: 'GhostTransformation',
-          source: { metamodel: 'mm/source' },
-          target: { metamodel: 'mm/target' }
-        }
+        kind: 'm2m',
+        entry: './lib/transformation.js',
+        exportName: 'GhostTransformation',
+        source: { metamodel: 'mm/source' },
+        target: { metamodel: 'mm/target' }
       })
     )
     const install = await run(['tx', 'install', ghostDir])
@@ -182,18 +179,15 @@ describe('tx run configuration consent (uniform policy)', () => {
     beforeAll(async () => {
       const plainDir = join(tempDir, 'plain-tx')
       mkdirSync(plainDir, { recursive: true })
+      writeFileSync(join(plainDir, 'package.json'), JSON.stringify({ name: 'plain-tx', version: '1.0.0' }))
       writeFileSync(
-        join(plainDir, 'package.json'),
+        join(plainDir, 'synth.json'),
         JSON.stringify({
-          name: 'plain-tx',
-          version: '1.0.0',
-          synth: {
-            kind: 'm2m',
-            entry: './lib/transformation.js',
-            exportName: 'PlainTransformation',
-            source: { metamodel: '@synthesis/standard-metamodels/eer' },
-            target: { metamodel: '@synthesis/standard-metamodels/relational' }
-          }
+          kind: 'm2m',
+          entry: './lib/transformation.js',
+          exportName: 'PlainTransformation',
+          source: { metamodel: '@synthesis/standard-metamodels/eer' },
+          target: { metamodel: '@synthesis/standard-metamodels/relational' }
         })
       )
       const install = await run(['tx', 'install', plainDir])

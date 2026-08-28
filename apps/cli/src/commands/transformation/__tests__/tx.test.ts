@@ -16,14 +16,14 @@ const testTxDir = join(testTmpDir, 'test-tx')
 const testTxPkgJson = {
   name: 'test-tx',
   version: '1.0.0',
-  description: 'Test transformation',
-  synth: {
-    kind: 'm2m',
-    entry: './lib/transformation.js',
-    exportName: 'TestTransformation',
-    source: { metamodel: 'source-meta' },
-    target: { metamodel: 'target-meta' }
-  }
+  description: 'Test transformation'
+}
+const testTxSynthJson = {
+  kind: 'm2m',
+  entry: './lib/transformation.js',
+  exportName: 'TestTransformation',
+  source: { metamodel: 'source-meta' },
+  target: { metamodel: 'target-meta' }
 }
 
 // Isolated HOME so tests do not depend on the developer's ~/.synth state
@@ -36,6 +36,7 @@ beforeAll(async () => {
   // Create test transformation directory
   mkdirSync(testTxDir, { recursive: true })
   writeFileSync(join(testTxDir, 'package.json'), JSON.stringify(testTxPkgJson, null, 2))
+  writeFileSync(join(testTxDir, 'synth.json'), JSON.stringify(testTxSynthJson, null, 2))
 })
 
 afterAll(() => {
@@ -108,14 +109,13 @@ describe('tx install', () => {
   it('rejects a package whose manifest is missing required fields', async () => {
     const invalidDir = join(testTmpDir, 'invalid-manifest-tx')
     mkdirSync(invalidDir, { recursive: true })
-    writeFileSync(
-      join(invalidDir, 'package.json'),
-      JSON.stringify({ name: 'invalid-manifest-tx', version: '1.0.0', synth: { kind: 'm2m' } })
-    )
+    writeFileSync(join(invalidDir, 'package.json'), JSON.stringify({ name: 'invalid-manifest-tx', version: '1.0.0' }))
+    writeFileSync(join(invalidDir, 'synth.json'), JSON.stringify({ kind: 'm2m' }))
 
     const { error, stderr } = await runCli(['tx', 'install', invalidDir], { home: testHome })
     expect(error).toBeDefined()
-    expect(stderr).toContain(`field 'entry'`)
+    // oclif wraps stderr at terminal width; flatten before asserting
+    expect(stderr.replace(/·?\s*\n\s*›?\s*/g, ' ')).toContain(`field 'entry'`)
   })
 
   it('rejects a manifest name that would escape the transformations directory', async () => {
@@ -129,11 +129,8 @@ describe('tx install', () => {
     ] as const) {
       const dir = join(testTmpDir, `bad-name-tx-${Buffer.from(badName).toString('hex')}`)
       mkdirSync(dir, { recursive: true })
-      writeFileSync(
-        join(dir, 'package.json'),
-        JSON.stringify({ name: 'bad-name-tx', version: '1.0.0', synth: { ...testTxPkgJson.synth } })
-      )
-      writeFileSync(join(dir, 'synth.json'), JSON.stringify({ ...testTxPkgJson.synth, name: badName }))
+      writeFileSync(join(dir, 'package.json'), JSON.stringify({ name: 'bad-name-tx', version: '1.0.0' }))
+      writeFileSync(join(dir, 'synth.json'), JSON.stringify({ ...testTxSynthJson, name: badName }))
 
       const { error, stderr } = await runCli(['tx', 'install', dir], { home: testHome })
       expect(error).toBeDefined()

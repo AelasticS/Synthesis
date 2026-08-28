@@ -12,6 +12,11 @@ overall version history.
 
 ### Changed
 
+- **CLI (breaking): `synth.json` is the only transformation manifest
+  location.** The fallback that read a `synth` object from `package.json`
+  is removed. A package that still carries a `synth` block fails
+  manifest loading with a migration hint pointing at `synth.json`.
+  Decision recorded in `design/engine-follow-ups.md`.
 - **Documentation site reorganized around two audience tracks.** The six
   parallel sections are replaced by a **User Guide** for CLI consumers
   (installation → quick start → concepts → tutorial → guides → command
@@ -38,8 +43,8 @@ overall version history.
   - **TSX model workspace with `$synth` headers.** Workspace models are
     `.tsx` JSX modules carrying a tool-maintained `$synth` header (kind,
     metamodel, references, provenance, authorship, dates). `model import`
-    is a validation gate — transpile and render, reference check, header
-    stamping — so everything in the workspace was loadable when it
+    is a validation gate (transpile and render, reference check, header
+    stamping), so everything in the workspace was loadable when it
     entered; `model export` round-trips verbatim; `doctor` re-checks the
     invariant workspace-wide and `doctor --fix` re-derives headers.
   - **Nested namespaces.** `com.example` maps to `models/com/example/`;
@@ -52,7 +57,7 @@ overall version history.
   - **Transformation manifests.** `synth.json` at the package root (or a
     `synth` object in `package.json`) declares kind (`m2m`/`m2t`),
     entry/exportName, source/target metamodels, and the packaged parts
-    (metamodel modules, decision model, binding model — variability is
+    (metamodel modules, decision model, binding model; variability is
     derived from their presence). `transformation install` validates the
     manifest with per-field errors; `transformation show` reads
     issues, options, and defaults from the decision model.
@@ -98,7 +103,7 @@ overall version history.
   `ValidationError` from `@aelastics/result` when the value's tagged type
   (`@@aelastics/type`) is not a subtype of the property's declared type.
   Subtype substitutability is recognized across schemas via the universal
-  `t.System` schema. Validation runs only on user-initiated assignments —
+  `t.System` schema. Validation runs only on user-initiated assignments;
   inverse-property mirror writes bypass the setter and are never
   re-validated. Plain JS objects lacking the `@@aelastics/type` tag are
   rejected. New helper `validateConformance(value, expectedType, path)`
@@ -114,7 +119,7 @@ overall version history.
 - **`TypeModel.inverses` slot.** `<InverseProperty>` JSX elements now land
   in `TypeModel.inverses: arrayOf(link("InverseProperty"))` instead of the
   semantically wrong `TypeModel.types` slot. Authors of types-metamodel
-  JSX files using `<InverseProperty>` see no source change — only the
+  JSX files using `<InverseProperty>` see no source change; only the
   resulting graph differs.
 - **CLI tarball distribution.** New `pack:tarballs` script in
   `apps/cli/package.json` and `.github/workflows/release-cli.yml`. The
@@ -137,14 +142,14 @@ overall version history.
   decision-based transformation runs only with an explicit `--config <ref>`
   or the `--default-configs` consent flag; with neither, the run aborts
   (exit 2) before any engine work with a message teaching both paths. The
-  previous behavior — silently generating and applying default
-  configurations — is gone. In chains and pipelines, `--config` binds to
+  previous behavior (silently generating and applying default
+  configurations) is gone. In chains and pipelines, `--config` binds to
   step 1 only; every other decision-based step takes `--default-configs`
   or the stepwise path (`--keep-intermediates` + `config init` against
   the kept intermediate).
 - **BREAKING (CLI): canonical command names with typing aliases.** Every
-  resource topic has a full-word canonical name — `transformation`,
-  `namespace`, `pipeline`, `model`, `config`, `workspace`, `example` —
+  resource topic has a full-word canonical name (`transformation`,
+  `namespace`, `pipeline`, `model`, `config`, `workspace`, `example`)
   with `tx`, `ns`, and `pl` as two-letter typing aliases of the first
   three. `example list` is renamed `example ls`.
 - **Uniform `--json` failure contract (CLI).** Every command failing in
@@ -195,7 +200,7 @@ overall version history.
 
 - **BREAKING (CLI): `synth m2t`.** Whether a run is model-to-model or
   model-to-text is decided by the transformation manifest's `kind`;
-  `transformation run` covers both. No deprecation alias — the command was
+  `transformation run` covers both. No deprecation alias: the command was
   never published.
 - **BREAKING (CLI): top-level `synth run`.** Replaced by
   `transformation run` (which also chains) and `pipeline run`: a verb that
@@ -206,7 +211,7 @@ overall version history.
   `apps/cli/oclif.manifest.json` (oclif-generated) are now gitignored.
   The docs CI workflow regenerates them on every deploy and the CLI build
   regenerates the manifest, so the git-committed copies were never the
-  consumed artifacts — only noise in diffs.
+  consumed artifacts, only noise in diffs.
 
 [Unreleased]: https://github.com/AelasticS/Synthesis/compare/cli-v0.1.0..HEAD
 [cli-v0.1.0]: https://github.com/AelasticS/Synthesis/compare/8b82ae4..cli-v0.1.0

@@ -61,18 +61,15 @@ describe('config init', () => {
     // Manifest-only fixture: the check runs before any package code loads
     const plainDir = join(tempDir, 'plain-tx')
     mkdirSync(plainDir, { recursive: true })
+    writeFileSync(join(plainDir, 'package.json'), JSON.stringify({ name: 'plain-tx', version: '1.0.0' }))
     writeFileSync(
-      join(plainDir, 'package.json'),
+      join(plainDir, 'synth.json'),
       JSON.stringify({
-        name: 'plain-tx',
-        version: '1.0.0',
-        synth: {
-          kind: 'm2m',
-          entry: './lib/transformation.js',
-          exportName: 'PlainTransformation',
-          source: { metamodel: '@synthesis/standard-metamodels/eer' },
-          target: { metamodel: '@synthesis/standard-metamodels/relational' }
-        }
+        kind: 'm2m',
+        entry: './lib/transformation.js',
+        exportName: 'PlainTransformation',
+        source: { metamodel: '@synthesis/standard-metamodels/eer' },
+        target: { metamodel: '@synthesis/standard-metamodels/relational' }
       })
     )
     await run(['tx', 'install', plainDir])
