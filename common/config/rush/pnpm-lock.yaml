@@ -594,6 +594,25 @@ importers:
         specifier: ~5.9.3
         version: 5.9.3
 
+  ../../templates/transformation-template:
+    dependencies:
+      '@synthesis/engine':
+        specifier: workspace:*
+        version: link:../../libraries/engine
+      '@synthesis/jsx-runtime':
+        specifier: workspace:*
+        version: link:../../libraries/jsx-runtime
+      '@synthesis/standard-metamodels':
+        specifier: workspace:*
+        version: link:../../libraries/standard-metamodels
+    devDependencies:
+      '@synthesis/cli':
+        specifier: workspace:*
+        version: link:../../apps/cli
+      typescript:
+        specifier: ~5.9.3
+        version: 5.9.3
+
 packages:
 
   '@algolia/abtesting@1.15.1':

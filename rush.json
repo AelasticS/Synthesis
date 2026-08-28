@@ -387,6 +387,10 @@
     {
       "packageName": "rel-to-sql-ddl",
       "projectFolder": "examples/rel-to-sql-ddl"
+    },
+    {
+      "packageName": "transformation-template",
+      "projectFolder": "templates/transformation-template"
     }
 
     // {

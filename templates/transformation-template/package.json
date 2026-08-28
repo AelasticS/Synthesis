@@ -1,0 +1,27 @@
+{
+  "name": "transformation-template",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Starter for a Synthesis transformation package. Rename, replace the metamodels, implement template().",
+  "author": "Your Name",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "files": [
+    "dist",
+    "synth.json"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "node scripts/smoke.mjs"
+  },
+  "dependencies": {
+    "@synthesis/jsx-runtime": "workspace:*",
+    "@synthesis/engine": "workspace:*",
+    "@synthesis/standard-metamodels": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "~5.9.3",
+    "@synthesis/cli": "workspace:*"
+  }
+}
