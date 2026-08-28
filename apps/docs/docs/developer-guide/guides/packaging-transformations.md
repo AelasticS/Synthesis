@@ -73,14 +73,10 @@ transformation package; they are not workspace models.
 
 ### Manifest location
 
-The reader accepts two locations:
-
-- a **`synth.json` file at the package root** — this takes precedence when
-  both are present, and is what `synth transformation init` scaffolds;
-- a **`synth` object inside `package.json`**.
-
-Which of the two becomes the single blessed convention is still an open
-decision; packages using either work today.
+The manifest is a **`synth.json` file at the package root** — it is what
+`synth transformation init` scaffolds, and its presence identifies a
+directory as a transformation package at a glance. If you publish to npm,
+remember to include it in `package.json`'s `files` list.
 
 `transformation install` validates the manifest with precise per-field
 errors and refuses packages without a valid one. The modules the manifest
