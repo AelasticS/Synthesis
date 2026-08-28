@@ -16,18 +16,18 @@ The full documentation site lives at
 
 | Section | Description |
 |---|---|
-| [Synthesis eDSL](https://AelasticS.github.io/aelastics/docs/synthesis/) | Define metamodels, build models with JSX, write transformations, configure variability with design decisions |
-| [synth CLI](https://AelasticS.github.io/aelastics/docs/cli/intro) | Run, package, install, and share transformations |
-| [@aelastics/types](https://AelasticS.github.io/aelastics/docs/types/intro) | Runtime type system with schemas, validation, and graph transducers |
-| [@aelastics/store](https://AelasticS.github.io/aelastics/docs/store/intro) | Reactive model store built on MobX |
-| [@aelastics/result](https://AelasticS.github.io/aelastics/docs/result/intro) | Typed success/failure handling without exceptions |
+| [User Guide](https://AelasticS.github.io/aelastics/user-guide) | Install the `synth` CLI, import models, run transformations, chains, and pipelines |
+| [Developer Guide](https://AelasticS.github.io/aelastics/developer-guide) | The Synthesis transformation language: define metamodels, build models with JSX, write transformations, configure variability with design decisions |
+| [@aelastics/types](https://AelasticS.github.io/aelastics/types/intro) | Runtime type system with schemas, validation, and graph transducers |
+| [@aelastics/store](https://AelasticS.github.io/aelastics/store/intro) | Reactive model store built on MobX |
+| [@aelastics/result](https://AelasticS.github.io/aelastics/result/intro) | Typed success/failure handling without exceptions |
 
 ## Installing the CLI
 
 The `synth` CLI ships as platform tarballs on
-[GitHub Releases](https://github.com/AelasticS/Synthesis/releases) — no Node
-runtime required on the user's machine. See
-**[Installation](https://AelasticS.github.io/aelastics/docs/cli/installation)**
+[GitHub Releases](https://github.com/AelasticS/Synthesis/releases); no Node
+runtime is required on the user's machine. See
+**[Installation](https://AelasticS.github.io/aelastics/user-guide/getting-started/installation)**
 for step-by-step instructions for Linux, macOS, Windows, and building from
 source.
 
@@ -53,6 +53,10 @@ Synthesis/
 ├── .github/workflows/         # CI: docs deploy, CLI release
 └── rush.json                  # Rush workspace definition
 ```
+
+The package layering, dependency graph, and the rules behind them are
+documented in
+[design/architecture.md](https://github.com/AelasticS/Synthesis/blob/main/design/architecture.md).
 
 ## Contributing
 

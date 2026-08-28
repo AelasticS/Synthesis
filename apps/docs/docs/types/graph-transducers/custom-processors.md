@@ -6,8 +6,8 @@ title: Custom Processors
 # Custom Processors
 
 The fluent `Transducer` API covers most use cases. When you need fine-grained
-control — conditional dispatch based on type or type category, multiple independent
-handlers per phase, or reusable processor classes — use `ProcessorBuilder` instead.
+control (conditional dispatch based on type or type category, multiple independent
+handlers per phase, or reusable processor classes), use `ProcessorBuilder` instead.
 
 ---
 

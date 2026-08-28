@@ -21,7 +21,7 @@ Two schemas exist from the start:
 
 ---
 
-## `schema()` — create a named schema
+## `schema()`: create a named schema
 
 ```ts
 schema(name, superSchema?)
@@ -104,7 +104,7 @@ The order does not matter as long as all types are defined before any
 
 ---
 
-## `TypeSchema` — the schema class
+## `TypeSchema`: the schema class
 
 `TypeSchema` is the class of all schema instances. Key members:
 

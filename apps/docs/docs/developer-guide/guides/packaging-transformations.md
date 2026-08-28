@@ -1,15 +1,15 @@
 ---
-sidebar_position: 6
+sidebar_position: 7
 ---
 
 # Packaging Transformations
 
 This page explains how to take a transformation you have written (see
-[Writing Transformations](../synthesis/writing-transformations)) and turn it
+[Writing Transformations](./writing-transformations.md)) and turn it
 into a package others can install with `synth transformation install`.
 
-A transformation package is npm-compatible — `transformation install`
-accepts npm names, git URLs, local directories, and `.tgz` tarballs — plus a
+A transformation package is npm-compatible (`transformation install`
+accepts npm names, git URLs, local directories, and `.tgz` tarballs) plus a
 Synthesis **manifest** that declares everything the CLI needs to discover,
 type-check, and run the transformation without loading code.
 
@@ -51,7 +51,7 @@ model-to-model transformation, as installed by the CLI's own test suite:
 | Field | Type | Purpose |
 |---|---|---|
 | `kind` | `"m2m"` or `"m2t"` | Model-to-model or model-to-text. Decides the whole run shape (`--out` vs `--out-dir`); never guessed from the command name. |
-| `entry` | module specifier | The module exporting the transformation class — package-relative (`./lib/transformation.js`) or a bare package specifier. |
+| `entry` | module specifier | The module exporting the transformation class, package-relative (`./lib/transformation.js`) or a bare package specifier. |
 | `exportName` | string | Named export of the transformation class inside `entry`. |
 | `source.metamodel` | string | Metamodel the input model must instantiate; checked against the input's `$synth` header before running, and used for chain type-checking and completion filtering. |
 | `target.metamodel` | string | Metamodel of the result (`"text"` for m2t). |
@@ -63,24 +63,20 @@ model-to-model transformation, as installed by the CLI's own test suite:
 
 The package's `name` and `version` come from `package.json` (`name` may be
 overridden in the manifest). A transformation is **decision-based** exactly
-when it declares both `parts.decisionModel` and `parts.bindingModel` — there
+when it declares both `parts.decisionModel` and `parts.bindingModel`; there
 is no separate issue list in the manifest. The decision and binding models
 are the single source of truth: `synth transformation show` loads the
 decision model to display the issues, options, and defaults, and
 `synth config init` / `--default-configs` generate configurations from them
-(see [Configurations](./configurations)). The parts ship **with** the
+(see [Configurations](../../user-guide/guides/configurations.md)). The parts ship **with** the
 transformation package; they are not workspace models.
 
 ### Manifest location
 
-The reader accepts two locations:
-
-- a **`synth.json` file at the package root** — this takes precedence when
-  both are present, and is what `synth transformation init` scaffolds;
-- a **`synth` object inside `package.json`**.
-
-Which of the two becomes the single blessed convention is still an open
-decision; packages using either work today.
+The manifest is a **`synth.json` file at the package root**; it is what
+`synth transformation init` scaffolds, and its presence identifies a
+directory as a transformation package at a glance. If you publish to npm,
+remember to include it in `package.json`'s `files` list.
 
 `transformation install` validates the manifest with precise per-field
 errors and refuses packages without a valid one. The modules the manifest
@@ -115,7 +111,7 @@ npm install
 # 2. Implement src/index.ts and fill in the synth.json placeholders
 #    (source/target metamodels, exportName; parts for decision-based tx)
 
-# 3. Build — runs the package's build script (or tsc directly)
+# 3. Build: runs the package's build script (or tsc directly)
 synth transformation build
 
 # 4. Run the project's test fixtures
@@ -148,8 +144,8 @@ synth transformation publish
 After install, the package lands under `<workspace>/transformations/<name>/`
 with its bundled dependencies; the workspace `config.json` records the
 install (name, version, kind, variability). A workspace holds **one**
-installed version per transformation name — installing another version
+installed version per transformation name; installing another version
 replaces it, and `synth transformation ls` shows what is current.
 Uninstalling is guarded: `synth transformation uninstall` refuses while a
 saved pipeline lists the transformation as a step (see
-[Pipelines](./pipelines#guards-and-health)).
+[Pipelines](../../user-guide/guides/pipelines.md#guards-and-health)).

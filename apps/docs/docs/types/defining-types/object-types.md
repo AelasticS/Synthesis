@@ -10,7 +10,7 @@ identity (entity), inheritance (subtype), and bidirectional relationships
 
 ---
 
-## `object()` — plain object type
+## `object()`: plain object type
 
 ```ts
 object(props, name?, schema?)
@@ -43,7 +43,7 @@ type IAddress = TypeOf<typeof Address>
 
 ---
 
-## `entity()` — object with an identifier
+## `entity()`: object with an identifier
 
 ```ts
 entity(props, keys, name?, schema?)
@@ -76,11 +76,11 @@ const Employee = entity(
 
 An entity type exposes `.identifier` (the array of key property names) and
 `.isEntity` (always `true`). Internally, `EntityType` is a type alias for
-`ObjectType` — both factories produce the same class.
+`ObjectType`; both factories produce the same class.
 
 ---
 
-## `subtype()` — inheritance
+## `subtype()`: inheritance
 
 ```ts
 subtype(superType, extraProps, name?, schema?)
@@ -113,7 +113,7 @@ inherited version.
 
 ---
 
-## `findTypeCategory()` — resolve a property's underlying category
+## `findTypeCategory()`: resolve a property's underlying category
 
 ```ts
 findTypeCategory(type: Any): TypeCategory | undefined
@@ -133,7 +133,7 @@ findTypeCategory(optional(Department))               // 'Object'
 
 ---
 
-## `inverseProps()` — declare a bidirectional relationship
+## `inverseProps()`: declare a bidirectional relationship
 
 ```ts
 inverseProps(firstType, firstProp, secondType, secondProp)

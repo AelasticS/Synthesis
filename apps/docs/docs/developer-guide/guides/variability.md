@@ -1,5 +1,5 @@
 ---
-sidebar_position: 7
+sidebar_position: 6
 ---
 
 # Design Decisions in Transformations
@@ -58,9 +58,9 @@ In the AelasticS framework, the four artifacts map to decorators and runtime str
 A variability point is a transformation rule where a design decision must be resolved. Mark it with `@VarPoint` and an issue name. The method body throws because it is never called directly. The framework dispatches to one of its registered options.
 
 ```typescript
-@E2E({ input: et.Relationship, output: rt.Table })
+@E2E()
 @VarPoint("OneToManyStrategy")
-RelationshipMapping(rel: et.IRelationship): Element<rt.IColumn> | Element<rt.ITable> {
+RelationshipMapping(rel: et.IRelationship): ExprNode<rt.IColumn> | ExprNode<rt.ITable> {
   throw new Error("VarOptions should be selected")
 }
 ```
@@ -73,7 +73,7 @@ Each option is a separate method registered with `@VarOption`. It takes the name
 
 ```typescript
 @VarOption("RelationshipMapping", Option("ForeignKey"))
-relationshipAsForeignKey(rel: et.IRelationship): Element<rt.IColumn> {
+relationshipAsForeignKey(rel: et.IRelationship): ExprNode<rt.IColumn> {
   return (
     <r.Column
       name={`${rel.name}_FK`}
@@ -83,7 +83,7 @@ relationshipAsForeignKey(rel: et.IRelationship): Element<rt.IColumn> {
 }
 
 @VarOption("RelationshipMapping", Option("JoinTable"))
-relationshipAsJoinTable(rel: et.IRelationship): Element<rt.ITable> {
+relationshipAsJoinTable(rel: et.IRelationship): ExprNode<rt.ITable> {
   return (
     <r.Table name={`${rel.name}_Join`}>
       <r.Column name={`${rel.sourceEntity.name}_FK`} isForeignKey={true} />
@@ -102,7 +102,7 @@ Marks an option as the fallback. When no other predicate evaluates to true, the 
 ```typescript
 @Default()
 @VarOption("RelationshipMapping", Option("ForeignKey"))
-relationshipAsForeignKey(rel: et.IRelationship): Element<rt.IColumn> {
+relationshipAsForeignKey(rel: et.IRelationship): ExprNode<rt.IColumn> {
   return <r.Column name={`${rel.name}_FK`} isForeignKey={true} />
 }
 ```
@@ -125,7 +125,7 @@ These compose freely:
 
 ```typescript
 @VarOption("SomeRule", And(Option("FeatureX"), Not(Option("LegacyMode"))))
-optimizedVariant(e: IElement): Element<ITarget> {
+optimizedVariant(e: IElement): ExprNode<ITarget> {
   // Selected when FeatureX is on and LegacyMode is off
 }
 ```
@@ -134,14 +134,14 @@ When each option's predicate is a single `Option(name)` reference (the common ca
 
 ## The Configuration Model in Code
 
-The configuration model is passed to the transformation constructor as the fourth type parameter of `abstractM2M`.
+The configuration model is passed to the transformation constructor as the fourth type parameter of `DecisionAwareM2M`.
 
 ```typescript
-import * as cm from './configuration.model.type'
+import * as cm from '@synthesis/decision-framework/decisions/3.configuration-model/configuration-meta.model'
 
-@M2M({ input: et.EERSchema, output: rt.RelSchema })
+@M2M()
 class EER2RelWithConfig
-  extends abstractM2M<et.IEERSchema, rt.IRelSchema, {}, cm.IConfigurationModel>
+  extends DecisionAwareM2M<et.IEERSchema, rt.IRelSchema, {}, cm.IConfigurationModel>
 {
   constructor(store: ModelStore, extra: {}, configModel?: cm.IConfigurationModel) {
     super(store, extra, configModel)
@@ -183,17 +183,18 @@ const mixedResult = new EER2RelWithConfig(store, {}, mixedConfig).transform(sour
 ## Complete Example
 
 ```typescript
-/** @jsx hm */
-import { hm, abstractM2M, M2M, E2E, Element, ModelStore } from 'aelastics-synthesis'
-import { VarPoint, VarOption, Default, Option } from 'aelastics-synthesis'
+/** @jsx createExprNode */
+import { createExprNode, ExprNode } from '@synthesis/jsx-runtime'
+import { E2E, M2M, ModelStore } from '@synthesis/engine'
+import { DecisionAwareM2M, VarPoint, VarOption, Default, Option } from '@synthesis/decision-framework'
 import * as et from './EER.meta.model.type'
 import * as rt from './REL.meta.model.type'
 import * as r from './REL.jsx-comps'
-import * as cm from './configuration.model.type'
+import * as cm from '@synthesis/decision-framework/decisions/3.configuration-model/configuration-meta.model'
 
-@M2M({ input: et.EERSchema, output: rt.RelSchema })
+@M2M()
 class EER2RelWithConfig
-  extends abstractM2M<et.IEERSchema, rt.IRelSchema, {}, cm.IConfigurationModel>
+  extends DecisionAwareM2M<et.IEERSchema, rt.IRelSchema, {}, cm.IConfigurationModel>
 {
   constructor(store: ModelStore, extra: {}, configModel?: cm.IConfigurationModel) {
     super(store, extra, configModel)
@@ -214,8 +215,8 @@ class EER2RelWithConfig
     )
   }
 
-  @E2E({ input: et.Entity, output: rt.Table })
-  Entity2Table(e: et.IEntity): Element<rt.ITable> {
+  @E2E()
+  Entity2Table(e: et.IEntity): ExprNode<rt.ITable> {
     return (
       <r.Table name={e.name}>
         {e.attributes.map((a) => this.Attribute2Column(a))}
@@ -223,28 +224,28 @@ class EER2RelWithConfig
     )
   }
 
-  @E2E({ input: et.Attribute, output: rt.Column })
-  Attribute2Column(a: et.IAttribute): Element<rt.IColumn> {
+  @E2E()
+  Attribute2Column(a: et.IAttribute): ExprNode<rt.IColumn> {
     return <r.Column name={a.name} />
   }
 
   // Variability point: how to handle relationships
-  @E2E({ input: et.Relationship, output: rt.Table })
+  @E2E()
   @VarPoint("OneToManyStrategy")
-  RelationshipMapping(rel: et.IRelationship): Element<rt.IColumn> | Element<rt.ITable> {
+  RelationshipMapping(rel: et.IRelationship): ExprNode<rt.IColumn> | ExprNode<rt.ITable> {
     throw new Error("VarOptions should be selected")
   }
 
   // Option A: foreign key column (default fallback)
   @Default()
   @VarOption("RelationshipMapping", Option("ForeignKey"))
-  relationshipAsForeignKey(rel: et.IRelationship): Element<rt.IColumn> {
+  relationshipAsForeignKey(rel: et.IRelationship): ExprNode<rt.IColumn> {
     return <r.Column name={`${rel.name}_FK`} isForeignKey={true} />
   }
 
   // Option B: separate join table
   @VarOption("RelationshipMapping", Option("JoinTable"))
-  relationshipAsJoinTable(rel: et.IRelationship): Element<rt.ITable> {
+  relationshipAsJoinTable(rel: et.IRelationship): ExprNode<rt.ITable> {
     return (
       <r.Table name={`${rel.name}_Join`}>
         <r.Column name={`Source_FK`} isForeignKey={true} />

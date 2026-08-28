@@ -9,13 +9,13 @@ all members are merged into a single flat object.
 
 ---
 
-## `intersectionOf()` — factory
+## `intersectionOf()`: factory
 
 ```ts
 intersectionOf(elements, name?, schema?)
 ```
 
-- `elements` — an array of `ObjectType` instances
+- `elements`: an array of `ObjectType` instances
 - All elements must be object types. Passing a non-object type throws at
   definition time.
 

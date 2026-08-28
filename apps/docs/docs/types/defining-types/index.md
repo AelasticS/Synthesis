@@ -4,7 +4,7 @@ title: Defining Types
 ---
 
 `@aelastics/types` lets you define data types at runtime. Those type definitions
-are first-class objects — they carry enough information to validate values, convert
+are first-class objects; they carry enough information to validate values, convert
 them to and from DTO formats, and drive custom data processing pipelines.
 
 Types are organized into three groups based on their structure, and collected into

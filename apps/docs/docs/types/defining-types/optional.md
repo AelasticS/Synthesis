@@ -8,7 +8,7 @@ valid value. Use it to mark a property as not required.
 
 ---
 
-## `optional()` — factory
+## `optional()`: factory
 
 ```ts
 optional(type, name?, owner?)
@@ -58,7 +58,7 @@ These are equivalent to `optional(string)`, `optional(number)`, and
 When the graph traversal engine encounters an optional property whose value is
 `undefined`, it skips that property and does not descend into it. When the
 value is present, the traversal continues as if the property had its base type
-directly — the `OptionalType` wrapper is transparent to the traversal.
+directly; the `OptionalType` wrapper is transparent to the traversal.
 
 This means validators on the base type only run when a value is present. No
 validator runs for an absent optional property.

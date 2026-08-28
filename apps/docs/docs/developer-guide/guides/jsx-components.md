@@ -1,5 +1,5 @@
 ---
-sidebar_position: 3
+sidebar_position: 2
 ---
 
 # Creating JSX Components
@@ -11,11 +11,11 @@ Before you can build model instances with JSX, each metamodel type needs a JSX c
 Every file that uses JSX for model construction must declare the custom JSX pragma:
 
 ```typescript
-/** @jsx hm */
-import { hm } from 'aelastics-synthesis'
+/** @jsx createExprNode */
+import { createExprNode } from '@synthesis/jsx-runtime'
 ```
 
-This tells TypeScript to route JSX expressions through `hm` instead of React's `createElement`. When you write `<Kernel name="Person">`, TypeScript compiles it into `hm(Kernel, { name: "Person" })`, which calls your `Kernel` component function.
+This tells TypeScript to route JSX expressions through `createExprNode` instead of React's `createElement`. When you write `<Kernel name="Person">`, TypeScript compiles it into `createExprNode(Kernel, { name: "Person" })`, which calls your `Kernel` component function.
 
 ## Defining JSX Components
 
@@ -28,18 +28,18 @@ The pattern is similar to React. In React, you define a component function and t
 | Children are nested DOM elements | Children are nested model elements connected via metamodel associations |
 | `<div className="x">` | `<Attribute name="Age">` |
 
-A component is a function that returns `new Element(type, props, connectionInfo)`. The `connectionInfo` tells the framework which metamodel association to use when connecting this element to its parent in a JSX expression:
+A component is a function that returns `new ExprNode(type, props, connectionInfo)`. The `connectionInfo` tells the framework which metamodel association to use when connecting this element to its parent in a JSX expression:
 
 ```typescript
-import { Element, Template } from 'aelastics-synthesis'
+import { ExprNode, Template } from '@synthesis/jsx-runtime'
 import * as e from './EER.meta.model.type'
 
 export const Attribute: Template<e.IAttribute> = (props) => {
-  return new Element(e.Attribute, props, 'attributes')
+  return new ExprNode(e.Attribute, props, 'attributes')
 }
 ```
 
-The three arguments to `new Element()`:
+The three arguments to `new ExprNode()`:
 
 | Argument | What it does |
 |---|---|
@@ -83,12 +83,12 @@ Root model/schema components and top-level entity types typically use `undefined
 ```typescript
 // Root schema: no parent to connect to
 export const EERSchema: CpxTemplate<IModelProps, e.IEERSchema> = (props) => {
-  return new Element(e.EERSchema, props, undefined)
+  return new ExprNode(e.EERSchema, props, undefined)
 }
 
 // Kernel entity: top-level element in the model, not a child of a specific property
 export const Kernel: Template<e.IKernel> = (props) => {
-  return new Element(e.Kernel, { objectClassification: "Kernel", ...props }, undefined)
+  return new ExprNode(e.Kernel, { objectClassification: "Kernel", ...props }, undefined)
 }
 ```
 
@@ -104,11 +104,11 @@ import { allowedAsTopLevelElement, Element, Template } from '@synthesis/jsx-runt
 // Sequence can be nested in another Node (connects via 'children')
 // OR appear at the top of a Process/Model (no 'children' on Process; goes to model.elements)
 export const Sequence: Template<bpmn.ISequence> = (props) => {
-  return new Element(bpmn.Sequence, props, allowedAsTopLevelElement('children'))
+  return new ExprNode(bpmn.Sequence, props, allowedAsTopLevelElement('children'))
 }
 ```
 
-When the parent's type schema has the declared propName (nested case), the runtime connects via that property. When it does not, the runtime accepts the missing propName as valid **only because** the JSX tag explicitly opted in AND the parent is a Namespace AND the child is a ModelElement — the child is then stored in `parent.elements` by `store.newModelElement`.
+When the parent's type schema has the declared propName (nested case), the runtime connects via that property. When it does not, the runtime accepts the missing propName as valid **only because** the JSX tag explicitly opted in AND the parent is a Namespace AND the child is a ModelElement; the child is then stored in `parent.elements` by `store.newModelElement`.
 
 Without the opt-in, a missing propName on the parent throws (see below).
 
@@ -127,7 +127,7 @@ The relationship between your metamodel, your components, and the resulting mode
 
 If the connection info string does not match any property in the parent's type, and the JSX tag has not opted in via `allowedAsTopLevelElement`, the runtime throws at render time with an informative error pointing to both the parent type and the missing property. Fix the metamodel (add the property), or change the connector propName, or (for tags that legitimately appear at top level too) use the opt-in helper.
 
-Additionally, when a child is connected through a declared property, the underlying `@aelastics/store` verifies that the child element's runtime type is a subtype of the property's declared element type. Assigning the wrong type — e.g. a `Role` into a property declared as `arrayOf(Task)` — throws a `ValidationError` from the store. See [Runtime type conformance](../store/intro#runtime-type-conformance) in the store documentation.
+Additionally, when a child is connected through a declared property, the underlying `@aelastics/store` verifies that the child element's runtime type is a subtype of the property's declared element type. Assigning the wrong type, e.g. a `Role` into a property declared as `arrayOf(Task)`, throws a `ValidationError` from the store. See [Runtime type conformance](../../store/intro.md#runtime-type-conformance) in the store documentation.
 
 ## References: From Trees to Graphs
 
@@ -167,32 +167,32 @@ The framework provides two main component signatures:
 
 ```typescript
 import * as e from './EER.meta.model.type'
-import { CpxTemplate, Element, Template, WithRefProps, ModelStore } from 'aelastics-synthesis'
+import { CpxTemplate, ExprNode, IStore, Template, WithRefProps } from '@synthesis/jsx-runtime'
 
-export type IModelProps = WithRefProps<e.IEERSchema> & { store?: ModelStore }
+export type IModelProps = WithRefProps<e.IEERSchema> & { store?: IStore }
 
 // Root schema (CpxTemplate: props include 'store', rendered type does not)
 export const EERSchema: CpxTemplate<IModelProps, e.IEERSchema> = (props) => {
-  return new Element(e.EERSchema, props, undefined)
+  return new ExprNode(e.EERSchema, props, undefined)
 }
 
 // Top-level entities (undefined: added to model's elements collection)
 export const Kernel: Template<e.IKernel> = (props) => {
-  return new Element(e.Kernel, { objectClassification: "Kernel", ...props }, undefined)
+  return new ExprNode(e.Kernel, { objectClassification: "Kernel", ...props }, undefined)
 }
 
 export const Weak: Template<e.IWeak> = (props) => {
-  return new Element(e.Weak, { objectClassification: "Weak", ...props }, undefined)
+  return new ExprNode(e.Weak, { objectClassification: "Weak", ...props }, undefined)
 }
 
 // Attribute connects to parent's 'attributes' array
 export const Attribute: Template<e.IAttribute> = (props) => {
-  return new Element(e.Attribute, props, 'attributes')
+  return new ExprNode(e.Attribute, props, 'attributes')
 }
 
 // Domain connects to parent's 'attrDomain' single property
 export const Domain: Template<e.IDomain> = (props) => {
-  return new Element(e.Domain, props, 'attrDomain')
+  return new ExprNode(e.Domain, props, 'attrDomain')
 }
 ```
 
@@ -214,37 +214,37 @@ The nesting directly mirrors the metamodel structure. `Domain` goes inside `Attr
 
 ```typescript
 import * as r from './REL.meta.model.type'
-import { CpxTemplate, Element, Template, WithRefProps, ModelStore } from 'aelastics-synthesis'
+import { CpxTemplate, ExprNode, IStore, Template, WithRefProps } from '@synthesis/jsx-runtime'
 
-export type IModelProps = WithRefProps<r.IRelSchema> & { store?: ModelStore }
+export type IModelProps = WithRefProps<r.IRelSchema> & { store?: IStore }
 
 export const RelSchema: CpxTemplate<IModelProps, r.IRelSchema> = (props) => {
-  return new Element(r.RelSchema, props, undefined)
+  return new ExprNode(r.RelSchema, props, undefined)
 }
 
 // Table: top-level in the schema
 export const Table: Template<r.ITable> = (props) => {
-  return new Element(r.Table, props, undefined)
+  return new ExprNode(r.Table, props, undefined)
 }
 
 // Column connects to parent Table's 'columns' array
 export const Column: Template<r.IColumn> = (props) => {
-  return new Element(r.Column, props, 'columns')
+  return new ExprNode(r.Column, props, 'columns')
 }
 
 // Index connects to parent Table's 'indexes' array
 export const Index: Template<r.IIndex> = (props) => {
-  return new Element(r.Index, props, 'indexes')
+  return new ExprNode(r.Index, props, 'indexes')
 }
 
 // ForeignKey connects to parent Table's 'foreignKeys' array
 export const ForeignKey: Template<r.IForeignKey> = (props) => {
-  return new Element(r.ForeignKey, props, 'foreignKeys')
+  return new ExprNode(r.ForeignKey, props, 'foreignKeys')
 }
 
 // Domain connects to parent's 'domain' property
 export const Domain: Template<r.IDomain> = (props) => {
-  return new Element(r.Domain, props, 'domain')
+  return new ExprNode(r.Domain, props, 'domain')
 }
 ```
 
@@ -254,7 +254,7 @@ Components can merge default property values before passing props to the Element
 
 ```typescript
 export const Kernel: Template<e.IKernel> = (props) => {
-  return new Element(e.Kernel, { objectClassification: "Kernel", ...props }, undefined)
+  return new ExprNode(e.Kernel, { objectClassification: "Kernel", ...props }, undefined)
 }
 ```
 

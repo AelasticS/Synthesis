@@ -9,14 +9,14 @@ currently holds. This is also known as a discriminated union.
 
 ---
 
-## `taggedUnion()` — factory
+## `taggedUnion()`: factory
 
 ```ts
 taggedUnion(elements, discriminator, name?, schema?)
 ```
 
-- `elements` — a record of object types keyed by their discriminator value
-- `discriminator` — the name of the property on each member type that holds
+- `elements`: a record of object types keyed by their discriminator value
+- `discriminator`: the name of the property on each member type that holds
   the identifying string
 
 Each member type must be an `ObjectType` that already has a property matching
@@ -75,7 +75,7 @@ property:
 declare const e: IEmployee
 
 if (e.profession === 'Doctor') {
-  console.log(e.specialization)  // OK — TypeScript knows this is DoctorType
+  console.log(e.specialization)  // OK: TypeScript knows this is DoctorType
 }
 ```
 

@@ -53,7 +53,7 @@ directly and bypasses the setter, so it is never re-validated and never
 throws spuriously.
 
 Properties whose declared type is not an entity type (`string`, `number`,
-`Map`, intersections, unions, etc.) are not validated by this mechanism —
+`Map`, intersections, unions, etc.) are not validated by this mechanism;
 their correctness is enforced at TypeScript compile time.
 
 ## API Reference

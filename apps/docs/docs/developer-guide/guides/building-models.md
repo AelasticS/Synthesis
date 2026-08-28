@@ -1,5 +1,5 @@
 ---
-sidebar_position: 4
+sidebar_position: 3
 ---
 
 # Building Model Instances
@@ -11,7 +11,8 @@ With metamodels defined and JSX components created, you can build model instance
 Every model lives in a `ModelStore`. The store manages element identity, naming, and type checking. A `Context` carries the store and rendering state through the JSX evaluation.
 
 ```typescript
-import { ModelStore, Context } from 'aelastics-synthesis'
+import { ModelStore } from '@synthesis/engine'
+import { Context } from '@synthesis/jsx-runtime'
 
 const store = new ModelStore()
 ```
@@ -21,8 +22,8 @@ const store = new ModelStore()
 Use your JSX components to build a model expression, then call `.render()` to evaluate it into a model instance.
 
 ```typescript
-/** @jsx hm */
-import { hm, Context } from 'aelastics-synthesis'
+/** @jsx createExprNode */
+import { createExprNode, Context } from '@synthesis/jsx-runtime'
 import * as e from './EER.jsx-comps'
 
 const store = new ModelStore()
@@ -49,7 +50,7 @@ const eerModel = (
 const model: IEERSchema = eerModel.render(new Context())
 ```
 
-The JSX expression is not the model. It is a tree of `Element` objects. Calling `.render()` walks this tree, creates actual model elements in the store, and wires up all associations. The return value is a typed model instance.
+The JSX expression is not the model. It is a tree of `ExprNode` objects. Calling `.render()` walks this tree, creates actual model elements in the store, and wires up all associations. The return value is a typed model instance.
 
 ### The `store` Prop
 
@@ -102,9 +103,9 @@ A template is a function that takes parameters and returns a JSX expression. Thi
 A common pattern is a reusable model fragment parameterized by name. For example, a generic document pattern for EER models:
 
 ```typescript
-/** @jsx hm */
+/** @jsx createExprNode */
 
-function DocumentPattern(documentName: string): Element<IEERSchema> {
+function DocumentPattern(documentName: string): ExprNode<IEERSchema> {
   return (
     <e.EERSchema name={`${documentName}-Schema`}>
       <e.Kernel name={documentName}>
@@ -141,7 +142,7 @@ This produces an EER schema with a Kernel entity named "Invoice", attributes "In
 Embed TypeScript expressions in curly braces to generate variable structure. Loops, conditionals, and any other TypeScript logic can appear inside JSX.
 
 ```typescript
-/** @jsx hm */
+/** @jsx createExprNode */
 
 interface IApprovalConfig {
   processName: string
@@ -181,7 +182,7 @@ This generates a process with three parallel approval tasks. Changing the parame
 A higher-order template is a function that takes another template as a parameter. This lets you abstract over the structure of sub-expressions.
 
 ```typescript
-/** @jsx hm */
+/** @jsx createExprNode */
 
 const GenericApproval = (WorkerTask: Template<ITask>) =>
   (config: IApprovalConfig) => {
@@ -230,7 +231,7 @@ const model2 = <GroupApproval processName="Group" howManyApprovers={3} isParalle
 
 ## Rendering
 
-The `render()` method on an `Element` evaluates the entire expression tree:
+The `render()` method on an `ExprNode` evaluates the entire expression tree:
 
 1. Creates a fresh model in the store.
 2. Walks the tree top-down.
@@ -252,7 +253,7 @@ console.log(model.elements[0].attributes)  // [IAttribute, IAttribute]
 You can also use the convenience function:
 
 ```typescript
-import { render } from 'aelastics-synthesis'
+import { render } from '@synthesis/jsx-runtime'
 
 const model = render(eerModel)
 ```

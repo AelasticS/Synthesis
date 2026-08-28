@@ -16,7 +16,7 @@ const stringResult = success('hello')
 const objectResult = success({ id: 1, name: 'Alice' })
 ```
 
-### Failed result — single error
+### Failed result: single error
 
 ```typescript
 import { failure, ServiceError } from '@aelastics/result'
@@ -24,7 +24,7 @@ import { failure, ServiceError } from '@aelastics/result'
 const result = failure(new ServiceError('ValidationError', 'Email is required'))
 ```
 
-### Failed result — multiple errors at once
+### Failed result: multiple errors at once
 
 ```typescript
 import { failures, ServiceError } from '@aelastics/result'
@@ -82,7 +82,7 @@ const errors = getErrors(result) // ServiceError[] | undefined
 
 ## Accumulating Errors
 
-When validating an object with multiple fields, collect all errors before returning — don't stop at the first one:
+When validating an object with multiple fields, collect all errors before returning; don't stop at the first one:
 
 ```typescript
 import { success, failures, addError, isFailure, ServiceError } from '@aelastics/result'

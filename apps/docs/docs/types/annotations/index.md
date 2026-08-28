@@ -4,7 +4,7 @@ title: Annotations
 ---
 
 Annotations attach typed metadata to type definitions. They are separate from a
-type's value constraints — constraints say what values are valid, annotations say
+type's value constraints: constraints say what values are valid, annotations say
 something additional about the type itself that is useful in other contexts.
 
 Common uses include UI rendering hints (labels, placeholders, display order),

@@ -44,8 +44,8 @@ const Employee = entity(
 ```
 
 In the example above, `department` holds a reference to a `Department` instance,
-not an embedded copy. When the graph is converted to a DTO, each object —
-whether it is a plain object or an entity — receives an auto-generated integer
+not an embedded copy. When the graph is converted to a DTO, each object,
+whether it is a plain object or an entity, receives an auto-generated integer
 `id` as part of its `ref` record. This `id` is assigned during serialization
 and is local to that serialization context. It is not the entity's declared
 identifier (the `['employeeNumber']` key in the example). When the same object

@@ -81,7 +81,7 @@ const result = [1, 2, 3, 4, 5].reduce(pipeline, [])
 ```
 
 The key property: `mapDouble` and `filterEven` know nothing about arrays. The
-same pipeline works on any source that can call a reducer — a stream, a generator,
+same pipeline works on any source that can call a reducer: a stream, a generator,
 an event emitter. The transformation logic is separated from the collection type.
 
 Processors compose by nesting. Each transducer wraps the next one, delegates to
@@ -234,10 +234,10 @@ type graph.
 The graph traversal protocol is three functions, each returning the same shape:
 
 ```ts
-// linear reducer — one phase
+// linear reducer: one phase
 (acc, value) => acc
 
-// graph transducer — three phases, same return shape
+// graph transducer: three phases, same return shape
 init:   (value, node)       => [acc, ctrl]  // before children
 step:   (acc,   node, item) => [acc, ctrl]  // after each child
 result: (acc,   node)       => [acc, ctrl]  // after all children
@@ -259,5 +259,5 @@ result: (acc,   node)       => [acc, ctrl]  // after all children
 ## What's next
 
 The five-step explanation above is the conceptual foundation. The next page covers
-the [Transducer API](./transducer-api.md) — the fluent builder that assembles
+the [Transducer API](./transducer-api.md), the fluent builder that assembles
 processor chains without implementing `IProcessor` directly.

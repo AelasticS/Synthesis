@@ -17,6 +17,21 @@ overall version history.
   is removed. A package that still carries a `synth` block fails
   manifest loading with a migration hint pointing at `synth.json`.
   Decision recorded in `design/engine-follow-ups.md`.
+- **Documentation site reorganized around two audience tracks.** The six
+  parallel sections are replaced by a **User Guide** for CLI consumers
+  (installation → quick start → concepts → tutorial → guides → command
+  reference, including a new end-to-end tutorial) and a **Developer Guide**
+  for transformation authors (overview → concepts → guides, with reserved
+  Tutorial and Examples positions). The three `@aelastics/*` libraries keep
+  standalone documentation under a Libraries menu. Titles avoid the "eDSL"
+  abbreviation in favor of "Synthesis transformation language". All
+  previously published URLs redirect to their new locations
+  (`@docusaurus/plugin-client-redirects`).
+- **Monorepo architecture documentation moved out of the site** to
+  [design/architecture.md](design/architecture.md); it is contributor
+  material, now linked from the README and CONTRIBUTING instead of shown as
+  user documentation. The duplicated Contributing page on the site was
+  dropped in favor of the repository's CONTRIBUTING.md.
 
 ## [cli-v0.1.0] - 2026-08-28
 

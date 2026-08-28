@@ -9,7 +9,7 @@ The current release exports only `arrayOf`. Map and set collection types (`mapOf
 
 ---
 
-## `arrayOf()` — typed array
+## `arrayOf()`: typed array
 
 ```ts
 arrayOf(element, name?, schema?)

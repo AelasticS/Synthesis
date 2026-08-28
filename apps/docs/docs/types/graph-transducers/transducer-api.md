@@ -100,7 +100,7 @@ transducer().dftMap().newInstance({ name: 'default' })
 
 ### `toDtoGraph()`
 
-Converts a typed instance to the graph DTO format — a flat, reference-based
+Converts a typed instance to the graph DTO format, a flat, reference-based
 representation suitable for serialization or transport.
 
 ```ts

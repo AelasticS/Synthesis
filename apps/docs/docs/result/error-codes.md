@@ -78,17 +78,17 @@ console.log(cumulative.errors[0].message) // 'Email is required'
 |---|---|
 | `ValidationError` | Input data fails a validation rule |
 | `ValidationError2` | Secondary validation (alternative severity or phase) |
-| `TypeError` | Wrong type — maps from JS `TypeError` |
-| `RangeError` | Value out of allowed range — maps from JS `RangeError` |
-| `ReferenceError` | Invalid reference — maps from JS `ReferenceError` |
-| `SyntaxError` | Parsing / syntax failure — maps from JS `SyntaxError` |
-| `EvalError` | Eval-related failure — maps from JS `EvalError` |
-| `URIError` | Malformed URI — maps from JS `URIError` |
+| `TypeError` | Wrong type; maps from JS `TypeError` |
+| `RangeError` | Value out of allowed range; maps from JS `RangeError` |
+| `ReferenceError` | Invalid reference; maps from JS `ReferenceError` |
+| `SyntaxError` | Parsing / syntax failure; maps from JS `SyntaxError` |
+| `EvalError` | Eval-related failure; maps from JS `EvalError` |
+| `URIError` | Malformed URI; maps from JS `URIError` |
 | `InternalError` | Unexpected internal failure |
 | `OperationFailed` | A business operation could not be completed |
 | `OperationNotAllowed` | The operation is not permitted in the current state |
 | `FeatureNotSupported` | The requested feature is not implemented |
-| `UnknownError` | Fallback — used when no other code applies |
+| `UnknownError` | Fallback; used when no other code applies |
 
 ```typescript
 import type { ErrorCode } from '@aelastics/result'

@@ -1,5 +1,5 @@
 ---
-sidebar_position: 3
+sidebar_position: 1
 ---
 
 # Command Reference
@@ -11,11 +11,11 @@ synth <resource> <verb> [arguments] [flags]
 ```
 
 An argument's resource type is always determined by the topic it was typed
-under — `transformation run`'s arguments are always transformations,
+under: `transformation run`'s arguments are always transformations,
 `pipeline run`'s argument is always a pipeline; nothing is guessed from what
 happens to exist in the workspace. The `transformation`, `namespace`, and
 `pipeline` topics have the typing aliases `tx`, `ns`, and `pl` (see
-[the alias table](./intro#canonical-names-and-typing-aliases)); a few
+[the alias table](../concepts.md#canonical-names-and-typing-aliases)); a few
 workspace-wide operations (`init`, `doctor`, `cd`, `workspace`) omit the
 resource prefix.
 
@@ -42,19 +42,19 @@ These apply to every `synth` command.
 | `4` | Workspace not initialized or unreadable. |
 
 The `--json` contract is uniform: on failure a command prints a
-machine-readable error object as its only stdout —
+machine-readable error object as its only stdout:
 
 ```json
 { "error": "Transformation 'no-such-tx' not found." }
 ```
 
-— **and** exits non-zero with the same code as the human-readable mode. No
+It **also** exits non-zero with the same code as the human-readable mode. No
 command ever prints an `error` object with exit 0.
 
 In a terminal session (stdin and stdout are TTYs, no `--json`, no `--quiet`,
 `CI` unset), the commands `transformation run`, `pipeline run`, and
 `config init` prompt for missing values instead of failing. Every other
-session — pipes, scripts, CI, machine output — gets the strict errors below,
+session (pipes, scripts, CI, machine output) gets the strict errors below,
 unchanged.
 
 ## Workspace
@@ -71,7 +71,7 @@ unchanged.
 model file must parse, its `$synth` header must agree with the rendered
 content, its declared references must resolve, and every saved pipeline must
 pass the same static checks as `pipeline mk` (schema, steps installed, chain
-compatibility — pipeline problems are warnings and never block the
+compatibility; pipeline problems are warnings and never block the
 workspace). `doctor --fix` re-derives and writes missing or unparseable model
 headers through the same code path as `model import`.
 
@@ -88,13 +88,13 @@ Namespaces are nested directories under `models/`; `com.example` is
 
 `namespace rm --cascade` additionally deletes every model **outside** the
 namespace that transitively references a model inside it (implies
-`--force`) — the same reverse-dependency reasoning as `model rm --cascade`,
-applied to the whole subtree.
+`--force`). This is the same reverse-dependency reasoning as
+`model rm --cascade`, applied to the whole subtree.
 
 ## Models
 
 A model is a `.tsx` file at `models/<namespace path>/<name>.tsx`, addressed
-by its ref `<namespace>/<name>` (see [Models are code](./intro#models-are-code)).
+by its ref `<namespace>/<name>` (see [Models are code](../guides/managing-models.md#models-are-code)).
 
 | Command | Description |
 |---|---|
@@ -105,11 +105,11 @@ by its ref `<namespace>/<name>` (see [Models are code](./intro#models-are-code))
 | `synth model validate <ref>` | Render the model for real and check it against its metamodel. |
 | `synth model rm <ref>` | Delete a model, guarded by the dependency graph. |
 
-### `model import` — the validation gate
+### `model import`: the validation gate
 
 Everything enters the workspace through `model import <file> --as <ref>`:
 
-1. The file is transpiled and rendered into a throwaway store — full
+1. The file is transpiled and rendered into a throwaway store, giving full
    structural validation. Broken JSX, an unresolvable metamodel, or a
    dangling `$refByName` reject the import.
 2. The model's references are checked against the workspace; a missing
@@ -122,7 +122,7 @@ Everything enters the workspace through `model import <file> --as <ref>`:
    existing target.
 
 The invariant this buys: **everything in the workspace was loadable when it
-entered**. That is why run time is strict — `--in` accepts workspace refs,
+entered**. That is why run time is strict: `--in` accepts workspace refs,
 never file paths.
 
 Configuration models reference their transformation's decision and binding
@@ -145,16 +145,16 @@ configuration models.
 ## Transformations
 
 Transformations are installed packages (see
-[Packaging Transformations](./packaging-transformations)); the manifest
-declares everything the CLI needs — kind, metamodels, entry point, decision
-and binding model parts — without loading code.
+[Packaging Transformations](../../developer-guide/guides/packaging-transformations.md)); the manifest
+declares everything the CLI needs (kind, metamodels, entry point, decision
+and binding model parts) without loading code.
 
 | Command | Description |
 |---|---|
 | `synth transformation install <package>` | Install from an npm name, git URL, local directory, or tarball; the manifest's claims are verified against the loaded transformation class. |
-| `synth transformation uninstall <name>` | Remove an installed transformation. Refused (exit 2) while any saved pipeline lists it as a step — update or `pipeline rm` those pipelines first. |
+| `synth transformation uninstall <name>` | Remove an installed transformation. Refused (exit 2) while any saved pipeline lists it as a step; update or `pipeline rm` those pipelines first. |
 | `synth transformation ls` | List installed transformations with versions. |
-| `synth transformation show <name>` | Print kind, source/target metamodels, and — for decision-based transformations — every issue with its options and defaults (loaded from the package's decision model). |
+| `synth transformation show <name>` | Print kind, source/target metamodels, and, for decision-based transformations, every issue with its options and defaults (loaded from the package's decision model). |
 | `synth transformation run <tx> [<tx> ...]` | Run one transformation or a chain; see below. |
 | `synth transformation init <name>` | Scaffold a new transformation project (`package.json`, `synth.json`, `tsconfig.json`, `src/index.ts`). |
 | `synth transformation build` | Build the transformation project in the current directory. |
@@ -180,7 +180,7 @@ manifest's `kind`, never by the command name.
 | `--default-configs` | Explicitly accept generated default configurations for every decision-based step not covered by `--config`. |
 | `--save-config <ref>` | Persist the generated default configuration as a workspace model (single step, only with `--default-configs`). |
 | `--keep-intermediates` | Also write every intermediate chain result as a workspace model at `<namespace>/<name>-<step-tx>`. |
-| `--save-as <name>` | After a successful run, save the steps as a pipeline (see [Pipelines](./pipelines)). |
+| `--save-as <name>` | After a successful run, save the steps as a pipeline (see [Pipelines](../guides/pipelines.md)). |
 | `--overwrite` | Replace existing targets (final and intermediate models, `--save-config` target, `--save-as` pipeline). |
 
 An m2m result is written back into the workspace as a model file with a
@@ -195,9 +195,9 @@ Many transformations are **decision-based**: they leave design decisions
 open (say, a naming convention) and declare defaults. `synth` never applies
 those defaults silently. A decision-based run must carry exactly one of:
 
-- `--config <ref>` — run on a reviewed, editable configuration model
-  (created with `synth config init`, see [Configurations](./configurations));
-- `--default-configs` — explicitly accept generated defaults; every applied
+- `--config <ref>`: run on a reviewed, editable configuration model
+  (created with `synth config init`, see [Configurations](../guides/configurations.md));
+- `--default-configs`: explicitly accept generated defaults; every applied
   choice is announced in the output, e.g. `NamingConvention -> SnakeCase (default)`.
 
 With neither, the run aborts (exit 2) **before any engine work**, and the
@@ -210,24 +210,24 @@ or accept generated defaults explicitly with --default-configs.
 ```
 
 The policy is uniform: it applies identically to single steps, ad-hoc
-chains, and saved pipelines — a pipeline is convenience, never a bypass.
+chains, and saved pipelines; a pipeline is convenience, never a bypass.
 
 ### Chains
 
 Several transformation names run as a chain: step N's output model feeds
 step N+1 in memory. Before anything executes, the chain is type-checked
-from the manifests — step N's target metamodel must equal step N+1's source
+from the manifests: step N's target metamodel must equal step N+1's source
 metamodel, and a mismatch names the incompatible pair. Only the last step
 may be m2t (text is terminal); a last m2t step requires `--out-dir`,
 otherwise `--out` applies.
 
-Configuration consent in a chain: `--config` binds to **step 1 only** —
+Configuration consent in a chain: `--config` binds to **step 1 only**;
 an explicit configuration cannot exist for a model that is only produced
 mid-run. Every other decision-based step (and step 1 without `--config`)
 requires `--default-configs`. To configure a later step explicitly, run
 stepwise: keep the intermediate with `--keep-intermediates`, then
-`config init` against it and run the next step with `--config` — the full
-sequence is in [Configurations](./configurations#configuring-a-chain-stepwise).
+`config init` against it and run the next step with `--config`; the full
+sequence is in [Configurations](../guides/configurations.md#configuring-a-chain-stepwise).
 
 ```bash
 # One chain, defaults accepted for both steps
@@ -245,7 +245,7 @@ synth transformation run eer-to-relational rel-to-sql-ddl \
 Configuration models record the decisions for one transformation on one
 specific source model. They live in the models tree like any other model;
 the `config` topic filters and contextualizes them. The full workflow is in
-[Configurations](./configurations).
+[Configurations](../guides/configurations.md).
 
 | Command | Description |
 |---|---|
@@ -258,14 +258,14 @@ the `config` topic filters and contextualizes them. The full workflow is in
 ## Pipelines
 
 A pipeline is a **named process**: an ordered list of transformation steps
-stored as plain JSON at `pipelines/<name>.json` — no data bindings, no
+stored as plain JSON at `pipelines/<name>.json`, with no data bindings and no
 stored consents. Every run names its own data. Full guide:
-[Pipelines](./pipelines).
+[Pipelines](../guides/pipelines.md).
 
 | Command | Description |
 |---|---|
 | `synth pipeline mk <name> <tx...>` | Create a pipeline; validation is static and manifest-driven, nothing executes (`--description`, `--overwrite`). |
-| `synth pipeline run <name> --in <ref>` | Run a saved pipeline — the identical request path as `transformation run` with those steps; `--in` is always required. |
+| `synth pipeline run <name> --in <ref>` | Run a saved pipeline through the identical request path as `transformation run` with those steps; `--in` is always required. |
 | `synth pipeline ls` | List saved pipelines with steps and description. |
 | `synth pipeline show <name>` | Show every field of a pipeline. |
 | `synth pipeline rm <name>` | Delete a pipeline (nothing references pipelines, so no dependency check). |
@@ -289,8 +289,8 @@ synth example run eer-to-rel-to-text --out ./generated
 ## Shell completion
 
 `synth autocomplete` prints the one-time setup instructions for command and
-flag completion; a second, dynamic layer completes **values** —
-transformation names, model and configuration refs, pipeline names,
-namespaces — context-aware (after `transformation run eer-to-relational`,
+flag completion; a second, dynamic layer completes **values**
+(transformation names, model and configuration refs, pipeline names,
+namespaces), context-aware (after `transformation run eer-to-relational`,
 TAB on `--in` offers only models matching its source metamodel). Setup for
-both layers is in [Installation](./installation#shell-completion).
+both layers is in [Installation](../getting-started/installation.md#shell-completion).

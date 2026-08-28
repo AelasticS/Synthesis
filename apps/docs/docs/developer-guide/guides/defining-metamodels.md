@@ -1,5 +1,5 @@
 ---
-sidebar_position: 2
+sidebar_position: 1
 ---
 
 # Defining Metamodels
@@ -23,7 +23,7 @@ All entity types, object types, and associations defined for this metamodel must
 Entity types are the building blocks of models. Each entity type defines named, identifiable model elements. Use `t.subtype()` to create entity types that extend a base type.
 
 ```typescript
-import { ModelElement } from 'aelastics-synthesis'
+import { ModelElement } from '@synthesis/metamodel-core'
 
 // A base concept for all EER elements
 export const ERConcept = t.subtype(
@@ -96,7 +96,7 @@ export const Weak = t.subtype(
 )
 ```
 
-At runtime, `Kernel` and `Weak` elements are recognized as subtypes of `Entity`. This is what enables polymorphic dispatch in transformations (see [Polymorphic Rule Dispatch](./polymorphic-dispatch)).
+At runtime, `Kernel` and `Weak` elements are recognized as subtypes of `Entity`. This is what enables polymorphic dispatch in transformations (see [Polymorphic Rule Dispatch](./polymorphic-dispatch.md)).
 
 ## Inverse Associations
 
@@ -127,7 +127,7 @@ These interfaces are used in transformation rules to get typed access to source 
 
 ```typescript
 import * as t from '@aelastics/types'
-import { Model, ModelElement } from 'aelastics-synthesis'
+import { Model, ModelElement } from '@synthesis/metamodel-core'
 
 export const EERModel_TypeSchema = t.schema("EERModelSchema")
 
@@ -166,7 +166,7 @@ export type IDomain    = t.TypeOf<typeof Domain>
 
 ```typescript
 import * as t from '@aelastics/types'
-import { Model, ModelElement } from 'aelastics-synthesis'
+import { Model, ModelElement } from '@synthesis/metamodel-core'
 
 export const RelModel_TypeSchema = t.schema("RelModelSchema")
 
@@ -189,4 +189,4 @@ export type ITable     = t.TypeOf<typeof Table>
 export type IColumn    = t.TypeOf<typeof Column>
 ```
 
-These two metamodels are the source and target of the EER-to-Relational transformation covered in [Writing Transformations](./writing-transformations).
+These two metamodels are the source and target of the EER-to-Relational transformation covered in [Writing Transformations](./writing-transformations.md).
