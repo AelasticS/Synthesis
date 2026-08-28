@@ -194,32 +194,43 @@ manually (`workflow_dispatch`) or by pushing a tag of the form `cli-vX.Y.Z`.
 
 Maintainer workflow:
 
-1. **Bump the version** in `apps/cli/package.json` (semantic versioning).
-2. **Update `CHANGELOG.md`** at the repo root with the new version's
+1. **Run the tests and the smoke suite.** Both must be green before
+   anything is tagged: the full test suite, and the CLI's executable
+   end-to-end smoke scenarios (`rushx smoke` runs the composed user
+   journey — workspace, import gate, execution, configurations,
+   chaining, pipelines, completion — through the real binary in an
+   isolated HOME):
+   ```bash
+   rush build
+   rush test
+   cd apps/cli && rushx smoke
+   ```
+2. **Bump the version** in `apps/cli/package.json` (semantic versioning).
+3. **Update `CHANGELOG.md`** at the repo root with the new version's
    entry under the conventional headings (Added / Changed / Fixed /
    Removed). Use the conventional-commits log between the previous tag
    and `HEAD` as input.
-3. **Commit** the version bump and changelog:
+4. **Commit** the version bump and changelog:
    ```bash
    git commit -am "chore(cli): release v0.2.0"
    ```
-4. **Tag** the commit and push:
+5. **Tag** the commit and push:
    ```bash
    git tag cli-v0.2.0
    git push && git push --tags
    ```
    The tag push triggers the release workflow.
-5. **Watch the workflow** in the GitHub Actions tab. It runs
+6. **Watch the workflow** in the GitHub Actions tab. It runs
    `rush build`, then `oclif pack tarballs`, then `gh release create`
    with the produced tarballs attached. Typical run is 5–10 minutes.
-6. **Smoke test** the release by downloading the tarball for your
+7. **Smoke test** the release by downloading the tarball for your
    platform from the new GitHub Release, extracting it, adding
    `synth/bin` to `PATH`, and running:
    ```bash
    synth --version
    synth doctor
    ```
-7. **Rollback** if anything is wrong: delete the GitHub Release and the
+8. **Rollback** if anything is wrong: delete the GitHub Release and the
    tag. Users on the previous tag are unaffected. Fix the issue and
    bump to the next patch version — do not re-publish under the same
    tag.

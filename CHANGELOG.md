@@ -12,6 +12,66 @@ overall version history.
 
 ### Added
 
+- **The `synth` CLI executes transformations end to end.** The former stub
+  surface (`run`, `m2t`, `config init`) is replaced by a working execution
+  path over a real workspace model format:
+  - **TSX model workspace with `$synth` headers.** Workspace models are
+    `.tsx` JSX modules carrying a tool-maintained `$synth` header (kind,
+    metamodel, references, provenance, authorship, dates). `model import`
+    is a validation gate — transpile and render, reference check, header
+    stamping — so everything in the workspace was loadable when it
+    entered; `model export` round-trips verbatim; `doctor` re-checks the
+    invariant workspace-wide and `doctor --fix` re-derives headers.
+  - **Nested namespaces.** `com.example` maps to `models/com/example/`;
+    refs and disk locations are mechanically derivable from each other,
+    so the ref is never stored and cannot drift.
+  - **Deletion dependency graph.** `model rm` and `namespace rm` are
+    refused while other models transitively reference the target (the
+    dependents are listed); `--cascade` deletes the reverse-dependency
+    closure.
+  - **Transformation manifests.** `synth.json` at the package root (or a
+    `synth` object in `package.json`) declares kind (`m2m`/`m2t`),
+    entry/exportName, source/target metamodels, and the packaged parts
+    (metamodel modules, decision model, binding model — variability is
+    derived from their presence). `transformation install` validates the
+    manifest with per-field errors; `transformation show` reads
+    issues, options, and defaults from the decision model.
+  - **`transformation run`** executes single steps and ad-hoc chains:
+    m2m results are written back as workspace models with provenance
+    headers and re-validated through the import gate; m2t generates files
+    under `--out-dir`. Chains are type-checked from the manifests before
+    execution, hand intermediates over in memory (persistable with
+    `--keep-intermediates`), and only the last step may be m2t.
+  - **Configuration flow.** `config init` generates the default
+    configuration as an editable workspace model; `transformation run
+    --config` validates it nominally (stamped tx/version, binding model,
+    source model) and structurally (issues, options, element resolution);
+    partial configurations fall back to announced, materialized defaults;
+    `--save-config` persists generated defaults.
+  - **Pipelines as named processes.** `pipeline mk/run/ls/show/rm/edit`
+    plus `transformation run --save-as`: a pipeline stores steps only
+    (plain JSON at `pipelines/<name>.json`, no data bindings, no stored
+    consents); `pipeline mk` validates statically with the same chain
+    checks as the execution pre-flight; `pipeline run` requires `--in`
+    and takes the identical request path as `transformation run`;
+    `transformation uninstall` is refused while a saved pipeline lists
+    the transformation as a step.
+  - **Interactive layer.** In a terminal, `transformation run`,
+    `pipeline run`, and `config init` open pickers for missing values
+    (transformation, input model, configuration consent, pipeline,
+    `--for`) and offer to import a `.tsx` path given instead of a ref;
+    piped, scripted, `--json`, `--quiet`, and CI invocations keep the
+    strict errors byte-identical. Dynamic shell completion completes
+    values (transformation names, refs, pipeline names, namespaces)
+    context-aware via the `synth completions` contract and bash/zsh
+    wrapper scripts under `apps/cli/scripts/completion/`.
+  - **Executable smoke suite.** `rushx smoke` in `apps/cli` runs the
+    end-to-end user journey through the real binary in an isolated HOME.
+- **Rewritten CLI documentation.** `apps/docs/docs/cli/` now documents the
+  delivered CLI (workspace and model format, full command reference with
+  exit codes and the consent policy, configuration and pipeline guides,
+  the real transformation manifest, shell completion setup); the
+  "not yet implemented" warnings are gone.
 - **Runtime type-conformance validation in `@aelastics/store`.** Property
   assignments (`obj.prop = value`), array pushes (`arr.push(value)`), and
   index replacements on entity-typed properties now throw a
@@ -53,6 +113,24 @@ overall version history.
 
 ### Changed
 
+- **BREAKING (CLI): decisions are never applied implicitly.** A
+  decision-based transformation runs only with an explicit `--config <ref>`
+  or the `--default-configs` consent flag; with neither, the run aborts
+  (exit 2) before any engine work with a message teaching both paths. The
+  previous behavior — silently generating and applying default
+  configurations — is gone. In chains and pipelines, `--config` binds to
+  step 1 only; every other decision-based step takes `--default-configs`
+  or the stepwise path (`--keep-intermediates` + `config init` against
+  the kept intermediate).
+- **BREAKING (CLI): canonical command names with typing aliases.** Every
+  resource topic has a full-word canonical name — `transformation`,
+  `namespace`, `pipeline`, `model`, `config`, `workspace`, `example` —
+  with `tx`, `ns`, and `pl` as two-letter typing aliases of the first
+  three. `example list` is renamed `example ls`.
+- **Uniform `--json` failure contract (CLI).** Every command failing in
+  `--json` mode prints a machine-readable `{ "error": ... }` object as its
+  only stdout AND exits non-zero; no command prints an error object with
+  exit 0.
 - **BPM `Node.parent`** is now `optional(link("Node"))` (was `link("Node")`).
   Breaks an infinite type-walk recursion in `deepCreate` for BPM Sequence
   / Task / etc. Authors who relied on `parent` being non-optional should
@@ -95,6 +173,14 @@ overall version history.
 
 ### Removed
 
+- **BREAKING (CLI): `synth m2t`.** Whether a run is model-to-model or
+  model-to-text is decided by the transformation manifest's `kind`;
+  `transformation run` covers both. No deprecation alias — the command was
+  never published.
+- **BREAKING (CLI): top-level `synth run`.** Replaced by
+  `transformation run` (which also chains) and `pipeline run`: a verb that
+  guesses its argument's resource type would need resolution-order rules
+  and shadow warnings; the two-verb surface needs neither.
 - **Auto-generated docs and CLI manifest from version control.**
   `apps/docs/docs/*/api/` (TypeDoc-generated) and
   `apps/cli/oclif.manifest.json` (oclif-generated) are now gitignored.

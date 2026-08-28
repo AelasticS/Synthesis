@@ -19,7 +19,7 @@ Synthesis is a TypeScript monorepo for model-driven software engineering. It pro
 
 ## Ecosystem
 
-Transformations are first-class, distributable artifacts. Authors package transformations with `synth tx build` and publish to npm; users install with `synth tx install` and run with `synth run`. See [Packaging Transformations](./cli/packaging-transformations).
+Transformations are first-class, distributable artifacts. Authors package transformations with `synth transformation build` and publish to npm; users install with `synth transformation install` and run with `synth transformation run`. See [Packaging Transformations](./cli/packaging-transformations).
 
 ## History
 
