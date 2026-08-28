@@ -80,7 +80,7 @@ describe('loadTxManifest — manifest locations', () => {
     const dir = makePackage({ ...basePkg, synth: validSynth })
     const promise = loadTxManifest(dir)
     await expect(promise).rejects.toThrow(`No transformation manifest found in '${dir}'`)
-    await expect(promise).rejects.toThrow('that location was retired — move the manifest into synth.json')
+    await expect(promise).rejects.toThrow('that location was retired; move the manifest into synth.json')
   })
 
   it('ignores a leftover synth block in package.json when synth.json exists', async () => {

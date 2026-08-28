@@ -7,8 +7,8 @@ plain `tsc`, and a README explaining what it demonstrates and how to run
 it with the `synth` CLI.
 
 The examples are Rush projects (CI builds them against the workspace),
-but deliberately carry no monorepo tooling beyond that — no heft, no
-rigs — so any example directory can be read, copied, or extracted as a
+but they deliberately carry no monorepo tooling beyond that: no heft,
+no rigs. Any example directory can be read, copied, or extracted as a
 standalone starting point.
 
 ## Catalog
@@ -36,7 +36,7 @@ Variability (decision-based)
 | --- | --- | --- | --- |
 | eer-to-relational | m2m | The flagship: decision model, binding model, `parts` | planned (graduating from CLI fixture) |
 | bpm-to-mermaid | m2t | BPM process model → Mermaid flowchart | planned |
-| one-source-many-configs | — | Same source, several configurations, different outputs | planned |
+| one-source-many-configs | scenario | Same source, several configurations, different outputs | planned |
 
 Composition
 
@@ -49,7 +49,7 @@ domains can be added at any time.
 
 ## Conventions
 
-- `synth.json` at the package root is the transformation manifest — the
+- `synth.json` at the package root is the transformation manifest, the
   only supported location.
 - `entry` points into `dist/` (the `tsc` output); `files` lists `dist`
   and `synth.json` so a published package stays installable.

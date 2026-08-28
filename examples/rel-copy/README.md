@@ -1,21 +1,21 @@
 # rel-copy
 
-The minimal Synthesis transformation — an endogenous m2m copy where the
+The minimal Synthesis transformation: an endogenous m2m copy where the
 source and the target metamodel are the same relational metamodel. With
 no mapping logic to distract, everything on display is the mechanics
 every transformation package shares:
 
-- [src/transformation.ts](./src/transformation.ts) — a transformation
+- [src/transformation.ts](./src/transformation.ts): a transformation
   class extending `abstractM2M`; its `template()` maps the source model
   onto a JSX expression tree over the target metamodel's components.
   Written without JSX syntax or decorators, so the only moving part is
   the `createExprNode` factory itself.
-- [synth.json](./synth.json) — the manifest: kind, entry module and
-  export, source/target metamodels. This is everything the CLI needs to
-  install and run the package without loading its code.
-- [package.json](./package.json) — plain npm metadata; `files` ships
+- [synth.json](./synth.json): the manifest, declaring kind, entry module
+  and export, and source/target metamodels. This is everything the CLI
+  needs to install and run the package without loading its code.
+- [package.json](./package.json): plain npm metadata; `files` ships
   `dist` and `synth.json`.
-- [sample/library-db.tsx](./sample/library-db.tsx) — a small relational
+- [sample/library-db.tsx](./sample/library-db.tsx): a small relational
   model to run the transformation on.
 
 ## Try it
@@ -38,7 +38,7 @@ synth model show demo/library-db-copy
 ```
 
 The output model `demo/library-db-copy` contains the same tables and
-columns as the input, under the schema name `LibraryDb_copy` — plus a
+columns as the input, under the schema name `LibraryDb_copy`, plus a
 provenance header recording which transformation produced it from what.
 
 ## What to look at next

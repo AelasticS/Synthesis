@@ -143,7 +143,7 @@ export async function loadTxManifestWithMeta(
     // A "synth" object in package.json was an earlier manifest location;
     // give migrating authors a pointer instead of a bare not-found.
     const retiredHint = isRecord(pkg.synth)
-      ? ` (The "synth" object in its package.json is not read: that location was retired — move the manifest into ${SYNTH_MANIFEST_FILENAME}.)`
+      ? ` (The "synth" object in its package.json is not read: that location was retired; move the manifest into ${SYNTH_MANIFEST_FILENAME}.)`
       : ''
     throw new ManifestError(
       `No transformation manifest found in '${packageDir}': expected a '${SYNTH_MANIFEST_FILENAME}' file at the package root.${retiredHint}`

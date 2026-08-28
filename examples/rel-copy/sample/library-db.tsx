@@ -17,8 +17,8 @@ export const $synth = {
 export default (store: ModelStore): ExprNode<rmT.IRelSchema> => (
   <RelSchema name="LibraryDb" content="" MDA_level="M1" store={store}>
     {/* Element names are unique across the whole model in the store's
-        naming scheme, so columns carry table-qualified names — the same
-        convention the eer-to-relational naming decisions generate. */}
+        naming scheme, so columns carry table-qualified names, the same
+        convention that the eer-to-relational naming decisions generate. */}
     <Table name="book">
       <Column name="book_id" type="int" isKey={true} isForeignKey={false} isNullable={false} isAutoincrement={true} />
       <Column name="book_title" type="varchar(255)" isKey={false} isForeignKey={false} isNullable={false} isAutoincrement={false} />

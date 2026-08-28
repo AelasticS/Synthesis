@@ -1,5 +1,5 @@
 /**
- * Endogenous relational -> relational copy transformation — the minimal
+ * Endogenous relational -> relational copy transformation, the minimal
  * Synthesis m2m example. Source and target metamodels are identical, so
  * everything on display is the mechanics: a transformation class whose
  * template() maps the source model onto a JSX expression tree built from
