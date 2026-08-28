@@ -3,6 +3,29 @@ import type { Config } from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
 import type { PluginOptions as TypeDocOptions } from 'docusaurus-plugin-typedoc';
 
+// The stock themes paint comments in muted gray; give them a distinct
+// green in both variants so shell sessions read clearly.
+const lightCodeTheme: typeof prismThemes.github = {
+  ...prismThemes.github,
+  styles: [
+    ...prismThemes.github.styles.filter((s) => !s.types.includes('comment')),
+    {
+      types: ['comment', 'prolog', 'doctype', 'cdata'],
+      style: {color: '#0b8235', fontStyle: 'italic' as const},
+    },
+  ],
+};
+const darkCodeTheme: typeof prismThemes.dracula = {
+  ...prismThemes.dracula,
+  styles: [
+    ...prismThemes.dracula.styles.filter((s) => !s.types.includes('comment')),
+    {
+      types: ['comment', 'prolog', 'doctype', 'cdata'],
+      style: {color: '#6a9955', fontStyle: 'italic' as const},
+    },
+  ],
+};
+
 const GITHUB_ORG = 'AelasticS';
 const SOURCE_REPO = 'Synthesis';
 const PAGES_REPO = 'aelastics';
@@ -139,8 +162,8 @@ const config: Config = {
       copyright: `Copyright © 2019–${new Date().getFullYear()} AelasticS.`,
     },
     prism: {
-      theme: prismThemes.github,
-      darkTheme: prismThemes.dracula,
+      theme: lightCodeTheme,
+      darkTheme: darkCodeTheme,
       additionalLanguages: ['typescript', 'bash', 'powershell'],
     },
   } satisfies Preset.ThemeConfig,
