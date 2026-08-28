@@ -1,3 +1,7 @@
+---
+sidebar_position: 1
+---
+
 # Part I: your first transformation
 
 In this part you build, install, and run a complete Synthesis
@@ -9,7 +13,7 @@ the `synth.json` manifest, the transformation class, and the CLI loop
 of build, install, and run.
 
 The finished package exists in the repository as
-[examples/rel-copy](../examples/rel-copy/); use it as the answer key
+`examples/rel-copy`; use it as the answer key
 whenever you want to compare.
 
 ## Prerequisites
@@ -285,6 +289,6 @@ would pass `model import` again.
 
 You have the full authoring loop: manifest, class, build, import,
 install, run, provenance. Everything else in Synthesis builds on this
-loop. In [Part II](./02-decision-based-transformations.md) the
+loop. In [Part II](./part-2-decision-based-transformations.md) the
 transformation stops hard-coding its design decisions and turns them
 into a declared, configurable design space.

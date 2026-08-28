@@ -1,3 +1,7 @@
+---
+sidebar_position: 2
+---
+
 # Part II: decision-based transformations
 
 Part I hard-coded every design choice. Real transformations contain
@@ -11,7 +15,7 @@ decisions for one concrete run.
 
 This part walks through the decision-based EER to relational
 transformation. The finished package is
-[examples/eer-to-relational](../examples/eer-to-relational/); every
+`examples/eer-to-relational`; every
 listing below is taken from it.
 
 ## The cast of models
@@ -272,5 +276,5 @@ is the variability mechanism in one picture.
 
 You can now declare a design space, bind it to a metamodel, implement
 its options as variation points, and drive runs with configurations.
-The [rel-to-sql-ddl](../examples/rel-to-sql-ddl/) example shows the
+The `rel-to-sql-ddl` example shows the
 same machinery on a text generation with a single global issue.
