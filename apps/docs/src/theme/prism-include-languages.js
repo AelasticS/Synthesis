@@ -49,9 +49,19 @@ export default function prismIncludeLanguages(PrismObject) {
       lookbehind: true,
     };
     PrismObject.languages.insertBefore('bash', 'function', {
-      // The synth binary, colored like other recognized commands.
+      // The full synth command phrase: binary + resource topic + verb
+      // (synth transformation show, synth model import, synth init).
+      // Resources and verbs are the CLI's closed grammar, so the whole
+      // phrase can be colored as one command.
       'synth-command': {
-        pattern: /\bsynth\b/,
+        pattern:
+          /\bsynth\b(?:[ \t]+(?:transformation|tx|namespace|ns|pipeline|pl|model|config|workspace|example|init|doctor|cd|autocomplete)\b)?(?:[ \t]+(?:run|show|ls|mk|rm|import|export|validate|install|uninstall|init|build|test|pack|publish|edit|describe)\b)?/,
+        alias: 'function',
+      },
+      // Repo tooling missing from Prism's known-command list, which made
+      // pnpm/rushx gray next to red npm/node in the same session.
+      'tool-command': {
+        pattern: /\b(?:pnpm|rushx|rush|npx|nvm)\b/,
         alias: 'function',
       },
       // Slash-bearing operands: URLs, filesystem paths, workspace refs,
