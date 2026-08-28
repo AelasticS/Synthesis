@@ -12,7 +12,7 @@ Consider transforming EER entities to relational tables. The base rule works for
 
 ```typescript
 // Without dispatch - manual type checking
-Entity2Table(e: et.IEntity): Element<rt.ITable> {
+Entity2Table(e: et.IEntity): ExprNode<rt.ITable> {
   if (this.context.store.isTypeOf(e, et.Kernel)) {
     return (
       <r.Table name={e.name}>
@@ -43,8 +43,7 @@ Mark the base rule with `@SpecPoint()`. This tells the framework that this rule 
 
 ```typescript
 @SpecPoint()
-@E2E({ input: et.Entity, output: rt.Table })
-Entity2Table(e: et.IEntity): Element<rt.ITable> {
+Entity2Table(e: et.IEntity): ExprNode<rt.ITable> {
   return (
     <r.Table name={e.name}>
       {e.attributes.map((a) => this.Attribute2Column(a))}
@@ -59,7 +58,7 @@ Use `@SpecOption(baseMethodName, inputType)` to register a specialized rule for 
 
 ```typescript
 @SpecOption('Entity2Table', et.Kernel)
-Kernel2Table(k: et.IKernel): Element<rt.ITable> {
+Kernel2Table(k: et.IKernel): ExprNode<rt.ITable> {
   return (
     <r.Table>
       <r.Column name={`${k.name}ID_PK`} />
@@ -68,7 +67,7 @@ Kernel2Table(k: et.IKernel): Element<rt.ITable> {
 }
 
 @SpecOption('Entity2Table', et.Weak)
-Weak2Table(w: et.IWeak): Element<rt.ITable> {
+Weak2Table(w: et.IWeak): ExprNode<rt.ITable> {
   return (
     <r.Table name={`Weak_${w.name}`}>
       <r.Column name={`${w.name}ID_PK`} />
@@ -104,14 +103,14 @@ This means specialized rules only need to declare what is different. They do not
 ## Complete Example
 
 ```typescript
-/** @jsx hm */
-import { hm, abstractM2M, M2M, E2E, Element, ModelStore } from 'aelastics-synthesis'
-import { SpecPoint, SpecOption } from 'aelastics-synthesis'
+/** @jsx createExprNode */
+import { createExprNode, ExprNode } from '@synthesis/jsx-runtime'
+import { abstractM2M, M2M, E2E, SpecPoint, SpecOption, ModelStore } from '@synthesis/engine'
 import * as et from './EER.meta.model.type'
 import * as rt from './REL.meta.model.type'
 import * as r from './REL.jsx-comps'
 
-@M2M({ input: et.EERSchema, output: rt.RelSchema })
+@M2M()
 class EER2RelTransformation extends abstractM2M<et.IEERSchema, rt.IRelSchema> {
 
   constructor(store: ModelStore) {
@@ -131,8 +130,7 @@ class EER2RelTransformation extends abstractM2M<et.IEERSchema, rt.IRelSchema> {
 
   // Base rule for any Entity
   @SpecPoint()
-  @E2E({ input: et.Entity, output: rt.Table })
-  Entity2Table(e: et.IEntity): Element<rt.ITable> {
+  Entity2Table(e: et.IEntity): ExprNode<rt.ITable> {
     return (
       <r.Table name={e.name}>
         {e.attributes.map((a) => this.Attribute2Column(a))}
@@ -142,7 +140,7 @@ class EER2RelTransformation extends abstractM2M<et.IEERSchema, rt.IRelSchema> {
 
   // Specialized: Kernel entities get a primary key column
   @SpecOption('Entity2Table', et.Kernel)
-  Kernel2Table(k: et.IKernel): Element<rt.ITable> {
+  Kernel2Table(k: et.IKernel): ExprNode<rt.ITable> {
     return (
       <r.Table>
         <r.Column name={`${k.name}ID_PK`} />
@@ -152,7 +150,7 @@ class EER2RelTransformation extends abstractM2M<et.IEERSchema, rt.IRelSchema> {
 
   // Specialized: Weak entities get PK + foreign key column
   @SpecOption('Entity2Table', et.Weak)
-  Weak2Table(w: et.IWeak): Element<rt.ITable> {
+  Weak2Table(w: et.IWeak): ExprNode<rt.ITable> {
     return (
       <r.Table name={`Weak_${w.name}`}>
         <r.Column name={`${w.name}ID_PK`} />
@@ -161,8 +159,8 @@ class EER2RelTransformation extends abstractM2M<et.IEERSchema, rt.IRelSchema> {
     )
   }
 
-  @E2E({ input: et.Attribute, output: rt.Column })
-  Attribute2Column(a: et.IAttribute): Element<rt.IColumn> {
+  @E2E()
+  Attribute2Column(a: et.IAttribute): ExprNode<rt.IColumn> {
     return <r.Column name={a.name} />
   }
 }

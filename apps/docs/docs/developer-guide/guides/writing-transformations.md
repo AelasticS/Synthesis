@@ -11,17 +11,15 @@ A model-to-model transformation maps a source model to a target model. In Synthe
 Every transformation extends `abstractM2M<Source, Destination, ExtraModels, ConfigModel>` and is decorated with `@M2M`.
 
 ```typescript
-/** @jsx hm */
-import { hm, abstractM2M, M2M, E2E, Element, ModelStore } from 'aelastics-synthesis'
+/** @jsx createExprNode */
+import { createExprNode, ExprNode } from '@synthesis/jsx-runtime'
+import { abstractM2M, M2M, E2E, ModelStore } from '@synthesis/engine'
 import * as et from './EER.meta.model.type'
 import * as rt from './REL.meta.model.type'
 import * as e from './EER.jsx-comps'
 import * as r from './REL.jsx-comps'
 
-@M2M({
-  input: et.EERSchema,
-  output: rt.RelSchema,
-})
+@M2M()
 class EER2RelTransformation extends abstractM2M<et.IEERSchema, rt.IRelSchema> {
 
   constructor(store: ModelStore) {
@@ -39,8 +37,8 @@ class EER2RelTransformation extends abstractM2M<et.IEERSchema, rt.IRelSchema> {
     )
   }
 
-  @E2E({ input: et.Entity, output: rt.Table })
-  Entity2Table(e: et.IEntity): Element<rt.ITable> {
+  @E2E()
+  Entity2Table(e: et.IEntity): ExprNode<rt.ITable> {
     return (
       <r.Table name={e.name}>
         {e.attributes.map((a) => this.Attribute2Column(a))}
@@ -48,8 +46,8 @@ class EER2RelTransformation extends abstractM2M<et.IEERSchema, rt.IRelSchema> {
     )
   }
 
-  @E2E({ input: et.Attribute, output: rt.Column })
-  Attribute2Column(a: et.IAttribute): Element<rt.IColumn> {
+  @E2E()
+  Attribute2Column(a: et.IAttribute): ExprNode<rt.IColumn> {
     return <r.Column name={a.name} />
   }
 }
@@ -59,13 +57,13 @@ class EER2RelTransformation extends abstractM2M<et.IEERSchema, rt.IRelSchema> {
 
 ### `@M2M` Decorator
 
-Applied to the class. Declares the input and output metamodel types.
+Applied to the class. It takes no arguments — the source and target
+model types come from the class's type parameters and the `template()`
+signature.
 
 ```typescript
-@M2M({
-  input: et.EERSchema,    // source type schema
-  output: rt.RelSchema,   // target type schema
-})
+@M2M()
+class EER2RelTransformation extends abstractM2M<et.IEERSchema, rt.IRelSchema> {
 ```
 
 The decorator registers the transformation with the framework and sets up the execution context.
@@ -94,15 +92,13 @@ The `template()` method typically:
 
 ### `@E2E` Decorator
 
-Applied to methods that transform individual elements. Declares which source type maps to which target type.
+Applied to methods that transform individual elements. Like `@M2M`, it
+takes no arguments — the source and target element types are the
+method's parameter and return types.
 
 ```typescript
-@E2E({
-  input: et.Entity,     // source element type
-  output: rt.Table,     // target element type
-  ruleName: "Entity2Table",  // optional: explicit name for tracing
-})
-Entity2Table(e: et.IEntity): Element<rt.ITable> {
+@E2E()
+Entity2Table(e: et.IEntity): ExprNode<rt.ITable> {
   // ...
 }
 ```
@@ -114,7 +110,7 @@ The `@E2E` decorator does two things:
 
 ### Return Type
 
-Every `@E2E` method returns `Element<TargetType>`, not the target instance directly. The JSX expression is an unevaluated element tree. The framework renders it during `transform()`.
+Every `@E2E` method returns `ExprNode<TargetType>`, not the target instance directly. The JSX expression is an unevaluated element tree. The framework renders it during `transform()`.
 
 ## Executing a Transformation
 
@@ -193,10 +189,10 @@ When a rule needs to reference a target element that was produced by another rul
 `Resolve` must have exactly one child, and that child must be a function. The function receives the resolved target model element as its argument and returns a JSX expression.
 
 ```typescript
-import { Resolve } from 'aelastics-synthesis'
+import { Resolve } from '@synthesis/jsx-runtime'
 
-@E2E({ input: et.Relationship, output: rt.ForeignKey })
-Relationship2ForeignKey(rel: et.IRelationship): Element<rt.IForeignKey> {
+@E2E()
+Relationship2ForeignKey(rel: et.IRelationship): ExprNode<rt.IForeignKey> {
   return (
     <r.ForeignKey name={rel.name}>
       <Resolve input={rel.sourceEntity} ruleName="Entity2Table">

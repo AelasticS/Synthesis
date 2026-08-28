@@ -16,8 +16,8 @@ This page builds that idea up from one small example.
 ## A model is the value of an expression
 
 A simple approval workflow — one Write task followed by two parallel
-Approve tasks — written as a model expression (imports elided; the `hm`
-pragma and setup are covered in [Building Model Instances](./guides/building-models.md)):
+Approve tasks — written as a model expression (imports and the JSX
+pragma elided; setup is covered in [Building Model Instances](./guides/building-models.md)):
 
 ```tsx
 const approval = (
@@ -55,15 +55,14 @@ around, and composed *before* they are ever evaluated.
 
 ## The four operators
 
-Every model expression is composed from exactly four kinds of operators.
-In the algebra they are called μ, ε, ρ, and κ; in JSX you write them as:
+Every model expression is composed from exactly four kinds of operators:
 
 | Operator | In JSX | What evaluation does |
 |---|---|---|
-| **Model creation** (μ) | the root model tag — `<Process store={store}>`, `<EERSchema …>` | creates a **model**: a typed container with its own namespace and type schema, into which child elements are placed |
-| **Element creation** (ε) | element tags — `<Task>`, `<Kernel>`, `<Column>` | creates a typed **element** with its properties and connects it to its parent |
-| **Reference** (ρ) | `$refByName`, `$ref`, `$refByID` | **retrieves** an existing element instead of creating one |
-| **Computation** (κ) | TypeScript in `{ … }` — `map`, conditionals, function calls | **computes** sub-expressions dynamically |
+| **Model creation** | the root model tag — `<Process store={store}>`, `<EERSchema …>` | creates a **model**: a typed container with its own namespace and type schema, into which child elements are placed |
+| **Element creation** | element tags — `<Task>`, `<Kernel>`, `<Column>` | creates a typed **element** with its properties and connects it to its parent |
+| **Reference** | `$refByName`, `$ref`, `$refByID` | **retrieves** an existing element instead of creating one |
+| **Computation** | TypeScript in `{ … }` — `map`, conditionals, function calls | **computes** sub-expressions dynamically |
 
 The first two build structure. The third is what makes models true
 *graphs* rather than trees: nesting alone can only express containment,
@@ -119,13 +118,6 @@ property values:
 
 ```mermaid
 graph TD
-    subgraph B["Approval doc=Invoice approvers=2 parallel=false"]
-        P2["Process “Invoice Approval”"] --> S2["Sequence"]
-        S2 --> W2["Task “Write Invoice”"]
-        S2 --> SQ["Sequence"]
-        SQ --> B1["Task “Approve Invoice 1”"]
-        SQ --> B2["Task “Approve Invoice 2”"]
-    end
     subgraph A["Approval doc=Contract approvers=3 parallel=true"]
         P1["Process “Contract Approval”"] --> S1["Sequence"]
         S1 --> W1["Task “Write Contract”"]
@@ -134,6 +126,14 @@ graph TD
         PL --> A2["Task “Approve Contract 2”"]
         PL --> A3["Task “Approve Contract 3”"]
     end
+    subgraph B["Approval doc=Invoice approvers=2 parallel=false"]
+        P2["Process “Invoice Approval”"] --> S2["Sequence"]
+        S2 --> W2["Task “Write Invoice”"]
+        S2 --> SQ["Sequence"]
+        SQ --> B1["Task “Approve Invoice 1”"]
+        SQ --> B2["Task “Approve Invoice 2”"]
+    end
+    A2 ~~~ P2
 ```
 
 An expression with no parameters and no computation is a *model literal* —
@@ -151,8 +151,8 @@ A model-to-model transformation is a template whose parameter is a
 a function from a source element to a target model expression —
 
 ```tsx
-@E2E({ input: et.Entity, output: rt.Table })
-Entity2Table(e: et.IEntity): Element<rt.ITable> {
+@E2E()
+Entity2Table(e: et.IEntity): ExprNode<rt.ITable> {
   return (
     <r.Table name={e.name}>
       {e.attributes.map((a) => this.Attribute2Column(a))}

@@ -23,7 +23,7 @@ All entity types, object types, and associations defined for this metamodel must
 Entity types are the building blocks of models. Each entity type defines named, identifiable model elements. Use `t.subtype()` to create entity types that extend a base type.
 
 ```typescript
-import { ModelElement } from 'aelastics-synthesis'
+import { ModelElement } from '@synthesis/metamodel-core'
 
 // A base concept for all EER elements
 export const ERConcept = t.subtype(
@@ -127,7 +127,7 @@ These interfaces are used in transformation rules to get typed access to source 
 
 ```typescript
 import * as t from '@aelastics/types'
-import { Model, ModelElement } from 'aelastics-synthesis'
+import { Model, ModelElement } from '@synthesis/metamodel-core'
 
 export const EERModel_TypeSchema = t.schema("EERModelSchema")
 
@@ -166,7 +166,7 @@ export type IDomain    = t.TypeOf<typeof Domain>
 
 ```typescript
 import * as t from '@aelastics/types'
-import { Model, ModelElement } from 'aelastics-synthesis'
+import { Model, ModelElement } from '@synthesis/metamodel-core'
 
 export const RelModel_TypeSchema = t.schema("RelModelSchema")
 
