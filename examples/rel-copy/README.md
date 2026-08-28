@@ -5,11 +5,11 @@ source and the target metamodel are the same relational metamodel. With
 no mapping logic to distract, everything on display is the mechanics
 every transformation package shares:
 
-- [src/transformation.ts](./src/transformation.ts): a transformation
+- [src/transformation.tsx](./src/transformation.tsx): a transformation
   class extending `abstractM2M`; its `template()` maps the source model
-  onto a JSX expression tree over the target metamodel's components.
-  Written without JSX syntax or decorators, so the only moving part is
-  the `createExprNode` factory itself.
+  onto the target model in JSX notation, the authoring language of
+  Synthesis, using the target metamodel's components as tags. No
+  decorators and no variability yet; eer-to-relational adds those.
 - [synth.json](./synth.json): the manifest, declaring kind, entry module
   and export, and source/target metamodels. This is everything the CLI
   needs to install and run the package without loading its code.

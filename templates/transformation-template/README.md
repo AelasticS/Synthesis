@@ -18,7 +18,7 @@ transformation-template/
 ├── synth.json            the transformation manifest
 ├── tsconfig.json
 ├── src/
-│   └── index.ts          starter transformation (relational copy)
+│   └── index.tsx         starter transformation (relational copy)
 ├── sample/
 │   └── example-model.tsx sample input model
 ├── scripts/
@@ -42,7 +42,7 @@ Then make it yours:
 2. In `synth.json`: point `source.metamodel` and `target.metamodel` at
    your metamodels, and set `exportName` to your class name. For m2m,
    keep `target.components` in sync with the target metamodel.
-3. In `src/index.ts`: rename the class and implement `template()`.
+3. In `src/index.tsx`: rename the class and implement `template()`.
 4. Replace `sample/example-model.tsx` with a model of your source
    metamodel, so the smoke test exercises the real thing.
 

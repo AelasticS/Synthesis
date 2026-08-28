@@ -192,7 +192,7 @@ The two ways:
 - `--default-configs` generates a configuration from the declared
   defaults, prints every choice, and proceeds:
 
-  ```
+  ```text
   decision NamingConvention -> SnakeCase (default)
   decision for element bookId: PrimaryKeyStrategy -> UseAutoIncrement (default)
   decision for element writtenBy: OneToManyStrategy -> JoinTable (default)
