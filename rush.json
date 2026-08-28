@@ -379,6 +379,10 @@
     {
       "packageName": "rel-copy",
       "projectFolder": "examples/rel-copy"
+    },
+    {
+      "packageName": "eer-to-relational",
+      "projectFolder": "examples/eer-to-relational"
     }
 
     // {

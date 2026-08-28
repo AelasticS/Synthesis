@@ -34,7 +34,7 @@ Variability (decision-based)
 
 | Example | Kind | Shows | Status |
 | --- | --- | --- | --- |
-| eer-to-relational | m2m | The flagship: decision model, binding model, `parts` | planned (graduating from CLI fixture) |
+| [eer-to-relational](./eer-to-relational/) | m2m | The flagship: decision model, binding model, `parts` | available |
 | bpm-to-mermaid | m2t | BPM process model → Mermaid flowchart | planned |
 | one-source-many-configs | scenario | Same source, several configurations, different outputs | planned |
 
