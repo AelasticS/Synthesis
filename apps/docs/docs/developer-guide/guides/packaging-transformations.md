@@ -1,11 +1,11 @@
 ---
-sidebar_position: 6
+sidebar_position: 7
 ---
 
 # Packaging Transformations
 
 This page explains how to take a transformation you have written (see
-[Writing Transformations](../synthesis/writing-transformations)) and turn it
+[Writing Transformations](./writing-transformations.md)) and turn it
 into a package others can install with `synth transformation install`.
 
 A transformation package is npm-compatible — `transformation install`
@@ -68,7 +68,7 @@ is no separate issue list in the manifest. The decision and binding models
 are the single source of truth: `synth transformation show` loads the
 decision model to display the issues, options, and defaults, and
 `synth config init` / `--default-configs` generate configurations from them
-(see [Configurations](./configurations)). The parts ship **with** the
+(see [Configurations](../../user-guide/guides/configurations.md)). The parts ship **with** the
 transformation package; they are not workspace models.
 
 ### Manifest location
@@ -152,4 +152,4 @@ installed version per transformation name — installing another version
 replaces it, and `synth transformation ls` shows what is current.
 Uninstalling is guarded: `synth transformation uninstall` refuses while a
 saved pipeline lists the transformation as a step (see
-[Pipelines](./pipelines#guards-and-health)).
+[Pipelines](../../user-guide/guides/pipelines.md#guards-and-health)).

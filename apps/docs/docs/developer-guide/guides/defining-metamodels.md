@@ -1,5 +1,5 @@
 ---
-sidebar_position: 2
+sidebar_position: 1
 ---
 
 # Defining Metamodels
@@ -96,7 +96,7 @@ export const Weak = t.subtype(
 )
 ```
 
-At runtime, `Kernel` and `Weak` elements are recognized as subtypes of `Entity`. This is what enables polymorphic dispatch in transformations (see [Polymorphic Rule Dispatch](./polymorphic-dispatch)).
+At runtime, `Kernel` and `Weak` elements are recognized as subtypes of `Entity`. This is what enables polymorphic dispatch in transformations (see [Polymorphic Rule Dispatch](./polymorphic-dispatch.md)).
 
 ## Inverse Associations
 
@@ -189,4 +189,4 @@ export type ITable     = t.TypeOf<typeof Table>
 export type IColumn    = t.TypeOf<typeof Column>
 ```
 
-These two metamodels are the source and target of the EER-to-Relational transformation covered in [Writing Transformations](./writing-transformations).
+These two metamodels are the source and target of the EER-to-Relational transformation covered in [Writing Transformations](./writing-transformations.md).

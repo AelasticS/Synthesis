@@ -5,21 +5,28 @@ sidebar_class_name: hidden
 
 # Synthesis
 
-Synthesis is a TypeScript monorepo for model-driven software engineering. It provides an embedded domain-specific language (eDSL) for defining metamodels, constructing model instances with JSX, and writing model-to-model transformations. Supporting libraries handle runtime type validation, reactive state management, and typed error handling. A CLI tool ties everything together for code generation workflows.
+Synthesis is a TypeScript monorepo for model-driven software engineering. Its core is the **Synthesis transformation language** — an embedded domain-specific language implemented within TypeScript — for defining metamodels, constructing model instances with JSX, and writing model-to-model transformations. Supporting libraries handle runtime type validation, reactive state management, and typed error handling. The `synth` CLI ties everything together for code generation workflows.
 
-## Documentation
+## Where to start
 
-| Section | Description |
+| I want to… | Go to |
 |---|---|
-| [Synthesis eDSL](./synthesis/) | Developer guide for the core eDSL. Define metamodels as type schemas, build models with JSX, write transformations with typed rules and automatic tracing, configure variability with design decisions. |
-| [synth CLI](./cli/intro) | Run, package, install, and share transformations as npm packages |
-| [@aelastics/types](./types/intro) | Runtime type system with schemas, validation, and graph transducers |
-| [@aelastics/store](./store/intro) | Reactive model store built on MobX |
-| [@aelastics/result](./result/intro) | Typed success/failure result handling without exceptions |
+| **Run transformations** — install the CLI, import my models, run and chain published transformations, save pipelines | [User Guide](./user-guide/index.md) |
+| **Build transformations** — define metamodels, build models with JSX, write transformation rules, package and publish them | [Developer Guide](./developer-guide/index.md) |
+
+## Libraries
+
+Three `@aelastics/*` libraries underpin Synthesis and are independently usable in any TypeScript project:
+
+| Library | Description |
+|---|---|
+| [@aelastics/types](./types/intro.md) | Runtime type system with schemas, validation, annotations, and graph transducers — define schemas and create validated instances with or without the rest of Synthesis |
+| [@aelastics/store](./store/intro.md) | Reactive model store built on MobX with runtime type conformance |
+| [@aelastics/result](./result/intro.md) | Typed success/failure result handling without exceptions |
 
 ## Ecosystem
 
-Transformations are first-class, distributable artifacts. Authors package transformations with `synth transformation build` and publish to npm; users install with `synth transformation install` and run with `synth transformation run`. See [Packaging Transformations](./cli/packaging-transformations).
+Transformations are first-class, distributable artifacts. Authors package transformations with `synth transformation build` and publish to npm; users install with `synth transformation install` and run with `synth transformation run`. See [Packaging Transformations](./developer-guide/guides/packaging-transformations.md).
 
 ## History
 

@@ -1,5 +1,5 @@
 ---
-sidebar_position: 3
+sidebar_position: 2
 ---
 
 # Creating JSX Components
@@ -127,7 +127,7 @@ The relationship between your metamodel, your components, and the resulting mode
 
 If the connection info string does not match any property in the parent's type, and the JSX tag has not opted in via `allowedAsTopLevelElement`, the runtime throws at render time with an informative error pointing to both the parent type and the missing property. Fix the metamodel (add the property), or change the connector propName, or (for tags that legitimately appear at top level too) use the opt-in helper.
 
-Additionally, when a child is connected through a declared property, the underlying `@aelastics/store` verifies that the child element's runtime type is a subtype of the property's declared element type. Assigning the wrong type — e.g. a `Role` into a property declared as `arrayOf(Task)` — throws a `ValidationError` from the store. See [Runtime type conformance](../store/intro#runtime-type-conformance) in the store documentation.
+Additionally, when a child is connected through a declared property, the underlying `@aelastics/store` verifies that the child element's runtime type is a subtype of the property's declared element type. Assigning the wrong type — e.g. a `Role` into a property declared as `arrayOf(Task)` — throws a `ValidationError` from the store. See [Runtime type conformance](../../store/intro.md#runtime-type-conformance) in the store documentation.
 
 ## References: From Trees to Graphs
 

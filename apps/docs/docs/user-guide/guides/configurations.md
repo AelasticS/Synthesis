@@ -1,5 +1,5 @@
 ---
-sidebar_position: 4
+sidebar_position: 2
 ---
 
 # Configurations
@@ -159,4 +159,4 @@ synth transformation run rel-to-sql-ddl \
 ```
 
 The same rules apply unchanged when the chain is a saved pipeline — see
-[Pipelines](./pipelines).
+[Pipelines](./pipelines.md).

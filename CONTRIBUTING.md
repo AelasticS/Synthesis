@@ -114,6 +114,9 @@ Synthesis/
 └── rush.json               # Rush workspace definition
 ```
 
+The package layering, dependency graph, and the rules behind them are
+documented in [design/architecture.md](design/architecture.md).
+
 ## Code Guidelines
 
 ### Style

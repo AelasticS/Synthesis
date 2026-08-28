@@ -1,5 +1,5 @@
 ---
-sidebar_position: 5
+sidebar_position: 4
 ---
 
 # Writing Transformations
@@ -248,6 +248,6 @@ abstractM2M<Source, Destination, ExtraModels, ConfigModel>
 | `ExtraModels` | Additional input models (object type with named models) | `{}` |
 | `ConfigModel` | Decision/configuration model for variability | `undefined` |
 
-Extra models and configuration models are covered in [Design Decisions in Transformations](./variability).
+Extra models and configuration models are covered in [Design Decisions in Transformations](./variability.md).
 
-Once your transformation is written, see [Packaging Transformations](../cli/packaging-transformations) for how to build, package, and publish it so others can install it with `synth tx install`.
+Once your transformation is written, see [Packaging Transformations](./packaging-transformations.md) for how to build, package, and publish it so others can install it with `synth tx install`.

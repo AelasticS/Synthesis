@@ -1,5 +1,5 @@
 ---
-sidebar_position: 3
+sidebar_position: 1
 ---
 
 # Command Reference
@@ -15,7 +15,7 @@ under — `transformation run`'s arguments are always transformations,
 `pipeline run`'s argument is always a pipeline; nothing is guessed from what
 happens to exist in the workspace. The `transformation`, `namespace`, and
 `pipeline` topics have the typing aliases `tx`, `ns`, and `pl` (see
-[the alias table](./intro#canonical-names-and-typing-aliases)); a few
+[the alias table](../concepts.md#canonical-names-and-typing-aliases)); a few
 workspace-wide operations (`init`, `doctor`, `cd`, `workspace`) omit the
 resource prefix.
 
@@ -94,7 +94,7 @@ applied to the whole subtree.
 ## Models
 
 A model is a `.tsx` file at `models/<namespace path>/<name>.tsx`, addressed
-by its ref `<namespace>/<name>` (see [Models are code](./intro#models-are-code)).
+by its ref `<namespace>/<name>` (see [Models are code](../guides/managing-models.md#models-are-code)).
 
 | Command | Description |
 |---|---|
@@ -145,7 +145,7 @@ configuration models.
 ## Transformations
 
 Transformations are installed packages (see
-[Packaging Transformations](./packaging-transformations)); the manifest
+[Packaging Transformations](../../developer-guide/guides/packaging-transformations.md)); the manifest
 declares everything the CLI needs — kind, metamodels, entry point, decision
 and binding model parts — without loading code.
 
@@ -180,7 +180,7 @@ manifest's `kind`, never by the command name.
 | `--default-configs` | Explicitly accept generated default configurations for every decision-based step not covered by `--config`. |
 | `--save-config <ref>` | Persist the generated default configuration as a workspace model (single step, only with `--default-configs`). |
 | `--keep-intermediates` | Also write every intermediate chain result as a workspace model at `<namespace>/<name>-<step-tx>`. |
-| `--save-as <name>` | After a successful run, save the steps as a pipeline (see [Pipelines](./pipelines)). |
+| `--save-as <name>` | After a successful run, save the steps as a pipeline (see [Pipelines](../guides/pipelines.md)). |
 | `--overwrite` | Replace existing targets (final and intermediate models, `--save-config` target, `--save-as` pipeline). |
 
 An m2m result is written back into the workspace as a model file with a
@@ -196,7 +196,7 @@ open (say, a naming convention) and declare defaults. `synth` never applies
 those defaults silently. A decision-based run must carry exactly one of:
 
 - `--config <ref>` — run on a reviewed, editable configuration model
-  (created with `synth config init`, see [Configurations](./configurations));
+  (created with `synth config init`, see [Configurations](../guides/configurations.md));
 - `--default-configs` — explicitly accept generated defaults; every applied
   choice is announced in the output, e.g. `NamingConvention -> SnakeCase (default)`.
 
@@ -227,7 +227,7 @@ mid-run. Every other decision-based step (and step 1 without `--config`)
 requires `--default-configs`. To configure a later step explicitly, run
 stepwise: keep the intermediate with `--keep-intermediates`, then
 `config init` against it and run the next step with `--config` — the full
-sequence is in [Configurations](./configurations#configuring-a-chain-stepwise).
+sequence is in [Configurations](../guides/configurations.md#configuring-a-chain-stepwise).
 
 ```bash
 # One chain, defaults accepted for both steps
@@ -245,7 +245,7 @@ synth transformation run eer-to-relational rel-to-sql-ddl \
 Configuration models record the decisions for one transformation on one
 specific source model. They live in the models tree like any other model;
 the `config` topic filters and contextualizes them. The full workflow is in
-[Configurations](./configurations).
+[Configurations](../guides/configurations.md).
 
 | Command | Description |
 |---|---|
@@ -260,7 +260,7 @@ the `config` topic filters and contextualizes them. The full workflow is in
 A pipeline is a **named process**: an ordered list of transformation steps
 stored as plain JSON at `pipelines/<name>.json` — no data bindings, no
 stored consents. Every run names its own data. Full guide:
-[Pipelines](./pipelines).
+[Pipelines](../guides/pipelines.md).
 
 | Command | Description |
 |---|---|
@@ -293,4 +293,4 @@ flag completion; a second, dynamic layer completes **values** —
 transformation names, model and configuration refs, pipeline names,
 namespaces — context-aware (after `transformation run eer-to-relational`,
 TAB on `--in` offers only models matching its source metamodel). Setup for
-both layers is in [Installation](./installation#shell-completion).
+both layers is in [Installation](../getting-started/installation.md#shell-completion).

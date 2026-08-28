@@ -1,8 +1,8 @@
----
-sidebar_position: 1
----
-
 # Monorepo Architecture
+
+> Internal architecture documentation for contributors to Synthesis itself.
+> User and developer documentation lives on the
+> [documentation site](https://AelasticS.github.io/aelastics/).
 
 Synthesis is organized as a 12-package monorepo with a strict, acyclic dependency graph. Packages are layered from generic infrastructure at the bottom to applications at the top.
 

@@ -1,5 +1,5 @@
 ---
-sidebar_position: 5
+sidebar_position: 3
 ---
 
 # Pipelines
@@ -23,7 +23,7 @@ you can replay by name. It is stored as plain JSON — not a model — at
 A pipeline deliberately stores **no data bindings**: no input model, no
 output target, no configuration, no consent flags. Stored bindings would
 silently steer replays — the same hazard the
-[explicit-consent policy](./configurations#why-consent-is-explicit) exists
+[explicit-consent policy](./configurations.md#why-consent-is-explicit) exists
 to prevent — and a stored configuration is provably wrong for any other
 input, because a configuration model is bound to one specific source model.
 So every `pipeline run` names its own data and gives its own consents,

@@ -35,6 +35,28 @@ const config: Config = {
 
   plugins: [
     [
+      '@docusaurus/plugin-client-redirects',
+      {
+        // The site was restructured into User Guide / Developer Guide tracks
+        // (2026-08); these keep the previously published URLs working.
+        redirects: [
+          { from: '/cli/intro', to: '/user-guide/concepts' },
+          { from: '/cli/installation', to: '/user-guide/getting-started/installation' },
+          { from: '/cli/commands', to: '/user-guide/reference/commands' },
+          { from: '/cli/configurations', to: '/user-guide/guides/configurations' },
+          { from: '/cli/pipelines', to: '/user-guide/guides/pipelines' },
+          { from: '/cli/packaging-transformations', to: '/developer-guide/guides/packaging-transformations' },
+          { from: '/synthesis', to: '/developer-guide' },
+          { from: '/synthesis/defining-metamodels', to: '/developer-guide/guides/defining-metamodels' },
+          { from: '/synthesis/jsx-components', to: '/developer-guide/guides/jsx-components' },
+          { from: '/synthesis/building-models', to: '/developer-guide/guides/building-models' },
+          { from: '/synthesis/writing-transformations', to: '/developer-guide/guides/writing-transformations' },
+          { from: '/synthesis/polymorphic-dispatch', to: '/developer-guide/guides/polymorphic-dispatch' },
+          { from: '/synthesis/variability', to: '/developer-guide/guides/variability' },
+        ],
+      },
+    ],
+    [
       'docusaurus-plugin-typedoc',
       {
         id: 'api-result',
@@ -83,17 +105,16 @@ const config: Config = {
     navbar: {
       title: 'Synthesis',
       items: [
+        { type: 'docSidebar', sidebarId: 'userGuide', position: 'left', label: 'User Guide' },
+        { type: 'docSidebar', sidebarId: 'developerGuide', position: 'left', label: 'Developer Guide' },
         {
-          label: 'Documentation',
+          label: 'Libraries',
           position: 'left',
           type: 'dropdown',
           items: [
-            { type: 'docSidebar', sidebarId: 'architecture', label: 'Architecture' },
-            { type: 'docSidebar', sidebarId: 'synthesis', label: 'Synthesis eDSL' },
-            { type: 'docSidebar', sidebarId: 'cli', label: 'synth CLI' },
-            { type: 'docSidebar', sidebarId: 'types', label: 'aelastics-types' },
-            { type: 'docSidebar', sidebarId: 'store', label: 'aelastics-store' },
-            { type: 'docSidebar', sidebarId: 'result', label: 'aelastics-result' },
+            { type: 'docSidebar', sidebarId: 'types', label: '@aelastics/types' },
+            { type: 'docSidebar', sidebarId: 'store', label: '@aelastics/store' },
+            { type: 'docSidebar', sidebarId: 'result', label: '@aelastics/result' },
           ],
         },
         {
@@ -103,7 +124,7 @@ const config: Config = {
           items: [
             {
               label: 'Contributing',
-              to: '/contributing',
+              href: `https://github.com/${GITHUB_ORG}/${SOURCE_REPO}/blob/main/CONTRIBUTING.md`,
             },
             {
               label: 'GitHub',
