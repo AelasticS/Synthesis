@@ -57,7 +57,7 @@ class EER2RelTransformation extends abstractM2M<et.IEERSchema, rt.IRelSchema> {
 
 ### `@M2M` Decorator
 
-Applied to the class. It takes no arguments — the source and target
+Applied to the class. It takes no arguments; the source and target
 model types come from the class's type parameters and the `template()`
 signature.
 
@@ -93,7 +93,7 @@ The `template()` method typically:
 ### `@E2E` Decorator
 
 Applied to methods that transform individual elements. Like `@M2M`, it
-takes no arguments — the source and target element types are the
+takes no arguments; the source and target element types are the
 method's parameter and return types.
 
 ```typescript

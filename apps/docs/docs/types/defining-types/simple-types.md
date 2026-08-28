@@ -5,7 +5,7 @@ title: Simple Types
 
 Simple types represent scalar values: strings, numbers, booleans, dates, and a
 few special singleton types. The library exports pre-defined instances for the
-most common ones. You do not call a factory to get them — you import them
+most common ones. You do not call a factory to get them; you import them
 directly and use them as property types.
 
 ---

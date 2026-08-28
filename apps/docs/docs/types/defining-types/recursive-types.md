@@ -3,7 +3,7 @@ sidebar_position: 7
 title: Recursive and Cyclic Types
 ---
 
-TypeScript and JavaScript objects can reference themselves — a tree node that
+TypeScript and JavaScript objects can reference themselves: a tree node that
 has children of the same type, or two entity types that reference each other.
 Defining such types naively creates a circular dependency: `Child` needs
 `Person` before `Person` is defined, and vice versa.
@@ -14,16 +14,16 @@ traversal starts.
 
 ---
 
-## `link()` — lazy type reference
+## `link()`: lazy type reference
 
 ```ts
 link(schema, path, name?, owner?)
 ```
 
-- `schema` — the `TypeSchema` that contains the target type
-- `path` — the name (or path) of the target type within that schema
-- `name` — optional name for the link type itself
-- `owner` — the schema that owns this link type (defaults to `schema`)
+- `schema`: the `TypeSchema` that contains the target type
+- `path`: the name (or path) of the target type within that schema
+- `name`: optional name for the link type itself
+- `owner`: the schema that owns this link type (defaults to `schema`)
 
 The link is not resolved at definition time. Resolution happens during schema
 traversal (validation, DTO conversion, instance creation). If the schema has
@@ -52,7 +52,7 @@ const TreeNode = object(
 ```
 
 `link(mySchema, 'TreeNode')` refers back to `TreeNode` by name within
-`mySchema`. The type does not exist yet when `link` is called — the reference
+`mySchema`. The type does not exist yet when `link` is called; the reference
 is resolved lazily when traversal starts.
 
 ---
@@ -96,7 +96,7 @@ link resolves to the `Person` type in `mySchema`.
 ## Cyclic instance graphs
 
 A linked property can point to a value that is already part of the current
-graph — for example, `child.parent` pointing back to the `Person` instance that
+graph, for example `child.parent` pointing back to the `Person` instance that
 contains `child`. The traversal engine tracks visited nodes and will not recurse
 into the same instance twice, so cyclic structures are handled without infinite
 loops.

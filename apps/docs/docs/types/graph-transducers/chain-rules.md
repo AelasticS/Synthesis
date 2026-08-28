@@ -66,7 +66,7 @@ process child nodes. That field is the fully composed pipeline. Adding two
 traversal steps creates a chain where each non-leaf node is visited twice:
 
 ```ts
-// Invalid — double traversal
+// Invalid: double traversal
 transducer()
   .dftMap()
   .dftMap()     // child nodes are traversed again here
@@ -84,7 +84,7 @@ Use exactly one of `dftMap()` or `dftReduce()` per pipeline.
 ## Chains without a traversal step
 
 A pipeline without `dftMap` or `dftReduce` is valid. It processes only the root
-node — there is no descent into children:
+node; there is no descent into children:
 
 ```ts
 // Flat processing: root node only

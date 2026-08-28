@@ -35,7 +35,7 @@ graph LR
 ```
 
 - A **metamodel** is a set of runtime type schemas defined with
-  [`@aelastics/types`](../types/intro.md) — the same library usable standalone
+  [`@aelastics/types`](../types/intro.md), the same library usable standalone
   for schema definition and validation.
 - **JSX components** are thin wrappers that map those types to JSX tags, so
   models can be written as declarative expressions.
@@ -68,4 +68,4 @@ A secondary example uses **BPM workflows** (Process, Task, Sequence, Parallel) t
 
 ## Sharing Your Work
 
-A transformation is more than code — it can be packaged as an installable npm package with a `synth.json` manifest describing its source and target metamodels and any variability points. See [Packaging Transformations](./guides/packaging-transformations.md).
+A transformation is more than code: it can be packaged as an installable npm package with a `synth.json` manifest describing its source and target metamodels and any variability points. See [Packaging Transformations](./guides/packaging-transformations.md).

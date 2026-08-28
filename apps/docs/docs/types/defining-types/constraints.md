@@ -24,7 +24,7 @@ The solution is to derive a new type first.
 
 ---
 
-## `derive()` — create a constrained variant
+## `derive()`: create a constrained variant
 
 ```ts
 type.derive(name?, schema?)
@@ -54,7 +54,7 @@ const Specialization = string
 
 ---
 
-## `addValidator()` — add a custom constraint
+## `addValidator()`: add a custom constraint
 
 ```ts
 type.addValidator({ predicate, message })
@@ -63,8 +63,8 @@ type.addValidator({ predicate, message })
 Adds a validator to any non-system type. A validator is an object with two
 fields:
 
-- `predicate: (value: V) => boolean` — returns `true` when the value is valid
-- `message: (value: V, label?: string) => string` — returns the error message
+- `predicate: (value: V) => boolean`: returns `true` when the value is valid
+- `message: (value: V, label?: string) => string`: returns the error message
   when the predicate returns `false`
 
 `addValidator` returns `this`, so multiple calls can be chained.

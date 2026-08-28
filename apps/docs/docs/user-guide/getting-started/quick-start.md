@@ -6,7 +6,7 @@ sidebar_position: 2
 
 The session below goes from an empty workspace to generated SQL. It assumes
 `synth` is [installed](./installation.md). The two transformation packages are
-placeholders — `synth transformation install` accepts any npm name, git URL,
+placeholders: `synth transformation install` accepts any npm name, git URL,
 local directory, or tarball that contains a transformation package (see
 [Packaging Transformations](../../developer-guide/guides/packaging-transformations.md));
 here `eer-to-relational` (model-to-model) and `rel-to-sql-ddl`
@@ -38,7 +38,7 @@ synth transformation run rel-to-sql-ddl --in com.example/persons-rel \
   --default-configs --out-dir ./generated
 ```
 
-The two runs also work as one **chain** — the intermediate model is handed
+The two runs also work as one **chain**, where the intermediate model is handed
 from step to step in memory:
 
 ```bash
@@ -51,9 +51,9 @@ synth transformation run eer-to-relational rel-to-sql-ddl \
 - The [Tutorial](../tutorial.md) repeats this journey end to end, with
   explanations at every step.
 - To steer the decisions instead of accepting defaults, generate an editable
-  configuration model with `synth config init` and pass it with `--config` —
+  configuration model with `synth config init` and pass it with `--config`;
   see [Configurations](../guides/configurations.md).
 - To give a chain a name and replay it on other models, save it as a
-  pipeline — see [Pipelines](../guides/pipelines.md).
+  pipeline; see [Pipelines](../guides/pipelines.md).
 - [Concepts](../concepts.md) explains the workspace, refs, and the consent
   policy behind `--default-configs`.

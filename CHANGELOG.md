@@ -23,7 +23,7 @@ overall version history.
   previously published URLs redirect to their new locations
   (`@docusaurus/plugin-client-redirects`).
 - **Monorepo architecture documentation moved out of the site** to
-  [design/architecture.md](design/architecture.md) — it is contributor
+  [design/architecture.md](design/architecture.md); it is contributor
   material, now linked from the README and CONTRIBUTING instead of shown as
   user documentation. The duplicated Contributing page on the site was
   dropped in favor of the repository's CONTRIBUTING.md.

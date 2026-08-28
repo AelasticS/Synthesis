@@ -12,8 +12,8 @@ flags for every command are in the
 
 ## Models are code
 
-A workspace model is a `.tsx` module — JSX that renders into a model when
-executed — not a JSON data file:
+A workspace model is a `.tsx` module (JSX that renders into a model when
+executed), not a JSON data file:
 
 ```tsx
 /** @jsx createExprNode */
@@ -43,7 +43,7 @@ export default (store: ModelStore) => (
 )
 ```
 
-Every workspace model carries an exported `$synth` header — a pure literal
+Every workspace model carries an exported `$synth` header, a pure literal
 constant that is **written and maintained by the tools** (`model import`,
 `transformation run`, `config init`), never required from humans. A
 hand-authored file without a header gets one derived at import.
@@ -69,7 +69,7 @@ rendered content (`doctor` reports disagreements, `doctor --fix` re-derives).
 
 Everything enters the workspace through `model import <file> --as <ref>`:
 
-1. The file is transpiled and rendered into a throwaway store — full
+1. The file is transpiled and rendered into a throwaway store, giving full
    structural validation. Broken JSX, an unresolvable metamodel, or a
    dangling `$refByName` reject the import.
 2. The model's references are checked against the workspace; a missing
@@ -82,7 +82,7 @@ Everything enters the workspace through `model import <file> --as <ref>`:
    existing target.
 
 The invariant this buys: **everything in the workspace was loadable when it
-entered**. That is why run time is strict — `--in` accepts workspace refs,
+entered**. That is why run time is strict: `--in` accepts workspace refs,
 never file paths.
 
 ## Inspecting and validating
@@ -97,7 +97,7 @@ synth model validate com.example/persons   # render for real, check metamodel
 `model validate` also accepts `--against <metamodel>` to assert the header
 declares a specific metamodel. Configuration models reference their
 transformation's decision and binding models, which live in the installed
-package rather than the workspace — pass `--tx <name>` so the validation
+package rather than the workspace; pass `--tx <name>` so the validation
 render pre-loads the package's parts.
 
 `synth doctor` re-checks the import-gate invariant workspace-wide;
@@ -119,7 +119,7 @@ namespace that transitively references a model inside it (implies
 ## Exporting
 
 `synth model export <ref> [--to <file>]` writes a model out to disk,
-verbatim, header included — the counterpart of `model import` for sharing a
+verbatim, header included: the counterpart of `model import` for sharing a
 model outside the workspace.
 
 ## Deleting and the dependency graph
@@ -133,6 +133,6 @@ configuration models.
 
 ## Next
 
-- [Configurations](./configurations.md) — decision-based transformations and
+- [Configurations](./configurations.md): decision-based transformations and
   the configuration models that steer them.
-- [Pipelines](./pipelines.md) — naming and replaying transformation chains.
+- [Pipelines](./pipelines.md): naming and replaying transformation chains.

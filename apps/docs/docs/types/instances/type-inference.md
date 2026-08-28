@@ -17,7 +17,7 @@ const Person = object(
 )
 ```
 
-`Person` is an instance of `ObjectType` — a class with methods like `validate`,
+`Person` is an instance of `ObjectType`, a class with methods like `validate`,
 `toDtoGraph`, and `createInstance`. It exists at runtime. You can pass it
 around, store it in a variable, put it in a map, and inspect it.
 
@@ -26,7 +26,7 @@ during compilation and are erased before the program runs.
 
 ---
 
-## `TypeOf` — bridging data to types
+## `TypeOf`: bridging data to types
 
 Because `Person` is a runtime value, TypeScript can infer its full static type.
 The `ObjectType` class carries phantom type parameters that encode the shape of
@@ -41,7 +41,7 @@ type IPerson = TypeOf<typeof Person>
 ```
 
 This is a TypeScript compile-time operation. `TypeOf<T>` is defined as
-`T['_V']` — it accesses the phantom `_V` type slot on the descriptor class.
+`T['_V']`: it accesses the phantom `_V` type slot on the descriptor class.
 The TypeScript compiler resolves it at compile time using its normal type
 inference, with no runtime cost.
 
@@ -79,7 +79,7 @@ updates automatically and the IDE reflects it.
 
 ```ts
 const [ok, err] = Person.validateAndReport(value)
-// value is IPerson — TypeScript knows its shape
+// value is IPerson: TypeScript knows its shape
 ```
 
 **Class implementations**

@@ -5,14 +5,14 @@ sidebar_class_name: hidden
 
 # Synthesis
 
-Synthesis is a TypeScript monorepo for model-driven software engineering. Its core is the **Synthesis transformation language** — an embedded domain-specific language implemented within TypeScript — for defining metamodels, constructing model instances with JSX, and writing model-to-model transformations. Supporting libraries handle runtime type validation, reactive state management, and typed error handling. The `synth` CLI ties everything together for code generation workflows.
+Synthesis is a TypeScript monorepo for model-driven software engineering. Its core is the **Synthesis transformation language**, an embedded domain-specific language implemented within TypeScript, for defining metamodels, constructing model instances with JSX, and writing model-to-model transformations. Supporting libraries handle runtime type validation, reactive state management, and typed error handling. The `synth` CLI ties everything together for code generation workflows.
 
 ## Where to start
 
 | I want to… | Go to |
 |---|---|
-| **Run transformations** — install the CLI, import my models, run and chain published transformations, save pipelines | [User Guide](./user-guide/index.md) |
-| **Build transformations** — define metamodels, build models with JSX, write transformation rules, package and publish them | [Developer Guide](./developer-guide/index.md) |
+| **Run transformations**: install the CLI, import my models, run and chain published transformations, save pipelines | [User Guide](./user-guide/index.md) |
+| **Build transformations**: define metamodels, build models with JSX, write transformation rules, package and publish them | [Developer Guide](./developer-guide/index.md) |
 
 ## Libraries
 
@@ -20,7 +20,7 @@ Three `@aelastics/*` libraries underpin Synthesis and are independently usable i
 
 | Library | Description |
 |---|---|
-| [@aelastics/types](./types/intro.md) | Runtime type system with schemas, validation, annotations, and graph transducers — define schemas and create validated instances with or without the rest of Synthesis |
+| [@aelastics/types](./types/intro.md) | Runtime type system with schemas, validation, annotations, and graph transducers; usable for defining schemas and creating validated instances with or without the rest of Synthesis |
 | [@aelastics/store](./store/intro.md) | Reactive model store built on MobX with runtime type conformance |
 | [@aelastics/result](./result/intro.md) | Typed success/failure result handling without exceptions |
 

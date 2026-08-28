@@ -25,8 +25,8 @@ The full documentation site lives at
 ## Installing the CLI
 
 The `synth` CLI ships as platform tarballs on
-[GitHub Releases](https://github.com/AelasticS/Synthesis/releases) — no Node
-runtime required on the user's machine. See
+[GitHub Releases](https://github.com/AelasticS/Synthesis/releases); no Node
+runtime is required on the user's machine. See
 **[Installation](https://AelasticS.github.io/aelastics/user-guide/getting-started/installation)**
 for step-by-step instructions for Linux, macOS, Windows, and building from
 source.

@@ -108,7 +108,7 @@ export const Sequence: Template<bpmn.ISequence> = (props) => {
 }
 ```
 
-When the parent's type schema has the declared propName (nested case), the runtime connects via that property. When it does not, the runtime accepts the missing propName as valid **only because** the JSX tag explicitly opted in AND the parent is a Namespace AND the child is a ModelElement — the child is then stored in `parent.elements` by `store.newModelElement`.
+When the parent's type schema has the declared propName (nested case), the runtime connects via that property. When it does not, the runtime accepts the missing propName as valid **only because** the JSX tag explicitly opted in AND the parent is a Namespace AND the child is a ModelElement; the child is then stored in `parent.elements` by `store.newModelElement`.
 
 Without the opt-in, a missing propName on the parent throws (see below).
 
@@ -127,7 +127,7 @@ The relationship between your metamodel, your components, and the resulting mode
 
 If the connection info string does not match any property in the parent's type, and the JSX tag has not opted in via `allowedAsTopLevelElement`, the runtime throws at render time with an informative error pointing to both the parent type and the missing property. Fix the metamodel (add the property), or change the connector propName, or (for tags that legitimately appear at top level too) use the opt-in helper.
 
-Additionally, when a child is connected through a declared property, the underlying `@aelastics/store` verifies that the child element's runtime type is a subtype of the property's declared element type. Assigning the wrong type — e.g. a `Role` into a property declared as `arrayOf(Task)` — throws a `ValidationError` from the store. See [Runtime type conformance](../../store/intro.md#runtime-type-conformance) in the store documentation.
+Additionally, when a child is connected through a declared property, the underlying `@aelastics/store` verifies that the child element's runtime type is a subtype of the property's declared element type. Assigning the wrong type, e.g. a `Role` into a property declared as `arrayOf(Task)`, throws a `ValidationError` from the store. See [Runtime type conformance](../../store/intro.md#runtime-type-conformance) in the store documentation.
 
 ## References: From Trees to Graphs
 
