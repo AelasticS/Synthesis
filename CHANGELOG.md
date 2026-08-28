@@ -18,6 +18,27 @@ overall version history.
   manifest loading with a migration hint pointing at `synth.json`.
   Decision recorded in `design/engine-follow-ups.md`.
 
+### Added
+
+- **Top-level `examples/` catalog of installable transformation
+  packages.** Three examples graduate from CLI test fixtures into
+  self-contained packages with TypeScript sources, sample models, and
+  walkthrough READMEs: rel-copy (minimal m2m), eer-to-relational
+  (decision-based m2m, with package-relative manifest parts), and
+  rel-to-sql-ddl (m2t). A generic smoke harness (`examples/smoke.mjs`)
+  runs the full install-and-run loop for every example from its `test`
+  script.
+
+### Fixed
+
+- **Decision framework: trace generation no longer fails when a rule
+  returns a reference node.** A `@VarOption` rule that grafts children
+  into an existing element via `$refByName` (for example the ForeignKey
+  option of eer-to-relational) produced a trace target named
+  `.../undefined`, and the dangling reference failed the entire run. The
+  trace target now uses the referenced element's name, and is omitted
+  when no stable name exists.
+
 ## [cli-v0.1.0] - 2026-08-28
 
 ### Added
