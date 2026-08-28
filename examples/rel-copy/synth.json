@@ -1,0 +1,12 @@
+{
+  "kind": "m2m",
+  "entry": "./dist/transformation.js",
+  "exportName": "RelCopyTransformation",
+  "source": {
+    "metamodel": "@synthesis/standard-metamodels/relational"
+  },
+  "target": {
+    "metamodel": "@synthesis/standard-metamodels/relational",
+    "components": "@synthesis/standard-metamodels/relational/components-legacy"
+  }
+}

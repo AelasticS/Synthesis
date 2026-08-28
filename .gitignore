@@ -98,3 +98,6 @@ apps/cli/package-lock.json
 
 # Claude Code local settings
 .claude/
+
+# Example package build output (plain tsc)
+examples/*/dist/

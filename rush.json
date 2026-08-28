@@ -375,6 +375,10 @@
     {
       "packageName": "@synthesis/cli",
       "projectFolder": "apps/cli"
+    },
+    {
+      "packageName": "rel-copy",
+      "projectFolder": "examples/rel-copy"
     }
 
     // {
