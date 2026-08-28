@@ -34,6 +34,22 @@ workarounds for all of them; none blocks the cli-v0.1.0 release.
   classifies missing-dependency render failures by matching the engine's
   error message text; a typed error carrying the missing name as data
   would make that robust.
+- **Hierarchical namespaces are only half-activated** (verified
+  2026-08-28). A model is a namespace (`Model ⊂ Namespace`,
+  metamodel-core), so equal element names in different models coexist —
+  but within a model every non-Model concept shares one flat name scope:
+  the renderer pushes only Model nodes onto the namespace stack (the
+  Namespace branch in `ExprNode.render` is commented out,
+  `jsx-runtime/src/element.ts` ~336), and no standard-metamodel container
+  (EER `Entity`/`Submodel`, relational `Table`) is Namespace-typed. Hence
+  attribute/column names must be unique per model — the reason for
+  table-qualified naming conventions. Activating nesting is a deliberate
+  design decision, not a bug fix: (a) push Namespace nodes in the
+  renderer, (b) opt container concepts into `Namespace` per metamodel,
+  (c) migrate name references — `$refByName` (relative `../` or absolute
+  paths; the resolver already understands the stack and `..`),
+  binding-model element references, and the CLI's element-name
+  resolution in configuration checks.
 
 ## CLI-side, consciously postponed
 
