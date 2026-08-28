@@ -13,7 +13,7 @@
   ],
   "scripts": {
     "build": "tsc",
-    "test": "echo \"rel-to-sql-ddl: no unit tests (validated by the examples smoke suite)\""
+    "test": "node ../smoke.mjs"
   },
   "dependencies": {
     "@synthesis/jsx-runtime": "workspace:*",
@@ -22,6 +22,7 @@
     "@synthesis/decision-framework": "workspace:*"
   },
   "devDependencies": {
-    "typescript": "~5.9.3"
+    "typescript": "~5.9.3",
+    "@synthesis/cli": "workspace:*"
   }
 }

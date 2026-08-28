@@ -144,6 +144,9 @@ importers:
         specifier: workspace:*
         version: link:../../libraries/standard-metamodels
     devDependencies:
+      '@synthesis/cli':
+        specifier: workspace:*
+        version: link:../../apps/cli
       typescript:
         specifier: ~5.9.3
         version: 5.9.3
@@ -160,6 +163,9 @@ importers:
         specifier: workspace:*
         version: link:../../libraries/standard-metamodels
     devDependencies:
+      '@synthesis/cli':
+        specifier: workspace:*
+        version: link:../../apps/cli
       typescript:
         specifier: ~5.9.3
         version: 5.9.3
@@ -179,6 +185,9 @@ importers:
         specifier: workspace:*
         version: link:../../libraries/standard-metamodels
     devDependencies:
+      '@synthesis/cli':
+        specifier: workspace:*
+        version: link:../../apps/cli
       typescript:
         specifier: ~5.9.3
         version: 5.9.3

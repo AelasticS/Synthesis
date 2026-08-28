@@ -57,3 +57,10 @@ domains can be added at any time.
   extraction to a standalone repository these become version ranges.
 - An example that needs an input model ships one under `sample/`,
   importable via `synth model import`.
+- Every example is smoke tested through the real CLI: its `test` script
+  runs [smoke.mjs](./smoke.mjs), which installs the package into an
+  isolated workspace, imports the sample models, and executes one run
+  (with default configurations when the package is decision-based). CI
+  runs this for every example on every pull request
+  (`.github/workflows/examples.yml`), so the catalog stays executable
+  truth rather than prose.
