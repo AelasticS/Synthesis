@@ -391,6 +391,10 @@
     {
       "packageName": "transformation-template",
       "projectFolder": "templates/transformation-template"
+    },
+    {
+      "packageName": "eer-tutorial-basic",
+      "projectFolder": "examples/eer-tutorial-basic"
     }
 
     // {

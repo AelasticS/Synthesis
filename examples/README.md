@@ -18,8 +18,8 @@ Fundamentals
 | Example | Kind | Shows | Status |
 | --- | --- | --- | --- |
 | [rel-copy](./rel-copy/) | m2m | The minimal transformation: class, manifest, install, run | available |
+| [eer-tutorial-basic](./eer-tutorial-basic/) | m2m | Tutorial Part 1: simple EER to relational, fixed logic | available |
 | tasklist-to-html | m2t | Authoring your own metamodel + simple text generation | planned |
-| eer-to-relational-basic | m2m | The classic EER→relational mapping, one fixed strategy | planned |
 
 Text generation (m2t)
 

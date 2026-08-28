@@ -25,6 +25,18 @@
       "types": "./lib/eer/EER.meta.model.type.d.ts",
       "default": "./lib/eer/EER.meta.model.type.js"
     },
+    "./eer-tutorial": {
+      "types": "./lib/eer-tutorial/index.d.ts",
+      "default": "./lib/eer-tutorial/index.js"
+    },
+    "./eer-tutorial/model": {
+      "types": "./lib/eer-tutorial/EER-tutorial.meta.model.type.d.ts",
+      "default": "./lib/eer-tutorial/EER-tutorial.meta.model.type.js"
+    },
+    "./eer-tutorial/components": {
+      "types": "./lib/eer-tutorial/EER-tutorial-components.d.ts",
+      "default": "./lib/eer-tutorial/EER-tutorial-components.js"
+    },
     "./relational": {
       "types": "./lib/relational/index.d.ts",
       "default": "./lib/relational/index.js"

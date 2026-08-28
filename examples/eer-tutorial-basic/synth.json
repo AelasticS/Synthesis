@@ -1,0 +1,12 @@
+{
+  "kind": "m2m",
+  "entry": "./dist/transformation.js",
+  "exportName": "EER2RelBasicTransformation",
+  "source": {
+    "metamodel": "@synthesis/standard-metamodels/eer-tutorial"
+  },
+  "target": {
+    "metamodel": "@synthesis/standard-metamodels/relational",
+    "components": "@synthesis/standard-metamodels/relational/components-legacy"
+  }
+}
