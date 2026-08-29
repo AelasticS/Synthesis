@@ -152,6 +152,10 @@ const config: Config = {
           type: 'dropdown',
           items: [
             {
+              label: 'Download synth CLI',
+              href: `https://github.com/${GITHUB_ORG}/${SOURCE_REPO}/releases/latest`,
+            },
+            {
               label: 'Contributing',
               href: `https://github.com/${GITHUB_ORG}/${SOURCE_REPO}/blob/main/CONTRIBUTING.md`,
             },
