@@ -80,32 +80,19 @@ and it is the whole mechanism of this page.
 
 ## How `SecParent` works
 
-Page 1 of Part 1 read the component definitions, and this is where two
-of them pay off:
+`Sec` and `SecParent` are two tags over the same `Section` concept, and
+what separates them is what nesting one of them means.
 
-```ts
-export const Sec: Template<f.ISection> = (props) => {
-  return new ExprNode(f.Section, props, "elements");
-};
+- `<Sec name="tables">` nested inside a document or another section
+  becomes a child of it. Nesting is containment, which is how Part 1
+  built its single document.
+- `<SecParent $refByName="tables" />` written inside a section creates
+  nothing. It names a section that already exists and makes that
+  section the parent of the one it is written in.
 
-export const SecParent: Template<f.ISection> = (props) => {
-  return new ExprNode(f.Section, props, "parentSection");
-};
-```
-
-Both tags instantiate the same `Section` concept. They differ only in
-the third argument, which names the property of the parent element that
-a nested occurrence connects into.
-
-- `Sec` connects into `"elements"`, so a section nested in something
-  becomes a child of it.
-- `SecParent` connects into `"parentSection"`, so a section written
-  inside another section sets that section's parent.
-
-Written in reference form, `<SecParent $refByName="tables" />` does not
-create a section. It names one that already exists, and assigns it to
-the enclosing section's `parentSection` property. Because the metamodel
-declares
+So a rule that returns a section carrying a `SecParent` is saying where
+its output belongs instead of being written there. Because the
+metamodel declares
 
 ```ts
 t.inverseProps(Section, 'elements', DocElement, 'parentSection');

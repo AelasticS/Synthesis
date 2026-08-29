@@ -112,63 +112,33 @@ when there are two documents.
 
 ## The tag functions
 
-From `libraries/engine/src/m2t/m2t-model/m2t.jsx.ts`, the components
-this tutorial uses:
+The engine exports the tags for these concepts from
+`libraries/engine/src/m2t/m2t-model/m2t.jsx.ts`. Unlike the metamodel
+you wrote in the model-to-model tutorial, this one comes with the
+engine, so you write JSX with these tags rather than declaring them.
 
-```ts
-export type IM2T_Props = WithRefProps<f.M2T_Model> & { store?: ModelStore };
+Each carries the same piece of information the components you declared
+there carried: which property of the enclosing element a nested
+occurrence connects into. That is what decides the shapes below.
 
-export const M2T: CpxTemplate<IM2T_Props, f.M2T_Model> = (props) => {
-  return new ExprNode(f.M2T_Model, props, undefined);
-};
-
-export const Doc: Template<f.IDocument> = (props) => {
-  return new ExprNode(f.Document, props, "items");
-};
-
-export const P: Template<f.IParagraph> = (props) => {
-  const connInfo: ConnectionInfo = defaultConnectionInfo("elements");
-  connInfo.textContentAllowed = true;
-  connInfo.textPropName = "txtContent";
-
-  return new ExprNode(f.Paragraph, props, connInfo);
-};
-
-export const Sec: Template<f.ISection> = (props) => {
-  return new ExprNode(f.Section, props, "elements");
-};
-
-export const SecParent: Template<f.ISection> = (props) => {
-  return new ExprNode(f.Section, props, "parentSection");
-};
-```
-
-The file also exports `Dir` and `DocParent`, which this tutorial does
-not use.
-
-Every component has the shape the model-to-model tutorial described:
-it returns `new ExprNode(type, props, connectionInfo)`, and the third
-argument names the property on the parent element that a nested
-occurrence of the tag connects into. Read the five in that light.
-
-- **`M2T`** passes `undefined` and is the root, so it takes the store,
-  exactly as `RelSchema` and `EERSchema` do.
-- **`Doc`** passes `"items"`, so a document nested in `<M2T>` lands in
-  the model's `items`. That collection is what the generator walks, and
-  it is why a document has to be nested in the root to become a file.
-- **`Sec`** passes `"elements"`, so a section nested in a `<Doc>` lands
-  in `document.elements`, and a section nested in another `<Sec>` lands
-  in that section's `elements`.
-- **`P`** is the one component that passes a `ConnectionInfo` object
-  instead of a bare property name, and the two extra fields are what
-  make paragraphs writable. `textContentAllowed` permits a text child,
-  and `textPropName: "txtContent"` says which property it goes into. It
-  is why `<P>{'CREATE TABLE Book ('}</P>` needs no prop: the child text
-  is the paragraph's content.
-- **`SecParent`** passes `"parentSection"`, which is the inverse end
-  from the previous page's `t.inverseProps`. Written inside a section,
-  it says which existing section this one belongs to, instead of being
+- **`<M2T>`** is the result model's root, so it takes the store,
+  exactly as `<RelSchema>` and `<EERSchema>` do.
+- **`<Doc>`** connects into the model's `items`, the collection the
+  generator walks. That is why a document has to be nested in the root
+  to become a file.
+- **`<Sec>`** connects into `elements`, so a section nested in a
+  `<Doc>` belongs to that document, and a section nested in another
+  `<Sec>` belongs to that section.
+- **`<P>`** is the one tag that accepts a text child, which becomes the
+  paragraph's content. That is why `<P>{'CREATE TABLE Book ('}</P>`
+  needs no prop for its text.
+- **`<SecParent>`** connects into `parentSection`, the inverse end of
+  the `t.inverseProps` declaration above. Written inside a section, it
+  names the existing section this one belongs to instead of being
   nested in it. Part 1 does not use it. Part 2 is built on it.
+
+The file also exports `Dir`, for writing documents into a folder, and
+`DocParent`, neither of which Part 1 uses.
 
 ## What the generator does with the tree
 
