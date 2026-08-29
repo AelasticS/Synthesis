@@ -3,8 +3,6 @@ sidebar_position: 10
 title: Object References
 ---
 
-To be written.
-
 ## Concept
 
 An object reference in `@aelastics/types` plays the same role as a foreign key in
