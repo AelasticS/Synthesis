@@ -102,6 +102,14 @@ overall version history.
   model with two relationships referencing the same entity failed to
   render on a duplicate name. Element names are unique per model rather
   than per table, so the columns now carry the relationship name.
+- **Text generation keeps the directory nesting a transformation
+  declares.** The engine's `generate` reported every item by its bare
+  name, so the `<Dir>` elements around a document were lost and two
+  documents of the same name in different directories were
+  indistinguishable. Each item now carries its path relative to the
+  generation root, and `transformation run --out-dir` writes the
+  documents into the nested directories. Real-mode generation also awaits
+  its own writes, which it previously did not.
 
 ## [cli-v0.1.0] - 2026-08-28
 

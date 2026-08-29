@@ -19,10 +19,6 @@ workarounds for all of them; none blocks the cli-v0.1.0 release.
   collision warnings), which is fragile. The store's inverse-property machinery
   should materialize the link; then delete the document-order heuristic in
   `apps/cli/src/tx/decisions.ts`.
-- **M2T `generate` flattens directory nesting**: `ItemResult.itemPath` is
-  only the bare doc name, so `<Dir>` structure is lost and same-named docs
-  collide (the CLI detects collisions and fails instead of silently
-  overwriting). `generate` should report the accumulated path.
 - **Configuration models round-trip through neither engine serialization**:
   `context.output.jsx` prints object props as bare identifiers
   (`selectedOption={SnakeCase}`) and `exportToJSX` inlines referenced
@@ -67,8 +63,17 @@ workarounds for all of them; none blocks the cli-v0.1.0 release.
 - **Concurrent file reads** in doctor and model ls; subtree-rooted walk for
   `model ls --ns`; both matter only for large workspaces.
 
-## Resolved decisions
+## Resolved
 
+- **M2T `generate` flattened directory nesting** (fixed 2026-08-29):
+  `ItemResult.itemPath` was only the bare doc name, so `<Dir>` structure
+  was lost and same-named docs in different directories collided.
+  `generate` now threads a path relative to the generation root alongside
+  the absolute one and reports that, so the nesting a transformation
+  declares survives into the result and on to the files the CLI writes
+  under `--out-dir`. The CLI's collision check stays as a safety net. The
+  same change awaits the walk over items, which real mode needs for its
+  writes to finish before `generate` resolves.
 - **Transformation manifest location** (resolved 2026-08-28): `synth.json`
   at the package root is the ONLY manifest location. The fallback that
   read a `synth` object from `package.json` (a remnant of the first

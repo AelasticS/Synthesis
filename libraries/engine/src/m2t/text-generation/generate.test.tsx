@@ -1,5 +1,8 @@
 /** @jsx createExprNode */
+import { existsSync, readFileSync } from "fs";
+import { join } from "path";
 import { createExprNode } from "./../../index";
+import { getValue } from "@aelastics/result";
 import {
   generate,
   M2T,
@@ -82,6 +85,53 @@ let testModel3_Element: ExprNode<M2T_Model> = (
   </M2T>
 );
 
+const nestedStore = new ModelStore();
+
+let nestedModel_Element: ExprNode<M2T_Model> = (
+  <M2T name="nested model" store={nestedStore}>
+    <Doc name="Top.txt">
+      <P>at the root</P>
+    </Doc>
+    <Dir name="TopDir">
+      <Doc name="InTop.txt">
+        <P>one level down</P>
+      </Doc>
+      <Dir name="Subdir1">
+        <Doc name="Deep.txt">
+          <P>two levels down</P>
+        </Doc>
+      </Dir>
+    </Dir>
+  </M2T>
+);
+
+// A model is the only namespace the store recognizes, so all of a model's
+// elements share one flat name scope and a single M2T model cannot yet
+// declare two documents called README.md (see the namespace entry in
+// design/engine-follow-ups.md). The two directories are therefore authored
+// as separate models and generated together.
+const sameNameStore = new ModelStore();
+
+let entitiesModel_Element: ExprNode<M2T_Model> = (
+  <M2T name="entities model" store={sameNameStore}>
+    <Dir name="entities">
+      <Doc name="README.md">
+        <P>the entities readme</P>
+      </Doc>
+    </Dir>
+  </M2T>
+);
+
+let relationsModel_Element: ExprNode<M2T_Model> = (
+  <M2T name="relations model" store={sameNameStore}>
+    <Dir name="relations">
+      <Doc name="README.md">
+        <P>the relations readme</P>
+      </Doc>
+    </Dir>
+  </M2T>
+);
+
 describe("test text generation", () => {
   // it("should generate correct document content for testModel1", async () => {
   //     const testDoc1: M2T_Model = testModel1_Element.render(new Context());
@@ -102,6 +152,71 @@ describe("test text generation", () => {
       rootDir: "TXT_Output2",
       mode: "real",
     });
-    expect(true).toBeTruthy();
+    expect(res.noFailures).toEqual(0);
+
+    // paths are reported relative to the generation root, so the nesting the
+    // model declares survives into the result
+    expect(res.results.map((r) => r.itemPath)).toEqual([
+      "TopDir",
+      "TopDir/Doc.txt",
+      "TopDir/Subdir1",
+      "TopDir/Subdir1/Doc1.txt",
+      "TopDir/Subdir2",
+    ]);
+
+    // real mode writes the files where those paths say they are; generate
+    // must not resolve before its writes finish
+    for (const item of res.results) {
+      expect(existsSync(join("TXT_Output2", item.itemPath))).toBeTruthy();
+    }
+    expect(readFileSync(join("TXT_Output2", "TopDir", "Subdir1", "Doc1.txt"), "utf-8")).toEqual(
+      "Title Doc1\nConclusions\n"
+    );
+  });
+
+  it("should report each item by its path relative to the generation root", async () => {
+    const nested: M2T_Model = nestedModel_Element.render(new Context());
+    const res = await generate(nestedStore, nested);
+    expect(res.noFailures).toEqual(0);
+    expect(res.noSuccesses).toEqual(5);
+
+    // a document at the root keeps its bare name; deeper ones carry the
+    // directories above them
+    expect(res.results.map((r) => r.itemPath)).toEqual([
+      "Top.txt",
+      "TopDir",
+      "TopDir/InTop.txt",
+      "TopDir/Subdir1",
+      "TopDir/Subdir1/Deep.txt",
+    ]);
+
+    expect(getValue(getResultByItemPath(res, "Top.txt")!)).toEqual("at the root\n");
+    expect(getValue(getResultByItemPath(res, "TopDir/InTop.txt")!)).toEqual("one level down\n");
+    expect(getValue(getResultByItemPath(res, "TopDir/Subdir1/Deep.txt")!)).toEqual(
+      "two levels down\n"
+    );
+  });
+
+  it("should keep same-named documents in different directories apart", async () => {
+    const entities: M2T_Model = entitiesModel_Element.render(new Context());
+    const relations: M2T_Model = relationsModel_Element.render(new Context());
+    const sameName = {
+      ...entities,
+      items: [...entities.items, ...relations.items],
+    } as M2T_Model;
+    const res = await generate(sameNameStore, sameName);
+    expect(res.noFailures).toEqual(0);
+
+    const docPaths = res.results.filter((r) => r.itemType === "Doc").map((r) => r.itemPath);
+    expect(docPaths).toEqual(["entities/README.md", "relations/README.md"]);
+    expect(new Set(docPaths).size).toEqual(2);
+
+    // each path addresses its own document rather than whichever was reported first
+    expect(getValue(getResultByItemPath(res, "entities/README.md")!)).toEqual(
+      "the entities readme\n"
+    );
+    expect(getValue(getResultByItemPath(res, "relations/README.md")!)).toEqual(
+      "the relations readme\n"
+    );
   });
 });
