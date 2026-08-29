@@ -2,7 +2,8 @@
 
 > Internal design documentation for contributors to Synthesis itself.
 > Strategy context for why this direction matters lives in
-> [llm-and-model-driven-engineering.md](llm-and-model-driven-engineering.md).
+> [llm-and-model-driven-engineering-v2.md](llm-and-model-driven-engineering-v2.md)
+> (the superseded first draft and a claim-to-evidence map sit alongside it).
 
 A design outline for extending model-to-text generation beyond plain text
 to Markdown, HTML, Word, and PDF, without turning the engine into a
@@ -16,7 +17,7 @@ A transformation with `"kind": "m2t"` produces an **M2T model**, not text.
 The metamodel (`libraries/engine/src/m2t/m2t-model/m2t.meta.model.ts`) is a
 small tree:
 
-```
+```text
 M2T_Model
   items: [ Directory | Document ]
 Directory
@@ -82,7 +83,7 @@ scope.
 The natural architecture has three levels, and each hop is an existing
 Synthesis concept.
 
-```
+```text
 domain / semantic models      novel, contract, technical manual, API reference
   |                           (many metamodels, one per genre)
   |  m2m transformation
