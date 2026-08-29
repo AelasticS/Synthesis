@@ -27,6 +27,12 @@ overall version history.
   abbreviation in favor of "Synthesis transformation language". All
   previously published URLs redirect to their new locations
   (`@docusaurus/plugin-client-redirects`).
+- **A transformation with a design space is called
+  "configuration-based", not "decision-based".** The term is swept
+  through CLI messages and help text, documentation, examples, and
+  package descriptions. The names of the models themselves are
+  unaffected: a decision model still declares issues and options, and a
+  configuration model still records the choices.
 - **Monorepo architecture documentation moved out of the site** to
   [design/architecture.md](design/architecture.md); it is contributor
   material, now linked from the README and CONTRIBUTING instead of shown as
@@ -36,13 +42,38 @@ overall version history.
 ### Added
 
 - **Top-level `examples/` catalog of installable transformation
-  packages.** Three examples graduate from CLI test fixtures into
-  self-contained packages with TypeScript sources, sample models, and
-  walkthrough READMEs: rel-copy (minimal m2m), eer-to-relational
-  (configuration-based m2m, with package-relative manifest parts), and
-  rel-to-sql-ddl (m2t). A generic smoke harness (`examples/smoke.mjs`)
-  runs the full install-and-run loop for every example from its `test`
-  script.
+  packages.** Each example is shaped like a package an author would
+  publish: TypeScript sources, a `synth.json` manifest, a sample model,
+  and a walkthrough README. The catalog holds three tutorial companions
+  (`eer-tutorial-basic`, `eer-tutorial-advanced`,
+  `eer-tutorial-configuration-based`) and two standalone examples
+  (`eer-to-relational`, a configuration-based m2m with package-relative
+  manifest parts, and `rel-to-sql-ddl`, an m2t generator). A generic
+  smoke harness (`examples/smoke.mjs`) runs the full install-and-run
+  loop for every example from its `test` script.
+- **Transformation-authoring tutorial in the developer guide.** The
+  Tutorial section holds two tutorials. The model-to-model tutorial
+  teaches one growing transformation, each part a folder of sub-pages
+  with its own companion package: Part 1 builds a simple EER to
+  relational transformation with fixed logic, Part 2 specializes the
+  entity rule per entity subtype with `@SpecPoint` and `@SpecOption`,
+  and Part 3 turns the one genuinely open choice, how a 1:N relationship
+  is mapped, into a configuration-based rule with a decision model,
+  binding model, and manifest parts. The model-to-text tutorial is
+  reserved while its structure is designed. Every listing and command
+  output was executed against the real tools.
+- **`@synthesis/standard-metamodels/eer-tutorial`**, a simplified EER
+  metamodel in two complete stages: `basic` (entities with attributes
+  over domains, binary relationships with cardinality roles) and
+  `advanced` (adds the `Kernel` and `Weak` entity subtypes, weak
+  entities carrying an owner link). A type metamodel has to be an
+  importable package, because workspace model rendering resolves bare
+  imports against the CLI installation so that models, transformations,
+  and the engine share the same type instances.
+- **`templates/transformation-template`**, a working starter for new
+  transformation packages: it builds, installs, and runs on day zero,
+  uses the smoke harness as its `test` script, and carries a CI workflow
+  that activates once the template is extracted to its own repository.
 
 ### Fixed
 
@@ -53,6 +84,24 @@ overall version history.
   `.../undefined`, and the dangling reference failed the entire run. The
   trace target now uses the referenced element's name, and is omitted
   when no stable name exists.
+- **Documented rule dispatch now matches the engine.** The polymorphic
+  dispatch guide and the developer-guide concepts page claimed that the
+  most specific matching rule wins and that the base rule runs as a
+  fallback. Neither holds: selection takes the first registered option
+  whose declared type is a subtype of the source element's runtime type,
+  and dispatch is total, so an element matching no option raises an
+  error instead of falling back.
+- **`transformation show` is described accurately.** The configurations
+  guide and the eer-to-relational README claimed it lists a
+  transformation's issues, options, and defaults. It reports the
+  manifest facts, including whether the transformation is
+  configuration-based; issues and options surface through `config init`,
+  `config show`, and the decision lines printed by a run.
+- **eer-to-relational no longer generates colliding column names.** Its
+  foreign key columns were named after the referenced entity alone, so a
+  model with two relationships referencing the same entity failed to
+  render on a duplicate name. Element names are unique per model rather
+  than per table, so the columns now carry the relationship name.
 
 ## [cli-v0.1.0] - 2026-08-28
 
