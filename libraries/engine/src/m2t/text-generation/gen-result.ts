@@ -3,6 +3,11 @@ import { failure, Result, success } from "@aelastics/result";
 export type ItemResult = {
   itemID: string;
   itemType: "Doc" | "Dir";
+  /**
+   * Path of the item relative to the generation root, "/" separated. The
+   * generation root itself, reported only when creating it fails, carries
+   * its own path.
+   */
   itemPath: string;
   outcome: Result<string>;
 };

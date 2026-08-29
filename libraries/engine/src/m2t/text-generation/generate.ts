@@ -55,8 +55,11 @@ export const generate = async (
     return ctx.result;
   }
 
-  // generate model elements
-  m.items.forEach(async (item) => await generateItem(item, ctx.rootDir, ctx));
+  // generate model elements; top-level items sit directly in the generation
+  // root, so their path relative to it starts out empty
+  for (const item of m.items) {
+    await generateItem(item, ctx.rootDir, "", ctx);
+  }
 
   return ctx.result;
 };
@@ -70,30 +73,45 @@ export const generate = async (
  */
 
 /**
+ * Join an item name onto the path of its parent, relative to the generation
+ * root. Items directly in the root carry an empty parent path.
+ */
+const joinRelPath = (relPath: string, name: string) =>
+  relPath === "" ? name : `${relPath}/${name}`;
+
+/**
  *
  * @param i
- * @param path
+ * @param path - absolute path of the parent directory, used for real-mode writes
+ * @param relPath - path of the parent directory relative to the generation root
  * @param ctx
  * @returns
  */
-const generateItem = async (i: IM2T_Item, path: string, ctx: GenContext) =>
+const generateItem = async (
+  i: IM2T_Item,
+  path: string,
+  relPath: string,
+  ctx: GenContext
+) =>
   isDirectory(i)
-    ? generateDirectory(i, path, ctx)
-    : generateDocument(<IDocument>i, path, ctx);
+    ? generateDirectory(i, path, relPath, ctx)
+    : generateDocument(<IDocument>i, path, relPath, ctx);
 
 const generateDirectory = async (
   dir: IDirectory,
   path: string,
+  relPath: string,
   ctx: GenContext
 ) => {
 
   const currPath = `${path}/${dir.name}`;
+  const currRelPath = joinRelPath(relPath, dir.name);
 
   try {
     if (ctx.realMode) await createDir(currPath);
     const res: ItemResult = {
       itemID: dir.id,
-      itemPath: dir.name,
+      itemPath: currRelPath,
       itemType: "Dir",
       outcome: success("successfully created"),
     };
@@ -102,7 +120,7 @@ const generateDirectory = async (
   } catch (e) {
     const res: ItemResult = {
       itemID: dir.id,
-      itemPath: dir.name,
+      itemPath: currRelPath,
       itemType: "Dir",
       outcome: failure(e as Error),
     };
@@ -112,20 +130,25 @@ const generateDirectory = async (
   }
 
   // execute files in the directory
-  dir.items.forEach(async (item) => await generateItem(item, currPath, ctx));
+  for (const item of dir.items) {
+    await generateItem(item, currPath, currRelPath, ctx);
+  }
 };
 
 /**
  *
  * @param doc
- * @param path
+ * @param path - absolute path of the parent directory, used for real-mode writes
+ * @param relPath - path of the parent directory relative to the generation root
  * @param ctx
  */
 const generateDocument = async (
   doc: IDocument,
   path: string,
+  relPath: string,
   ctx: GenContext
 ) => {
+  const currRelPath = joinRelPath(relPath, doc.name);
   try {
     let buffer: Array<string> = [];
     doc.elements.forEach((s) => buffer.push(generateFileElement(s)));
@@ -135,7 +158,7 @@ const generateDocument = async (
 
     const res: ItemResult = {
       itemID: doc.id,
-      itemPath: doc.name,
+      itemPath: currRelPath,
       itemType: "Doc",
       outcome: success(text),
     };
@@ -144,7 +167,7 @@ const generateDocument = async (
   } catch (e) {
     const res: ItemResult = {
       itemID: doc.id,
-      itemPath: doc.name,
+      itemPath: currRelPath,
       itemType: "Doc",
       outcome: failure(e as Error),
     };
@@ -183,6 +206,14 @@ export const getResultByItemID = (res: GenResult, id: string) => {
   return r ? r.outcome : undefined;
 };
 
+/**
+ * Get a result about a specific directory or file, addressed by its path
+ * relative to the generation root, for example "TopDir/Subdir1/Doc1.txt".
+ * A document directly in the root is addressed by its bare name.
+ * @param res - result about executing
+ * @param path
+ * @returns
+ */
 export const getResultByItemPath = (res: GenResult, path: string) => {
   const r = res.results.find((item) => item.itemPath === path);
   return r ? r.outcome : undefined;
