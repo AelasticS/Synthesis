@@ -40,6 +40,12 @@ scaffolding, and lets the rules fill it in by name:
           </Sec>
           <Sec name="tables"></Sec>
         </Doc>
+
+        {/* The second document and the rule calls follow. The next page
+            finishes the template and shows it whole. */}
+      </M2T>
+    )
+  }
 ```
 
 `<Sec name="tables"></Sec>` has no children. It is a named region of
@@ -109,9 +115,15 @@ to read backwards. `<SecParent $refByName="tables" />` inside
 
 ## Where the top-level sections go
 
-The rules are called at the top level of the model:
+The rules are called at the top level of the model, after the documents
+have been declared:
 
 ```tsx
+      <M2T name={`${s.name}_sql`}>
+        <Doc name={`${s.name}.sql`}>
+          {/* header and empty named sections, as above */}
+        </Doc>
+
         {this.tablesOf(s).map((tab) => this.tableToCreate(tab))}
         {this.foreignKeysOf(s).map((fk) => this.foreignKeyToAlter(fk))}
       </M2T>
