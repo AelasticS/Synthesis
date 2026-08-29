@@ -87,7 +87,7 @@ say "Phase 2: transformation execution"
 run "tx install m2m fixture"              0 "eer-to-relational"    tx install "$TX_M2M"
 run "tx install m2t fixture"              0 "rel-to-sql-ddl"       tx install "$TX_M2T"
 run "tx show is manifest-driven"          0 "m2m"                  tx show eer-to-relational
-run "decision-based run aborts without consent" 2 "decision-based" tx run eer-to-relational --in com.example/persons --out com.example/persons-rel
+run "configuration-based run aborts without consent" 2 "configuration-based" tx run eer-to-relational --in com.example/persons --out com.example/persons-rel
 run "tx run m2m announces defaults"       0 "SnakeCase (default)"  tx run eer-to-relational --in com.example/persons --default-configs --out com.example/persons-rel
 run "output model records provenance"     0 "eer-to-relational"    model show com.example/persons-rel --json
 run "generated model passes validate"     0 "is valid"             model validate com.example/persons-rel
@@ -136,7 +136,7 @@ run "doctor clean at the end"             0 "0 errors"             doctor
 # One execution core behind every run surface: chains hand the result model
 # to the next step in memory, are type-checked from manifests up front,
 # apply the uniform explicit-consent policy (--config binds to step 1 only,
-# all other decision-based steps take --default-configs), and only the last
+# all other configuration-based steps take --default-configs), and only the last
 # step may be m2t. --keep-intermediates persists mid-chain results as
 # workspace models; the stepwise path (config init against a kept
 # intermediate) configures later steps explicitly.
@@ -145,7 +145,7 @@ say "Phase 4: chaining"
 
 run "chain generates SQL with default configs" 0 "IdentifierQuoting -> Unquoted (default)" tx run eer-to-relational rel-to-sql-ddl --in com.example/persons --default-configs --out-dir "$WORK/chain-gen"
 grep -q "CREATE TABLE person" "$WORK/chain-gen"/*.sql && ok "chained SQL contains CREATE TABLE" || bad "chained SQL contains CREATE TABLE"
-run "chain aborts without consent"        2 "decision-based"       tx run eer-to-relational rel-to-sql-ddl --in com.example/persons --out-dir "$WORK/chain-never"
+run "chain aborts without consent"        2 "configuration-based"       tx run eer-to-relational rel-to-sql-ddl --in com.example/persons --out-dir "$WORK/chain-never"
 run "config steers step 1, defaults cover step 2" 0 "CamelCase"    tx run eer-to-relational rel-to-sql-ddl --in com.example/persons --config com.example/persons-cfg --default-configs --out-dir "$WORK/chain-camel"
 grep -q "personId" "$WORK/chain-camel"/*.sql && ok "step-1 config visible in chained SQL" || bad "step-1 config visible in chained SQL"
 run "m2t mid-chain is rejected"           1 "last step"            tx run rel-to-sql-ddl rel-to-sql-ddl --in com.example/persons --default-configs --out-dir "$WORK/chain-never"
@@ -183,7 +183,7 @@ run "mk rejects a name shadowing a tx"     1 "shadow"              pipeline mk r
 run "pipeline run executes with explicit --in" 0 "Wrote"           pipeline run gen-sql --in com.example/persons --default-configs --out-dir "$WORK/p5-gen"
 grep -q "CREATE TABLE person" "$WORK/p5-gen"/*.sql && ok "pipeline SQL produced" || bad "pipeline SQL produced"
 run "pipeline run without --in errors clearly" 1 "Missing required flag --in" pipeline run gen-sql
-run "pipeline run without consent aborts"  2 "decision-based"      pipeline run gen-sql --in com.example/persons --out-dir "$WORK/p5-never"
+run "pipeline run without consent aborts"  2 "configuration-based"      pipeline run gen-sql --in com.example/persons --out-dir "$WORK/p5-never"
 run "import a second source model"         0 "Imported"            model import "$FIXTURE" --as com.example/persons2
 run "pl run alias runs on the second model" 0 "Wrote"              pl run gen-sql --in com.example/persons2 --default-configs --out-dir "$WORK/p5-alias"
 grep -q "CREATE TABLE person" "$WORK/p5-alias"/*.sql && ok "alias-run SQL produced" || bad "alias-run SQL produced"
