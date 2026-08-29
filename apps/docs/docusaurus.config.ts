@@ -153,7 +153,7 @@ const config: Config = {
           items: [
             {
               label: 'Download synth CLI',
-              href: `https://github.com/${GITHUB_ORG}/${SOURCE_REPO}/releases/latest`,
+              to: '/user-guide/getting-started/download',
             },
             {
               label: 'Contributing',

@@ -212,7 +212,10 @@ Maintainer workflow:
 3. **Update `CHANGELOG.md`** at the repo root with the new version's
    entry under the conventional headings (Added / Changed / Fixed /
    Removed). Use the conventional-commits log between the previous tag
-   and `HEAD` as input.
+   and `HEAD` as input. Also update the documentation download page
+   (`apps/docs/docs/user-guide/getting-started/download.md`): the
+   version number, the per-platform asset links, and the platform
+   support note.
 4. **Commit** the version bump and changelog:
    ```bash
    git commit -am "chore(cli): release v0.2.0"

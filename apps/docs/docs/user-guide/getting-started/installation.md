@@ -1,5 +1,5 @@
 ---
-sidebar_position: 1
+sidebar_position: 2
 ---
 
 # Installation
@@ -19,8 +19,9 @@ Two install paths are supported:
 
 ### Linux and macOS
 
-Pick the tarball matching your platform from the
-[latest release](https://github.com/AelasticS/Synthesis/releases/latest),
+Pick the bundle for your platform from the [Download](./download.md) page
+(or the
+[latest release](https://github.com/AelasticS/Synthesis/releases/latest)),
 extract it, and add the resulting `synth/bin` to your `PATH`.
 
 ```bash

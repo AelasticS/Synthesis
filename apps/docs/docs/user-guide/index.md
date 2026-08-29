@@ -16,17 +16,19 @@ transformation rules, package and publish them), switch to the
 
 ## How this guide is organized
 
-1. [Installation](./getting-started/installation.md): get the `synth` binary
+1. [Download](./getting-started/download.md): the bundle for your platform,
+   with versions and release notes.
+2. [Installation](./getting-started/installation.md): get the `synth` binary
    onto your machine.
-2. [Quick Start](./getting-started/quick-start.md): from an empty workspace to
+3. [Quick Start](./getting-started/quick-start.md): from an empty workspace to
    generated SQL in a dozen commands.
-3. [Concepts](./concepts.md): the workspace, models and refs, transformations,
+4. [Concepts](./concepts.md): the workspace, models and refs, transformations,
    pipelines, and the explicit-consent policy for design decisions.
-4. [Tutorial](./tutorial.md): a guided end-to-end session with explanations at
+5. [Tutorial](./tutorial.md): a guided end-to-end session with explanations at
    every step.
-5. Guides: task-oriented pages on
+6. Guides: task-oriented pages on
    [managing models](./guides/managing-models.md),
    [configurations](./guides/configurations.md), and
    [pipelines](./guides/pipelines.md).
-6. [Command Reference](./reference/commands.md): every command, flag, and exit
+7. [Command Reference](./reference/commands.md): every command, flag, and exit
    code.
