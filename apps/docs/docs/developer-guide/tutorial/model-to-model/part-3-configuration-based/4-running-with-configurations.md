@@ -37,8 +37,8 @@ Transformation: eer-tutorial-configuration-based
   description: Tutorial Part 3 companion: EER to relational transformation whose 1:N relationship mapping is a configured decision
   kind: m2m
   source metamodel: @synthesis/standard-metamodels/eer-tutorial/advanced
-  target metamodel: @synthesis/standard-metamodels/relational
-  target components: @synthesis/standard-metamodels/relational/components-legacy
+  target metamodel: @synthesis/standard-metamodels/rel-tutorial
+  target components: @synthesis/standard-metamodels/rel-tutorial/components
   variability: yes
   entry: ./dist/transformation.js (export: EER2RelConfigurableTransformation)
   parts:
@@ -127,28 +127,28 @@ offering a choice that could not be honoured.
 ```tsx
 <RelSchema store={store} name="Library_rel" content="" MDA_level="M1">
   <Table name="Book">
-    <Column name="bookId" type="INTEGER" isKey={true} isAutoincrement={true} isForeignKey={false} isNullable={false} />
-    <Column name="bookTitle" type="VARCHAR(255)" isKey={false} isAutoincrement={false} isForeignKey={false} isNullable={true} />
+    <Column name="bookId" type="INTEGER" isKey={true} isAutoincrement={true} isNullable={false} />
+    <Column name="bookTitle" type="VARCHAR(255)" isKey={false} isAutoincrement={false} isNullable={true} />
   </Table>
   <Table name="Author">
-    <Column name="authorId" type="INTEGER" isKey={true} isAutoincrement={true} isForeignKey={false} isNullable={false} />
-    <Column name="authorName" type="VARCHAR(255)" isKey={false} isAutoincrement={false} isForeignKey={false} isNullable={true} />
+    <Column name="authorId" type="INTEGER" isKey={true} isAutoincrement={true} isNullable={false} />
+    <Column name="authorName" type="VARCHAR(255)" isKey={false} isAutoincrement={false} isNullable={true} />
   </Table>
   <Table name="Publisher">
-    <Column name="publisherId" type="INTEGER" isKey={true} isAutoincrement={true} isForeignKey={false} isNullable={false} />
-    <Column name="publisherName" type="VARCHAR(255)" isKey={false} isAutoincrement={false} isForeignKey={false} isNullable={true} />
+    <Column name="publisherId" type="INTEGER" isKey={true} isAutoincrement={true} isNullable={false} />
+    <Column name="publisherName" type="VARCHAR(255)" isKey={false} isAutoincrement={false} isNullable={true} />
   </Table>
   <Table name="BookCopy">
-    <Column name="copyNumber" type="INTEGER" isKey={true} isAutoincrement={true} isForeignKey={false} isNullable={false} />
-    <Column name="copyShelf" type="VARCHAR(255)" isKey={false} isAutoincrement={false} isForeignKey={false} isNullable={true} />
-    <Column name="BookCopy_BookId_FK" type="INTEGER" isKey={true} isForeignKey={true} references="Book" isNullable={false} isAutoincrement={false} />
+    <Column name="copyNumber" type="INTEGER" isKey={true} isAutoincrement={true} isNullable={false} />
+    <Column name="copyShelf" type="VARCHAR(255)" isKey={false} isAutoincrement={false} isNullable={true} />
+    <Column name="BookCopy_BookId_FK" type="INTEGER" isKey={true} isNullable={false} isAutoincrement={false} references={<Column $refByName="bookId" />} />
   </Table>
   <Table $refByName="Book">
-    <Column name="PublisherId_FK" type="INTEGER" isForeignKey={true} isKey={false} references="Publisher" isNullable={true} isAutoincrement={false} />
+    <Column name="PublisherId_FK" type="INTEGER" isKey={false} isNullable={true} isAutoincrement={false} references={<Column $refByName="publisherId" />} />
   </Table>
   <Table name="writtenBy">
-    <Column name="writtenBy_AuthorId_FK" type="INTEGER" isForeignKey={true} isKey={false} references="Author" isNullable={false} isAutoincrement={false} />
-    <Column name="writtenBy_BookId_FK" type="INTEGER" isForeignKey={true} isKey={false} references="Book" isNullable={false} isAutoincrement={false} />
+    <Column name="writtenBy_AuthorId_FK" type="INTEGER" isKey={false} isNullable={false} isAutoincrement={false} references={<Column $refByName="authorId" />} />
+    <Column name="writtenBy_BookId_FK" type="INTEGER" isKey={false} isNullable={false} isAutoincrement={false} references={<Column $refByName="bookId" />} />
   </Table>
 </RelSchema>
 ```
@@ -160,7 +160,8 @@ relationship rule.
 
 `<Table $refByName="Book">` is `oneToManyAsForeignKey`, running as the
 `@Default()` option. It grafts a nullable `PublisherId_FK` into the
-`Book` table declared above rather than creating a table of its own.
+`Book` table declared above rather than creating a table of its own,
+and links it to `Publisher`'s key column, `publisherId`.
 
 `<Table name="writtenBy">` is the M:N branch, which never consulted a
 configuration. Its columns are `writtenBy_AuthorId_FK` and
@@ -331,11 +332,11 @@ the tail differs. Under `ForeignKey`:
 
 ```tsx
   <Table $refByName="Book">
-    <Column name="PublisherId_FK" type="INTEGER" isForeignKey={true} isKey={false} references="Publisher" isNullable={true} isAutoincrement={false} />
+    <Column name="PublisherId_FK" type="INTEGER" isKey={false} isNullable={true} isAutoincrement={false} references={<Column $refByName="publisherId" />} />
   </Table>
   <Table name="writtenBy">
-    <Column name="writtenBy_AuthorId_FK" type="INTEGER" isForeignKey={true} isKey={false} references="Author" isNullable={false} isAutoincrement={false} />
-    <Column name="writtenBy_BookId_FK" type="INTEGER" isForeignKey={true} isKey={false} references="Book" isNullable={false} isAutoincrement={false} />
+    <Column name="writtenBy_AuthorId_FK" type="INTEGER" isKey={false} isNullable={false} isAutoincrement={false} references={<Column $refByName="authorId" />} />
+    <Column name="writtenBy_BookId_FK" type="INTEGER" isKey={false} isNullable={false} isAutoincrement={false} references={<Column $refByName="bookId" />} />
   </Table>
 ```
 
@@ -343,20 +344,28 @@ Under `JoinTable`:
 
 ```tsx
   <Table name="publishedBy">
-    <Column name="publishedBy_PublisherId_FK" type="INTEGER" isForeignKey={true} isKey={false} references="Publisher" isNullable={false} isAutoincrement={false} />
-    <Column name="publishedBy_BookId_FK" type="INTEGER" isForeignKey={true} isKey={false} references="Book" isNullable={false} isAutoincrement={false} />
+    <Column name="publishedBy_PublisherId_FK" type="INTEGER" isKey={false} isNullable={false} isAutoincrement={false} references={<Column $refByName="publisherId" />} />
+    <Column name="publishedBy_BookId_FK" type="INTEGER" isKey={false} isNullable={false} isAutoincrement={false} references={<Column $refByName="bookId" />} />
   </Table>
   <Table name="writtenBy">
-    <Column name="writtenBy_AuthorId_FK" type="INTEGER" isForeignKey={true} isKey={false} references="Author" isNullable={false} isAutoincrement={false} />
-    <Column name="writtenBy_BookId_FK" type="INTEGER" isForeignKey={true} isKey={false} references="Book" isNullable={false} isAutoincrement={false} />
+    <Column name="writtenBy_AuthorId_FK" type="INTEGER" isKey={false} isNullable={false} isAutoincrement={false} references={<Column $refByName="authorId" />} />
+    <Column name="writtenBy_BookId_FK" type="INTEGER" isKey={false} isNullable={false} isAutoincrement={false} references={<Column $refByName="bookId" />} />
   </Table>
 ```
 
-Three things to read out of that.
+Four things to read out of that.
 
 **`Book` no longer carries the publisher.** The `<Table $refByName="Book">`
 block is gone entirely, so `Book` is exactly the columns its attributes
 produced. The link moved out of the table and into one of its own.
+
+**The link to `Book` became explicit.** Under `ForeignKey` it was
+half-stated: `PublisherId_FK` named `publisherId` as its target, and
+the fact that the row belonged to a book was carried by which table the
+column sat on. Under `JoinTable` both ends are columns with `references`
+links of their own, `publishedBy_PublisherId_FK` at `publisherId` and
+`publishedBy_BookId_FK` at `bookId`. The same relationship, said once
+implicitly and once in full.
 
 **`publishedBy` became a table.** Two non-nullable foreign key columns,
 one per role, structurally identical to `writtenBy`. Both were produced
@@ -369,10 +378,10 @@ discussion. The binding condition kept it out of the design space, and
 nothing anyone writes in a configuration model can move it.
 
 That last point is also where the qualified column names pay off. This
-schema holds two join tables, and both reference `Book`. Under Part 2's
-naming they would both have produced a column called `BookId_FK`, and
-since element names are unique across a model, the second would have
-failed the run rather than silently overwriting the first.
+schema holds two join tables, and both point at `bookId`. Under Part
+2's naming they would both have produced a column called `BookId_FK`,
+and since element names are unique across a model, the second would
+have failed the run rather than silently overwriting the first.
 
 ## Where you are
 

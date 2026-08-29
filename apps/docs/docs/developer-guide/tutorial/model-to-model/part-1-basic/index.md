@@ -71,9 +71,9 @@ input, the transformation third, and the packaging and the run last.
 1. **[The source metamodel](./1-source-metamodel.md)**: the basic
    tutorial EER metamodel, its concepts as aelastics types, its JSX tag
    functions, and why a metamodel has to be an importable package.
-2. **[The target metamodel](./2-target-metamodel.md)**: the relational
-   metamodel, which you reuse rather than author, and what the manifest
-   needs from it.
+2. **[The target metamodel](./2-target-metamodel.md)**: the tutorial's
+   simplified relational metamodel, which you reuse rather than author,
+   how it models a foreign key, and what the manifest needs from it.
 3. **[The source model](./3-source-model.md)**: authoring the sample
    Library schema in JSX, creating a workspace, and importing the model
    through the CLI's validation gate.

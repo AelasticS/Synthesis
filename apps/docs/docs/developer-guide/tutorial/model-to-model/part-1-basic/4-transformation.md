@@ -19,8 +19,8 @@ import type { ExprNode } from '@synthesis/jsx-runtime'
 import { abstractM2M } from '@synthesis/engine'
 import type { ModelStore } from '@synthesis/engine'
 import * as em from '@synthesis/standard-metamodels/eer-tutorial/basic/model'
-import * as rmT from '@synthesis/standard-metamodels/relational/model-legacy'
-import { RelSchema, Table, Column } from '@synthesis/standard-metamodels/relational/components-legacy'
+import * as rmT from '@synthesis/standard-metamodels/rel-tutorial/model'
+import { RelSchema, Table, Column } from '@synthesis/standard-metamodels/rel-tutorial/components'
 ```
 
 Notice the asymmetry, and that it is exactly the asymmetry of a
@@ -91,10 +91,15 @@ the TypeScript side of the same fact, since `isTypeOf` is a runtime
 check.
 
 **Two passes, in order.** Entities are mapped before relationships, and
-that ordering is load-bearing. The relationship rule attaches a foreign
-key column to a table that must already exist, and it does so by
-reference. Map relationships first and there would be nothing to attach
-to.
+that ordering is load-bearing twice over. The relationship rule
+attaches a foreign key column to a table that must already exist, and
+it does so by reference. It also gives that column a `references` link
+to the primary key column it points at, and page 2 explained that a
+link resolves against what is in the store, so the referenced column
+has to exist too. Both facts are supplied by the same ordering: every
+table and every attribute column is created in the first pass, before
+any relationship is looked at. Map relationships first and there would
+be nothing to attach to and nothing to point at.
 
 Curly braces embed TypeScript, and an array of `ExprNode` values is a
 valid set of children, so `filter` and `map` are all the traversal
@@ -133,15 +138,14 @@ rest of the class stays as it is.
         type={this.columnType(a.attrDomain)}
         isKey={a.isKey}
         isAutoincrement={a.isKey}
-        isForeignKey={false}
         isNullable={!a.isKey}
       />
     )
   }
 ```
 
-Four of the six props encode small design decisions that Part 1 simply
-fixes:
+Three of the five props encode small design decisions that Part 1
+simply fixes:
 
 - The column's SQL type comes from the attribute's domain, through
   `columnType` below.
@@ -151,11 +155,18 @@ fixes:
 - A key attribute is not nullable and a non-key attribute is
   (`isNullable={!a.isKey}`). Real schemas would want per-attribute
   control.
-- No attribute-derived column is ever a foreign key. Foreign keys come
-  only from relationships.
 
-Because the relational metamodel gives these properties no defaults,
-every column the transformation creates states all of them.
+The metamodel gives none of those properties a default, so every column
+the transformation creates states all four of `type`, `isKey`,
+`isNullable` and `isAutoincrement`.
+
+Then note what the rule does not write: there is no `references` prop
+here. An attribute-derived column is never a foreign key, and because
+page 2's metamodel derives that fact from the absence of a reference
+rather than storing it in a flag, saying nothing is how the rule says
+so. `references` is the one optional property of a `Column`, and
+leaving it out is a statement rather than an omission. Foreign keys
+come only from relationships.
 
 ## Domains drive the column types
 
@@ -182,23 +193,34 @@ named `number`. Which SQL type that becomes is a target-side decision,
 made here, in one place, by one function. Point the same source model
 at a different target technology and this function is what you replace.
 
-A companion function answers the question the relationship rule needs:
-what type should a foreign key column have?
+A companion function answers the question the relationship rules ask
+twice, once for the column's type and once for what it points at:
 
 ```tsx
-  // A foreign key column has the type of the referenced entity's key
-  // attribute.
-  private keyColumnType(entity: em.IEntity): string {
+  // A foreign key points at the primary key column of the entity it
+  // references, so that column has to exist: an entity without a key
+  // attribute cannot be referenced at all.
+  private keyAttributeOf(entity: em.IEntity): em.IAttribute {
     const key = entity.attributes.find((a) => a.isKey)
-    return key ? this.columnType(key.attrDomain) : 'VARCHAR(255)'
+    if (!key) {
+      throw new Error(`Entity '${entity.name}' has no key attribute, so nothing can reference it`)
+    }
+    return key
   }
 ```
 
-A foreign key has to be type-compatible with the key it references, so
-the rule looks up the referenced entity's key attribute and maps its
-domain with the same function. Entities without a key attribute fall
-back to a string, which keeps the transformation total rather than
-correct in a case the sample model does not contain.
+It returns the attribute itself rather than a type, because the
+relationship rules need two things from it. Its domain gives the column
+its SQL type, since a foreign key has to be type-compatible with the
+key it references. Its name gives the column its `references` target,
+since the generated primary key column carries the attribute's name.
+
+The `throw` is the interesting line. An entity without a key attribute
+cannot be referenced by anything, because there is no column to point
+at, and page 2's metamodel gives the rule no way to fudge it: it cannot
+write a reference to a table instead, and it cannot invent a plausible
+type and leave the target unstated. Failing loudly is the only honest
+answer, and it fails at the entity that is actually wrong, naming it.
 
 ## Relationships: the one deliberate conditional
 
@@ -232,12 +254,11 @@ there.
         {rel.roles.map((role) => (
           <Column
             name={`${role.domain.name}Id_FK`}
-            type={this.keyColumnType(role.domain)}
-            isForeignKey={true}
+            type={this.columnType(this.keyAttributeOf(role.domain).attrDomain)}
             isKey={false}
-            references={role.domain.name}
             isNullable={false}
             isAutoincrement={false}
+            references={<Column $refByName={this.keyAttributeOf(role.domain).name} />}
           />
         ))}
       </Table>
@@ -247,9 +268,24 @@ there.
 
 A new table named after the relationship, with one foreign key column
 per role. `role.domain` is the entity that role connects, so
-`categorizedAs` produces `BookId_FK` referencing `Book` and
-`CategoryId_FK` referencing `Category`. Neither column is nullable: a
-row in a join table that references nothing means nothing.
+`categorizedAs` produces `BookId_FK` pointing at `Book`'s key column
+`bookId` and `CategoryId_FK` pointing at `Category`'s `categoryId`.
+Neither column is nullable: a row in a join table that references
+nothing means nothing.
+
+The `references` prop is JSX nested inside JSX, which is worth reading
+slowly the first time:
+
+```tsx
+references={<Column $refByName={this.keyAttributeOf(role.domain).name} />}
+```
+
+`keyAttributeOf(role.domain)` finds the source attribute that is the
+entity's key, and `.name` is the name the attribute column was given
+back in `attributeToColumn`, since that rule copies the attribute's
+name straight through. So the expression resolves the already-created
+`bookId` column and links this new column to it. Nothing here creates a
+column; `$refByName` on the output side names one that exists.
 
 ### Everything else becomes a foreign key
 
@@ -262,12 +298,11 @@ row in a join table that references nothing means nothing.
       <Table $refByName={pkSide.domain.name}>
         <Column
           name={`${fkSide.domain.name}Id_FK`}
-          type={this.keyColumnType(fkSide.domain)}
-          isForeignKey={true}
+          type={this.columnType(this.keyAttributeOf(fkSide.domain).attrDomain)}
           isKey={false}
-          references={fkSide.domain.name}
           isNullable={fkSide.lb === '0'}
           isAutoincrement={false}
+          references={<Column $refByName={this.keyAttributeOf(fkSide.domain).name} />}
         />
       </Table>
     )
@@ -276,29 +311,34 @@ row in a join table that references nothing means nothing.
 
 Two roles, two jobs. `fkSide` is the role with upper bound `1`: the
 entity on that end supplies the key, so its name gives the column its
-name and its reference. `pkSide` is the other role, the N side, and its
+name and its key attribute gives the column its type and its
+`references` target. `pkSide` is the other role, the N side, and its
 entity's table is the one that receives the column. For `writtenBy`,
 `fkSide` is `AuthoredBy` (an `Author`) and `pkSide` is `Wrote` (a
-`Book`), so a column named `AuthorId_FK` referencing `Author` is added
-to the `Book` table. The `?? rel.roles[0]` fallbacks keep the method
-total for degenerate role arrays.
+`Book`), so a column named `AuthorId_FK` pointing at `Author`'s
+`authorId` column is added to the `Book` table. The `?? rel.roles[0]`
+fallbacks keep the method total for degenerate role arrays.
 
 Nullability follows the lower bound: `isNullable={fkSide.lb === '0'}`
 means an optional end produces a nullable column, which is exactly what
 `lb="0"` on `AuthoredBy` says.
 
-The one genuinely new idea here is `$refByName` in the target:
+This method uses `$refByName` on the output side twice, in two
+different positions, and the distinction is worth naming. Inside
+`references` it produced a value, the column being pointed at. In the
+opening tag it produces a place:
 
 ```tsx
 <Table $refByName={pkSide.domain.name}>
 ```
 
-This is not a new table. It is the reference form from page 3, used on
-the output side: it names an element the transformation already
+This is not a new table. It names an element the transformation already
 produced (the `Book` table, created by `entityToTable`) and grafts the
 column into it. A rule that adds to an existing element rather than
-creating one is a normal, first-class thing to write, and it is why
-entities had to be mapped before relationships.
+creating one is a normal, first-class thing to write.
+
+Both positions need their target to exist already, which is the
+ordering the template's two passes guarantee.
 
 ## What that conditional is doing there
 

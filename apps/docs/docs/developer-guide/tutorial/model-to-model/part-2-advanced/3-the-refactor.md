@@ -66,12 +66,11 @@ The same method, decorated, plus two options:
       <Table>
         <Column
           name={`${w.name}_${w.owner.name}Id_FK`}
-          type={this.keyColumnType(w.owner)}
+          type={this.columnType(this.keyAttributeOf(w.owner).attrDomain)}
           isKey={true}
-          isForeignKey={true}
-          references={w.owner.name}
           isNullable={false}
           isAutoincrement={false}
+          references={<Column $refByName={this.keyAttributeOf(w.owner).name} />}
         />
       </Table>
     )
@@ -98,13 +97,20 @@ total.
 
 **`weakToTable`** adds exactly one column and nothing else. It sets no
 `name` prop, so the table keeps the name the skeleton gave it. The
-column it adds is a foreign key to the owner (`references={w.owner.name}`,
-typed by `keyColumnType(w.owner)`, the helper Part 1 already wrote for
-relationship foreign keys), and it is marked `isKey={true}`.
+column it adds is a foreign key to the owner's primary key column, and
+it is marked `isKey={true}`.
 
 That flag is the whole point of the exercise. The weak entity's own
 partial key and this foreign key together identify a row, which is what
 "identified relative to an owner" means in a relational schema.
+
+Both halves of the foreign key go through `keyAttributeOf(w.owner)`,
+the helper Part 1 already wrote for relationship foreign keys. Its
+domain types the column, and its name is what the `references` link
+resolves, so `BookCopy`'s owner column points at `Book`'s `bookId`
+column rather than at the `Book` table. Page 1 noted the ordering this
+implies: `Book` is declared above `BookCopy` in the sample, so `bookId`
+is in the store by the time this rule runs.
 
 The column's name is built as `` `${w.name}_${w.owner.name}Id_FK` ``,
 producing `BookCopy_BookId_FK` rather than the plainer `BookId_FK`.
@@ -127,8 +133,8 @@ is otherwise Part 1's file:
     "metamodel": "@synthesis/standard-metamodels/eer-tutorial/advanced"
   },
   "target": {
-    "metamodel": "@synthesis/standard-metamodels/relational",
-    "components": "@synthesis/standard-metamodels/relational/components-legacy"
+    "metamodel": "@synthesis/standard-metamodels/rel-tutorial",
+    "components": "@synthesis/standard-metamodels/rel-tutorial/components"
   }
 }
 ```
@@ -198,28 +204,28 @@ is defined.
 ```tsx
 <RelSchema store={store} name="Library_rel" content="" MDA_level="M1">
   <Table name="Book">
-    <Column name="bookId" type="INTEGER" isKey={true} isAutoincrement={true} isForeignKey={false} isNullable={false} />
-    <Column name="bookTitle" type="VARCHAR(255)" isKey={false} isAutoincrement={false} isForeignKey={false} isNullable={true} />
+    <Column name="bookId" type="INTEGER" isKey={true} isAutoincrement={true} isNullable={false} />
+    <Column name="bookTitle" type="VARCHAR(255)" isKey={false} isAutoincrement={false} isNullable={true} />
   </Table>
   <Table name="Author">
-    <Column name="authorId" type="INTEGER" isKey={true} isAutoincrement={true} isForeignKey={false} isNullable={false} />
-    <Column name="authorName" type="VARCHAR(255)" isKey={false} isAutoincrement={false} isForeignKey={false} isNullable={true} />
+    <Column name="authorId" type="INTEGER" isKey={true} isAutoincrement={true} isNullable={false} />
+    <Column name="authorName" type="VARCHAR(255)" isKey={false} isAutoincrement={false} isNullable={true} />
   </Table>
   <Table name="Publisher">
-    <Column name="publisherId" type="INTEGER" isKey={true} isAutoincrement={true} isForeignKey={false} isNullable={false} />
-    <Column name="publisherName" type="VARCHAR(255)" isKey={false} isAutoincrement={false} isForeignKey={false} isNullable={true} />
+    <Column name="publisherId" type="INTEGER" isKey={true} isAutoincrement={true} isNullable={false} />
+    <Column name="publisherName" type="VARCHAR(255)" isKey={false} isAutoincrement={false} isNullable={true} />
   </Table>
   <Table name="BookCopy">
-    <Column name="copyNumber" type="INTEGER" isKey={true} isAutoincrement={true} isForeignKey={false} isNullable={false} />
-    <Column name="copyShelf" type="VARCHAR(255)" isKey={false} isAutoincrement={false} isForeignKey={false} isNullable={true} />
-    <Column name="BookCopy_BookId_FK" type="INTEGER" isKey={true} isForeignKey={true} references="Book" isNullable={false} isAutoincrement={false} />
+    <Column name="copyNumber" type="INTEGER" isKey={true} isAutoincrement={true} isNullable={false} />
+    <Column name="copyShelf" type="VARCHAR(255)" isKey={false} isAutoincrement={false} isNullable={true} />
+    <Column name="BookCopy_BookId_FK" type="INTEGER" isKey={true} isNullable={false} isAutoincrement={false} references={<Column $refByName="bookId" />} />
   </Table>
   <Table $refByName="Book">
-    <Column name="PublisherId_FK" type="INTEGER" isForeignKey={true} isKey={false} references="Publisher" isNullable={true} isAutoincrement={false} />
+    <Column name="PublisherId_FK" type="INTEGER" isKey={false} isNullable={true} isAutoincrement={false} references={<Column $refByName="publisherId" />} />
   </Table>
   <Table name="writtenBy">
-    <Column name="AuthorId_FK" type="INTEGER" isForeignKey={true} isKey={false} references="Author" isNullable={false} isAutoincrement={false} />
-    <Column name="BookId_FK" type="INTEGER" isForeignKey={true} isKey={false} references="Book" isNullable={false} isAutoincrement={false} />
+    <Column name="AuthorId_FK" type="INTEGER" isKey={false} isNullable={false} isAutoincrement={false} references={<Column $refByName="authorId" />} />
+    <Column name="BookId_FK" type="INTEGER" isKey={false} isNullable={false} isAutoincrement={false} references={<Column $refByName="bookId" />} />
   </Table>
 </RelSchema>
 ```
@@ -237,9 +243,9 @@ relationship rule, running unchanged.
 
 ```tsx
   <Table name="BookCopy">
-    <Column name="copyNumber" type="INTEGER" isKey={true} isAutoincrement={true} isForeignKey={false} isNullable={false} />
-    <Column name="copyShelf" type="VARCHAR(255)" isKey={false} isAutoincrement={false} isForeignKey={false} isNullable={true} />
-    <Column name="BookCopy_BookId_FK" type="INTEGER" isKey={true} isForeignKey={true} references="Book" isNullable={false} isAutoincrement={false} />
+    <Column name="copyNumber" type="INTEGER" isKey={true} isAutoincrement={true} isNullable={false} />
+    <Column name="copyShelf" type="VARCHAR(255)" isKey={false} isAutoincrement={false} isNullable={true} />
+    <Column name="BookCopy_BookId_FK" type="INTEGER" isKey={true} isNullable={false} isAutoincrement={false} references={<Column $refByName="bookId" />} />
   </Table>
 ```
 
@@ -251,18 +257,20 @@ model order. The third came from the option, appended after them, which
 is why it is last rather than first.
 
 And that third column is the payoff: `isKey={true}` together with
-`isForeignKey={true}` and `references="Book"`. `BookCopy`'s primary key
-is `copyNumber` plus a reference to the owning `Book`, which is exactly
-what the source model asserted and what Part 1's single rule had no way
-to express. Compare it against the foreign keys the relationship rule
-produced, both `isKey={false}`: a relationship's foreign key describes
-a row, while a weak entity's foreign key identifies it.
+`references={<Column $refByName="bookId" />}`. `BookCopy`'s primary key
+is `copyNumber` plus a reference to the owning `Book`'s key column,
+which is exactly what the source model asserted and what Part 1's
+single rule had no way to express. Compare it against the foreign keys
+the relationship rule produced, both `isKey={false}`: a relationship's
+foreign key describes a row, while a weak entity's foreign key
+identifies it. The first two columns carry no `references` prop at all,
+which is how the model says they are not foreign keys.
 
 Note also `BookId_FK` in the `writtenBy` join table, sitting in the
-same model as `BookCopy_BookId_FK`. Both reference `Book`, and both
-would have been called `BookId_FK` under a naive naming scheme. Element
-names are unique per model, so the second one would have failed the
-run, not silently merged.
+same model as `BookCopy_BookId_FK`. Both point at the same `bookId`
+column, and both would have been called `BookId_FK` under a naive
+naming scheme. Element names are unique per model, so the second one
+would have failed the run, not silently merged.
 
 ## When an option is missing
 

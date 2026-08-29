@@ -44,6 +44,14 @@ The entity rule is untouched from Part 2, still a `@SpecPoint` with
 one class, on different methods: specialization dispatches on what the
 source element *is*, variability on what the configuration *says*.
 
+The target is the tutorial's simplified relational metamodel
+(`@synthesis/standard-metamodels/rel-tutorial`), unchanged from Parts 1
+and 2: tables of columns, where a column's optional `references` link
+points at the primary key column it refers to. There is no
+`isForeignKey` flag, because a column is a foreign key exactly when it
+references another column. Both options below build such columns, and
+they differ only in which table the column lands on.
+
 ## The three models beside the transformation
 
 A configuration-based package ships more than a transformation class.
@@ -105,7 +113,7 @@ synth model show demo/library-rel
 
 The run prints the decision it took:
 
-```
+```text
 decision for element publishedBy: OneToManyStrategy -> ForeignKey (default)
 ```
 
@@ -114,7 +122,14 @@ Only `publishedBy` appears, because the binding condition let only the
 `Author` and `Publisher` tables, a `BookCopy` table carrying
 `BookCopy_BookId_FK` from the weak option, a `PublisherId_FK` column
 grafted onto `Book` by the foreign key option, and a `writtenBy` join
-table for the M:N relationship.
+table for the M:N relationship. `Book` ends with the reference the
+foreign key option put there:
+
+```tsx
+<Table $refByName="Book">
+  <Column name="PublisherId_FK" type="INTEGER" isKey={false} isNullable={true} isAutoincrement={false} references={<Column $refByName="publisherId" />} />
+</Table>
+```
 
 ### Choosing differently
 
@@ -146,10 +161,20 @@ synth model show demo/library-rel-jt
 ```
 
 `Book` loses its `PublisherId_FK` column and a `publishedBy` table
-appears instead, with `publishedBy_PublisherId_FK` and
-`publishedBy_BookId_FK`. The M:N `writtenBy` table is untouched: it was
-never up for discussion. Same source model, same transformation code,
-a different relational architecture.
+appears instead:
+
+```tsx
+<Table name="publishedBy">
+  <Column name="publishedBy_PublisherId_FK" type="INTEGER" isKey={false} isNullable={false} isAutoincrement={false} references={<Column $refByName="publisherId" />} />
+  <Column name="publishedBy_BookId_FK" type="INTEGER" isKey={false} isNullable={false} isAutoincrement={false} references={<Column $refByName="bookId" />} />
+</Table>
+```
+
+The link to `Book` was implicit in the foreign key version, carried by
+the fact that the column sat on the `Book` table; here it is a column
+and a `references` link like any other. The M:N `writtenBy` table is
+untouched: it was never up for discussion. Same source model, same
+transformation code, a different relational architecture.
 
 Join table columns are qualified with the relationship name for a
 reason. Once a 1:N relationship may also become a join table, one schema

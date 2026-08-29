@@ -191,13 +191,23 @@ to be represented as a link to that entity.
 With `owner` present, everything a specialized rule needs is one
 property access away, and page 3's `weakToTable` uses exactly that:
 
-- `w.owner.name` gives both the column name and the referenced table.
-- The owner's key attribute gives the column's SQL type, through the
-  same `keyColumnType` helper Part 1 wrote for foreign keys.
+- `w.owner.name` gives the column its name, qualified with the weak
+  entity's own name.
+- The owner's key attribute gives the column both its SQL type and the
+  column it references, through the same `keyAttributeOf` helper Part 1
+  wrote for relationship foreign keys.
 
 This is the general shape of the lesson. Adding a subtype to a
 metamodel is only half the work; the subtype earns its place when it
 carries the property that makes the specialized rule possible.
+
+The `owner` link also settles a question of order. Part 1's page 2
+explained that a `references` link resolves against what is already in
+the store, so the owner's primary key column has to exist before the
+weak entity's table is built. Entities are mapped in model order, so
+the owner has to be written before the weak entity in the source file.
+`Book` above `BookCopy` in this sample is what satisfies that, and the
+same holds for a weak entity owned by another weak entity.
 
 ## What stays the same in `template()`
 

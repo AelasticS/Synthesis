@@ -80,12 +80,11 @@ methods:
       <Table $refByName={pkSide.domain.name}>
         <Column
           name={`${fkSide.domain.name}Id_FK`}
-          type={this.keyColumnType(fkSide.domain)}
-          isForeignKey={true}
+          type={this.columnType(this.keyAttributeOf(fkSide.domain).attrDomain)}
           isKey={false}
-          references={fkSide.domain.name}
           isNullable={fkSide.lb === '0'}
           isAutoincrement={false}
+          references={<Column $refByName={this.keyAttributeOf(fkSide.domain).name} />}
         />
       </Table>
     )
@@ -138,12 +137,11 @@ The same logic, with the open half handed over:
       <Table $refByName={pkSide.domain.name}>
         <Column
           name={`${fkSide.domain.name}Id_FK`}
-          type={this.keyColumnType(fkSide.domain)}
-          isForeignKey={true}
+          type={this.columnType(this.keyAttributeOf(fkSide.domain).attrDomain)}
           isKey={false}
-          references={fkSide.domain.name}
           isNullable={fkSide.lb === '0'}
           isAutoincrement={false}
+          references={<Column $refByName={this.keyAttributeOf(fkSide.domain).name} />}
         />
       </Table>
     )
@@ -228,12 +226,11 @@ honest way to say so:
         {rel.roles.map((role) => (
           <Column
             name={`${rel.name}_${role.domain.name}Id_FK`}
-            type={this.keyColumnType(role.domain)}
-            isForeignKey={true}
+            type={this.columnType(this.keyAttributeOf(role.domain).attrDomain)}
             isKey={false}
-            references={role.domain.name}
             isNullable={false}
             isAutoincrement={false}
+            references={<Column $refByName={this.keyAttributeOf(role.domain).name} />}
           />
         ))}
       </Table>
@@ -318,8 +315,8 @@ and a `parts` block is added:
     "metamodel": "@synthesis/standard-metamodels/eer-tutorial/advanced"
   },
   "target": {
-    "metamodel": "@synthesis/standard-metamodels/relational",
-    "components": "@synthesis/standard-metamodels/relational/components-legacy"
+    "metamodel": "@synthesis/standard-metamodels/rel-tutorial",
+    "components": "@synthesis/standard-metamodels/rel-tutorial/components"
   },
   "parts": {
     "metamodels": [

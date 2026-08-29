@@ -6,7 +6,7 @@
     "metamodel": "@synthesis/standard-metamodels/eer-tutorial/basic"
   },
   "target": {
-    "metamodel": "@synthesis/standard-metamodels/relational",
-    "components": "@synthesis/standard-metamodels/relational/components-legacy"
+    "metamodel": "@synthesis/standard-metamodels/rel-tutorial",
+    "components": "@synthesis/standard-metamodels/rel-tutorial/components"
   }
 }

@@ -1,4 +1,4 @@
-// Relational (REL) metamodel — canonical v1 only.
+// Relational (REL) metamodel: canonical v1 only.
 //
 // v2 and legacy variants share aelastics-types schema/array names with v1
 // (e.g. NameType, ColumnArray, ...). Loading more than one variant via this

@@ -14,8 +14,8 @@ import type { ExprNode } from '@synthesis/jsx-runtime'
 import { abstractM2M, E2E, SpecPoint, SpecOption } from '@synthesis/engine'
 import type { ModelStore } from '@synthesis/engine'
 import * as em from '@synthesis/standard-metamodels/eer-tutorial/advanced/model'
-import * as rmT from '@synthesis/standard-metamodels/relational/model-legacy'
-import { RelSchema, Table, Column } from '@synthesis/standard-metamodels/relational/components-legacy'
+import * as rmT from '@synthesis/standard-metamodels/rel-tutorial/model'
+import { RelSchema, Table, Column } from '@synthesis/standard-metamodels/rel-tutorial/components'
 
 export class EER2RelAdvancedTransformation extends abstractM2M<em.IEERSchema, rmT.IRelSchema> {
   constructor(store: ModelStore) {
@@ -70,12 +70,11 @@ export class EER2RelAdvancedTransformation extends abstractM2M<em.IEERSchema, rm
       <Table>
         <Column
           name={`${w.name}_${w.owner.name}Id_FK`}
-          type={this.keyColumnType(w.owner)}
+          type={this.columnType(this.keyAttributeOf(w.owner).attrDomain)}
           isKey={true}
-          isForeignKey={true}
-          references={w.owner.name}
           isNullable={false}
           isAutoincrement={false}
+          references={<Column $refByName={this.keyAttributeOf(w.owner).name} />}
         />
       </Table>
     )
@@ -88,7 +87,6 @@ export class EER2RelAdvancedTransformation extends abstractM2M<em.IEERSchema, rm
         type={this.columnType(a.attrDomain)}
         isKey={a.isKey}
         isAutoincrement={a.isKey}
-        isForeignKey={false}
         isNullable={!a.isKey}
       />
     )
@@ -114,12 +112,11 @@ export class EER2RelAdvancedTransformation extends abstractM2M<em.IEERSchema, rm
       <Table $refByName={pkSide.domain.name}>
         <Column
           name={`${fkSide.domain.name}Id_FK`}
-          type={this.keyColumnType(fkSide.domain)}
-          isForeignKey={true}
+          type={this.columnType(this.keyAttributeOf(fkSide.domain).attrDomain)}
           isKey={false}
-          references={fkSide.domain.name}
           isNullable={fkSide.lb === '0'}
           isAutoincrement={false}
+          references={<Column $refByName={this.keyAttributeOf(fkSide.domain).name} />}
         />
       </Table>
     )
@@ -131,12 +128,11 @@ export class EER2RelAdvancedTransformation extends abstractM2M<em.IEERSchema, rm
         {rel.roles.map((role) => (
           <Column
             name={`${role.domain.name}Id_FK`}
-            type={this.keyColumnType(role.domain)}
-            isForeignKey={true}
+            type={this.columnType(this.keyAttributeOf(role.domain).attrDomain)}
             isKey={false}
-            references={role.domain.name}
             isNullable={false}
             isAutoincrement={false}
+            references={<Column $refByName={this.keyAttributeOf(role.domain).name} />}
           />
         ))}
       </Table>
@@ -158,10 +154,14 @@ export class EER2RelAdvancedTransformation extends abstractM2M<em.IEERSchema, rm
     }
   }
 
-  // A foreign key column has the type of the referenced entity's key
-  // attribute.
-  private keyColumnType(entity: em.IEntity): string {
+  // A foreign key points at the primary key column of the entity it
+  // references, so that column has to exist: an entity without a key
+  // attribute cannot be referenced at all.
+  private keyAttributeOf(entity: em.IEntity): em.IAttribute {
     const key = entity.attributes.find((a) => a.isKey)
-    return key ? this.columnType(key.attrDomain) : 'VARCHAR(255)'
+    if (!key) {
+      throw new Error(`Entity '${entity.name}' has no key attribute, so nothing can reference it`)
+    }
+    return key
   }
 }

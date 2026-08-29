@@ -25,6 +25,18 @@
       "types": "./lib/eer/EER.meta.model.type.d.ts",
       "default": "./lib/eer/EER.meta.model.type.js"
     },
+    "./rel-tutorial": {
+      "types": "./lib/rel-tutorial/index.d.ts",
+      "default": "./lib/rel-tutorial/index.js"
+    },
+    "./rel-tutorial/model": {
+      "types": "./lib/rel-tutorial/REL-tutorial.meta.model.type.d.ts",
+      "default": "./lib/rel-tutorial/REL-tutorial.meta.model.type.js"
+    },
+    "./rel-tutorial/components": {
+      "types": "./lib/rel-tutorial/REL-tutorial-components.d.ts",
+      "default": "./lib/rel-tutorial/REL-tutorial-components.js"
+    },
     "./eer-tutorial/basic": {
       "types": "./lib/eer-tutorial/basic/index.d.ts",
       "default": "./lib/eer-tutorial/basic/index.js"
