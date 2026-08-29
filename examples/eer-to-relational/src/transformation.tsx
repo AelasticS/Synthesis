@@ -72,6 +72,10 @@ export class EER2RelDomainWithDecisionTransformation extends DecisionAwareM2M<
     throw new Error("Not implemented VarOptions for VarPoint RelationshipMapping")
   }
 
+  // Element names are unique across the whole model, not per table, so
+  // foreign key columns are qualified with the relationship name. Without
+  // that, two relationships referencing the same entity would produce the
+  // same column name and the render would fail on a duplicate.
   @Default()
   @VarOption("RelationshipMapping", Option("ForeignKey"))
   relationshipAsForeignKey(rel: IRelationship): ExprNode<rmT.IColumn> {
@@ -81,7 +85,7 @@ export class EER2RelDomainWithDecisionTransformation extends DecisionAwareM2M<
     return (
       <Table $refByName={this.applyNaming(pkSide.domain.name)}>
         <Column
-          name={this.applyNaming(fkSide.domain.name + "Id_FK")}
+          name={this.applyNaming(rel.name + "_" + fkSide.domain.name + "Id_FK")}
           type={this.keyColumnType(fkSide.domain)}
           isForeignKey={true}
           isKey={false}
@@ -100,7 +104,7 @@ export class EER2RelDomainWithDecisionTransformation extends DecisionAwareM2M<
     return (
       <Table name={this.applyNaming(rel.name)}>
         <Column
-          name={this.applyNaming(role1.domain.name + "Id_FK")}
+          name={this.applyNaming(rel.name + "_" + role1.domain.name + "Id_FK")}
           type={this.keyColumnType(role1.domain)}
           isForeignKey={true}
           references={this.applyNaming(role1.domain.name)}
@@ -108,7 +112,7 @@ export class EER2RelDomainWithDecisionTransformation extends DecisionAwareM2M<
           isKey={role1.ub === "1"}
         />
         <Column
-          name={this.applyNaming(role2.domain.name + "Id_FK")}
+          name={this.applyNaming(rel.name + "_" + role2.domain.name + "Id_FK")}
           type={this.keyColumnType(role2.domain)}
           isForeignKey={true}
           references={this.applyNaming(role2.domain.name)}

@@ -395,6 +395,10 @@
     {
       "packageName": "eer-tutorial-advanced",
       "projectFolder": "examples/eer-tutorial-advanced"
+    },
+    {
+      "packageName": "eer-tutorial-configuration-based",
+      "projectFolder": "examples/eer-tutorial-configuration-based"
     }
 
     // {

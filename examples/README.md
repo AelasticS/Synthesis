@@ -23,7 +23,7 @@ doubles as the answer key while you follow along.
 | --- | --- | --- | --- |
 | [eer-tutorial-basic](./eer-tutorial-basic/) | m2m | Part 1: simple EER to relational with fixed logic | available |
 | [eer-tutorial-advanced](./eer-tutorial-advanced/) | m2m | Part 2: entity rule specialization with `@SpecPoint` and `@SpecOption` | available |
-| eer-tutorial-configuration-based | m2m | Part 3: relationship mapping decided by a configuration model | in preparation |
+| [eer-tutorial-configuration-based](./eer-tutorial-configuration-based/) | m2m | Part 3: relationship mapping decided by a configuration model | available |
 | eer-tutorial-higher-order | m2m | Part 4: higher-order templates | in preparation |
 
 ### Full examples

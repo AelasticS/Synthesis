@@ -37,7 +37,8 @@ Answer key: `examples/eer-tutorial-basic`.
 
 ### Part 2: Advanced
 
-**In preparation.**
+**Available now.**
+[Continue here](./part-2-advanced/index.md).
 
 The source metamodel grows the `Kernel` and `Weak` entity subtypes, and
 the entity rule stops being one function that inspects its argument.
@@ -48,12 +49,14 @@ mechanism when the variants are determined by the source model: a weak
 entity is a weak entity, and no configuration should be able to say
 otherwise.
 
-Answer key: the Part 2 companion package, using
-`@synthesis/standard-metamodels/eer-tutorial/advanced`.
+Answer key: `examples/eer-tutorial-advanced`, which uses
+`@synthesis/standard-metamodels/eer-tutorial/advanced` as its source
+metamodel.
 
 ### Part 3: Configuration-based
 
-**In preparation.**
+**Available now.**
+[Continue here](./part-3-configuration-based/index.md).
 
 What remains after Part 2 is the genuinely open case: the relationship
 cardinality decisions. Part 3 turns them into a declared design space.
@@ -66,7 +69,7 @@ dispatches on the configuration rather than on an `if` statement. The
 same source model and the same transformation then produce different
 relational architectures.
 
-Answer key: `examples/eer-to-relational`.
+Answer key: `examples/eer-tutorial-configuration-based`.
 
 ### Part 4: Higher-order templates
 
@@ -82,8 +85,8 @@ factored out of individual rules and applied uniformly.
 | Part | What decides the mapping | Mechanism | Status |
 | --- | --- | --- | --- |
 | 1: Basic | A hand written conditional in the rule | Plain TypeScript | Available |
-| 2: Advanced | The runtime type of the source element | `@SpecPoint` and `@SpecOption` | In preparation |
-| 3: Configuration-based | A configuration chosen for the run | Decision model, binding model, `@VarPoint` and `@VarOption` | In preparation |
+| 2: Advanced | The runtime type of the source element | `@SpecPoint` and `@SpecOption` | Available |
+| 3: Configuration-based | A configuration chosen for the run | Decision model, binding model, `@VarPoint` and `@VarOption` | Available |
 | 4: Higher-order templates | A template passed as a parameter | Parameterized templates | In preparation |
 
 ## Prerequisites for all parts

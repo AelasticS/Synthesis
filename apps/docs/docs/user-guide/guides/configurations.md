@@ -24,8 +24,11 @@ A configuration-based transformation ships two extra models inside its package
 What you author is the third one: a **configuration model**, a workspace
 model (kind `configuration-model`) recording one concrete choice per
 decision, for one specific source model. `synth transformation show <tx>`
-lists a transformation's issues, options, and defaults without running
-anything.
+reports whether a transformation is configuration-based at all
+(`variability: yes`) without running anything; the issues and options
+themselves surface when you generate a configuration with
+`synth config init`, inspect one with `synth config show <ref>`, or run
+the transformation, which announces every decision it applies.
 
 ## Why consent is explicit
 

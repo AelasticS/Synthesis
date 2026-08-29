@@ -1,0 +1,28 @@
+{
+  "name": "eer-tutorial-configuration-based",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Tutorial Part 3 companion: EER to relational transformation whose 1:N relationship mapping is a configured decision",
+  "author": "Sinisa Neskovic",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "dist/transformation.js",
+  "files": [
+    "dist",
+    "synth.json"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "node ../smoke.mjs"
+  },
+  "dependencies": {
+    "@synthesis/jsx-runtime": "workspace:*",
+    "@synthesis/engine": "workspace:*",
+    "@synthesis/standard-metamodels": "workspace:*",
+    "@synthesis/decision-framework": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "~5.9.3",
+    "@synthesis/cli": "workspace:*"
+  }
+}
