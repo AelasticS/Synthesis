@@ -89,6 +89,30 @@ factored out of individual rules and applied uniformly.
 | 3: Configuration-based | A configuration chosen for the run | Decision model, binding model, `@VarPoint` and `@VarOption` | Available |
 | 4: Higher-order templates | A template passed as a parameter | Parameterized templates | In preparation |
 
+## What happens after your transformation runs
+
+A transformation is rarely the whole job. Because its result is an
+ordinary model in the workspace, it can be fed straight into the next
+transformation: an EER schema becomes a relational schema, and that
+relational schema becomes SQL text. The CLI runs such a chain in one
+command, passing intermediate models in memory, and a chain that proves
+useful can be saved as a named pipeline and replayed.
+
+Composing runs is the user's side of the story, and the User Guide
+covers it in
+[Pipelines](../../../user-guide/guides/pipelines.md), with a worked
+end-to-end walkthrough in the
+[User Guide tutorial](../../../user-guide/tutorial.md).
+
+What matters on the authoring side is that chaining is only possible
+because of what you declare. The CLI type-checks a chain from the
+manifests before it executes anything: step N's target metamodel must
+equal step N+1's source metamodel. The `source` and `target` entries in
+`synth.json` are therefore not documentation, they are the interface
+that decides whether your transformation can be composed with anyone
+else's. Declaring them accurately is what makes your package a good
+citizen in a chain.
+
 ## Prerequisites for all parts
 
 You need a checkout of the Synthesis repository built once with `rush
