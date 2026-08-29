@@ -14,7 +14,7 @@ export default class PipelineRun extends BaseCommand {
 
   static override description = `Run a saved pipeline on a workspace model.
 
-A pipeline stores only the process: its transformation steps. Every run names its own data explicitly, exactly like 'transformation run' with the same steps: --in is always required, output goes to --out (last step m2m; default '<namespace>/<name>-<last-tx>' derived from --in) or --out-dir (last step m2t), and configuration consent follows the normal policy (--config binds to step 1 only; every other decision-based step requires --default-configs, otherwise the run aborts before any engine work). The full pre-flight applies; a pipeline is convenience, never a bypass. In a terminal session, missing values are asked for interactively: no name opens a picker over the saved pipelines, a missing --in over the models matching step 1's source metamodel, an unconsented decision-based step offers --config/--default-configs explicitly, and a missing --out-dir is prompted for. Piped, scripted, --json, --quiet, and CI invocations never prompt. Exit codes: 2 for a missing configuration consent, a chain or source metamodel mismatch, an invalid configuration or pipeline file, or a result that fails the import gate, 3 for an unknown pipeline, transformation, or model.`
+A pipeline stores only the process: its transformation steps. Every run names its own data explicitly, exactly like 'transformation run' with the same steps: --in is always required, output goes to --out (last step m2m; default '<namespace>/<name>-<last-tx>' derived from --in) or --out-dir (last step m2t), and configuration consent follows the normal policy (--config binds to step 1 only; every other configuration-based step requires --default-configs, otherwise the run aborts before any engine work). The full pre-flight applies; a pipeline is convenience, never a bypass. In a terminal session, missing values are asked for interactively: no name opens a picker over the saved pipelines, a missing --in over the models matching step 1's source metamodel, an unconsented configuration-based step offers --config/--default-configs explicitly, and a missing --out-dir is prompted for. Piped, scripted, --json, --quiet, and CI invocations never prompt. Exit codes: 2 for a missing configuration consent, a chain or source metamodel mismatch, an invalid configuration or pipeline file, or a result that fails the import gate, 3 for an unknown pipeline, transformation, or model.`
 
   static override examples = [
     '<%= config.bin %> <%= command.id %> gen-sql --in com.example/persons --default-configs --out-dir ./generated',
@@ -40,11 +40,11 @@ A pipeline stores only the process: its transformation steps. Every run names it
       description: 'Output directory for generated files (last step m2t only).'
     }),
     config: Flags.string({
-      description: 'Configuration model ref for step 1 (decision-based only; later steps take --default-configs).'
+      description: 'Configuration model ref for step 1 (configuration-based only; later steps take --default-configs).'
     }),
     'default-configs': Flags.boolean({
       description:
-        'Explicitly accept generated default configurations for every decision-based step not covered by --config.',
+        'Explicitly accept generated default configurations for every configuration-based step not covered by --config.',
       default: false
     }),
     'save-config': Flags.string({

@@ -6,7 +6,7 @@
  *
  * Configuration policy (uniform, applies to every execution path):
  * decisions are never applied without explicit user consent. A
- * decision-based step runs either on a named configuration model
+ * configuration-based step runs either on a named configuration model
  * (`--config`, step 1 only) or on generated defaults the user asked for
  * with `--default-configs`; with neither, the run aborts before any
  * engine work. `--save-config` persists what `--default-configs`
@@ -122,7 +122,7 @@ export interface RunSurfaceFlags {
 
 /**
  * Indexes of the chain steps that would run on GENERATED DEFAULT
- * configurations: every decision-based step not covered by `--config`
+ * configurations: every configuration-based step not covered by `--config`
  * (which binds to step 1 only). The single owner of the coverage
  * judgment: the execution core's consent gate and the interactive
  * consent picker both read it, so they cannot disagree about which
@@ -168,7 +168,7 @@ export interface ExecuteRequest {
 /**
  * How a step's configuration is sourced, resolved ONCE in pre-flight:
  *   'explicit':  step 1 running on the model named with --config;
- *   'defaults':  decision-based step running on generated defaults
+ *   'defaults':  configuration-based step running on generated defaults
  *                (valid only with the --default-configs consent);
  *   'none':      the transformation declares no decisions.
  * The consent gate, the execution branch, the --save-config write, and the
@@ -251,7 +251,7 @@ export async function executeRun(request: ExecuteRequest): Promise<void> {
   // 4. Configuration flags: --config and --default-configs are mutually
   // exclusive for a single step (the exclusivity lives HERE, in the core,
   // so both command surfaces enforce it identically); --config binds to
-  // step 1 ONLY; --default-configs needs at least one decision-based step;
+  // step 1 ONLY; --default-configs needs at least one configuration-based step;
   // --save-config persists what --default-configs generated (single-step
   // only, never in chains).
   if (!multi && request.config !== undefined && request.defaultConfigs) {
@@ -264,11 +264,11 @@ export async function executeRun(request: ExecuteRequest): Promise<void> {
     fail(
       EXIT_CODES.FAILURE,
       multi
-        ? `--config binds to step 1 of the chain, and '${first.manifest.name}' is not decision-based (it declares no decision/binding model parts).`
-        : `--config is only valid for decision-based transformations; '${first.manifest.name}' declares no decision/binding model parts.`
+        ? `--config binds to step 1 of the chain, and '${first.manifest.name}' is not configuration-based (it declares no decision/binding model parts).`
+        : `--config is only valid for configuration-based transformations; '${first.manifest.name}' declares no decision/binding model parts.`
     )
   }
-  // --default-configs must have at least one decision-based step left to
+  // --default-configs must have at least one configuration-based step left to
   // consent to (i.e. one that would run on generated defaults).
   const uncoveredSteps = steps.filter((step) => step.configSource === 'defaults')
   if (request.defaultConfigs && uncoveredSteps.length === 0) {
@@ -276,9 +276,9 @@ export async function executeRun(request: ExecuteRequest): Promise<void> {
       EXIT_CODES.FAILURE,
       multi
         ? request.config !== undefined
-          ? `--default-configs has nothing to apply: step 1 runs on --config and no later step is decision-based.`
-          : `--default-configs was given but no step of the chain is decision-based; there are no decisions to default.`
-        : `--default-configs is only valid for decision-based transformations; '${first.manifest.name}' declares no decision/binding model parts.`
+          ? `--default-configs has nothing to apply: step 1 runs on --config and no later step is configuration-based.`
+          : `--default-configs was given but no step of the chain is configuration-based; there are no decisions to default.`
+        : `--default-configs is only valid for configuration-based transformations; '${first.manifest.name}' declares no decision/binding model parts.`
     )
   }
   if (request.saveConfig !== undefined) {
@@ -291,7 +291,7 @@ export async function executeRun(request: ExecuteRequest): Promise<void> {
     if (!first.manifest.variability) {
       fail(
         EXIT_CODES.FAILURE,
-        `--save-config is only valid for decision-based transformations; '${first.manifest.name}' declares no decision/binding model parts.`
+        `--save-config is only valid for configuration-based transformations; '${first.manifest.name}' declares no decision/binding model parts.`
       )
     }
     if (!request.defaultConfigs) {
@@ -310,7 +310,7 @@ export async function executeRun(request: ExecuteRequest): Promise<void> {
   }
   const inRef = source.ref
 
-  // 6. Consent gate: every decision-based step must be covered by --config
+  // 6. Consent gate: every configuration-based step must be covered by --config
   // (step 1 only) or --default-configs, BEFORE any engine work. The
   // message depends on WHICH step is uncovered: step 1's input model
   // exists in the workspace, so an explicit configuration is possible and
@@ -320,13 +320,13 @@ export async function executeRun(request: ExecuteRequest): Promise<void> {
     if (uncovered === 0) {
       fail(
         EXIT_CODES.VALIDATION_FAILURE,
-        `${multi ? stepLabel(0) : `Transformation '${first.manifest.name}'`} is decision-based. Provide --config <ref> (create one with: synth config init ${first.manifest.name} --for ${inRef}) or accept generated defaults explicitly with --default-configs.`
+        `${multi ? stepLabel(0) : `Transformation '${first.manifest.name}'`} is configuration-based. Provide --config <ref> (create one with: synth config init ${first.manifest.name} --for ${inRef}) or accept generated defaults explicitly with --default-configs.`
       )
     }
     if (uncovered > 0) {
       fail(
         EXIT_CODES.VALIDATION_FAILURE,
-        `${stepLabel(uncovered)} is decision-based; a chain cannot take an explicit configuration for a model that is produced mid-run. Either run stepwise: transformation run + config init against the intermediate, or accept generated defaults explicitly: --default-configs.`
+        `${stepLabel(uncovered)} is configuration-based; a chain cannot take an explicit configuration for a model that is produced mid-run. Either run stepwise: transformation run + config init against the intermediate, or accept generated defaults explicitly: --default-configs.`
       )
     }
   }
@@ -639,7 +639,7 @@ export async function executeRun(request: ExecuteRequest): Promise<void> {
       fail(EXIT_CODES.FAILURE, errorMessage(err), err)
     }
 
-    // Decision-based step: load the explicit configuration (step 1 only;
+    // Configuration-based step: load the explicit configuration (step 1 only;
     // its references resolve only now, with parts and input model in the
     // store) or generate the default one; announce every effective decision.
     let configModel: unknown

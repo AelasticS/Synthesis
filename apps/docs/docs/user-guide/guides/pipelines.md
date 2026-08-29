@@ -74,7 +74,7 @@ synth pipeline run gen-sql --in com.example/persons \
 request path** as `transformation run` with those steps: full pre-flight,
 `--out`/`--out-dir` by the last step's kind, `--keep-intermediates`, and
 the normal consent policy: `--config` binds to step 1 only, every other
-decision-based step requires `--default-configs`, and an unconsented run
+configuration-based step requires `--default-configs`, and an unconsented run
 aborts before any engine work. A pipeline is convenience, never a bypass.
 
 ```bash

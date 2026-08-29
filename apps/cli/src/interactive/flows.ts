@@ -272,11 +272,11 @@ function listLabels(steps: ChainStep[], indexes: number[]): string {
   return `${labels.slice(0, -1).join(', ')} and ${labels[labels.length - 1]}`
 }
 
-/** Consent select for decision-based steps whose input is produced mid-run. */
+/** Consent select for configuration-based steps whose input is produced mid-run. */
 async function consentForLaterSteps(deps: FlowDeps, steps: ChainStep[], indexes: number[]): Promise<void> {
   const many = indexes.length > 1
   const picked = await deps.prompter.select(
-    `${listLabels(steps, indexes)} ${many ? 'are' : 'is'} decision-based; a model produced mid-run cannot take an explicit configuration. Generate default configurations for ${many ? 'these steps' : 'this step'}?`,
+    `${listLabels(steps, indexes)} ${many ? 'are' : 'is'} configuration-based; a model produced mid-run cannot take an explicit configuration. Generate default configurations for ${many ? 'these steps' : 'this step'}?`,
     [DEFAULTS_CHOICE, ABORT_CHOICE]
   )
   if (picked === 'abort') {
@@ -346,7 +346,7 @@ export async function completeRunRequest(deps: FlowDeps, input: RunFlowInput): P
   }
 
   // 4. Configuration consent, per the uniform policy: --config covers step
-  // 1 only; every other decision-based step needs the defaults consent
+  // 1 only; every other configuration-based step needs the defaults consent
   // (the execution core's own coverage judgment). A picker choice IS that
   // consent.
   if (!defaultConfigs) {
@@ -374,7 +374,7 @@ export async function completeRunRequest(deps: FlowDeps, input: RunFlowInput): P
         ABORT_CHOICE
       )
       const picked = await deps.prompter.select(
-        `${stepLabel(steps, 0)} is decision-based and no configuration was given. How should its decisions be made?`,
+        `${stepLabel(steps, 0)} is configuration-based and no configuration was given. How should its decisions be made?`,
         choices
       )
       if (picked === 'abort') {
@@ -450,7 +450,7 @@ export interface ConfigInitFlowResult {
 }
 
 /**
- * Complete a `config init` request: pick a decision-based transformation
+ * Complete a `config init` request: pick a configuration-based transformation
  * when none was named, then pick (or import) the model the configuration
  * is for, filtered by the transformation's source metamodel. An
  * explicitly named transformation is checked for variability BEFORE any
@@ -470,7 +470,7 @@ export async function completeConfigInitRequest(
     if (decisionBased.length === 0) {
       throw new FlowAborted(
         EXIT_CODES.NOT_FOUND,
-        `No decision-based transformations installed; only decision-based transformations have configurations.`
+        `No configuration-based transformations installed; only configuration-based transformations have configurations.`
       )
     }
     txName = await deps.prompter.search('Select the transformation to configure', decisionBased.map(txChoice))
@@ -498,7 +498,7 @@ export async function completeConfigInitRequest(
       // prompt whose answer it would discard.
       throw new FlowAborted(
         EXIT_CODES.FAILURE,
-        `Transformation '${manifest.name}' is not decision-based (its manifest declares no decision/binding model parts); there is nothing to configure.`
+        `Transformation '${manifest.name}' is not configuration-based (its manifest declares no decision/binding model parts); there is nothing to configure.`
       )
     }
     const models = filterModelsForMetamodel(await modelHeaders(deps.modelsDir), manifest.source.metamodel)

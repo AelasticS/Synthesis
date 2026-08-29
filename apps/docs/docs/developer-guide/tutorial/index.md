@@ -4,24 +4,42 @@ sidebar_position: 3
 
 # Tutorial
 
-A two-part, hands-on path to authoring Synthesis transformations. You
-build complete, installable transformation packages and run them with
-the `synth` CLI; every command and output shown was executed against
-the real tools, and each part names a smoke-tested package from the
-repository's `examples/` catalog as its answer key.
+Synthesis transformations come in two kinds, and this section holds one
+hands-on tutorial for each. Both build complete, installable packages
+that you run with the `synth` CLI. Every command and every output shown
+was executed against the real tools, and every part names a
+smoke-tested package from the repository's `examples/` catalog as its
+answer key.
 
-- [Part I: your first transformation](./part-1-first-transformation.md)
-  builds a minimal model-to-model transformation: the package layout,
-  the `synth.json` manifest, the transformation class, and the loop of
-  build, install, and run. Answer key: `examples/rel-copy`.
-- [Part II: decision-based transformations](./part-2-decision-based-transformations.md)
-  turns hard-coded design choices into a declared design space: the
-  decision model, the binding model, variation points, manifest parts,
-  and configuration-driven runs. Answer key:
-  `examples/eer-to-relational`.
+## The two tutorials
 
-Part I assumes no prior Synthesis experience beyond the
-[User Guide's introduction](../../user-guide/concepts.md); Part II
-builds directly on Part I. If you prefer reading finished code first,
-start with the [Examples](../examples/index.md) section instead and
-return here for the why behind each piece.
+**[Model-to-model transformations](./model-to-model/index.md)** read a
+source model and produce a target model in another metamodel. The
+running case is the classic one: an Extended Entity-Relationship schema
+becomes a relational schema. The tutorial has four parts. It starts
+with a transformation whose logic is fixed and readable in one sitting,
+then reworks that same logic three times, each time replacing hand
+written branching with a Synthesis mechanism: typed rule
+specialization, configuration-based rules, and higher-order templates.
+Part 1 is available now; Parts 2 to 4 are in preparation.
+
+**[Model-to-text transformations](./model-to-text/index.md)** read a
+model and produce files: SQL DDL, documentation, source code, diagram
+sources. This tutorial is in preparation. Until it is written, the
+`examples/rel-to-sql-ddl` package and the
+[Packaging Transformations](../guides/packaging-transformations.md)
+guide cover the same ground in shorter form.
+
+## How to read them
+
+The model-to-model tutorial is the place to start, even if your goal is
+text generation. Metamodels, JSX authoring, the workspace, the
+`synth.json` manifest, and the build, install, run loop are shared by
+both kinds, and the model-to-model tutorial is where they are explained
+in full.
+
+If you would rather read finished code before prose, open the
+[Examples](../examples/index.md) section first and come back here for
+the reasoning behind each piece. If you have never met the `synth` CLI,
+the [User Guide's concepts page](../../user-guide/concepts.md) is a
+short orientation that this tutorial assumes.

@@ -154,7 +154,7 @@ describe('pipeline run (canonical) and pl run (alias)', () => {
       'pipeline', 'run', 'gen-sql', '--in', 'com.example/persons', '--out-dir', join(tempDir, 'never-consent')
     ])
     expect(code).toBe(2)
-    expect(flatten(stderr)).toContain('decision-based')
+    expect(flatten(stderr)).toContain('configuration-based')
     expect(existsSync(join(tempDir, 'never-consent'))).toBe(false)
   })
 

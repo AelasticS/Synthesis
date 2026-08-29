@@ -32,7 +32,7 @@ eer-to-relational/
   the model store before execution, in this order: `metamodels` (functions
   `(store) => ExprNode`), then `decisionModel`, then `bindingModel`.
   Declaring both `decisionModel` and `bindingModel` marks the
-  transformation as decision-based (variability); the manifest never
+  transformation as configuration-based (variability); the manifest never
   duplicates the issue list; the decision model module is the single
   source of truth.
 

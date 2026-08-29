@@ -1,9 +1,9 @@
 {
   "kind": "m2m",
   "entry": "./dist/transformation.js",
-  "exportName": "RelCopyTransformation",
+  "exportName": "EER2RelAdvancedTransformation",
   "source": {
-    "metamodel": "@synthesis/standard-metamodels/relational"
+    "metamodel": "@synthesis/standard-metamodels/eer-tutorial/advanced"
   },
   "target": {
     "metamodel": "@synthesis/standard-metamodels/relational",

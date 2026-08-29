@@ -2,7 +2,7 @@
   "name": "rel-to-sql-ddl",
   "version": "0.1.0",
   "private": true,
-  "description": "Decision-based Synthesis m2t transformation: relational schema to SQL DDL text",
+  "description": "Configuration-based Synthesis m2t transformation: relational schema to SQL DDL text",
   "author": "Sinisa Neskovic",
   "license": "Apache-2.0",
   "type": "module",

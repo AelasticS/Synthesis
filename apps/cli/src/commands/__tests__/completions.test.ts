@@ -137,11 +137,11 @@ describe('model and configuration positions', () => {
     expect(lines(other.stdout)).toEqual([])
   })
 
-  it('completes --for for config init and the config init positional (decision-based only)', async () => {
+  it('completes --for for config init and the config init positional (configuration-based only)', async () => {
     const forFlag = await complete(['config', 'init', 'eer-to-relational', '--for', EMPTY])
     expect(lines(forFlag.stdout)).toEqual(['com.example/persons'])
     const txArg = await complete(['config', 'init', EMPTY])
-    // rel-copy is not decision-based and must not appear
+    // rel-copy is not configuration-based and must not appear
     expect(lines(txArg.stdout)).toEqual(['eer-to-relational', 'rel-to-sql-ddl'])
   })
 

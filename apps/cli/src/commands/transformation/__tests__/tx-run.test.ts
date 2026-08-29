@@ -135,16 +135,16 @@ describe('tx run errors', () => {
 })
 
 describe('tx run configuration consent (uniform policy)', () => {
-  // Decisions are NEVER applied without explicit consent: a decision-based
+  // Decisions are NEVER applied without explicit consent: a configuration-based
   // transformation runs on --config or on --default-configs, and with
   // neither it aborts (exit 2) before any engine work.
-  it('aborts a decision-based run without --config or --default-configs, teaching both', async () => {
+  it('aborts a configuration-based run without --config or --default-configs, teaching both', async () => {
     const { code, stderr } = await run([
       'tx', 'run', 'eer-to-relational', '--in', 'com.example/persons', '--out', 'com.example/never-consent'
     ])
     expect(code).toBe(2)
     const message = flatten(stderr)
-    expect(message).toContain(`Transformation 'eer-to-relational' is decision-based`)
+    expect(message).toContain(`Transformation 'eer-to-relational' is configuration-based`)
     expect(message).toContain('synth config init eer-to-relational --for com.example/persons')
     expect(message).toContain('--default-configs')
     expect(existsSync(join(modelsDir, 'com', 'example', 'never-consent.tsx'))).toBe(false)
@@ -204,7 +204,7 @@ describe('tx run configuration consent (uniform policy)', () => {
         '--config', 'com.example/tx-cfg', '--out', 'com.example/never-plain'
       ])
       expect(code).toBe(1)
-      expect(flatten(stderr)).toContain('--config is only valid for decision-based transformations')
+      expect(flatten(stderr)).toContain('--config is only valid for configuration-based transformations')
     })
 
     it('rejects --default-configs', async () => {
@@ -213,7 +213,7 @@ describe('tx run configuration consent (uniform policy)', () => {
         '--default-configs', '--out', 'com.example/never-plain'
       ])
       expect(code).toBe(1)
-      expect(flatten(stderr)).toContain('--default-configs is only valid for decision-based transformations')
+      expect(flatten(stderr)).toContain('--default-configs is only valid for configuration-based transformations')
     })
 
     it('rejects --save-config', async () => {
@@ -222,7 +222,7 @@ describe('tx run configuration consent (uniform policy)', () => {
         '--save-config', 'com.example/never-plain-cfg', '--out', 'com.example/never-plain'
       ])
       expect(code).toBe(1)
-      expect(flatten(stderr)).toContain('--save-config is only valid for decision-based transformations')
+      expect(flatten(stderr)).toContain('--save-config is only valid for configuration-based transformations')
     })
   })
 })
@@ -231,7 +231,7 @@ describe('tx run m2m', () => {
   const outRef = 'com.example/persons-rel'
   const outPath = () => join(modelsDir, 'com', 'example', 'persons-rel.tsx')
 
-  it('runs the decision-based m2m fixture end to end', async () => {
+  it('runs the configuration-based m2m fixture end to end', async () => {
     const { stdout, error } = await run([
       'tx', 'run', 'eer-to-relational', '--in', 'com.example/persons', '--default-configs', '--out', outRef
     ])
@@ -604,7 +604,7 @@ describe('tx run m2t', () => {
   })
 
   it('honors an explicit DoubleQuoted configuration for the m2t step', async () => {
-    // The m2t fixture is decision-based too: config init against the
+    // The m2t fixture is configuration-based too: config init against the
     // relational model, select DoubleQuoted, and the emitted DDL wraps
     // every identifier in double quotes.
     const init = await run([

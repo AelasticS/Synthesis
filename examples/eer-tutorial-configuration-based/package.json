@@ -1,8 +1,8 @@
 {
-  "name": "rel-copy",
+  "name": "eer-tutorial-configuration-based",
   "version": "0.1.0",
   "private": true,
-  "description": "Minimal Synthesis m2m transformation: endogenous relational-to-relational copy",
+  "description": "Tutorial Part 3 companion: EER to relational transformation whose 1:N relationship mapping is a configured decision",
   "author": "Sinisa Neskovic",
   "license": "Apache-2.0",
   "type": "module",
@@ -18,7 +18,8 @@
   "dependencies": {
     "@synthesis/jsx-runtime": "workspace:*",
     "@synthesis/engine": "workspace:*",
-    "@synthesis/standard-metamodels": "workspace:*"
+    "@synthesis/standard-metamodels": "workspace:*",
+    "@synthesis/decision-framework": "workspace:*"
   },
   "devDependencies": {
     "typescript": "~5.9.3",

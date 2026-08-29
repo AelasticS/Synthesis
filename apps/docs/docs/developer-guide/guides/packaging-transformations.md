@@ -62,7 +62,7 @@ model-to-model transformation, as installed by the CLI's own test suite:
 | `name` | string | Optional override; otherwise the package.json `name` is the transformation's name. |
 
 The package's `name` and `version` come from `package.json` (`name` may be
-overridden in the manifest). A transformation is **decision-based** exactly
+overridden in the manifest). A transformation is **configuration-based** exactly
 when it declares both `parts.decisionModel` and `parts.bindingModel`; there
 is no separate issue list in the manifest. The decision and binding models
 are the single source of truth: `synth transformation show` loads the
@@ -109,7 +109,7 @@ cd my-transformation
 npm install
 
 # 2. Implement src/index.ts and fill in the synth.json placeholders
-#    (source/target metamodels, exportName; parts for decision-based tx)
+#    (source/target metamodels, exportName; parts for configuration-based tx)
 
 # 3. Build: runs the package's build script (or tsc directly)
 synth transformation build

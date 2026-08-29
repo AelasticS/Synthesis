@@ -8,7 +8,7 @@
  * exercises the full CLI loop in an isolated workspace: init, import
  * every model in sample/, transformation install, and one run against
  * the first sample (with --default-configs when the package is
- * decision-based; with --out-dir when it is m2t). It fails loudly if
+ * configuration-based; with --out-dir when it is m2t). It fails loudly if
  * any step fails or no output is produced.
  */
 import { execFileSync } from 'node:child_process'

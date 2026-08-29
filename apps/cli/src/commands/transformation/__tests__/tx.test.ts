@@ -295,7 +295,7 @@ describe('fixture transformation packages', () => {
     expect(parsed.exportName).toBe('Rel2DdlTransformation')
     expect(parsed.sourceMetamodel).toBe('@synthesis/standard-metamodels/relational')
     expect(parsed.targetMetamodel).toBe('text')
-    // The m2t fixture is decision-based (IdentifierQuoting) since Phase 4
+    // The m2t fixture is configuration-based (IdentifierQuoting) since Phase 4
     expect(parsed.variability).toBe(true)
     expect(parsed.parts.decisionModel.exportName).toBe('DdlGenerationIssues')
     expect(parsed.parts.bindingModel.exportName).toBe('Rel_Bindings')

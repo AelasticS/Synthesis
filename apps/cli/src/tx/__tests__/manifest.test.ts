@@ -271,7 +271,7 @@ describe('loadTxManifest: fixture packages', () => {
     })
   })
 
-  it('loads the rel-to-sql-ddl (m2t, decision-based) fixture', async () => {
+  it('loads the rel-to-sql-ddl (m2t, configuration-based) fixture', async () => {
     const manifest = await loadTxManifest(m2tFixture)
     expect(manifest).toEqual({
       name: 'rel-to-sql-ddl',

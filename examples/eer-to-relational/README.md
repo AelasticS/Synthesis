@@ -1,6 +1,6 @@
 # eer-to-relational
 
-The flagship decision-based transformation: an EER schema becomes a
+The flagship configuration-based transformation: an EER schema becomes a
 relational schema, and the design questions that have no single right
 answer are left open as explicit decisions, closed per run by a
 configuration model. Three issues are on offer:
@@ -41,7 +41,7 @@ synth init
 synth namespace mk demo
 synth model import sample/library.tsx --as demo/library
 
-# Install; show reads the decision model and lists issues and options
+# Install; show reports the manifest facts, including variability: yes
 synth transformation install .
 synth transformation show eer-to-relational
 
@@ -64,9 +64,11 @@ synth transformation run eer-to-relational --in demo/library --config demo/libra
 ```
 
 With ForeignKey selected, the join table disappears; instead the `book`
-table (the N side) gains an `author_id_fk` column referencing `author`.
-Same source model, same transformation, different architecture: that is
-the variability mechanism in one picture.
+table (the N side) gains a `written_by_author_id_fk` column referencing
+`author`. Foreign key columns carry the relationship name because
+element names are unique across the whole model, not per table. Same
+source model, same transformation, different architecture: that is the
+variability mechanism in one picture.
 
 ## What to look at next
 
