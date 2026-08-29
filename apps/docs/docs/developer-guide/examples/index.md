@@ -15,13 +15,24 @@ prose.
 
 ## Tutorial companions
 
-Each part of the [model-to-model tutorial](../tutorial/model-to-model/index.md)
-has its own complete package, which is the finished state of that part.
+Each part of both tutorials has its own complete package, which is the
+finished state of that part.
+
+From the [model-to-model tutorial](../tutorial/model-to-model/index.md):
 
 | Example | Kind | What it shows |
 | --- | --- | --- |
 | `examples/eer-tutorial-basic` | m2m | Part 1: a simple EER to relational transformation with fixed logic. |
 | `examples/eer-tutorial-advanced` | m2m | Part 2: the entity rule specialized per entity subtype with `@SpecPoint` and `@SpecOption`. |
+| `examples/eer-tutorial-configuration-based` | m2m | Part 3: the relationship mapping decided by a configuration model. |
+
+From the [model-to-text tutorial](../tutorial/model-to-text/index.md):
+
+| Example | Kind | What it shows |
+| --- | --- | --- |
+| `examples/sql-tutorial-basic` | m2t | Part 1: a relational schema becomes one SQL DDL file. |
+| `examples/sql-tutorial-structured` | m2t | Part 2: named sections, and output split across two files so constraints are applied after the tables exist. |
+| `examples/sql-tutorial-configuration-based` | m2t | Part 3: the file layout and identifier quoting chosen by configuration. |
 
 ## Full examples
 

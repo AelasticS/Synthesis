@@ -399,6 +399,18 @@
     {
       "packageName": "eer-tutorial-configuration-based",
       "projectFolder": "examples/eer-tutorial-configuration-based"
+    },
+    {
+      "packageName": "sql-tutorial-basic",
+      "projectFolder": "examples/sql-tutorial-basic"
+    },
+    {
+      "packageName": "sql-tutorial-structured",
+      "projectFolder": "examples/sql-tutorial-structured"
+    },
+    {
+      "packageName": "sql-tutorial-configuration-based",
+      "projectFolder": "examples/sql-tutorial-configuration-based"
     }
 
     // {

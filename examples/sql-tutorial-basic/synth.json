@@ -1,0 +1,11 @@
+{
+  "kind": "m2t",
+  "entry": "./dist/transformation.js",
+  "exportName": "RelToSqlBasicTransformation",
+  "source": {
+    "metamodel": "@synthesis/standard-metamodels/rel-tutorial"
+  },
+  "target": {
+    "metamodel": "text"
+  }
+}

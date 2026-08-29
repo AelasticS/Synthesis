@@ -21,14 +21,15 @@ with a transformation whose logic is fixed and readable in one sitting,
 then reworks that same logic three times, each time replacing hand
 written branching with a Synthesis mechanism: typed rule
 specialization, configuration-based rules, and higher-order templates.
-Part 1 is available now; Parts 2 to 4 are in preparation.
+Parts 1 to 3 are available now; Part 4 is in preparation.
 
 **[Model-to-text transformations](./model-to-text/index.md)** read a
 model and produce files: SQL DDL, documentation, source code, diagram
-sources. This tutorial is in preparation. Until it is written, the
-`examples/rel-to-sql-ddl` package and the
-[Packaging Transformations](../guides/packaging-transformations.md)
-guide cover the same ground in shorter form.
+sources. Its running case picks up exactly where the other tutorial
+leaves off, turning a relational schema into SQL DDL. Its three parts
+move from a single generated file, to output structured across several
+files, to a generator whose file layout is chosen by a configuration
+rather than fixed in the code. All three are available now.
 
 ## How to read them
 

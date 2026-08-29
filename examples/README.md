@@ -15,9 +15,11 @@ standalone starting point.
 
 ### Tutorial companions
 
-Every part of the model-to-model tutorial has its own complete,
-independent package. Each one is the finished state of that part, so it
-doubles as the answer key while you follow along.
+Every part of the tutorials has its own complete, independent package.
+Each one is the finished state of that part, so it doubles as the answer
+key while you follow along. The model-to-text tutorial picks up where
+the model-to-model one leaves off: its sample model is what
+eer-tutorial-basic generates.
 
 | Example | Kind | Shows | Status |
 | --- | --- | --- | --- |
@@ -25,6 +27,9 @@ doubles as the answer key while you follow along.
 | [eer-tutorial-advanced](./eer-tutorial-advanced/) | m2m | Part 2: entity rule specialization with `@SpecPoint` and `@SpecOption` | available |
 | [eer-tutorial-configuration-based](./eer-tutorial-configuration-based/) | m2m | Part 3: relationship mapping decided by a configuration model | available |
 | eer-tutorial-higher-order | m2m | Part 4: higher-order templates | in preparation |
+| [sql-tutorial-basic](./sql-tutorial-basic/) | m2t | Text Part 1: relational schema to one SQL DDL file | available |
+| [sql-tutorial-structured](./sql-tutorial-structured/) | m2t | Text Part 2: named sections and one file per document | available |
+| [sql-tutorial-configuration-based](./sql-tutorial-configuration-based/) | m2t | Text Part 3: output layout and identifier quoting decided by a configuration model | available |
 
 ### Full examples
 
