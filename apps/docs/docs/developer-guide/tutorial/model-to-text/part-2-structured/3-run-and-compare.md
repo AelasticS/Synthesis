@@ -131,7 +131,7 @@ Applied in order, the two files produce the schema Part 1's single file
 produced. The difference is that they also produce it for schemas whose
 references are circular, which no single file with inline clauses can.
 
-## The two halves of the tutorial, again
+## Running it as the second step of a chain
 
 The sample model is the output of `eer-tutorial-basic`, so this
 generator can be run as the second step of a chain in exactly the way

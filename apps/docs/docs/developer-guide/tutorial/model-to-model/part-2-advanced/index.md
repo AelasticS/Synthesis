@@ -71,7 +71,7 @@ listing on the following pages is taken from it verbatim.
 - One new build setting: `"experimentalDecorators": true` in the
   package's `tsconfig.json`. Page 3 shows where it goes.
 
-## The arc
+## In this part
 
 1. **[The entity subtypes](./1-entity-subtypes.md)**: the advanced
    metamodel stage, what `Kernel` and `Weak` add over the basic stage,

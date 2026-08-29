@@ -110,7 +110,7 @@ every command output was produced by running it.
 - `"experimentalDecorators": true` in `tsconfig.json`, which Parts 1
   and 2 did not need.
 
-## The arc
+## In this part
 
 Three pages. The design space has to be declared before anything can be
 bound to it, the transformation reads it, and the run closes it.

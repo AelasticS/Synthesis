@@ -87,7 +87,7 @@ every listing on the following pages is taken from it verbatim.
 - `"experimentalDecorators": true` in `tsconfig.json`, unchanged from
   Part 2.
 
-## The arc
+## In this part
 
 The four pages follow the order in which the pieces have to exist. The
 design space comes first because nothing can be bound to it until it is

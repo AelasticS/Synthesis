@@ -184,7 +184,7 @@ of the loop. In Part 2 two loops write into two different sections, and
 each section is ordered by its own loop. The order of the file is no
 longer the order in which the template happens to mention things.
 
-## Sections are still invisible
+## Sections produce no text of their own
 
 Nothing on this page changes what a section contributes to the output,
 which is nothing. `tables-header`, `tables`, and `table_Book` produce

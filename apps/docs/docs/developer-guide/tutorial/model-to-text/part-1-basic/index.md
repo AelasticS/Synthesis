@@ -64,7 +64,7 @@ Three ideas carry the whole part:
   language. It is imported from `@synthesis/engine`, and the manifest
   names it with the marker string `"text"`.
 
-## The arc
+## In this part
 
 Three pages, in the order the pieces have to exist.
 

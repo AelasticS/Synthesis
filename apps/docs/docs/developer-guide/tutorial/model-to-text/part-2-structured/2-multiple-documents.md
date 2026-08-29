@@ -180,7 +180,7 @@ anything up any more. The same fact about the model, a column having a
 one place instead of two, and it produces a statement in the other file
 instead of a clause in this one.
 
-## The template, whole
+## The complete template
 
 The previous page showed the first document and this page showed the
 second, both as fragments. Here is the finished `template()`, which is

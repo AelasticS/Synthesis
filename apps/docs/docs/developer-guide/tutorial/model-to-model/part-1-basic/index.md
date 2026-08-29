@@ -61,7 +61,7 @@ Three ideas carry the whole part:
   A metamodel declares its concepts as aelastics types and exposes one
   tag function per concept.
 
-## The arc
+## In this part
 
 The five pages follow the order in which the pieces actually have to
 exist. Metamodels come first because nothing can be written without

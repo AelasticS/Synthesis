@@ -58,7 +58,7 @@ listing on the following pages is taken from it verbatim.
   new build setting and no new dependency: unlike the model-to-model
   tutorial's Part 2, this part introduces no decorators.
 
-## The arc
+## In this part
 
 1. **[Sections](./1-sections.md)**: named sections as addresses,
    `SecParent` and the inverse property it writes, what happens when a
@@ -66,8 +66,8 @@ listing on the following pages is taken from it verbatim.
    a section.
 2. **[Multiple documents](./2-multiple-documents.md)**: why the foreign
    keys move to a second file, the rules that produce the `ALTER TABLE`
-   statements, and the two limits worth knowing about file output
-   today.
+   statements, the finished template and the two lines that fill both
+   documents, and how file names and folders work.
 3. **[Run and compare](./3-run-and-compare.md)**: the run, both
    generated files in full, a comparison against Part 1's single file,
    and what remains open for Part 3.
