@@ -62,4 +62,4 @@ The transformation tutorial walks through exactly this package shape,
 first without variability and then with decision, binding, and
 configuration models. The `examples/` catalog of the Synthesis
 repository holds finished packages, from the minimal rel-copy to the
-decision-based eer-to-relational; make yours look like those.
+configuration-based eer-to-relational; make yours look like those.

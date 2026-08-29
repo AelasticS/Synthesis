@@ -86,9 +86,9 @@ consents, so every run names its own data. See [Pipelines](./guides/pipelines.md
 
 ## Decisions and configurations
 
-Many transformations are **decision-based**: they leave design decisions
+Many transformations are **configuration-based**: they leave design decisions
 open (say, a naming convention) and declare defaults. `synth` never applies
-defaults silently: a decision-based run must either name a reviewed
+defaults silently: a configuration-based run must either name a reviewed
 **configuration model** (`--config <ref>`) or accept the generated defaults
 explicitly (`--default-configs`), and every applied default is announced in
 the output. With neither, the run aborts before any engine work. The full

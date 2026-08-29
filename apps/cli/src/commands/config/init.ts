@@ -37,7 +37,7 @@ interface InitFlags {
 export default class ConfigInit extends BaseCommand {
   static override description = `Generate the default configuration model for a transformation on a model.
 
-Runs the transformation's default-configuration generation (one default choice per issue its binding model attaches, global and per-element) against the model named with --for and saves the result as an editable configuration model in the workspace; this is the same generation 'transformation run --default-configs' accepts in memory. Edit the saved file to steer the transformation, then pass it to 'transformation run --config'. In a terminal session, a missing transformation opens a picker over the installed decision-based transformations and a missing --for over the models matching its source metamodel; piped, scripted, --json, --quiet, and CI invocations never prompt. Exit codes: 2 for a source-metamodel mismatch or a result that fails the import gate, 3 for an unknown transformation or missing model.`
+Runs the transformation's default-configuration generation (one default choice per issue its binding model attaches, global and per-element) against the model named with --for and saves the result as an editable configuration model in the workspace; this is the same generation 'transformation run --default-configs' accepts in memory. Edit the saved file to steer the transformation, then pass it to 'transformation run --config'. In a terminal session, a missing transformation opens a picker over the installed configuration-based transformations and a missing --for over the models matching its source metamodel; piped, scripted, --json, --quiet, and CI invocations never prompt. Exit codes: 2 for a source-metamodel mismatch or a result that fails the import gate, 3 for an unknown transformation or missing model.`
 
   static override examples = [
     '<%= config.bin %> <%= command.id %> eer-to-relational --for com.example/persons',
@@ -91,7 +91,7 @@ Runs the transformation's default-configuration generation (one default choice p
   private async runParsed(tx: string, forRef: string, flags: InitFlags): Promise<void> {
     const json = Boolean(flags.json)
 
-    // 1. Resolve the installed transformation; only decision-based ones
+    // 1. Resolve the installed transformation; only configuration-based ones
     // have anything to configure
     let packageDir: string
     let manifest: TxManifest
@@ -104,7 +104,7 @@ Runs the transformation's default-configuration generation (one default choice p
     if (!manifest.variability) {
       this.jsonAwareFail(
         json,
-        `Transformation '${manifest.name}' is not decision-based (its manifest declares no decision/binding model parts); there is nothing to configure.`,
+        `Transformation '${manifest.name}' is not configuration-based (its manifest declares no decision/binding model parts); there is nothing to configure.`,
         EXIT_CODES.FAILURE
       )
     }

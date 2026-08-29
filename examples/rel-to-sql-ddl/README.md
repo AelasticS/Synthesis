@@ -6,7 +6,7 @@ target is the engine's text-document metamodel (documents, sections,
 paragraphs), and the CLI serializes the resulting documents to files
 under `--out-dir`.
 
-The transformation is decision-based with a single global issue,
+The transformation is configuration-based with a single global issue,
 IdentifierQuoting: emit SQL identifiers verbatim (Unquoted, the
 default) or wrapped in double quotes (DoubleQuoted).
 

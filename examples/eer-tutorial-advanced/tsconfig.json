@@ -10,7 +10,8 @@
     "sourceMap": true,
     "skipLibCheck": true,
     "jsx": "react",
-    "jsxFactory": "createExprNode"
+    "jsxFactory": "createExprNode",
+    "experimentalDecorators": true
   },
   "include": ["src"]
 }

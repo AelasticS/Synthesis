@@ -401,7 +401,7 @@ describe('pickPipelineName', () => {
 })
 
 describe('completeConfigInitRequest', () => {
-  it('offers only decision-based transformations, then models matching the source metamodel', async () => {
+  it('offers only configuration-based transformations, then models matching the source metamodel', async () => {
     const deps = makeDeps(['rel-to-sql-ddl', 'com.example/persons-rel'])
     const result = await completeConfigInitRequest(deps, {})
     const [txPrompt, modelPrompt] = deps.prompter.calls
@@ -431,11 +431,11 @@ describe('completeConfigInitRequest', () => {
     expect(result).toEqual({ txName: 'eer-to-relational', forRef: 'com.example/persons' })
   })
 
-  it('fails a non-decision-based transformation BEFORE prompting for --for', async () => {
+  it('fails a non-configuration-based transformation BEFORE prompting for --for', async () => {
     const deps = makeDeps([])
     await expect(completeConfigInitRequest(deps, { txName: 'rel-copy' })).rejects.toMatchObject({
       exit: 1,
-      message: expect.stringContaining('is not decision-based')
+      message: expect.stringContaining('is not configuration-based')
     })
     // The whole point: the --for answer would be discarded, so it is never asked
     expect(deps.prompter.calls).toEqual([])

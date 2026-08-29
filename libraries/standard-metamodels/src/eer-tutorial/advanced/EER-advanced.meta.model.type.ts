@@ -41,7 +41,17 @@ t.inverseProps(Attribute, "attrEntity", Entity, "attributes")
 // The specialization part dispatches Entity2Table on these subtypes.
 export const Kernel = t.subtype(Entity, {}, "Kernel", EERTutorialAdvanced_TypeSchema)
 
-export const Weak = t.subtype(Entity, {}, "Weak", EERTutorialAdvanced_TypeSchema)
+// A weak entity is identified relative to an owner entity: its own
+// attributes carry only a partial key, so the owner link is what a
+// specialized rule turns into the rest of the key.
+export const Weak = t.subtype(
+  Entity,
+  {
+    owner: Entity,
+  },
+  "Weak",
+  EERTutorialAdvanced_TypeSchema
+)
 
 export const Mapping = t.subtype(
   ModelElement,

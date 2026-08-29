@@ -1,8 +1,8 @@
 {
-  "name": "rel-copy",
+  "name": "eer-tutorial-advanced",
   "version": "0.1.0",
   "private": true,
-  "description": "Minimal Synthesis m2m transformation: endogenous relational-to-relational copy",
+  "description": "Tutorial Part 2 companion: EER to relational transformation with a specialized entity rule",
   "author": "Sinisa Neskovic",
   "license": "Apache-2.0",
   "type": "module",

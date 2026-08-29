@@ -133,6 +133,6 @@ configuration models.
 
 ## Next
 
-- [Configurations](./configurations.md): decision-based transformations and
+- [Configurations](./configurations.md): configuration-based transformations and
   the configuration models that steer them.
 - [Pipelines](./pipelines.md): naming and replaying transformation chains.

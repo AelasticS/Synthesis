@@ -57,7 +57,7 @@ describe('config init', () => {
     expect(stderr).toContain('Transformation not found')
   })
 
-  it('rejects a transformation that is not decision-based', async () => {
+  it('rejects a transformation that is not configuration-based', async () => {
     // Manifest-only fixture: the check runs before any package code loads
     const plainDir = join(tempDir, 'plain-tx')
     mkdirSync(plainDir, { recursive: true })
@@ -76,7 +76,7 @@ describe('config init', () => {
     try {
       const { code, stderr } = await run(['config', 'init', 'plain-tx', '--for', 'com.example/persons'])
       expect(code).toBe(1)
-      expect(flatten(stderr)).toContain('not decision-based')
+      expect(flatten(stderr)).toContain('not configuration-based')
     } finally {
       await run(['tx', 'uninstall', 'plain-tx'])
     }

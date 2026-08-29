@@ -72,7 +72,7 @@ synth transformation show eer-to-relational
 
 The output names its kind (model-to-model), its source and target
 metamodels (EER → Relational), and, because this transformation is
-**decision-based**, every open issue with its options and default, for
+**configuration-based**, every open issue with its options and default, for
 example issue `NamingConvention` with options `SnakeCase` (default) and
 `CamelCase`. Nothing has executed yet; all of this comes from the package's
 manifest and decision model.
@@ -88,7 +88,7 @@ synth transformation run eer-to-relational --in com.example/persons
 In a script this fails (exit 2) before any engine work:
 
 ```text
-Transformation 'eer-to-relational' is decision-based. Provide --config <ref>
+Transformation 'eer-to-relational' is configuration-based. Provide --config <ref>
 (create one with: synth config init eer-to-relational --for com.example/persons)
 or accept generated defaults explicitly with --default-configs.
 ```

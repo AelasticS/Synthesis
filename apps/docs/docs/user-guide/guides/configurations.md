@@ -11,7 +11,7 @@ guide for making those decisions with `synth`.
 
 ## Three models behind a decision
 
-A decision-based transformation ships two extra models inside its package
+A configuration-based transformation ships two extra models inside its package
 (they are **parts** of the package, not workspace models):
 
 - The **decision model** declares the open issues and their options, with
@@ -32,7 +32,7 @@ anything.
 `synth` never applies defaults silently. A default is still a design
 decision, and a decision applied implicitly is a decision nobody reviewed;
 the run's output would depend on choices the user never saw. So a
-decision-based run must say what to do, in one of exactly two ways:
+configuration-based run must say what to do, in one of exactly two ways:
 
 - `--config <ref>`: run on a configuration model you created and reviewed;
 - `--default-configs`: explicitly accept generated defaults for this run;
@@ -41,7 +41,7 @@ decision-based run must say what to do, in one of exactly two ways:
 With neither, the run aborts (exit 2) before any engine work:
 
 ```text
-Transformation 'eer-to-relational' is decision-based. Provide --config <ref>
+Transformation 'eer-to-relational' is configuration-based. Provide --config <ref>
 (create one with: synth config init eer-to-relational --for com.example/persons)
 or accept generated defaults explicitly with --default-configs.
 ```
@@ -137,7 +137,7 @@ overwrite the input model.
 
 In a chain, `--config` binds to **step 1 only**: a later step's input model
 is only produced mid-run, so no reviewed configuration can exist for it in
-advance. Every other decision-based step needs `--default-configs`. To
+advance. Every other configuration-based step needs `--default-configs`. To
 configure a later step explicitly, run stepwise: keep the intermediate,
 configure against it, then run the next step:
 

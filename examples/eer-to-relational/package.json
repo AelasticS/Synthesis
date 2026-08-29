@@ -2,7 +2,7 @@
   "name": "eer-to-relational",
   "version": "0.1.0",
   "private": true,
-  "description": "Decision-based Synthesis m2m transformation: EER schema to relational schema",
+  "description": "Configuration-based Synthesis m2m transformation: EER schema to relational schema",
   "author": "Sinisa Neskovic",
   "license": "Apache-2.0",
   "type": "module",

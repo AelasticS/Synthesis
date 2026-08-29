@@ -34,10 +34,11 @@ synth model show demo/library-rel
 
 The sample Library schema has one 1:N relationship (writtenBy) and one
 M:N relationship (categorizedAs); the output contains `Book`, `Author`,
-and `Category` tables, a `BookId_FK`-style foreign key on `Book`, and a
-`categorizedAs` join table with two foreign keys.
+and `Category` tables, an `AuthorId_FK` foreign key column grafted onto
+`Book`, and a `categorizedAs` join table with two foreign keys.
 
 ## What to look at next
 
-Part 2's companion adds Kernel and Weak entity subtypes and specializes
-the entity rule with `@SpecPoint`/`@SpecOption`.
+[eer-tutorial-advanced](../eer-tutorial-advanced/), the Part 2
+companion, adds Kernel and Weak entity subtypes and specializes the
+entity rule with `@SpecPoint` and `@SpecOption`.

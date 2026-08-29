@@ -81,12 +81,16 @@ Weak2Table(w: et.IWeak): ExprNode<rt.ITable> {
 
 When `Entity2Table` is called with a source element:
 
-1. The framework checks the runtime type of the element against the store's type system.
-2. If the element is a `Kernel`, the `Kernel2Table` specialization is selected.
-3. If the element is a `Weak`, the `Weak2Table` specialization is selected.
-4. If no specialization matches, the base rule (`Entity2Table`) runs as the fallback.
+1. The framework reads the runtime type of the element from the store.
+2. It scans the registered specializations in declaration order and selects the first one whose declared type matches that runtime type.
+3. The base rule runs as well: its result becomes the abstract parent, and the selected specialization's result is attached to it (see Result Merging below).
+4. If no specialization matches, the dispatch throws `No specialized method found`.
 
-The dispatch is deterministic. The most specific matching rule wins. This mirrors method dispatch in object-oriented languages, but applied to transformation rules.
+Two consequences are worth knowing before you rely on this.
+
+**Dispatch is total, so the options must cover every type the rule receives.** There is no fallback to the base rule on its own. If a transformation can encounter a plain `Entity`, declare a specialization for it; otherwise the run fails at that element.
+
+**The match tests whether the specialization's declared type is a subtype of the element's runtime type.** For the ordinary case, where each element's runtime type is exactly one of the declared option types, this selects the option you expect. It also means an element of the common supertype (a plain `Entity` here) matches the first registered specialization rather than being rejected, and that a type more specific than any declared option is not matched at all. Deeper hierarchies therefore need their own explicit specializations.
 
 ## Result Merging
 

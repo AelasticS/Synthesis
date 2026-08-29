@@ -27,7 +27,7 @@ synth transformation install ./rel-to-sql-ddl
 # See what a transformation declares (kind, metamodels, open decisions)
 synth transformation show eer-to-relational
 
-# Run EER -> relational. The transformation is decision-based, so consent
+# Run EER -> relational. The transformation is configuration-based, so consent
 # is explicit: --default-configs accepts the generated default decisions,
 # and every applied default is announced in the output.
 synth transformation run eer-to-relational --in com.example/persons \

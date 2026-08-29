@@ -1,6 +1,6 @@
 # eer-to-relational
 
-The flagship decision-based transformation: an EER schema becomes a
+The flagship configuration-based transformation: an EER schema becomes a
 relational schema, and the design questions that have no single right
 answer are left open as explicit decisions, closed per run by a
 configuration model. Three issues are on offer:

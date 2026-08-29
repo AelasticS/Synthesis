@@ -13,36 +13,32 @@ standalone starting point.
 
 ## Catalog
 
-Fundamentals
+### Tutorial companions
+
+Every part of the model-to-model tutorial has its own complete,
+independent package. Each one is the finished state of that part, so it
+doubles as the answer key while you follow along.
 
 | Example | Kind | Shows | Status |
 | --- | --- | --- | --- |
-| [rel-copy](./rel-copy/) | m2m | The minimal transformation: class, manifest, install, run | available |
-| [eer-tutorial-basic](./eer-tutorial-basic/) | m2m | Tutorial Part 1: simple EER to relational, fixed logic | available |
-| tasklist-to-html | m2t | Authoring your own metamodel + simple text generation | planned |
+| [eer-tutorial-basic](./eer-tutorial-basic/) | m2m | Part 1: simple EER to relational with fixed logic | available |
+| [eer-tutorial-advanced](./eer-tutorial-advanced/) | m2m | Part 2: entity rule specialization with `@SpecPoint` and `@SpecOption` | available |
+| eer-tutorial-configuration-based | m2m | Part 3: relationship mapping decided by a configuration model | in preparation |
+| eer-tutorial-higher-order | m2m | Part 4: higher-order templates | in preparation |
 
-Text generation (m2t)
+### Full examples
 
-| Example | Kind | Shows | Status |
-| --- | --- | --- | --- |
-| [rel-to-sql-ddl](./rel-to-sql-ddl/) | m2t | Decision-based SQL DDL generation | available |
-| eer-to-markdown-docs | m2t | Markdown documentation from any EER model | planned |
-| eer-to-mermaid-er | m2t | Mermaid `erDiagram` source from an EER model | planned |
-| types-to-typescript | m2t | types-metamodel → TypeScript declarations | planned |
-
-Variability (decision-based)
+Larger packages that stand on their own rather than teaching one concept
+at a time.
 
 | Example | Kind | Shows | Status |
 | --- | --- | --- | --- |
-| [eer-to-relational](./eer-to-relational/) | m2m | The flagship: decision model, binding model, `parts` | available |
-| bpm-to-mermaid | m2t | BPM process model → Mermaid flowchart | planned |
-| one-source-many-configs | scenario | Same source, several configurations, different outputs | planned |
+| [eer-to-relational](./eer-to-relational/) | m2m | Configuration-based transformation over the full EER metamodel: decision model, binding model, manifest `parts` | available |
+| [rel-to-sql-ddl](./rel-to-sql-ddl/) | m2t | Text generation with one global configuration issue (identifier quoting) | available |
 
-Composition
-
-| Example | Kind | Shows | Status |
-| --- | --- | --- | --- |
-| eer-to-sql-pipeline | pipeline | Chaining eer-to-relational → rel-to-sql-ddl | planned |
+Further examples (text generation from EER models, Mermaid diagrams,
+TypeScript declarations, pipeline composition) are under discussion and
+will be added to this table as they are agreed.
 
 The catalog grows incrementally; each example is self-contained, so new
 domains can be added at any time.
@@ -60,7 +56,7 @@ domains can be added at any time.
 - Every example is smoke tested through the real CLI: its `test` script
   runs [smoke.mjs](./smoke.mjs), which installs the package into an
   isolated workspace, imports the sample models, and executes one run
-  (with default configurations when the package is decision-based). CI
+  (with default configurations when the package is configuration-based). CI
   runs this for every example on every pull request
   (`.github/workflows/examples.yml`), so the catalog stays executable
   truth rather than prose.

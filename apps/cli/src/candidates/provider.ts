@@ -33,7 +33,7 @@ export interface TxCandidate {
   kind: TxKind
   sourceMetamodel: string
   targetMetamodel: string
-  /** True iff the transformation is decision-based. */
+  /** True iff the transformation is configuration-based. */
   variability: boolean
   /** package.json description ('' when absent). */
   description: string

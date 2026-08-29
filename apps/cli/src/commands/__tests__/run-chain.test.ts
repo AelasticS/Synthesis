@@ -51,7 +51,7 @@ describe('chain pre-flight', () => {
     ])
     expect(code).toBe(2)
     const message = flatten(stderr)
-    expect(message).toContain('step 1 (eer-to-relational) is decision-based')
+    expect(message).toContain('step 1 (eer-to-relational) is configuration-based')
     expect(message).toContain('--config')
     expect(message).toContain('synth config init eer-to-relational --for com.example/persons')
     expect(message).toContain('--default-configs')
@@ -70,7 +70,7 @@ describe('chain pre-flight', () => {
     ])
     expect(code).toBe(2)
     const message = flatten(stderr)
-    expect(message).toContain('step 2 (rel-to-sql-ddl) is decision-based')
+    expect(message).toContain('step 2 (rel-to-sql-ddl) is configuration-based')
     expect(message).toContain('produced mid-run')
     expect(message).toContain('--default-configs')
     expect(existsSync(join(tempDir, 'never'))).toBe(false)
@@ -275,12 +275,12 @@ describe('chain execution', () => {
     expect(existsSync(join(modelsDir, 'com', 'example', 'run-rel.tsx'))).toBe(true)
   })
 
-  it('aborts a decision-based single run without consent (exit 2)', async () => {
+  it('aborts a configuration-based single run without consent (exit 2)', async () => {
     const { code, stderr } = await run([
       'tx', 'run', 'eer-to-relational', '--in', 'com.example/persons', '--out', 'com.example/never'
     ])
     expect(code).toBe(2)
-    expect(flatten(stderr)).toContain(`Transformation 'eer-to-relational' is decision-based`)
+    expect(flatten(stderr)).toContain(`Transformation 'eer-to-relational' is configuration-based`)
   })
 })
 

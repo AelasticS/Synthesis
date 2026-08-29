@@ -377,10 +377,6 @@
       "projectFolder": "apps/cli"
     },
     {
-      "packageName": "rel-copy",
-      "projectFolder": "examples/rel-copy"
-    },
-    {
       "packageName": "eer-to-relational",
       "projectFolder": "examples/eer-to-relational"
     },
@@ -395,6 +391,10 @@
     {
       "packageName": "eer-tutorial-basic",
       "projectFolder": "examples/eer-tutorial-basic"
+    },
+    {
+      "packageName": "eer-tutorial-advanced",
+      "projectFolder": "examples/eer-tutorial-advanced"
     }
 
     // {

@@ -279,7 +279,7 @@ function normalizeParts(
   if ((parts.decisionModel === undefined) !== (parts.bindingModel === undefined)) {
     fail(
       parts.decisionModel === undefined ? 'parts.decisionModel' : 'parts.bindingModel',
-      `must be declared together with its counterpart (a decision-based transformation needs both 'parts.decisionModel' and 'parts.bindingModel')`
+      `must be declared together with its counterpart (a configuration-based transformation needs both 'parts.decisionModel' and 'parts.bindingModel')`
     )
   }
   return parts

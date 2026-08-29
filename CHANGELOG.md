@@ -39,7 +39,7 @@ overall version history.
   packages.** Three examples graduate from CLI test fixtures into
   self-contained packages with TypeScript sources, sample models, and
   walkthrough READMEs: rel-copy (minimal m2m), eer-to-relational
-  (decision-based m2m, with package-relative manifest parts), and
+  (configuration-based m2m, with package-relative manifest parts), and
   rel-to-sql-ddl (m2t). A generic smoke harness (`examples/smoke.mjs`)
   runs the full install-and-run loop for every example from its `test`
   script.
@@ -160,12 +160,12 @@ overall version history.
 ### Changed
 
 - **BREAKING (CLI): decisions are never applied implicitly.** A
-  decision-based transformation runs only with an explicit `--config <ref>`
+  configuration-based transformation runs only with an explicit `--config <ref>`
   or the `--default-configs` consent flag; with neither, the run aborts
   (exit 2) before any engine work with a message teaching both paths. The
   previous behavior of silently generating and applying default
   configurations is gone. In chains and pipelines, `--config` binds to
-  step 1 only; every other decision-based step takes `--default-configs`
+  step 1 only; every other configuration-based step takes `--default-configs`
   or the stepwise path (`--keep-intermediates` + `config init` against
   the kept intermediate).
 - **BREAKING (CLI): canonical command names with typing aliases.** Every

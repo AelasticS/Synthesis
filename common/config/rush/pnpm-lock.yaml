@@ -157,7 +157,7 @@ importers:
         specifier: ~5.9.3
         version: 5.9.3
 
-  ../../examples/eer-tutorial-basic:
+  ../../examples/eer-tutorial-advanced:
     dependencies:
       '@synthesis/engine':
         specifier: workspace:*
@@ -176,7 +176,7 @@ importers:
         specifier: ~5.9.3
         version: 5.9.3
 
-  ../../examples/rel-copy:
+  ../../examples/eer-tutorial-basic:
     dependencies:
       '@synthesis/engine':
         specifier: workspace:*

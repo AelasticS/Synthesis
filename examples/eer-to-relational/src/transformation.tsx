@@ -1,7 +1,7 @@
 /** @jsx createExprNode */
 
 /**
- * Decision-based EER to relational transformation, the flagship Synthesis
+ * Configuration-based EER to relational transformation, the flagship Synthesis
  * example. Three design issues are left open by the transformation and
  * closed per run by a configuration model: how 1:N relationships are
  * implemented (foreign key or join table), how primary keys are generated

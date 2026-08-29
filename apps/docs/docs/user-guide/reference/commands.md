@@ -154,7 +154,7 @@ and binding model parts) without loading code.
 | `synth transformation install <package>` | Install from an npm name, git URL, local directory, or tarball; the manifest's claims are verified against the loaded transformation class. |
 | `synth transformation uninstall <name>` | Remove an installed transformation. Refused (exit 2) while any saved pipeline lists it as a step; update or `pipeline rm` those pipelines first. |
 | `synth transformation ls` | List installed transformations with versions. |
-| `synth transformation show <name>` | Print kind, source/target metamodels, and, for decision-based transformations, every issue with its options and defaults (loaded from the package's decision model). |
+| `synth transformation show <name>` | Print kind, source/target metamodels, and, for configuration-based transformations, every issue with its options and defaults (loaded from the package's decision model). |
 | `synth transformation run <tx> [<tx> ...]` | Run one transformation or a chain; see below. |
 | `synth transformation init <name>` | Scaffold a new transformation project (`package.json`, `synth.json`, `tsconfig.json`, `src/index.ts`). |
 | `synth transformation build` | Build the transformation project in the current directory. |
@@ -176,8 +176,8 @@ manifest's `kind`, never by the command name.
 | `--in <ref>` | Source model ref the first step transforms. Required. |
 | `--out <ref>` | Destination for the final result model (last step m2m only; default `<namespace>/<name>-<last-tx>` derived from `--in`). |
 | `--out-dir <dir>` | Output directory for generated files (last step m2t only). |
-| `--config <ref>` | Configuration model for step 1 (decision-based only). |
-| `--default-configs` | Explicitly accept generated default configurations for every decision-based step not covered by `--config`. |
+| `--config <ref>` | Configuration model for step 1 (configuration-based only). |
+| `--default-configs` | Explicitly accept generated default configurations for every configuration-based step not covered by `--config`. |
 | `--save-config <ref>` | Persist the generated default configuration as a workspace model (single step, only with `--default-configs`). |
 | `--keep-intermediates` | Also write every intermediate chain result as a workspace model at `<namespace>/<name>-<step-tx>`. |
 | `--save-as <name>` | After a successful run, save the steps as a pipeline (see [Pipelines](../guides/pipelines.md)). |
@@ -191,9 +191,9 @@ files under `--out-dir`. Existing targets are only replaced with
 
 ### The consent policy: decisions are never applied implicitly
 
-Many transformations are **decision-based**: they leave design decisions
+Many transformations are **configuration-based**: they leave design decisions
 open (say, a naming convention) and declare defaults. `synth` never applies
-those defaults silently. A decision-based run must carry exactly one of:
+those defaults silently. A configuration-based run must carry exactly one of:
 
 - `--config <ref>`: run on a reviewed, editable configuration model
   (created with `synth config init`, see [Configurations](../guides/configurations.md));
@@ -204,7 +204,7 @@ With neither, the run aborts (exit 2) **before any engine work**, and the
 error teaches both paths:
 
 ```text
-Transformation 'eer-to-relational' is decision-based. Provide --config <ref>
+Transformation 'eer-to-relational' is configuration-based. Provide --config <ref>
 (create one with: synth config init eer-to-relational --for com.example/persons)
 or accept generated defaults explicitly with --default-configs.
 ```
@@ -223,7 +223,7 @@ otherwise `--out` applies.
 
 Configuration consent in a chain: `--config` binds to **step 1 only**;
 an explicit configuration cannot exist for a model that is only produced
-mid-run. Every other decision-based step (and step 1 without `--config`)
+mid-run. Every other configuration-based step (and step 1 without `--config`)
 requires `--default-configs`. To configure a later step explicitly, run
 stepwise: keep the intermediate with `--keep-intermediates`, then
 `config init` against it and run the next step with `--config`; the full
