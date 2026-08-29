@@ -182,14 +182,20 @@ instead of a clause in this one.
 
 ## Two limits worth knowing
 
-**Documents are files in one flat directory.** Every document is
-written directly under `--out-dir`. The text metamodel does declare a
-`Directory` concept, and the components file exports a `Dir` tag, but
-the generator currently reports only the bare document name to the CLI,
-so wrapping documents in a directory does not create one: the files
-land at the top level anyway. A fix is in progress. Until it lands,
-plan for a flat set of files, and put any grouping you need into the
-file names, as this package does with `Library_rel-constraints.sql`.
+**This package writes a flat set of files, but folders are available.**
+Every document here is written directly under `--out-dir`, and the
+grouping this package needs lives in the file names, as with
+`Library_rel-constraints.sql`. If you want real folders, the text
+metamodel declares a `Directory` concept and the components file
+exports a `Dir` tag: wrap documents in `<Dir name="ddl">` and they are
+written to `ddl/` under the output directory.
+
+One thing to watch when you do. A directory contains items, meaning
+documents and other directories, not document elements. Sections
+produced at the top level of the model, the pattern this page just
+taught, must therefore stay outside the `Dir` and reach their document
+through `<SecParent>` as before. Putting them inside a directory fails
+with a message saying that `elements` is not declared on `Directory`.
 
 **Two documents cannot share a name.** Documents are model elements,
 and element names are unique across a whole model rather than per

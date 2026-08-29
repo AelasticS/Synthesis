@@ -498,13 +498,14 @@ That is the whole of what the CLI does with a document today: one `<Doc>`
 becomes one file, and every file lands directly under the output
 directory.
 
-A fourth layout that gave each table its own folder is the obvious next
-option, and the text metamodel already has a directory concept for
-expressing it. The generator's file reporting is flat today, so nested
-output is not usable yet and this tutorial does not teach it. When it
-lands, it lands as one more `@VarOption` on `documentLayout` and nothing
-else in the package changes, which is a fair summary of what declaring a
-design space buys.
+A fourth layout that grouped the files into folders is the obvious next
+option. The text metamodel has a `Directory` concept and the components
+file exports a `Dir` tag, and documents wrapped in one are written into
+that folder, so nothing prevents it. Adding it would mean one more
+`@VarOption` on `documentLayout` and no other change to the package,
+which is a fair summary of what declaring a design space buys: the set
+of admissible answers grows in one place, and every caller keeps
+working.
 
 ## Where you are
 
