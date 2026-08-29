@@ -180,22 +180,15 @@ anything up any more. The same fact about the model, a column having a
 one place instead of two, and it produces a statement in the other file
 instead of a clause in this one.
 
-## Two limits worth knowing
+## Two things worth knowing about documents
 
 **This package writes a flat set of files, but folders are available.**
 Every document here is written directly under `--out-dir`, and the
 grouping this package needs lives in the file names, as with
-`Library_rel-constraints.sql`. If you want real folders, the text
-metamodel declares a `Directory` concept and the components file
-exports a `Dir` tag: wrap documents in `<Dir name="ddl">` and they are
-written to `ddl/` under the output directory.
-
-One thing to watch when you do. A directory contains items, meaning
-documents and other directories, not document elements. Sections
-produced at the top level of the model, the pattern this page just
-taught, must therefore stay outside the `Dir` and reach their document
-through `<SecParent>` as before. Putting them inside a directory fails
-with a message saying that `elements` is not declared on `Directory`.
+`Library_rel-constraints.sql`. For real folders, wrap documents in a
+directory: `<Dir name="ddl">` around the two `<Doc>` elements writes
+them to `ddl/` under the output directory. A directory holds documents
+and other directories, so only the documents move inside it.
 
 **Two documents cannot share a name.** Documents are model elements,
 and element names are unique across a whole model rather than per

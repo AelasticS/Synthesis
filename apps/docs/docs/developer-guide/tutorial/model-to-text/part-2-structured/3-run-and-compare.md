@@ -145,21 +145,6 @@ synth transformation run eer-tutorial-basic sql-tutorial-structured \
 An EER schema goes in and two SQL files come out, with the relational
 schema existing only in memory between the steps.
 
-## Both packages are smoke tested
-
-Every example in the repository is exercised by the same script, which
-runs the full CLI loop in an isolated workspace and fails loudly if any
-step does. For these two packages it reports:
-
-```text
-sql-tutorial-basic: OK (generated Library_rel.sql)
-sql-tutorial-structured: OK (generated Library_rel-constraints.sql, Library_rel.sql)
-```
-
-That line is the reason the listings on these pages can be quoted
-verbatim: the packages are built and run in CI, so a change that breaks
-them breaks the build rather than quietly making the tutorial wrong.
-
 ## Where you are
 
 You have taken one generator and changed how its output is organized,
