@@ -173,12 +173,37 @@ target model; every rule invocation is recorded in a **trace** linking
 each target element back to the source elements it came from, giving
 bidirectional traceability for free.
 
-Rule selection is *subtype-aware*: when several rules could apply to a
-source element, the most specific one for the element's runtime type is
-dispatched. This is the mechanism behind
+Rule selection can be made *subtype-aware*: a rule marked as a
+specialization point dispatches on the runtime type of its source
+element, so each subtype gets its own rule instead of a branch inside a
+single rule. This is the mechanism behind
 [Polymorphic Rule Dispatch](./guides/polymorphic-dispatch.md). The full
 authoring workflow is in
 [Writing Transformations](./guides/writing-transformations.md).
+
+### Model to model, and model to text
+
+A transformation's target can be another model or it can be text, and
+Synthesis treats those as the same kind of thing.
+
+A **model-to-model** transformation (`m2m`) produces a model of the
+target metamodel: an EER schema becomes a relational schema, whose
+elements are ordinary model elements you can query, transform again, or
+store in the workspace.
+
+A **model-to-text** transformation (`m2t`) produces text, and it does so
+by targeting the engine's text-document metamodel, whose concepts are
+documents, sections, and paragraphs. Generating SQL means building a
+document expression whose paragraphs happen to contain SQL. Nothing
+about the rules changes: they are the same typed functions returning JSX
+over a target metamodel's components.
+
+The difference is what happens to the result. An m2m result is written
+back into the workspace as a model, with a provenance header recording
+what produced it. An m2t result is serialized to files in a directory.
+A transformation package declares which kind it is in its manifest, and
+the two compose: a chain may pass models from step to step and end with
+a text step, because text is terminal.
 
 ## Metamodels are type schemas
 
