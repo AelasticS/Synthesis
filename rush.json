@@ -349,7 +349,7 @@
       "projectFolder": "apps/docs"
     },
     {
-      "packageName": "@synthesis/cli",
+      "packageName": "@aelastics/synthesis-cli",
       "projectFolder": "apps/cli"
     },
     {

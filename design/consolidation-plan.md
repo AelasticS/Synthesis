@@ -148,9 +148,10 @@ Execution notes (agreed shape, decided at execution time):
       434 plus 4 resolution tests; 86 smoke)
 
 ### Stage 5: CLI rename
-- [ ] apps/cli package.json name `@aelastics/synthesis-cli`; binary stays
-      `synth`; workspace dependents updated (examples devDependency)
-- [ ] gates
+- [x] apps/cli package.json name `@aelastics/synthesis-cli`; binary stays
+      `synth`; workspace dependents, both smoke harness bin paths, the
+      release workflow and the pack script updated
+- [x] gates
 
 ### Stage 6: docs and catalog
 - [ ] design/architecture.md rewritten for the new structure
@@ -216,3 +217,5 @@ import rewrites fan out safely to subagents by directory.
   and the loader fallback landed with unit tests plus end-to-end proof
   through the tutorial smokes. All gates green on the first chain run:
   build, CLI 438 tests, 86 smoke, nine example/template smokes.
+- 2026-09-01: stage 5 complete. CLI renamed @aelastics/synthesis-cli,
+  binary still synth. Gates green.

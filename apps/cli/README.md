@@ -1,4 +1,4 @@
-# @synthesis/cli
+# @aelastics/synthesis-cli
 
 Synthesis model-driven engineering CLI.
 

@@ -1,5 +1,5 @@
 /**
- * @synthesis/cli - Synthesis model-driven engineering CLI
+ * @aelastics/synthesis-cli - Synthesis model-driven engineering CLI
  *
  * This module re-exports types and utilities for programmatic consumers.
  * The CLI itself is invoked via bin/run.js.

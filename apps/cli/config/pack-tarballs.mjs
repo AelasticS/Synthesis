@@ -87,7 +87,7 @@ const pkgJsonPath = join(cliRoot, 'package.json')
 const originalPkgJson = readFileSync(pkgJsonPath, 'utf-8')
 
 if (!existsSync(join(cliRoot, 'oclif.manifest.json'))) {
-  throw new Error('oclif.manifest.json missing; run `rush build --to @synthesis/cli` first')
+  throw new Error('oclif.manifest.json missing; run `rush build --to @aelastics/synthesis-cli` first')
 }
 
 try {

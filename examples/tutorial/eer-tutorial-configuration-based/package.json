@@ -22,6 +22,6 @@
   },
   "devDependencies": {
     "typescript": "~5.9.3",
-    "@synthesis/cli": "workspace:*"
+    "@aelastics/synthesis-cli": "workspace:*"
   }
 }

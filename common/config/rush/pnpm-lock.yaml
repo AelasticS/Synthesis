@@ -144,7 +144,7 @@ importers:
         specifier: workspace:*
         version: link:../metamodels/relational
     devDependencies:
-      '@synthesis/cli':
+      '@aelastics/synthesis-cli':
         specifier: workspace:*
         version: link:../../../apps/cli
       typescript:
@@ -186,7 +186,7 @@ importers:
         specifier: workspace:*
         version: link:../metamodels/relational
     devDependencies:
-      '@synthesis/cli':
+      '@aelastics/synthesis-cli':
         specifier: workspace:*
         version: link:../../../apps/cli
       typescript:
@@ -205,7 +205,7 @@ importers:
         specifier: workspace:*
         version: link:../metamodels/rel-tutorial
     devDependencies:
-      '@synthesis/cli':
+      '@aelastics/synthesis-cli':
         specifier: workspace:*
         version: link:../../../apps/cli
       typescript:
@@ -224,7 +224,7 @@ importers:
         specifier: workspace:*
         version: link:../metamodels/rel-tutorial
     devDependencies:
-      '@synthesis/cli':
+      '@aelastics/synthesis-cli':
         specifier: workspace:*
         version: link:../../../apps/cli
       typescript:
@@ -243,7 +243,7 @@ importers:
         specifier: workspace:*
         version: link:../metamodels/rel-tutorial
     devDependencies:
-      '@synthesis/cli':
+      '@aelastics/synthesis-cli':
         specifier: workspace:*
         version: link:../../../apps/cli
       typescript:
@@ -285,7 +285,7 @@ importers:
         specifier: workspace:*
         version: link:../metamodels/rel-tutorial
     devDependencies:
-      '@synthesis/cli':
+      '@aelastics/synthesis-cli':
         specifier: workspace:*
         version: link:../../../apps/cli
       typescript:
@@ -301,7 +301,7 @@ importers:
         specifier: workspace:*
         version: link:../metamodels/rel-tutorial
     devDependencies:
-      '@synthesis/cli':
+      '@aelastics/synthesis-cli':
         specifier: workspace:*
         version: link:../../../apps/cli
       typescript:
@@ -317,7 +317,7 @@ importers:
         specifier: workspace:*
         version: link:../metamodels/rel-tutorial
     devDependencies:
-      '@synthesis/cli':
+      '@aelastics/synthesis-cli':
         specifier: workspace:*
         version: link:../../../apps/cli
       typescript:
@@ -483,7 +483,7 @@ importers:
         specifier: workspace:*
         version: link:../../examples/tutorial/metamodels/rel-tutorial
     devDependencies:
-      '@synthesis/cli':
+      '@aelastics/synthesis-cli':
         specifier: workspace:*
         version: link:../../apps/cli
       typescript:
