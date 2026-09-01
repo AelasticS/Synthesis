@@ -6,8 +6,8 @@
  * configuration does not choose explicitly. Option names correspond to
  * the @VarOption methods of the transformation class.
  */
-import { createExprNode } from "@aelastics/synthesis/jsx-runtime";
-import { DecisionModel, ElementIssue, ModelIssue, Option, SimpleOption, } from "@aelastics/synthesis/decision-framework/decisions/1.decision-model/decision-meta.model-components";
+import { createExprNode } from "@aelastics/synthesis/jsx";
+import { DecisionModel, ElementIssue, ModelIssue, Option, SimpleOption, } from "@aelastics/synthesis/metamodels/decision";
 export const RelationSchemaDesignIssues = (store) => (createExprNode(DecisionModel, { name: "RelationSchemaDesign", description: "Design space for persistence strategies", store: store },
     createExprNode(ElementIssue, { name: "OneToManyStrategy", description: "How to implement 1:N relationships" },
         createExprNode(Option, { name: "ForeignKey", description: "Use Foreign Key in the Many side table", isDefault: false, optionType: createExprNode(SimpleOption, { name: "FK" }) }),

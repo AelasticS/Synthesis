@@ -1,12 +1,12 @@
 /** @jsx createExprNode */
 
-import { createExprNode } from "@aelastics/synthesis/jsx-runtime"
-import { ExprNode } from "@aelastics/synthesis/jsx-runtime"
-import { ModelStore } from "@aelastics/synthesis/engine"
+import { createExprNode } from "@aelastics/synthesis/jsx"
+import { ExprNode } from "@aelastics/synthesis/jsx"
+import { ModelStore } from "@aelastics/synthesis/store"
 
-import * as dbmC from "@aelastics/synthesis/decision-framework/decisions/2.binding-model/binding-meta.model-components"
+import * as dbmC from "@aelastics/synthesis/metamodels/binding"
 import * as etC from "@aelastics/synthesis/metamodels/types/components"
-import * as gdmC from "@aelastics/synthesis/decision-framework/decisions/1.decision-model/decision-meta.model-components"
+import * as gdmC from "@aelastics/synthesis/metamodels/decision"
 
 // We assume the GDM and Source Metamodel are loaded in the store
 export const createBindingModel = (store: ModelStore) => (

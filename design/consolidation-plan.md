@@ -18,7 +18,10 @@ AI attribution in commits or files.
 Run after every stage; a stage is done only when all pass.
 
 - `rush build` (from the worktree root; run `rush update` once first, the
-  worktree has its own install state)
+  worktree has its own install state). Note: rush exits 1 whenever any
+  operation has warnings, and @synthesis/docs has pre-existing typedoc
+  warnings (verified identical on main), so the pass criterion is the
+  "Operations succeeded" line, not the exit code.
 - apps/cli: `rushx test` and `rushx smoke`. Baseline before stage 3:
   441 tests, 86 smoke checks. Stage 3 deletes the example commands, so
   record the new baseline in the stage log when it lands.
@@ -67,15 +70,21 @@ and prefix replacement over subpaths is collision-free.
 - [x] gates
 
 ### Stage 2: the namespaced export surface
-- [ ] add subpath exports: ./jsx, ./metamodel, ./store, ./m2m, ./m2t,
-      ./variability, ./metamodels/{decision,binding,configuration,trace,types}
-      each with /model where the convention applies
-- [ ] rewrite all consumer imports to the namespaces (per-symbol, fan out
-      by package); delete the root barrel, root exports nothing
-- [ ] CLI emit sites write the new specifiers (tx/execute.ts model imports,
-      tx/config-model.ts configuration-model imports)
-- [ ] CLI tests/fixtures that assert on old specifiers updated
-- [ ] gates
+- [x] add subpath exports: ./jsx, ./metamodel, ./store, ./m2m, ./m2t,
+      ./variability, ./metamodels/{decision,binding,configuration,trace,
+      trace-extensions,types}, decision/binding/configuration each with
+      /model per the flat-components-plus-model convention (trace-extensions
+      added beyond the original table to avoid mixing the two trace
+      metamodels in one flat namespace)
+- [x] rewrite all consumer imports to the namespaces (per-symbol, two
+      parallel subagents); compatibility subpaths removed from the exports
+      map; root exports nothing
+- [x] CLI emit sites write the new specifiers (generated models import
+      @aelastics/synthesis/jsx; generated configuration models import
+      @aelastics/synthesis/metamodels/{configuration,decision,binding} and
+      /configuration/model)
+- [x] CLI tests/fixtures that assert on old specifiers updated
+- [x] gates
 
 ### Stage 3: retire the old example machinery
 - [ ] delete libraries/runner, libraries/examples; remove from rush.json
@@ -161,3 +170,10 @@ import rewrites fan out safely to subagents by directory.
   libraries/examples was adapted from the deleted v2 relational variant
   to the surviving content, which diminishes its FK demonstration; that
   package retires in stage 3, so no action.
+- 2026-09-01: stage 2 complete. Final namespaced surface built and all
+  consumers flipped per symbol; gates green with unmasked exit codes (CLI
+  441 tests, 86 smoke, 9 example/template smokes). Two process lessons
+  now binding: verify sweeps with `git grep` (plain grep on this machine
+  silently missed apps/cli/src/tx/decisions.ts twice), and never pipe a
+  gate through tail without pipefail, since it masks the exit code (also
+  the source of the rush-warnings note under Gates).

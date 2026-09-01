@@ -1,6 +1,7 @@
 /** @jsx createExprNode */
-import { ExprNode, ModelStore } from "@aelastics/synthesis/engine";
-import * as t from "@aelastics/synthesis/decision-framework/decisions/1.decision-model/decision-meta.model";
+import { ExprNode } from "@aelastics/synthesis/jsx";
+import { ModelStore } from "@aelastics/synthesis/store";
+import * as t from "@aelastics/synthesis/metamodels/decision/model";
 /**
  * Design space of the Rel to DDL text generation. One global (model-wide)
  * issue: how SQL identifiers are emitted. `Unquoted` is the default and

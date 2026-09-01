@@ -23,10 +23,10 @@ This example composes every major piece of Synthesis in a single Runnable:
 | Layer    | File                  | Reuses                                                     |
 |----------|-----------------------|------------------------------------------------------------|
 | Source   | `source-model.tsx`    | `@synthesis/standard-metamodels/eer`                       |
-| Config   | `decision-config.tsx` | `@aelastics/synthesis/decision-framework/.../configuration`          |
+| Config   | `decision-config.tsx` | `@aelastics/synthesis/metamodels/configuration`            |
 | M2M      | `pipeline.ts`         | `eer-to-rel-small/EER2RelDomainWithDecisionTransformation` |
-| M2T      | `ddl-template.tsx`    | `@aelastics/synthesis/engine` M2T runtime                            |
-| Pipeline | `pipeline.ts`         | `@aelastics/synthesis/engine` `generate`                             |
+| M2T      | `ddl-template.tsx`    | `@aelastics/synthesis/m2t` M2T runtime                     |
+| Pipeline | `pipeline.ts`         | `@aelastics/synthesis/m2t` `generate`                      |
 | Runnable | `runnable.ts`         | `@synthesis/runner`                                        |
 
 The transformation logic is **not duplicated**: this folder imports and reuses

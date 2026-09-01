@@ -14,10 +14,10 @@
  * The tutorial walks through every step, and the examples/ catalog in
  * the Synthesis repository holds finished packages to compare with.
  */
-import { createExprNode } from '@aelastics/synthesis/jsx-runtime'
-import type { ExprNode } from '@aelastics/synthesis/jsx-runtime'
-import { abstractM2M } from '@aelastics/synthesis/engine'
-import type { ModelStore } from '@aelastics/synthesis/engine'
+import { createExprNode } from '@aelastics/synthesis/jsx'
+import type { ExprNode } from '@aelastics/synthesis/jsx'
+import { abstractM2M } from '@aelastics/synthesis/m2m'
+import type { ModelStore } from '@aelastics/synthesis/store'
 import * as rmT from '@synthesis/standard-metamodels/relational/model-legacy'
 import { RelSchema, Table, Column } from '@synthesis/standard-metamodels/relational/components-legacy'
 

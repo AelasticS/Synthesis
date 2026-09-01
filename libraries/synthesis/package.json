@@ -15,41 +15,61 @@
       "types": "./lib/index.d.ts",
       "default": "./lib/index.js"
     },
-    "./jsx-runtime": {
-      "types": "./lib/jsx-runtime/index.d.ts",
-      "default": "./lib/jsx-runtime/index.js"
+    "./jsx": {
+      "types": "./lib/jsx.d.ts",
+      "default": "./lib/jsx.js"
     },
-    "./jsx-runtime/*": {
-      "types": "./lib/jsx-runtime/*.d.ts",
-      "default": "./lib/jsx-runtime/*.js"
+    "./metamodel": {
+      "types": "./lib/metamodel.d.ts",
+      "default": "./lib/metamodel.js"
     },
-    "./metamodel-core": {
-      "types": "./lib/metamodel-core/index.d.ts",
-      "default": "./lib/metamodel-core/index.js"
+    "./store": {
+      "types": "./lib/store.d.ts",
+      "default": "./lib/store.js"
     },
-    "./metamodel-core/*": {
-      "types": "./lib/metamodel-core/*.d.ts",
-      "default": "./lib/metamodel-core/*.js"
+    "./m2m": {
+      "types": "./lib/m2m.d.ts",
+      "default": "./lib/m2m.js"
     },
-    "./engine": {
-      "types": "./lib/engine/index.d.ts",
-      "default": "./lib/engine/index.js"
+    "./m2t": {
+      "types": "./lib/m2t.d.ts",
+      "default": "./lib/m2t.js"
     },
-    "./engine/*": {
-      "types": "./lib/engine/*.d.ts",
-      "default": "./lib/engine/*.js"
+    "./variability": {
+      "types": "./lib/variability.d.ts",
+      "default": "./lib/variability.js"
     },
-    "./decision-framework": {
-      "types": "./lib/decision-framework/index.d.ts",
-      "default": "./lib/decision-framework/index.js"
+    "./metamodels/decision": {
+      "types": "./lib/metamodels/decision/index.d.ts",
+      "default": "./lib/metamodels/decision/index.js"
     },
-    "./decision-framework/*": {
-      "types": "./lib/decision-framework/*.d.ts",
-      "default": "./lib/decision-framework/*.js"
+    "./metamodels/decision/model": {
+      "types": "./lib/metamodels/decision/model.d.ts",
+      "default": "./lib/metamodels/decision/model.js"
     },
-    "./metamodels/types": {
-      "types": "./lib/metamodels/types/index.d.ts",
-      "default": "./lib/metamodels/types/index.js"
+    "./metamodels/binding": {
+      "types": "./lib/metamodels/binding/index.d.ts",
+      "default": "./lib/metamodels/binding/index.js"
+    },
+    "./metamodels/binding/model": {
+      "types": "./lib/metamodels/binding/model.d.ts",
+      "default": "./lib/metamodels/binding/model.js"
+    },
+    "./metamodels/configuration": {
+      "types": "./lib/metamodels/configuration/index.d.ts",
+      "default": "./lib/metamodels/configuration/index.js"
+    },
+    "./metamodels/configuration/model": {
+      "types": "./lib/metamodels/configuration/model.d.ts",
+      "default": "./lib/metamodels/configuration/model.js"
+    },
+    "./metamodels/trace": {
+      "types": "./lib/metamodels/trace/index.d.ts",
+      "default": "./lib/metamodels/trace/index.js"
+    },
+    "./metamodels/trace-extensions": {
+      "types": "./lib/metamodels/trace-extensions/index.d.ts",
+      "default": "./lib/metamodels/trace-extensions/index.js"
     },
     "./metamodels/types/model": {
       "types": "./lib/metamodels/types/types-meta.model.d.ts",
@@ -70,15 +90,20 @@
   },
   "typesVersions": {
     "*": {
-      "jsx-runtime": ["lib/jsx-runtime/index.d.ts"],
-      "jsx-runtime/*": ["lib/jsx-runtime/*.d.ts"],
-      "metamodel-core": ["lib/metamodel-core/index.d.ts"],
-      "metamodel-core/*": ["lib/metamodel-core/*.d.ts"],
-      "engine": ["lib/engine/index.d.ts"],
-      "engine/*": ["lib/engine/*.d.ts"],
-      "decision-framework": ["lib/decision-framework/index.d.ts"],
-      "decision-framework/*": ["lib/decision-framework/*.d.ts"],
-      "metamodels/types": ["lib/metamodels/types/index.d.ts"],
+      "jsx": ["lib/jsx.d.ts"],
+      "metamodel": ["lib/metamodel.d.ts"],
+      "store": ["lib/store.d.ts"],
+      "m2m": ["lib/m2m.d.ts"],
+      "m2t": ["lib/m2t.d.ts"],
+      "variability": ["lib/variability.d.ts"],
+      "metamodels/decision": ["lib/metamodels/decision/index.d.ts"],
+      "metamodels/decision/model": ["lib/metamodels/decision/model.d.ts"],
+      "metamodels/binding": ["lib/metamodels/binding/index.d.ts"],
+      "metamodels/binding/model": ["lib/metamodels/binding/model.d.ts"],
+      "metamodels/configuration": ["lib/metamodels/configuration/index.d.ts"],
+      "metamodels/configuration/model": ["lib/metamodels/configuration/model.d.ts"],
+      "metamodels/trace": ["lib/metamodels/trace/index.d.ts"],
+      "metamodels/trace-extensions": ["lib/metamodels/trace-extensions/index.d.ts"],
       "metamodels/types/model": ["lib/metamodels/types/types-meta.model.d.ts"],
       "metamodels/types/components": ["lib/metamodels/types/types-components.d.ts"],
       "metamodels/types/predefined-model": ["lib/metamodels/types/predefined-model.d.ts"],

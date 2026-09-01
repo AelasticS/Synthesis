@@ -1,16 +1,17 @@
 /** @jsx createExprNode */
 
-import { createExprNode } from "@aelastics/synthesis/jsx-runtime"
-import { ExprNode, ModelStore } from "@aelastics/synthesis/engine"
+import { createExprNode } from "@aelastics/synthesis/jsx"
+import { ExprNode } from "@aelastics/synthesis/jsx"
+import { ModelStore } from "@aelastics/synthesis/store"
 import {
   DecisionModel,
   ElementIssue,
   ModelIssue,
   Option,
   SimpleOption,
-} from "@aelastics/synthesis/decision-framework/decisions/1.decision-model/decision-meta.model-components"
+} from "@aelastics/synthesis/metamodels/decision"
 
-import * as t from "@aelastics/synthesis/decision-framework/decisions/1.decision-model/decision-meta.model"
+import * as t from "@aelastics/synthesis/metamodels/decision/model"
 
 export const RelationSchemaDesignIssues = (store: ModelStore): ExprNode<t.IDecisionModel> => (
   <DecisionModel

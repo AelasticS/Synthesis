@@ -1,5 +1,5 @@
 import * as r from "./REL.meta.model.type.legacy"
-import { CpxTemplate, ExprNode, IStore, Template, WithRefProps } from "@aelastics/synthesis/jsx-runtime"
+import { CpxTemplate, ExprNode, IStore, Template, WithRefProps } from "@aelastics/synthesis/jsx"
 
 export type IModelProps = WithRefProps<r.IRelSchema> & { store?: IStore }
 

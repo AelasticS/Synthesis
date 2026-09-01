@@ -1,7 +1,7 @@
 /** @jsx createExprNode */
 
-import { ExprNode, ElementInstance } from "@aelastics/synthesis/jsx-runtime";
-import { createExprNode } from "@aelastics/synthesis/jsx-runtime";
+import { ExprNode, ElementInstance } from "@aelastics/synthesis/jsx";
+import { createExprNode } from "@aelastics/synthesis/jsx";
 import * as t from "@aelastics/synthesis/metamodels/types/model";
 import {
   TypeObject,
@@ -15,9 +15,10 @@ import {
   TypeArray,
   ArrayElementType,
 } from "@aelastics/synthesis/metamodels/types/components";
-import { Context } from "@aelastics/synthesis/jsx-runtime";
-import { ModelStore, generate } from "@aelastics/synthesis/engine";
-import * as m2tmm from "@aelastics/synthesis/engine";
+import { Context } from "@aelastics/synthesis/jsx";
+import { ModelStore } from "@aelastics/synthesis/store";
+import { generate } from "@aelastics/synthesis/m2t";
+import * as m2tmm from "@aelastics/synthesis/m2t";
 import { Types2TextModelTransformations } from "./types2text.model-transformation";
 import { importPredefinedTypes } from "@aelastics/synthesis/metamodels/types/predefined-model";
 

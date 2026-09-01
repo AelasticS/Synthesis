@@ -1,14 +1,14 @@
 /** @jsx createExprNode */
 
 
-import { createExprNode } from "@aelastics/synthesis/jsx-runtime";
-import { ExprNode } from "@aelastics/synthesis/jsx-runtime";
+import { createExprNode } from "@aelastics/synthesis/jsx";
+import { ExprNode } from "@aelastics/synthesis/jsx";
 import * as et from "@synthesis/standard-metamodels/eer/model";
 import { EERSchema, Kernel, Attribute, Domain, Relationship, OrdinaryMapping, Weak, WeakMapping } from "@synthesis/standard-metamodels/eer";
 
 
-import { Context } from "@aelastics/synthesis/jsx-runtime";
-import { ModelStore } from "@aelastics/synthesis/engine";
+import { Context } from "@aelastics/synthesis/jsx";
+import { ModelStore } from "@aelastics/synthesis/store";
 
 const testStore = new ModelStore();
 const context = new Context();

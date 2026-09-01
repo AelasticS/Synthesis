@@ -1,9 +1,9 @@
 /** @jsx createExprNode */
-import type { ExprNode } from '@aelastics/synthesis/jsx-runtime';
-import type { ModelStore } from '@aelastics/synthesis/engine';
-import * as m2tmm from '@aelastics/synthesis/engine';
-import { DecisionAwareM2M } from '@aelastics/synthesis/decision-framework';
-import * as cm from '@aelastics/synthesis/decision-framework/decisions/3.configuration-model/configuration-meta.model';
+import type { ExprNode } from '@aelastics/synthesis/jsx';
+import type { ModelStore } from '@aelastics/synthesis/store';
+import * as m2tmm from '@aelastics/synthesis/m2t';
+import { DecisionAwareM2M } from '@aelastics/synthesis/variability';
+import * as cm from '@aelastics/synthesis/metamodels/configuration/model';
 import * as rmT from '@synthesis/standard-metamodels/rel-tutorial/model';
 /** One foreign key: the column that points, and the column it points at. */
 type ForeignKey = {

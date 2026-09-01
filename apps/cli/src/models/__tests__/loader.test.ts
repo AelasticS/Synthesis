@@ -4,7 +4,7 @@ import { dirname, join, resolve } from 'node:path'
 import { createRequire } from 'node:module'
 import { fileURLToPath } from 'node:url'
 
-import { ModelStore } from '@aelastics/synthesis/engine'
+import { ModelStore } from '@aelastics/synthesis/store'
 
 import {
   ModelClosureError,
@@ -78,7 +78,7 @@ describe('renderModel', () => {
     expect((root as { name: string }).name).toBe('Persons')
     expect((header as { kind: string }).kind).toBe('model')
     // Rendered models register under their qualified name below the
-    // jsx-runtime top-level namespace.
+    // jsx module's top-level namespace.
     expect(store.getByName('//www.aelastics.org/Persons')).toBe(root)
   })
 

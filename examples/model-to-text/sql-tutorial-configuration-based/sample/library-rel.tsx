@@ -1,8 +1,8 @@
 /** @jsx createExprNode */
 
-import { createExprNode } from '@aelastics/synthesis/jsx-runtime'
-import type { ExprNode } from '@aelastics/synthesis/jsx-runtime'
-import type { ModelStore } from '@aelastics/synthesis/engine'
+import { createExprNode } from '@aelastics/synthesis/jsx'
+import type { ExprNode } from '@aelastics/synthesis/jsx'
+import type { ModelStore } from '@aelastics/synthesis/store'
 import { RelSchema, Table, Column } from '@synthesis/standard-metamodels/rel-tutorial/components'
 import type * as rmT from '@synthesis/standard-metamodels/rel-tutorial/model'
 

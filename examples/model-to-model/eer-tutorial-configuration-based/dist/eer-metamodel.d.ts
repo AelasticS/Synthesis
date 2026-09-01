@@ -11,7 +11,7 @@
  * the vocabulary the decision machinery talks about, not a second
  * definition of the language.
  */
-import type { ModelStore } from '@aelastics/synthesis/engine';
-import type { ExprNode } from '@aelastics/synthesis/jsx-runtime';
+import type { ModelStore } from '@aelastics/synthesis/store';
+import type { ExprNode } from '@aelastics/synthesis/jsx';
 import type * as t from '@aelastics/synthesis/metamodels/types/model';
 export declare const EERTutorialMetamodel: (store: ModelStore) => ExprNode<t.ITypeModel>;

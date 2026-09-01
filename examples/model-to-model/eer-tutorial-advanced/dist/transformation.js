@@ -14,8 +14,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
  * relationship logic is still the plain conditional of Part 1; Part 3
  * turns that one into a configuration-based rule.
  */
-import { createExprNode } from '@aelastics/synthesis/jsx-runtime';
-import { abstractM2M, E2E, SpecPoint, SpecOption } from '@aelastics/synthesis/engine';
+import { createExprNode } from '@aelastics/synthesis/jsx';
+import { abstractM2M, E2E, SpecPoint, SpecOption } from '@aelastics/synthesis/m2m';
 import * as em from '@synthesis/standard-metamodels/eer-tutorial/advanced/model';
 import { RelSchema, Table, Column } from '@synthesis/standard-metamodels/rel-tutorial/components';
 export class EER2RelAdvancedTransformation extends abstractM2M {

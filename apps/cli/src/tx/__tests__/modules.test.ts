@@ -21,7 +21,7 @@ afterAll(() => {
 describe('importTxModule', () => {
   it('imports a bare package specifier through the CLI module registry', async () => {
     const dir = makePackageDir()
-    const mod = await importTxModule(dir, '@aelastics/synthesis/engine')
+    const mod = await importTxModule(dir, '@aelastics/synthesis/store')
     expect(typeof mod.ModelStore).toBe('function')
   })
 

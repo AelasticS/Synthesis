@@ -1,4 +1,4 @@
-import type { ModelStore } from '@aelastics/synthesis/engine'
+import type { ModelStore } from '@aelastics/synthesis/store'
 
 import { indexDecisionModel, validateConfigStructure } from '../decisions.js'
 

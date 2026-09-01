@@ -1,13 +1,13 @@
 /** @jsx createExprNode */
 
-import { createExprNode } from "@aelastics/synthesis/jsx-runtime"
-import { Context } from "@aelastics/synthesis/jsx-runtime"
-import { ModelStore } from "@aelastics/synthesis/engine"
-import { IModel } from "@aelastics/synthesis/metamodel-core"
-import * as dbmT from "@aelastics/synthesis/decision-framework/decisions/2.binding-model/binding-meta.model"
+import { createExprNode } from "@aelastics/synthesis/jsx"
+import { Context } from "@aelastics/synthesis/jsx"
+import { ModelStore } from "@aelastics/synthesis/store"
+import { IModel } from "@aelastics/synthesis/metamodel"
+import * as dbmT from "@aelastics/synthesis/metamodels/binding/model"
 import * as sm2ddm
-  from "@aelastics/synthesis/decision-framework/decisions/4.source-model-2-default-configuration-model/SourceModel2DefaultConfigurationModel"
-import { DecisionModel } from "@aelastics/synthesis/decision-framework/decisions/1.decision-model/decision-meta.model"
+  from "@aelastics/synthesis/variability"
+import { DecisionModel } from "@aelastics/synthesis/metamodels/decision/model"
 
 // Import the specific examples
 import { createUniversityModel } from "./01-source-model"

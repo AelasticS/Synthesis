@@ -1,5 +1,5 @@
 import type { Runnable, RunResult } from "@synthesis/runner";
-import { ModelStore } from "@aelastics/synthesis/engine";
+import { ModelStore } from "@aelastics/synthesis/store";
 
 // Importing the transformation class registers its @M2M decorator wiring,
 // which is the meaningful side effect we want to exercise here.

@@ -7,16 +7,17 @@
 
 
 
-import { createExprNode } from "@aelastics/synthesis/jsx-runtime";
-import { VarPoint, VarOption, Option, Or, Not, And, DecisionAwareM2M } from "@aelastics/synthesis/decision-framework";
+import { createExprNode } from "@aelastics/synthesis/jsx";
+import { VarPoint, VarOption, Option, Or, Not, And, DecisionAwareM2M } from "@aelastics/synthesis/variability";
 import * as et from "@synthesis/standard-metamodels/eer/model";
 import * as rt from "@synthesis/standard-metamodels/relational/model-legacy";
 import * as e from "@synthesis/standard-metamodels/eer";
 import * as r from "@synthesis/standard-metamodels/relational/components-legacy";
-import { ExprNode, Resolve } from "@aelastics/synthesis/jsx-runtime";
-import { Context } from "@aelastics/synthesis/jsx-runtime";
-import { E2E, ModelStore, M2M, SpecPoint, SpecOption } from "@aelastics/synthesis/engine"
-import * as cmT from "@aelastics/synthesis/decision-framework/decisions/3.configuration-model/configuration-meta.model"; // import decision model types for decision model transformation
+import { ExprNode, Resolve } from "@aelastics/synthesis/jsx";
+import { Context } from "@aelastics/synthesis/jsx";
+import { E2E, M2M, SpecPoint, SpecOption } from "@aelastics/synthesis/m2m"
+import { ModelStore } from "@aelastics/synthesis/store"
+import * as cmT from "@aelastics/synthesis/metamodels/configuration/model"; // import decision model types for decision model transformation
 
 
 const testStore = new ModelStore();

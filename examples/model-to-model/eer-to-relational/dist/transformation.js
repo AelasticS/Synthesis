@@ -15,10 +15,10 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
  * @VarOption implementations correspond to options declared in the
  * decision model (see decision-model.tsx).
  */
-import { createExprNode } from "@aelastics/synthesis/jsx-runtime";
-import { VarPoint, VarOption, Default, Option, DecisionAwareM2M } from "@aelastics/synthesis/decision-framework";
+import { createExprNode } from "@aelastics/synthesis/jsx";
+import { VarPoint, VarOption, Default, Option, DecisionAwareM2M } from "@aelastics/synthesis/variability";
 import { Relationship, Entity, } from "@synthesis/standard-metamodels/eer/model";
-import { E2E, M2M } from "@aelastics/synthesis/engine";
+import { E2E, M2M } from "@aelastics/synthesis/m2m";
 import { RelSchema, Table, Column } from "@synthesis/standard-metamodels/relational/components-legacy";
 let EER2RelDomainWithDecisionTransformation = class EER2RelDomainWithDecisionTransformation extends DecisionAwareM2M {
     constructor(store, {}, configModel) {

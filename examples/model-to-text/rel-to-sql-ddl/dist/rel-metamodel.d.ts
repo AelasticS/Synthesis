@@ -1,6 +1,6 @@
 /** @jsx createExprNode */
-import { ModelStore } from "@aelastics/synthesis/engine";
-import { ExprNode } from "@aelastics/synthesis/jsx-runtime";
+import { ModelStore } from "@aelastics/synthesis/store";
+import { ExprNode } from "@aelastics/synthesis/jsx";
 import * as t from "@aelastics/synthesis/metamodels/types/model";
 /**
  * Minimal relational metamodel model, mirroring er-metamodel.tsx of the

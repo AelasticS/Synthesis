@@ -1,16 +1,16 @@
 /** @jsx createExprNode */
 
-import { createExprNode } from "@aelastics/synthesis/jsx-runtime"
-import { ModelStore } from "@aelastics/synthesis/engine"
-import { Model, Element } from "@aelastics/synthesis/jsx-runtime"
+import { createExprNode } from "@aelastics/synthesis/jsx"
+import { ModelStore } from "@aelastics/synthesis/store"
+import { Model, Element } from "@aelastics/synthesis/jsx"
 
-import { ElementIssue, GlobalIssue, Option } from "@aelastics/synthesis/decision-framework/decisions/1.decision-model/decision-meta.model-components"
-import { BindingModel } from "@aelastics/synthesis/decision-framework/decisions/2.binding-model/binding-meta.model-components"
+import { ElementIssue, GlobalIssue, Option } from "@aelastics/synthesis/metamodels/decision"
+import { BindingModel } from "@aelastics/synthesis/metamodels/binding"
 import {
   ElementChoice,
   Choice,
   ConfigurationModel, GlobalChoice,
-} from "@aelastics/synthesis/decision-framework/decisions/3.configuration-model/configuration-meta.model-components"
+} from "@aelastics/synthesis/metamodels/configuration"
 
 export const CompanySchemaConfig = (store: ModelStore) => (
   <ConfigurationModel name="CompanySchemaConfig"

@@ -7,10 +7,10 @@
  * element issue to the elements it really concerns; here,
  * OneToManyStrategy applies only to relationships that are 1:N.
  */
-import { createExprNode } from "@aelastics/synthesis/jsx-runtime";
-import { BindingModel, Binding } from "@aelastics/synthesis/decision-framework/decisions/2.binding-model/binding-meta.model-components";
-import { Model, Element as ModelElement } from "@aelastics/synthesis/jsx-runtime";
-import { DecisionModel, ElementIssue } from "@aelastics/synthesis/decision-framework/decisions/1.decision-model/decision-meta.model-components";
+import { createExprNode } from "@aelastics/synthesis/jsx";
+import { BindingModel, Binding } from "@aelastics/synthesis/metamodels/binding";
+import { Model, Element as ModelElement } from "@aelastics/synthesis/jsx";
+import { DecisionModel, ElementIssue } from "@aelastics/synthesis/metamodels/decision";
 export const ER_Bindings = (store) => (createExprNode(BindingModel, { name: "ER_Bindings", description: "Binding EER Model concepts to relation schema design issues", sourceModel: createExprNode(Model, { "$refByName": "//www.aelastics.org/ERMetamodel" }), decisionModel: createExprNode(DecisionModel, { "$refByName": "//www.aelastics.org/RelationSchemaDesign" }), store: store },
     createExprNode(Binding, { name: "PKStrategyBinding", description: "Binding Primary Key Strategy to EER Model", element: createExprNode(ModelElement, { "$refByName": "//www.aelastics.org/ERMetamodel/Attribute" }), issues: [
             createExprNode(ElementIssue, { "$refByName": "//www.aelastics.org/RelationSchemaDesign/PrimaryKeyStrategy" }),

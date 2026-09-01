@@ -1,16 +1,16 @@
 /** @jsx createExprNode */
 
 
-import { Context } from "@aelastics/synthesis/jsx-runtime"
-import { ModelStore } from "@aelastics/synthesis/engine"
+import { Context } from "@aelastics/synthesis/jsx"
+import { ModelStore } from "@aelastics/synthesis/store"
 
 import * as etT from "@aelastics/synthesis/metamodels/types/model"
 import * as eerMMFn from "./er-metamodel"
 
-import * as bmT from "@aelastics/synthesis/decision-framework/decisions/2.binding-model/binding-meta.model"
+import * as bmT from "@aelastics/synthesis/metamodels/binding/model"
 
 import * as sm2ddm
-  from "@aelastics/synthesis/decision-framework/decisions/4.source-model-2-default-configuration-model/SourceModel2DefaultConfigurationModel"
+  from "@aelastics/synthesis/variability"
 
 import * as eerT from "@synthesis/standard-metamodels/eer/model"
 

@@ -1,16 +1,17 @@
 /** @jsx createExprNode */
 
-import { createExprNode } from "@aelastics/synthesis/jsx-runtime"
-import { abstractM2M } from "@aelastics/synthesis/engine"
-import { ExprNode, Resolve } from "@aelastics/synthesis/jsx-runtime"
-import { Context } from "@aelastics/synthesis/jsx-runtime"
-import { E2E, ModelStore, M2M, SpecPoint, SpecOption } from "@aelastics/synthesis/engine"
-import { IModel, IModelElement, Model, ModelElement } from "@aelastics/synthesis/metamodel-core"
-import * as gdmT from "@aelastics/synthesis/decision-framework/decisions/1.decision-model/decision-meta.model"
-import * as gdmC from "@aelastics/synthesis/decision-framework/decisions/1.decision-model/decision-meta.model-components"
+import { createExprNode } from "@aelastics/synthesis/jsx"
+import { abstractM2M } from "@aelastics/synthesis/m2m"
+import { ExprNode, Resolve } from "@aelastics/synthesis/jsx"
+import { Context } from "@aelastics/synthesis/jsx"
+import { E2E, M2M, SpecPoint, SpecOption } from "@aelastics/synthesis/m2m"
+import { ModelStore } from "@aelastics/synthesis/store"
+import { IModel, IModelElement, Model, ModelElement } from "@aelastics/synthesis/metamodel"
+import * as gdmT from "@aelastics/synthesis/metamodels/decision/model"
+import * as gdmC from "@aelastics/synthesis/metamodels/decision"
 
-import * as dbmT from "@aelastics/synthesis/decision-framework/decisions/2.binding-model/binding-meta.model"
-import * as dbmC from "@aelastics/synthesis/decision-framework/decisions/2.binding-model/binding-meta.model-components"
+import * as dbmT from "@aelastics/synthesis/metamodels/binding/model"
+import * as dbmC from "@aelastics/synthesis/metamodels/binding"
 
 
 export class SourceModelToSourceModelWithDecisionModelBinding extends abstractM2M<IModel, dbmT.IBindingModel, {

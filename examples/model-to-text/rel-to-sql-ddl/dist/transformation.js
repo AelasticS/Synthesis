@@ -5,10 +5,11 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-import { createExprNode } from "@aelastics/synthesis/jsx-runtime";
-import { M2T, Doc, P, Sec, SecParent, E2E, M2M, } from "@aelastics/synthesis/engine";
+import { createExprNode } from "@aelastics/synthesis/jsx";
+import { M2T, Doc, P, Sec, SecParent } from "@aelastics/synthesis/m2t";
+import { E2E, M2M } from "@aelastics/synthesis/m2m";
 import * as rmT from "@synthesis/standard-metamodels/relational/model-legacy";
-import { VarPoint, VarOption, Option, Default, DecisionAwareM2M } from "@aelastics/synthesis/decision-framework";
+import { VarPoint, VarOption, Option, Default, DecisionAwareM2M } from "@aelastics/synthesis/variability";
 /**
  * Model-to-text transformation that turns a relational schema into a
  * single-document M2T model containing SQL DDL (CREATE TABLE statements).

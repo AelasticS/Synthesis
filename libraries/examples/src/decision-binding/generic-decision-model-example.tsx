@@ -1,9 +1,9 @@
 /** @jsx createExprNode */
 
 
-import { createExprNode } from "@aelastics/synthesis/jsx-runtime"
-import { ExprNode } from "@aelastics/synthesis/jsx-runtime"
-import * as gdmT from "@aelastics/synthesis/decision-framework/decisions/1.decision-model/decision-meta.model"
+import { createExprNode } from "@aelastics/synthesis/jsx"
+import { ExprNode } from "@aelastics/synthesis/jsx"
+import * as gdmT from "@aelastics/synthesis/metamodels/decision/model"
 import {
   CompositeOption,
   DecisionModel,
@@ -12,11 +12,11 @@ import {
   ModelIssue, ModelSubIssue,
   Option,
   SimpleOption,
-} from "@aelastics/synthesis/decision-framework/decisions/1.decision-model/decision-meta.model-components"
+} from "@aelastics/synthesis/metamodels/decision"
 
 
-import { Context } from "@aelastics/synthesis/jsx-runtime"
-import { ModelStore } from "@aelastics/synthesis/engine"
+import { Context } from "@aelastics/synthesis/jsx"
+import { ModelStore } from "@aelastics/synthesis/store"
 import * as t from "@aelastics/types"
 import { TypeObject, Property, PropertyDomain } from "@aelastics/synthesis/metamodels/types/components"
 import { importPredefinedTypes } from "@aelastics/synthesis/metamodels/types/predefined-model"

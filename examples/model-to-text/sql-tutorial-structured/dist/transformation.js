@@ -17,8 +17,9 @@
  * transformation produces can be read without following a rule anywhere
  * else.
  */
-import { createExprNode } from '@aelastics/synthesis/jsx-runtime';
-import { abstractM2M, M2T, Doc, Sec, P } from '@aelastics/synthesis/engine';
+import { createExprNode } from '@aelastics/synthesis/jsx';
+import { abstractM2M } from '@aelastics/synthesis/m2m';
+import { M2T, Doc, Sec, P } from '@aelastics/synthesis/m2t';
 import * as rmT from '@synthesis/standard-metamodels/rel-tutorial/model';
 export class RelToSqlStructuredTransformation extends abstractM2M {
     constructor(store) {

@@ -1,21 +1,14 @@
 /** @jsx createExprNode */
 
-import { createExprNode } from "@aelastics/synthesis/jsx-runtime"
-import { ExprNode } from "@aelastics/synthesis/jsx-runtime"
-import {
-  M2T,
-  Doc,
-  P,
-  Sec,
-  SecParent,
-  ModelStore,
-  E2E,
-  M2M,
-} from "@aelastics/synthesis/engine"
-import * as m2tmm from "@aelastics/synthesis/engine"
+import { createExprNode } from "@aelastics/synthesis/jsx"
+import { ExprNode } from "@aelastics/synthesis/jsx"
+import { M2T, Doc, P, Sec, SecParent } from "@aelastics/synthesis/m2t"
+import { ModelStore } from "@aelastics/synthesis/store"
+import { E2E, M2M } from "@aelastics/synthesis/m2m"
+import * as m2tmm from "@aelastics/synthesis/m2t"
 import * as rmT from "@synthesis/standard-metamodels/relational/model-legacy"
-import { VarPoint, VarOption, Option, Default, DecisionAwareM2M } from "@aelastics/synthesis/decision-framework"
-import * as cm from "@aelastics/synthesis/decision-framework/decisions/3.configuration-model/configuration-meta.model"
+import { VarPoint, VarOption, Option, Default, DecisionAwareM2M } from "@aelastics/synthesis/variability"
+import * as cm from "@aelastics/synthesis/metamodels/configuration/model"
 
 /**
  * Model-to-text transformation that turns a relational schema into a

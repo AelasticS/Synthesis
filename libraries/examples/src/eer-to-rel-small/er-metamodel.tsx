@@ -1,8 +1,9 @@
 /** @jsx createExprNode */
 
-import { Context, ModelStore } from "@aelastics/synthesis/engine"
-import { ExprNode } from "@aelastics/synthesis/jsx-runtime"
-import { createExprNode } from "@aelastics/synthesis/jsx-runtime"
+import { Context } from "@aelastics/synthesis/jsx"
+import { ModelStore } from "@aelastics/synthesis/store"
+import { ExprNode } from "@aelastics/synthesis/jsx"
+import { createExprNode } from "@aelastics/synthesis/jsx"
 import {
   InverseProperty,
   Property,

@@ -1,8 +1,8 @@
 /** @jsx createExprNode */
 
-import { createExprNode } from '@aelastics/synthesis/jsx-runtime'
-import type { ExprNode } from '@aelastics/synthesis/jsx-runtime'
-import type { ModelStore } from '@aelastics/synthesis/engine'
+import { createExprNode } from '@aelastics/synthesis/jsx'
+import type { ExprNode } from '@aelastics/synthesis/jsx'
+import type { ModelStore } from '@aelastics/synthesis/store'
 import { EERSchema, Entity, Kernel, Weak, Attribute, Domain, Relationship, Role } from '@synthesis/standard-metamodels/eer-tutorial/advanced'
 import type * as em from '@synthesis/standard-metamodels/eer-tutorial/advanced/model'
 

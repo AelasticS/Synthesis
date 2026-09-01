@@ -1,13 +1,13 @@
 /** @jsx createExprNode */
 
-import { createExprNode } from "@aelastics/synthesis/jsx-runtime"
-import { ExprNode } from "@aelastics/synthesis/jsx-runtime"
-import { ModelStore } from "@aelastics/synthesis/engine"
+import { createExprNode } from "@aelastics/synthesis/jsx"
+import { ExprNode } from "@aelastics/synthesis/jsx"
+import { ModelStore } from "@aelastics/synthesis/store"
 
-import { BindingModel, Binding } from "@aelastics/synthesis/decision-framework/decisions/2.binding-model/binding-meta.model-components"
-import * as t from "@aelastics/synthesis/decision-framework/decisions/2.binding-model/binding-meta.model"
-import { Model, Element as ModelElement } from "@aelastics/synthesis/jsx-runtime"
-import { DecisionModel, ElementIssue } from "@aelastics/synthesis/decision-framework/decisions/1.decision-model/decision-meta.model-components"
+import { BindingModel, Binding } from "@aelastics/synthesis/metamodels/binding"
+import * as t from "@aelastics/synthesis/metamodels/binding/model"
+import { Model, Element as ModelElement } from "@aelastics/synthesis/jsx"
+import { DecisionModel, ElementIssue } from "@aelastics/synthesis/metamodels/decision"
 
 
 export const ER_Bindings = (store: ModelStore): ExprNode<t.IBindingModel> => (

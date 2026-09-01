@@ -1,4 +1,4 @@
-import { ElementIssue, IIssue, Issue, Option } from "@aelastics/synthesis/decision-framework/decisions/1.decision-model/decision-meta.model"
+import { ElementIssue, IIssue, Issue, Option } from "@aelastics/synthesis/metamodels/decision/model"
 import * as t from "@aelastics/types"
 import { string } from "@aelastics/types"
 

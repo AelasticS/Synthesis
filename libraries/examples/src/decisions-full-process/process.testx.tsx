@@ -1,8 +1,8 @@
 /** @jsx createExprNode */
 
-import { createExprNode } from "@aelastics/synthesis/jsx-runtime"
-import { Context } from "@aelastics/synthesis/jsx-runtime"
-import { ModelStore } from "@aelastics/synthesis/engine"
+import { createExprNode } from "@aelastics/synthesis/jsx"
+import { Context } from "@aelastics/synthesis/jsx"
+import { ModelStore } from "@aelastics/synthesis/store"
 
 // Import our newly created models
 import { createUniversityModel } from "./01-source-model"
@@ -11,8 +11,8 @@ import { createBindingModel } from "./03-binding-model"
 
 // Import transformation logic
 import * as sm2ddm
-  from "@aelastics/synthesis/decision-framework/decisions/4.source-model-2-default-configuration-model/SourceModel2DefaultConfigurationModel"
-import * as dbmT from "@aelastics/synthesis/decision-framework/decisions/2.binding-model/binding-meta.model"
+  from "@aelastics/synthesis/variability"
+import * as dbmT from "@aelastics/synthesis/metamodels/binding/model"
 
 // Metamodel imports (needed for type assertions or store loading)
 import * as eerM from "../eer-as-types-metamodel/eer-metamodel-aelasticTypes"

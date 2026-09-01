@@ -6,9 +6,9 @@
  * before the decision and binding models, so the binding model can
  * reference its concepts (Attribute, Relationship) by absolute path.
  */
-import { ModelStore } from "@aelastics/synthesis/engine"
-import { ExprNode } from "@aelastics/synthesis/jsx-runtime"
-import { createExprNode } from "@aelastics/synthesis/jsx-runtime"
+import { ModelStore } from "@aelastics/synthesis/store"
+import { ExprNode } from "@aelastics/synthesis/jsx"
+import { createExprNode } from "@aelastics/synthesis/jsx"
 import {
   InverseProperty,
   Property,

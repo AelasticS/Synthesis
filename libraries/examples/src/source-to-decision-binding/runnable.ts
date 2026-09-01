@@ -1,5 +1,5 @@
 import type { Runnable, RunResult } from "@synthesis/runner";
-import { ModelStore } from "@aelastics/synthesis/engine";
+import { ModelStore } from "@aelastics/synthesis/store";
 
 // Importing the class registers its decorators; we instantiate it to confirm
 // wiring works. Calling .transform() would require a populated source model +

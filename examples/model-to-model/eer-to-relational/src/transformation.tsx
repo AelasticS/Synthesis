@@ -10,8 +10,8 @@
  * @VarOption implementations correspond to options declared in the
  * decision model (see decision-model.tsx).
  */
-import { createExprNode } from "@aelastics/synthesis/jsx-runtime"
-import { VarPoint, VarOption, Default, Option, DecisionAwareM2M } from "@aelastics/synthesis/decision-framework"
+import { createExprNode } from "@aelastics/synthesis/jsx"
+import { VarPoint, VarOption, Default, Option, DecisionAwareM2M } from "@aelastics/synthesis/variability"
 import {
   IEntity,
   IEERSchema,
@@ -23,9 +23,10 @@ import {
   IDomain,
 } from "@synthesis/standard-metamodels/eer/model"
 import * as rmT from "@synthesis/standard-metamodels/relational/model-legacy"
-import { ExprNode } from "@aelastics/synthesis/jsx-runtime"
-import { E2E, ModelStore, M2M } from "@aelastics/synthesis/engine"
-import * as cm from "@aelastics/synthesis/decision-framework/decisions/3.configuration-model/configuration-meta.model"
+import { ExprNode } from "@aelastics/synthesis/jsx"
+import { E2E, M2M } from "@aelastics/synthesis/m2m"
+import { ModelStore } from "@aelastics/synthesis/store"
+import * as cm from "@aelastics/synthesis/metamodels/configuration/model"
 import { RelSchema, Table, Column } from "@synthesis/standard-metamodels/relational/components-legacy"
 
 @M2M()

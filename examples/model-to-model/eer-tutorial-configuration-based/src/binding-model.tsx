@@ -14,13 +14,13 @@
  * only the 1:N relationships, so those are the only elements a
  * configuration model ever offers a choice for.
  */
-import { createExprNode } from '@aelastics/synthesis/jsx-runtime'
-import type { ExprNode } from '@aelastics/synthesis/jsx-runtime'
-import type { ModelStore } from '@aelastics/synthesis/engine'
-import { Model, Element as ModelElement } from '@aelastics/synthesis/jsx-runtime'
-import { BindingModel, Binding } from '@aelastics/synthesis/decision-framework/decisions/2.binding-model/binding-meta.model-components'
-import type * as t from '@aelastics/synthesis/decision-framework/decisions/2.binding-model/binding-meta.model'
-import { DecisionModel, ElementIssue } from '@aelastics/synthesis/decision-framework/decisions/1.decision-model/decision-meta.model-components'
+import { createExprNode } from '@aelastics/synthesis/jsx'
+import type { ExprNode } from '@aelastics/synthesis/jsx'
+import type { ModelStore } from '@aelastics/synthesis/store'
+import { Model, Element as ModelElement } from '@aelastics/synthesis/jsx'
+import { BindingModel, Binding } from '@aelastics/synthesis/metamodels/binding'
+import type * as t from '@aelastics/synthesis/metamodels/binding/model'
+import { DecisionModel, ElementIssue } from '@aelastics/synthesis/metamodels/decision'
 
 export const EERTutorialBindings = (store: ModelStore): ExprNode<t.IBindingModel> => (
   <BindingModel

@@ -12,12 +12,12 @@
  * by a configuration model (see decision-model.tsx and
  * binding-model.tsx).
  */
-import { createExprNode } from '@aelastics/synthesis/jsx-runtime'
-import type { ExprNode } from '@aelastics/synthesis/jsx-runtime'
-import { E2E, SpecPoint, SpecOption, M2M } from '@aelastics/synthesis/engine'
-import type { ModelStore } from '@aelastics/synthesis/engine'
-import { DecisionAwareM2M, VarPoint, VarOption, Default, Option } from '@aelastics/synthesis/decision-framework'
-import * as cm from '@aelastics/synthesis/decision-framework/decisions/3.configuration-model/configuration-meta.model'
+import { createExprNode } from '@aelastics/synthesis/jsx'
+import type { ExprNode } from '@aelastics/synthesis/jsx'
+import { E2E, SpecPoint, SpecOption, M2M } from '@aelastics/synthesis/m2m'
+import type { ModelStore } from '@aelastics/synthesis/store'
+import { DecisionAwareM2M, VarPoint, VarOption, Default, Option } from '@aelastics/synthesis/variability'
+import * as cm from '@aelastics/synthesis/metamodels/configuration/model'
 import * as em from '@synthesis/standard-metamodels/eer-tutorial/advanced/model'
 import * as rmT from '@synthesis/standard-metamodels/rel-tutorial/model'
 import { RelSchema, Table, Column } from '@synthesis/standard-metamodels/rel-tutorial/components'

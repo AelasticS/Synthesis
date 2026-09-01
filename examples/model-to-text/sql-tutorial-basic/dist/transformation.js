@@ -13,8 +13,9 @@
  * The whole schema maps to a single document here. Part 2 splits it into
  * two, and Part 3 turns the split itself into a decision.
  */
-import { createExprNode } from '@aelastics/synthesis/jsx-runtime';
-import { abstractM2M, M2T, Doc, Sec, P } from '@aelastics/synthesis/engine';
+import { createExprNode } from '@aelastics/synthesis/jsx';
+import { abstractM2M } from '@aelastics/synthesis/m2m';
+import { M2T, Doc, Sec, P } from '@aelastics/synthesis/m2t';
 import * as rmT from '@synthesis/standard-metamodels/rel-tutorial/model';
 export class RelToSqlBasicTransformation extends abstractM2M {
     constructor(store) {

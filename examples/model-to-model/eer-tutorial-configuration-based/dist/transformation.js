@@ -17,9 +17,9 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
  * by a configuration model (see decision-model.tsx and
  * binding-model.tsx).
  */
-import { createExprNode } from '@aelastics/synthesis/jsx-runtime';
-import { E2E, SpecPoint, SpecOption, M2M } from '@aelastics/synthesis/engine';
-import { DecisionAwareM2M, VarPoint, VarOption, Default, Option } from '@aelastics/synthesis/decision-framework';
+import { createExprNode } from '@aelastics/synthesis/jsx';
+import { E2E, SpecPoint, SpecOption, M2M } from '@aelastics/synthesis/m2m';
+import { DecisionAwareM2M, VarPoint, VarOption, Default, Option } from '@aelastics/synthesis/variability';
 import * as em from '@synthesis/standard-metamodels/eer-tutorial/advanced/model';
 import { RelSchema, Table, Column } from '@synthesis/standard-metamodels/rel-tutorial/components';
 let EER2RelConfigurableTransformation = class EER2RelConfigurableTransformation extends DecisionAwareM2M {

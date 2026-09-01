@@ -1,4 +1,5 @@
 /** @jsx createExprNode */
-import type { ExprNode, ModelStore } from '@aelastics/synthesis/engine';
-import type * as t from '@aelastics/synthesis/decision-framework/decisions/1.decision-model/decision-meta.model';
+import type { ExprNode } from '@aelastics/synthesis/jsx';
+import type { ModelStore } from '@aelastics/synthesis/store';
+import type * as t from '@aelastics/synthesis/metamodels/decision/model';
 export declare const RelationshipDesignIssues: (store: ModelStore) => ExprNode<t.IDecisionModel>;

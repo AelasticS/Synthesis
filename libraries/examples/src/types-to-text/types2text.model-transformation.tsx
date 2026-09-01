@@ -1,22 +1,11 @@
 /** @jsx createExprNode */
-import { createExprNode } from "@aelastics/synthesis/jsx-runtime";
-import {
-  M2T,
-  Dir,
-  Doc,
-  P,
-  Sec,
-  SecParent,
-  ModelStore,
-  E2E,
-  M2M,
-  abstractM2M,
-  SpecPoint,
-  SpecOption,
-} from "@aelastics/synthesis/engine";
-import * as m2tmm from "@aelastics/synthesis/engine";
+import { createExprNode } from "@aelastics/synthesis/jsx";
+import { M2T, Dir, Doc, P, Sec, SecParent } from "@aelastics/synthesis/m2t";
+import { ModelStore } from "@aelastics/synthesis/store";
+import { E2E, M2M, abstractM2M, SpecPoint, SpecOption } from "@aelastics/synthesis/m2m";
+import * as m2tmm from "@aelastics/synthesis/m2t";
 import * as tmm from "@aelastics/synthesis/metamodels/types/model";
-import { Context, ExprNode } from "@aelastics/synthesis/jsx-runtime";
+import { Context, ExprNode } from "@aelastics/synthesis/jsx";
 import * as t from "@aelastics/types"
 
 
@@ -94,7 +83,7 @@ export class Types2TextModelTransformations extends abstractM2M<
         import * as t from "@aelastics/types";
       </P>,
       <P parentSection={<Sec $refByName="imports"></Sec>}>
-        {`import { Model, ModelElement } from "@aelastics/synthesis/metamodel-core";`}
+        {`import { Model, ModelElement } from "@aelastics/synthesis/metamodel";`}
       </P>,
     ];
   }

@@ -1,5 +1,5 @@
 /** @jsx createExprNode */
-import { createExprNode } from "@aelastics/synthesis/jsx-runtime";
+import { createExprNode } from "@aelastics/synthesis/jsx";
 import { InverseProperty, Property, PropertyDomain, TypeArray, TypeModel, TypeObject, TypeOptional, TypeSubtype, } from "@aelastics/synthesis/metamodels/types/components";
 import { TypeBoolean, TypeNumber, TypeString } from "@aelastics/synthesis/metamodels/types/predefined-types";
 export const EERModel = (store) => (createExprNode(TypeModel, { name: "ERMetamodel", store: store },
