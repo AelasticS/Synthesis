@@ -145,6 +145,19 @@ synth transformation run eer-tutorial-basic sql-tutorial-structured \
 An EER schema goes in and two SQL files come out, with the relational
 schema existing only in memory between the steps.
 
+## The complete source
+
+Every listing in this part is a fragment of one file. Here it is whole,
+embedded from `examples/sql-tutorial-structured` at build time, so what
+you read is exactly what the smoke test runs:
+
+```tsx file=<rootDir>/examples/sql-tutorial-structured/src/transformation.tsx
+```
+
+The package around it is four more files: `package.json`,
+`tsconfig.json`, `synth.json`, and the sample model under `sample/`.
+Nothing in it is generated or hidden.
+
 ## Where you are
 
 You have taken one generator and changed how its output is organized,
