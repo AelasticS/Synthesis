@@ -55,10 +55,13 @@ Three ideas carry the whole part:
   same `abstractM2M` base class a model-to-model transformation
   extends, and its `template()` method returns JSX in exactly the same
   way. Only the target type is different.
-- **One document is one file.** The target metamodel is a model of
-  items; every `Document` item in the result becomes one file under
-  `--out-dir`, and its name is the file name. The shape of the document
-  tree is the shape of the output.
+- **The target metamodel is a model of a file system subtree.** Its
+  items are directories, which become folders, and documents, which
+  become files; inside a document, sections and paragraphs are the
+  content. The shape of that model is the shape of the output, which is
+  why a run names a directory with `--out-dir` rather than a single
+  result with `--out`. Part 1 keeps it as simple as it goes: one
+  document, no folders, so one file whose name is the document's.
 - **The text metamodel ships with the engine.** It is not one of the
   `@synthesis/standard-metamodels`, because it is not a domain
   language. It is imported from `@synthesis/engine`, and the manifest

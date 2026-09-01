@@ -6,15 +6,25 @@ has no separate template language for that, and no second execution
 model. Generating text is a transformation like any other, and the only
 thing that really changes is the target metamodel.
 
-That target metamodel describes documents. A model written in it holds
-items; a `Document` is an item and becomes one file, a `Section` is a
-named region inside a document, and a `Paragraph` is one line of text.
+That target metamodel describes a file system subtree: folders, the
+files inside them, and the content of each file. A model written in it
+holds items, where an item is either a `Directory`, which becomes a
+folder and holds items of its own, or a `Document`, which becomes one
+file. Inside a document, a `Section` is a named region and a
+`Paragraph` is one line of text. So a model in this metamodel is a plan
+of what to write to disk, from the folder structure down to the
+individual lines.
+
 The rules that build such a model are the same typed functions
 returning JSX that the model-to-model tutorial taught, in a class
-extending the same base class. What differs is the manifest's `kind`
-(`"m2t"`), the flag a run takes (`--out-dir` instead of `--out`), and
-the fact that the result lands in a directory rather than back in the
-workspace.
+extending the same base class. The manifest declares `"kind": "m2t"`,
+and a run takes `--out-dir` rather than `--out`. That last difference
+is not an arbitrary flag name. A model-to-model transformation produces
+exactly one model, which the CLI stores as one workspace model under
+the name `--out` gives it. A model-to-text transformation produces a
+whole tree, possibly many files in many folders, so there is nothing
+single to name: you give it a directory, and the tree described by the
+model is written underneath it.
 
 The running case is SQL DDL, and the source metamodel is
 `@synthesis/standard-metamodels/rel-tutorial`: exactly what the
