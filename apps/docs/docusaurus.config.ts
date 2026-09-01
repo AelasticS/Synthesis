@@ -1,3 +1,4 @@
+import { resolve } from 'node:path';
 import { themes as prismThemes } from 'prism-react-renderer';
 import type { Config } from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
@@ -179,4 +180,19 @@ const config: Config = {
   } satisfies Preset.ThemeConfig,
 };
 
-export default config;
+/**
+ * Pages embed the real source of the example packages with
+ * `file=<path>` code fences, so a listing in the documentation cannot
+ * drift from the code it documents. `remark-code-import` is ESM only,
+ * which is why the config is an async factory with a dynamic import,
+ * and `rootDir` lets a page reach the `examples/` tree above this site.
+ */
+export default async function createConfig(): Promise<Config> {
+  const { default: codeImport } = await import('remark-code-import');
+  const presetOptions = (config.presets![0] as [string, Preset.Options])[1];
+  presetOptions.docs = {
+    ...presetOptions.docs,
+    beforeDefaultRemarkPlugins: [[codeImport, { rootDir: resolve(__dirname, '..', '..') }]],
+  };
+  return config;
+}
