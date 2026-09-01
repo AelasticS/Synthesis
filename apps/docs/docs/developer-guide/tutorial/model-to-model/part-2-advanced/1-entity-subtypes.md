@@ -128,7 +128,7 @@ stays exported too, and the next section shows what it is still for.
 
 The Part 2 sample is Part 1's Library schema with the entity tags made
 specific and one entity added. Here are the parts that matter, from
-`examples/eer-tutorial-advanced/sample/library.tsx`:
+`examples/model-to-model/eer-tutorial-advanced/sample/library.tsx`:
 
 ```tsx
     <Kernel name="Book">

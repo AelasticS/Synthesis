@@ -11,6 +11,18 @@ but they deliberately carry no monorepo tooling beyond that: no heft,
 no rigs. Any example directory can be read, copied, or extracted as a
 standalone starting point.
 
+## Layout
+
+Packages are grouped by what a transformation produces, so the folder
+answers the first question a reader has about any example:
+
+```text
+examples/
+  model-to-model/    a model in one metamodel becomes a model in another
+  model-to-text/     a model becomes files
+  smoke.mjs          the harness every package's test script runs
+```
+
 ## Catalog
 
 ### Tutorial companions

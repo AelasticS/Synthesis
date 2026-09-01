@@ -91,7 +91,7 @@ The source model does not change either, and neither does the build,
 install, run loop, beyond the run gaining a configuration.
 
 The finished package is in the repository as
-`examples/sql-tutorial-configuration-based`. Use it as the answer key;
+`examples/model-to-text/sql-tutorial-configuration-based`. Use it as the answer key;
 every listing on the following pages is taken from it verbatim, and
 every command output was produced by running it.
 

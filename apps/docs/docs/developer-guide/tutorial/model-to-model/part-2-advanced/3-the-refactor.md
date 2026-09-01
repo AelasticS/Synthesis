@@ -8,7 +8,7 @@ Everything is in place: a metamodel that distinguishes the two kinds of
 entity, and a mechanism that dispatches on the distinction. This page
 puts them together, runs the result, and reads the generated model.
 
-Every listing is from `examples/eer-tutorial-advanced`.
+Every listing is from `examples/model-to-model/eer-tutorial-advanced`.
 
 ## Before
 

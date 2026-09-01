@@ -187,7 +187,7 @@ second, both as fragments. Here is the finished `template()`, embedded
 from the companion package itself rather than copied, so it cannot
 drift from the code that actually runs:
 
-```tsx file=<rootDir>/examples/sql-tutorial-structured/src/transformation.tsx#L43-L69
+```tsx file=<rootDir>/examples/model-to-text/sql-tutorial-structured/src/transformation.tsx#L43-L69
 ```
 
 The last two lines are how the documents get populated, and they are

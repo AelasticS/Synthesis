@@ -8,7 +8,7 @@ The design space is declared and bound. This page is the other half:
 the rule that stops answering the question, and the manifest entry that
 makes the package configuration-based.
 
-Every listing is from `examples/eer-tutorial-configuration-based`.
+Every listing is from `examples/model-to-model/eer-tutorial-configuration-based`.
 
 ## The class becomes decision-aware
 

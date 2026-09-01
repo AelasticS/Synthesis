@@ -22,24 +22,24 @@ From the [model-to-model tutorial](../tutorial/model-to-model/index.md):
 
 | Example | Kind | What it shows |
 | --- | --- | --- |
-| `examples/eer-tutorial-basic` | m2m | Part 1: a simple EER to relational transformation with fixed logic. |
-| `examples/eer-tutorial-advanced` | m2m | Part 2: the entity rule specialized per entity subtype with `@SpecPoint` and `@SpecOption`. |
-| `examples/eer-tutorial-configuration-based` | m2m | Part 3: the relationship mapping decided by a configuration model. |
+| `examples/model-to-model/eer-tutorial-basic` | m2m | Part 1: a simple EER to relational transformation with fixed logic. |
+| `examples/model-to-model/eer-tutorial-advanced` | m2m | Part 2: the entity rule specialized per entity subtype with `@SpecPoint` and `@SpecOption`. |
+| `examples/model-to-model/eer-tutorial-configuration-based` | m2m | Part 3: the relationship mapping decided by a configuration model. |
 
 From the [model-to-text tutorial](../tutorial/model-to-text/index.md):
 
 | Example | Kind | What it shows |
 | --- | --- | --- |
-| `examples/sql-tutorial-basic` | m2t | Part 1: a relational schema becomes one SQL DDL file. |
-| `examples/sql-tutorial-structured` | m2t | Part 2: named sections, and output split across two files so constraints are applied after the tables exist. |
-| `examples/sql-tutorial-configuration-based` | m2t | Part 3: the file layout and identifier quoting chosen by configuration. |
+| `examples/model-to-text/sql-tutorial-basic` | m2t | Part 1: a relational schema becomes one SQL DDL file. |
+| `examples/model-to-text/sql-tutorial-structured` | m2t | Part 2: named sections, and output split across two files so constraints are applied after the tables exist. |
+| `examples/model-to-text/sql-tutorial-configuration-based` | m2t | Part 3: the file layout and identifier quoting chosen by configuration. |
 
 ## Full examples
 
 | Example | Kind | What it shows |
 | --- | --- | --- |
-| `examples/eer-to-relational` | m2m | A configuration-based transformation over the full EER metamodel: decision model, binding model, manifest `parts`, and configurations. |
-| `examples/rel-to-sql-ddl` | m2t | Text generation: a relational schema becomes a SQL DDL file, with one global issue (identifier quoting). |
+| `examples/model-to-model/eer-to-relational` | m2m | A configuration-based transformation over the full EER metamodel: decision model, binding model, manifest `parts`, and configurations. |
+| `examples/model-to-text/rel-to-sql-ddl` | m2t | Text generation: a relational schema becomes a SQL DDL file, with one global issue (identifier quoting). |
 
 ## Running an example
 
@@ -47,7 +47,7 @@ Every example follows the same loop, spelled out in its README. For the
 Part 1 companion:
 
 ```bash
-cd examples/eer-tutorial-basic
+cd examples/model-to-model/eer-tutorial-basic
 
 synth init
 synth namespace mk demo

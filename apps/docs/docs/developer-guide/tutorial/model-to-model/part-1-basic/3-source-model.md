@@ -19,7 +19,7 @@ nonexistent element is caught rather than tolerated.
 
 Create `sample/library.tsx` in your package. Any location works; the
 examples keep sample inputs under `sample/`. Here is the file complete,
-from `examples/eer-tutorial-basic/sample/library.tsx`:
+from `examples/model-to-model/eer-tutorial-basic/sample/library.tsx`:
 
 ```tsx
 /** @jsx createExprNode */

@@ -46,7 +46,7 @@ The `columnLine` helper loses exactly one branch, the one that emitted
 the inline `REFERENCES` clause, and gains nothing.
 
 The finished package exists in the repository as
-`examples/sql-tutorial-structured`. Use it as the answer key; every
+`examples/model-to-text/sql-tutorial-structured`. Use it as the answer key; every
 listing on the following pages is taken from it verbatim.
 
 ## Prerequisites
