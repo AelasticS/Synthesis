@@ -1,0 +1,137 @@
+# Consolidation execution plan
+
+Tracks the execution of [consolidation.md](./consolidation.md). Update the
+checkboxes and the stage log as work proceeds; this file is the cross-session
+source of truth for where the effort stands.
+
+Working context: branch `feat/consolidation`, worktree
+`/home/sinisa/Projects/Synthesis-wt-consolidation`. Merge to main with
+`--no-ff` when all stages are green. Do not push; the user pushes.
+
+Conventions binding for all stages: no em dashes in user-facing text; say
+"configuration-based", never "decision-based"; JSX notation is the authoring
+style (never present createExprNode calls as the way to write templates); no
+AI attribution in commits or files.
+
+## Gates
+
+Run after every stage; a stage is done only when all pass.
+
+- `rush build` (from the worktree root; run `rush update` once first, the
+  worktree has its own install state)
+- apps/cli: `rushx test` and `rushx smoke`. Baseline before stage 3:
+  441 tests, 86 smoke checks. Stage 3 deletes the example commands, so
+  record the new baseline in the stage log when it lands.
+- every example package: `rushx test` (the smoke harness)
+- apps/docs: `rushx build` (enforces the broken-link check). Restart any
+  Docusaurus dev server after config or dependency changes; clear
+  `.docusaurus` if a phantom broken link appears.
+
+## Stages
+
+### Stage 0: record the agreement
+- [x] design/consolidation.md and this plan committed on the branch
+
+### Stage 1: physical consolidation of @aelastics/synthesis
+Goal: one package, everything compiles, behavior identical. Consumer
+imports are rewritten mechanically to the temporary root barrel; the
+namespaced surface comes in stage 2.
+- [ ] create libraries/synthesis with src/jsx-runtime/, src/metamodel-core/,
+      src/engine/, src/decision-framework/, src/metamodels/types/ moved from
+      the five source packages (git mv to preserve history)
+- [ ] temporary root barrel re-exporting the union of the old barrels
+      (excluding the colliding schema `Model`, reachable via a named export
+      until stage 2)
+- [ ] merge tsconfig/jest/heft config; keep `.testx` files excluded as today
+- [ ] move bpm (src + its two engine tests) into the engine test tree as a
+      fixture; delete relational v1/v2 variant files and the two disabled
+      `.testx` files that were their only consumers
+- [ ] rush.json: remove the five old projects, add libraries/synthesis
+- [ ] rewrite all imports of the five old package names across libraries/,
+      apps/, examples/, templates/ to `@aelastics/synthesis` (mechanical)
+- [ ] gates
+
+### Stage 2: the namespaced export surface
+- [ ] add subpath exports: ./jsx, ./metamodel, ./store, ./m2m, ./m2t,
+      ./variability, ./metamodels/{decision,binding,configuration,trace,types}
+      each with /model where the convention applies
+- [ ] rewrite all consumer imports to the namespaces (per-symbol, fan out
+      by package); delete the root barrel, root exports nothing
+- [ ] CLI emit sites write the new specifiers (tx/execute.ts model imports,
+      tx/config-model.ts configuration-model imports)
+- [ ] CLI tests/fixtures that assert on old specifiers updated
+- [ ] gates
+
+### Stage 3: retire the old example machinery
+- [ ] delete libraries/runner, libraries/examples; remove from rush.json
+- [ ] delete `synth example` command group and its tests
+- [ ] make the two CLI fixtures self-contained (their parts currently
+      deep-import `@synthesis/examples/lib/...`; give them package-local
+      parts like the real examples have today)
+- [ ] record the new CLI test/smoke baseline here: ____ tests, ____ smoke
+- [ ] gates
+
+### Stage 4: examples own their metamodels
+- [ ] create the four metamodel packages (eer-tutorial-metamodel,
+      rel-tutorial-metamodel, eer-metamodel, relational-metamodel) from the
+      corresponding standard-metamodels sources, each with /model, flat
+      components, and the metamodel-as-model export (deduplicating the
+      compiled copies now inside eer-tutorial-configuration-based,
+      sql-tutorial-configuration-based, eer-to-relational, rel-to-sql-ddl)
+- [ ] relational-metamodel carries the current legacy content under the
+      honest name; delete nothing until all consumers are repointed
+- [ ] move example packages into the suite layout (examples/tutorial/,
+      examples/eer-to-sql/); update rush.json folders and smoke.mjs paths
+- [ ] repoint every example, sample model, and manifest to the metamodel
+      packages; manifest metamodel strings become the package specifiers
+- [ ] repoint templates/transformation-template and the rel-copy fixture to
+      rel-tutorial-metamodel
+- [ ] loader fallback in the CLI (models/loader.ts resolver order:
+      CLI installation, then installed transformation dependencies, memoized
+      per specifier per process; tx/modules.ts routes bare parts through it)
+- [ ] deriveMetamodel rule change (models/stamp.ts) and `transformation
+      init` scaffold placeholders
+- [ ] delete libraries/standard-metamodels; remove from rush.json
+- [ ] gates, including every example smoke
+
+### Stage 5: CLI rename
+- [ ] apps/cli package.json name `@aelastics/synthesis-cli`; binary stays
+      `synth`; workspace dependents updated (examples devDependency)
+- [ ] gates
+
+### Stage 6: docs and catalog
+- [ ] design/architecture.md rewritten for the new structure
+- [ ] developer-guide pages: new import specifiers and the new metamodel
+      rule (replace "a metamodel must be an @synthesis/standard-metamodels
+      subpath" with the metamodel-package rule)
+- [ ] the two `file=` fences follow the moved example paths; re-check the
+      line-pinned one (part-2-structured/2-multiple-documents.md pins
+      L40-L98 of sql-tutorial-structured's transformation)
+- [ ] examples/README.md rewritten for the suite layout (also fixes the
+      broken catalog links and removes the phantom higher-order row until
+      that example exists)
+- [ ] grep the whole repo for `@synthesis/` and `standard-metamodels`;
+      nothing may remain except historical design notes and CHANGELOG
+- [ ] CHANGELOG entry
+- [ ] gates, docs build last
+
+### Stage 7: merge
+- [ ] full gate run from clean state in the worktree
+- [ ] merge feat/consolidation into main with --no-ff (from the main
+      checkout; never switch branches inside a live worktree session)
+- [ ] full gate run on merged main
+- [ ] update the memory file and this plan's log; do not push
+
+## Parallelization notes
+
+Stages 1 and 2 touch everything and must be sequential. After stage 2 lands,
+stage 3 (CLI-side) and the metamodel-package creation half of stage 4
+(examples-side) touch mostly disjoint files and can run as parallel lanes,
+including as separate sessions if desired; the loader-fallback item of
+stage 4 belongs to the CLI lane. Stage 6 docs pages can be fanned out per
+tutorial part once stage 4 paths are final. Within any stage, mechanical
+import rewrites fan out safely to subagents by directory.
+
+## Stage log
+
+- 2026-09-01: branch and worktree created; agreement recorded (stage 0).
