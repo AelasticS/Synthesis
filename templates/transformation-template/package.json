@@ -16,12 +16,11 @@
     "test": "node scripts/smoke.mjs"
   },
   "dependencies": {
-    "@synthesis/jsx-runtime": "workspace:*",
-    "@synthesis/engine": "workspace:*",
-    "@synthesis/standard-metamodels": "workspace:*"
+    "@aelastics/synthesis": "workspace:*",
+    "rel-tutorial-metamodel": "workspace:*"
   },
   "devDependencies": {
     "typescript": "~5.9.3",
-    "@synthesis/cli": "workspace:*"
+    "@aelastics/synthesis-cli": "workspace:*"
   }
 }

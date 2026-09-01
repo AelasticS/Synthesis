@@ -1,5 +1,5 @@
 import { Args, Flags } from '@oclif/core'
-import { ModelStore } from '@synthesis/engine'
+import { ModelStore } from '@aelastics/synthesis/store'
 
 import { BaseCommand } from '../../base/base-command.js'
 import { getModelsPath } from '../../config/index.js'

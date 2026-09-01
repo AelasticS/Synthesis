@@ -14,8 +14,8 @@ import { runCli } from '../../test-utils/run-cli.js'
 const packageRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../../..')
 const fixturesDir = join(packageRoot, 'src/tx/__tests__/fixtures')
 
-const EER = '@synthesis/standard-metamodels/eer'
-const REL = '@synthesis/standard-metamodels/relational'
+const EER = 'eer-metamodel'
+const REL = 'relational-metamodel'
 
 let testHome: string
 let otherWorkspace: string
@@ -93,9 +93,13 @@ describe('transformation positions', () => {
 
   it('completes the second positional chain-aware: only compatible continuations', async () => {
     const { stdout } = await complete(['tx', 'run', 'eer-to-relational', EMPTY])
-    // Both consume the relational metamodel eer-to-relational produces;
-    // eer-to-relational itself (source: eer) must NOT appear
-    expect(lines(stdout)).toEqual(['rel-copy', 'rel-to-sql-ddl'])
+    // Only rel-to-sql-ddl consumes the relational metamodel eer-to-relational
+    // produces; eer-to-relational itself (source: eer) and rel-copy (source:
+    // the tutorial relational metamodel) must NOT appear
+    expect(lines(stdout)).toEqual(['rel-to-sql-ddl'])
+    // The endogenous step is its own continuation
+    const afterCopy = await complete(['tx', 'run', 'rel-copy', EMPTY])
+    expect(lines(afterCopy.stdout)).toEqual(['rel-copy'])
   })
 
   it('completes nothing after an m2t step (text is terminal)', async () => {
@@ -110,7 +114,7 @@ describe('transformation positions', () => {
     const mkFirst = await complete(['pipeline', 'mk', 'my-pipe', EMPTY])
     expect(lines(mkFirst.stdout)).toEqual(['eer-to-relational', 'rel-copy', 'rel-to-sql-ddl'])
     const mkSecond = await complete(['pl', 'mk', 'my-pipe', 'eer-to-relational', EMPTY])
-    expect(lines(mkSecond.stdout)).toEqual(['rel-copy', 'rel-to-sql-ddl'])
+    expect(lines(mkSecond.stdout)).toEqual(['rel-to-sql-ddl'])
     // The new pipeline NAME is free-form: nothing to complete
     const mkName = await complete(['pipeline', 'mk', EMPTY])
     expect(lines(mkName.stdout)).toEqual([])

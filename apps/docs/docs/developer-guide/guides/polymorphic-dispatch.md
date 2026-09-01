@@ -108,8 +108,9 @@ This means specialized rules only need to declare what is different. They do not
 
 ```typescript
 /** @jsx createExprNode */
-import { createExprNode, ExprNode } from '@synthesis/jsx-runtime'
-import { abstractM2M, M2M, E2E, SpecPoint, SpecOption, ModelStore } from '@synthesis/engine'
+import { createExprNode, ExprNode } from '@aelastics/synthesis/jsx'
+import { abstractM2M, M2M, E2E, SpecPoint, SpecOption } from '@aelastics/synthesis/m2m'
+import type { ModelStore } from '@aelastics/synthesis/store'
 import * as et from './EER.meta.model.type'
 import * as rt from './REL.meta.model.type'
 import * as r from './REL.jsx-comps'

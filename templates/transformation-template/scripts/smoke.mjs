@@ -18,11 +18,11 @@ import { tmpdir } from 'node:os'
 
 const pkgDir = process.cwd()
 // Resolved through the package's own node_modules link, so the script
-// works wherever the package is checked out, as long as @synthesis/cli
+// works wherever the package is checked out, as long as @aelastics/synthesis-cli
 // is a (dev) dependency.
-const cliBin = join(pkgDir, 'node_modules', '@synthesis', 'cli', 'bin', 'run.js')
+const cliBin = join(pkgDir, 'node_modules', '@aelastics', 'synthesis-cli', 'bin', 'run.js')
 if (!existsSync(cliBin)) {
-  console.error(`@synthesis/cli not found at ${cliBin}; add it as a devDependency and run rush update`)
+  console.error(`@aelastics/synthesis-cli not found at ${cliBin}; add it as a devDependency and run rush update`)
   process.exit(1)
 }
 
@@ -47,13 +47,13 @@ try {
   if (samples.length === 0) {
     throw new Error('no sample model found in sample/')
   }
+  cli(['transformation', 'install', pkgDir])
+
   const refs = samples.map((file) => {
     const ref = `demo/${file.replace(/\.tsx$/, '')}`
     cli(['model', 'import', join(pkgDir, 'sample', file), '--as', ref])
     return ref
   })
-
-  cli(['transformation', 'install', pkgDir])
 
   const runArgs = ['transformation', 'run', txName, '--in', refs[0]]
   if (manifest.parts && manifest.parts.decisionModel) {

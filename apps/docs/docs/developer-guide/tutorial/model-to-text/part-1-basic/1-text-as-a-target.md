@@ -8,7 +8,7 @@ A transformation's signature has two halves, and only one of them is
 new here.
 
 The **source** half is the simplified tutorial relational metamodel,
-`@synthesis/standard-metamodels/rel-tutorial`. You have met it already:
+`rel-tutorial-metamodel`. You have met it already:
 it is the target of the model-to-model tutorial, and its
 [page on that metamodel](../../model-to-model/part-1-basic/2-target-metamodel.md)
 reads it in full. Three concepts are all it has. A `RelSchema` contains
@@ -42,20 +42,21 @@ many files in many folders, so there is nothing single to name. You
 give it a directory, and the tree described by the model is written
 underneath it.
 
-The metamodel ships with the engine rather than with the standard
-metamodels, in `libraries/engine/src/m2t/m2t-model/`, and is imported
-from `@synthesis/engine`. That location is a statement about what it
+The metamodel ships inside the `@aelastics/synthesis` library rather
+than as a domain metamodel package, in
+`libraries/synthesis/src/engine/m2t/m2t-model/`, and is imported from
+`@aelastics/synthesis/m2t`. That location is a statement about what it
 is: not a domain language somebody chose, but part of the machinery,
 because the CLI has to understand it in order to write files.
 
 ## The concepts
 
-From `libraries/engine/src/m2t/m2t-model/m2t.meta.model.ts`, the
-concepts this tutorial uses:
+From `libraries/synthesis/src/engine/m2t/m2t-model/m2t.meta.model.ts`,
+the concepts this tutorial uses:
 
 ```ts
 import * as t from "@aelastics/types"
-import { ModelElement, Model } from "@synthesis/metamodel-core";
+import { ModelElement, Model } from "../../../metamodel-core";
 
 export const M2T_Schema = t.schema("M2T_Schema");
 

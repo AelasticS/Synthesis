@@ -15,14 +15,14 @@ import { existsSync } from 'node:fs'
 import { mkdir, readFile } from 'node:fs/promises'
 import { dirname } from 'node:path'
 
-import { ModelStore } from '@synthesis/engine'
-import { Context } from '@synthesis/jsx-runtime'
-import { SourceModelToDefaultConfigurationModel } from '@synthesis/decision-framework/decisions/4.source-model-2-default-configuration-model/SourceModel2DefaultConfigurationModel'
+import { ModelStore } from '@aelastics/synthesis/store'
+import { Context } from '@aelastics/synthesis/jsx'
+import { SourceModelToDefaultConfigurationModel } from '@aelastics/synthesis/variability'
 import {
   Choice as ChoiceTemplate,
   ElementChoice as ElementChoiceTemplate,
   GlobalChoice as GlobalChoiceTemplate
-} from '@synthesis/decision-framework/decisions/3.configuration-model/configuration-meta.model-components'
+} from '@aelastics/synthesis/metamodels/configuration'
 
 import { parseSynthHeader, serializeSynthHeader } from '../models/header.js'
 import type { SynthHeader } from '../models/header.js'
@@ -43,16 +43,12 @@ import { buildModelModuleSource, uniqueJsxTags } from './output.js'
 type StoreElement = Parameters<ModelStore['getTypeOf']>[0]
 
 /** Metamodel specifier stamped into every configuration model's header. */
-export const CONFIGURATION_METAMODEL =
-  '@synthesis/decision-framework/decisions/3.configuration-model/configuration-meta.model'
+export const CONFIGURATION_METAMODEL = '@aelastics/synthesis/metamodels/configuration/model'
 
-const CONFIG_COMPONENTS =
-  '@synthesis/decision-framework/decisions/3.configuration-model/configuration-meta.model-components'
-const DECISION_COMPONENTS =
-  '@synthesis/decision-framework/decisions/1.decision-model/decision-meta.model-components'
-const BINDING_COMPONENTS =
-  '@synthesis/decision-framework/decisions/2.binding-model/binding-meta.model-components'
-const JSX_RUNTIME = '@synthesis/jsx-runtime'
+const CONFIG_COMPONENTS = '@aelastics/synthesis/metamodels/configuration'
+const DECISION_COMPONENTS = '@aelastics/synthesis/metamodels/decision'
+const BINDING_COMPONENTS = '@aelastics/synthesis/metamodels/binding'
+const JSX_MODULE = '@aelastics/synthesis/jsx'
 
 /** Which module exports each tag the serializer may emit. */
 const TAG_MODULES: Record<string, string> = {
@@ -64,12 +60,12 @@ const TAG_MODULES: Record<string, string> = {
   ElementIssue: DECISION_COMPONENTS,
   Option: DECISION_COMPONENTS,
   BindingModel: BINDING_COMPONENTS,
-  Model: JSX_RUNTIME,
-  Element: JSX_RUNTIME
+  Model: JSX_MODULE,
+  Element: JSX_MODULE
 }
 
-// The generator is typed against @synthesis/metamodel-core, which is not a
-// CLI dependency; the manifest-driven call site is untyped anyway.
+// The generator is typed against @aelastics/synthesis/metamodel, whose
+// types the CLI does not consume; the manifest-driven call site is untyped anyway.
 const DefaultConfigGenerator = SourceModelToDefaultConfigurationModel as unknown as new (
   store: ModelStore,
   extra: { bindingModel: unknown }
@@ -380,11 +376,11 @@ export function buildConfigModelModule(
   header: SynthHeader,
   byModule: Map<string, string[]> = groupConfigTagsByModule(jsx)
 ): string {
-  const jsxRuntimeTags = ['createExprNode', ...(byModule.get(JSX_RUNTIME) ?? [])]
+  const jsxModuleTags = ['createExprNode', ...(byModule.get(JSX_MODULE) ?? [])]
   const importLines = [
-    `import { ${jsxRuntimeTags.join(', ')} } from '${JSX_RUNTIME}'`,
+    `import { ${jsxModuleTags.join(', ')} } from '${JSX_MODULE}'`,
     ...[...byModule.entries()]
-      .filter(([module]) => module !== JSX_RUNTIME)
+      .filter(([module]) => module !== JSX_MODULE)
       .sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
       .map(([module, tags]) => `import { ${tags.join(', ')} } from '${module}'`)
   ]

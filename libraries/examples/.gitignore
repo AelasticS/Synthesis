@@ -1,7 +1,0 @@
-lib/
-dist/
-temp/
-.heft/
-.rush/
-node_modules/
-*.tsbuildinfo

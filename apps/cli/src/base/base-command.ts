@@ -12,6 +12,7 @@ import {
   isWorkspaceInitialized
 } from '../config/index.js'
 import type { FlowDeps } from '../interactive/flows.js'
+import { registerModuleResolutionRoots } from '../models/resolution.js'
 import { errorMessage } from '../support/errors.js'
 import { EXIT_CODES } from '../support/exit-codes.js'
 import { isPromptCancel } from '../support/interactive.js'
@@ -97,6 +98,13 @@ export abstract class BaseCommand<T extends typeof Command = typeof Command> ext
     if (flags.ns) {
       this.workspaceConfig.currentNamespace = flags.ns
     }
+
+    // Installed transformation packages are fallback resolution roots for
+    // bare imports in workspace models and manifest modules (their
+    // dependencies, e.g. metamodel packages, must resolve for rendering).
+    registerModuleResolutionRoots(
+      Object.values(this.workspaceConfig.transformations ?? {}).map((t) => t.path)
+    )
 
     // Switch to namespace directory if set
     const nsPath = getCurrentNamespacePath(this.workspaceConfig)

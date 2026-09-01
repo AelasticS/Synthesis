@@ -3,7 +3,7 @@ import type { SynthHeader } from '../header.js'
 
 const completeHeaderText = `export const $synth = {
   kind: 'model',
-  metamodel: '@synthesis/standard-metamodels/eer',
+  metamodel: 'eer-metamodel',
   references: {},
   generatedBy: null,
   createdAt: '2026-08-27T10:00:00.000Z',
@@ -18,7 +18,7 @@ const completeHeaderText = `export const $synth = {
 
 const completeHeader: SynthHeader = {
   kind: 'model',
-  metamodel: '@synthesis/standard-metamodels/eer',
+  metamodel: 'eer-metamodel',
   references: {},
   generatedBy: null,
   createdAt: '2026-08-27T10:00:00.000Z',
@@ -31,8 +31,8 @@ const completeHeader: SynthHeader = {
   custom: {}
 }
 
-const sampleFile = `import { ModelStore } from '@synthesis/engine'
-import { Entity } from '@synthesis/standard-metamodels/eer'
+const sampleFile = `import { ModelStore } from '@aelastics/synthesis/store'
+import { Entity } from 'eer-metamodel'
 
 ${completeHeaderText}
 
@@ -202,7 +202,7 @@ describe('serializeSynthHeader', () => {
   it('serializes nested references, generatedBy, tags and custom deterministically', () => {
     const header: SynthHeader = {
       kind: 'configuration-model',
-      metamodel: '@synthesis/decision-framework/configuration',
+      metamodel: '@aelastics/synthesis/metamodels/configuration/model',
       references: { sourceModel: 'com.example/persons', bindingModel: 'eer-to-relational/binding' },
       generatedBy: { tx: 'eer-to-relational', txVersion: '1.2.0', date: '2026-08-27T10:00:00.000Z' },
       createdAt: '2026-08-27T10:00:00.000Z',
@@ -216,7 +216,7 @@ describe('serializeSynthHeader', () => {
     }
     expect(serializeSynthHeader(header)).toBe(`export const $synth = {
   kind: 'configuration-model',
-  metamodel: '@synthesis/decision-framework/configuration',
+  metamodel: '@aelastics/synthesis/metamodels/configuration/model',
   references: {
     sourceModel: 'com.example/persons',
     bindingModel: 'eer-to-relational/binding'
@@ -301,7 +301,7 @@ export default () => a(b, c)
   it('round-trips: parse(write(x)) equals x', () => {
     const header: SynthHeader = {
       kind: 'decision-model',
-      metamodel: '@synthesis/decision-framework/decisions',
+      metamodel: '@aelastics/synthesis/metamodels/decision/model',
       references: { bindingModel: 'tx/binding' },
       generatedBy: { tx: 'gen-tx', date: '2026-08-27T00:00:00.000Z' },
       createdAt: '2026-08-27T00:00:00.000Z',

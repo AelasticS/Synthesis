@@ -63,8 +63,8 @@ export default class TransformationInit extends BaseCommand {
       kind: 'm2m',
       entry: './dist/index.js',
       exportName: 'MyTransformation',
-      source: { metamodel: '@synthesis/standard-metamodels/source' },
-      target: { metamodel: '@synthesis/standard-metamodels/target' }
+      source: { metamodel: 'my-source-metamodel' },
+      target: { metamodel: 'my-target-metamodel' }
     }
     await writeFile(join(projectDir, 'synth.json'), JSON.stringify(synthJson, null, 2) + '\n')
 

@@ -109,8 +109,8 @@ describe('tx run errors', () => {
       'tx', 'run', 'rel-to-sql-ddl', '--in', 'com.example/persons', '--out-dir', join(tempDir, 'never')
     ])
     expect(code).toBe(2)
-    expect(stderr).toContain('@synthesis/standard-metamodels/eer')
-    expect(stderr).toContain('@synthesis/standard-metamodels/relational')
+    expect(stderr).toContain('eer-metamodel')
+    expect(stderr).toContain('relational-metamodel')
   })
 
   it('requires --out-dir for an m2t transformation', async () => {
@@ -186,8 +186,8 @@ describe('tx run configuration consent (uniform policy)', () => {
           kind: 'm2m',
           entry: './lib/transformation.js',
           exportName: 'PlainTransformation',
-          source: { metamodel: '@synthesis/standard-metamodels/eer' },
-          target: { metamodel: '@synthesis/standard-metamodels/relational' }
+          source: { metamodel: 'eer-metamodel' },
+          target: { metamodel: 'relational-metamodel' }
         })
       )
       const install = await run(['tx', 'install', plainDir])
@@ -254,7 +254,7 @@ describe('tx run m2m', () => {
     expect(error).toBeUndefined()
     const parsed = JSON.parse(stdout)
     expect(parsed.header.kind).toBe('model')
-    expect(parsed.header.metamodel).toBe('@synthesis/standard-metamodels/relational')
+    expect(parsed.header.metamodel).toBe('relational-metamodel')
     expect(parsed.header.generatedBy.tx).toBe('eer-to-relational')
     expect(parsed.header.generatedBy.config).toBe('defaults')
   })
@@ -535,8 +535,8 @@ describe('tx run --config with deleted choices (default materialization)', () =>
     const helper = [
       '/** @jsx createExprNode */',
       '',
-      "import { createExprNode } from '@synthesis/jsx-runtime'",
-      "import { DecisionModel, ModelIssue, Option, SimpleOption } from '@synthesis/decision-framework/decisions/1.decision-model/decision-meta.model-components'",
+      "import { createExprNode } from '@aelastics/synthesis/jsx'",
+      "import { DecisionModel, ModelIssue, Option, SimpleOption } from '@aelastics/synthesis/metamodels/decision'",
       '',
       'export const $synth = {',
       "  kind: 'decision-model',",

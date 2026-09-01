@@ -9,7 +9,7 @@
  *
  * `entry` and every `parts` module specifier may be either a
  * package-relative path (`./lib/transformation.js`) or a bare package
- * specifier (`@synthesis/examples/lib/...`). A path-looking specifier
+ * specifier (`@some-scope/some-package/lib/...`). A path-looking specifier
  * without the `./` prefix (`lib/transformation.js`) is normalized to the
  * package-relative form at load time when it names an existing file under
  * the package directory. Resolution against the installed package happens

@@ -65,8 +65,8 @@ export const SqlGenerationIssues = (store: ModelStore): ExprNode<t.IDecisionMode
 )
 ```
 
-The imports come from the decision framework rather than from a
-metamodel package:
+The imports come from the library's internal decision metamodel rather
+than from a domain metamodel package:
 
 ```tsx
 import {
@@ -74,7 +74,7 @@ import {
   GlobalIssue,
   Option,
   SimpleOption
-} from '@synthesis/decision-framework/decisions/1.decision-model/decision-meta.model-components'
+} from '@aelastics/synthesis/metamodels/decision'
 ```
 
 Everything else is the shape Part 1 established: the
@@ -223,8 +223,11 @@ that reason.
 `sourceModel` resolves by absolute path in the store, so something has
 to be there for it to land on. The real source metamodel is a TypeScript
 package of type objects, imported and compared by identity; it is not in
-the store. So the package ships the concepts a second time, as a model,
-in `src/rel-metamodel.tsx`, written in the types metamodel:
+the store. So the metamodel package ships its concepts a second time, as
+a model: its `as-model` facet, exported as
+`rel-tutorial-metamodel/as-model` from
+`examples/tutorial/metamodels/rel-tutorial/src/as-model.tsx`, written in
+the types metamodel:
 
 ```tsx
 export const RelTutorialMetamodel = (store: ModelStore): ExprNode<t.ITypeModel> => (

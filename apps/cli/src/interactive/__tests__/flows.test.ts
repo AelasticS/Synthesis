@@ -16,8 +16,8 @@ import type { FlowDeps } from '../flows.js'
 const packageRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../../..')
 const fixturesDir = join(packageRoot, 'src/tx/__tests__/fixtures')
 
-const EER = '@synthesis/standard-metamodels/eer'
-const REL = '@synthesis/standard-metamodels/relational'
+const EER = 'eer-metamodel'
+const REL = 'relational-metamodel'
 
 interface RecordedPrompt {
   type: 'search' | 'select' | 'confirm' | 'input'

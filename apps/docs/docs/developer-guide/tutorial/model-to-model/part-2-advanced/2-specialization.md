@@ -8,7 +8,7 @@ The metamodel now distinguishes kernel entities from weak ones. This
 page is the mechanism that lets the transformation act on that
 distinction without ever asking which kind of entity it has.
 
-Two decorators do the work, both from `@synthesis/engine`:
+Two decorators do the work, both from `@aelastics/synthesis/m2m`:
 
 - **`@SpecPoint()`** marks a rule as a specialization point. The rule
   keeps its body and its meaning, and becomes dispatchable.
@@ -32,8 +32,8 @@ fills in:
 ```
 
 The base method is named by string, and the source type by the
-metamodel's type object, `em.Kernel` and `em.Weak` from the `model`
-namespace. That is the same type object the store compares against in
+metamodel's type object, `em.Kernel` and `em.Weak` from the `/model`
+subpath. That is the same type object the store compares against in
 `isTypeOf`, and the same one the source model was rendered with, which
 is what Part 1's point about metamodels having to be importable
 packages was protecting.
@@ -54,11 +54,11 @@ options are reached only through the dispatch.
 Without it the decorators are a compile error, and it is the only
 difference between Part 1's `tsconfig.json` and Part 2's.
 
-**The import list grows.** The engine import picks up the three
+**The import list grows.** The m2m import picks up the three
 decorators the class uses:
 
 ```tsx
-import { abstractM2M, E2E, SpecPoint, SpecOption } from '@synthesis/engine'
+import { abstractM2M, E2E, SpecPoint, SpecOption } from '@aelastics/synthesis/m2m'
 ```
 
 ## Decorator order is not a matter of taste

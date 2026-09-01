@@ -32,7 +32,7 @@ column grafted onto `Book`, and a `categorizedAs` join table. Both
 kinds of foreign key are therefore exercised by a single run.
 
 The finished package exists in the repository as
-`examples/model-to-text/sql-tutorial-basic`. Use it as the answer key whenever you
+`examples/tutorial/sql-tutorial-basic`. Use it as the answer key whenever you
 want to compare; every listing on the following pages is taken from it
 verbatim.
 
@@ -62,10 +62,10 @@ Three ideas carry the whole part:
   why a run names a directory with `--out-dir` rather than a single
   result with `--out`. Part 1 keeps it as simple as it goes: one
   document, no folders, so one file whose name is the document's.
-- **The text metamodel ships with the engine.** It is not one of the
-  `@synthesis/standard-metamodels`, because it is not a domain
-  language. It is imported from `@synthesis/engine`, and the manifest
-  names it with the marker string `"text"`.
+- **The text metamodel ships with the library.** It is not a domain
+  metamodel package, because it is not a domain language. It is
+  imported from `@aelastics/synthesis/m2t`, and the manifest names it
+  with the marker string `"text"`.
 
 ## In this part
 

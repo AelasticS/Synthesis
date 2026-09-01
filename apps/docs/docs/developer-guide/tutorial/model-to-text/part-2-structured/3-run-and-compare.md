@@ -15,7 +15,7 @@ two new rules. Nothing about packaging it or running it has changed.
   "entry": "./dist/transformation.js",
   "exportName": "RelToSqlStructuredTransformation",
   "source": {
-    "metamodel": "@synthesis/standard-metamodels/rel-tutorial"
+    "metamodel": "rel-tutorial-metamodel"
   },
   "target": {
     "metamodel": "text"
@@ -148,10 +148,10 @@ schema existing only in memory between the steps.
 ## The complete source
 
 Every listing in this part is a fragment of one file. Here it is whole,
-embedded from `examples/model-to-text/sql-tutorial-structured` at build time, so what
+embedded from `examples/tutorial/sql-tutorial-structured` at build time, so what
 you read is exactly what the smoke test runs:
 
-```tsx file=<rootDir>/examples/model-to-text/sql-tutorial-structured/src/transformation.tsx
+```tsx file=<rootDir>/examples/tutorial/sql-tutorial-structured/src/transformation.tsx
 ```
 
 The package around it is four more files: `package.json`,

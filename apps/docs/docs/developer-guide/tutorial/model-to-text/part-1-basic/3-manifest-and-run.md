@@ -36,7 +36,7 @@ rewritten by hand, so the two halves of the tutorial really do join up.
   "entry": "./dist/transformation.js",
   "exportName": "RelToSqlBasicTransformation",
   "source": {
-    "metamodel": "@synthesis/standard-metamodels/rel-tutorial"
+    "metamodel": "rel-tutorial-metamodel"
   },
   "target": {
     "metamodel": "text"
@@ -96,25 +96,25 @@ dependencies:
   ],
   "scripts": {
     "build": "tsc",
-    "test": "node ../smoke.mjs"
+    "test": "node ../../smoke.mjs"
   },
   "dependencies": {
-    "@synthesis/jsx-runtime": "workspace:*",
-    "@synthesis/engine": "workspace:*",
-    "@synthesis/standard-metamodels": "workspace:*"
+    "@aelastics/synthesis": "workspace:*",
+    "rel-tutorial-metamodel": "workspace:*"
   },
   "devDependencies": {
     "typescript": "~5.9.3",
-    "@synthesis/cli": "workspace:*"
+    "@aelastics/synthesis-cli": "workspace:*"
   }
 }
 ```
 
-The three runtime dependencies are the three things the transformation
-imports. Note that `@synthesis/engine` earns its place twice here: it
-supplies the base class, as it does for every transformation, and it
-supplies the target metamodel and its tags, which is particular to
-model-to-text work.
+The two runtime dependencies are the two things the transformation
+imports. Note that `@aelastics/synthesis` earns its place twice here:
+it supplies the base class, as it does for every transformation, and
+it supplies the target metamodel and its tags, which is particular to
+model-to-text work. The source metamodel is the only separate package,
+shipped as a dependency so the CLI can resolve it.
 
 ## `tsconfig.json`
 
@@ -298,9 +298,8 @@ relational schema it produces, is the easy way to provoke it:
 
 ```text
 Error: Type mismatch: source model demo/library declares metamodel
-'@synthesis/standard-metamodels/eer-tutorial/basic' but transformation
-'sql-tutorial-basic' expects
-'@synthesis/standard-metamodels/rel-tutorial'.
+'eer-tutorial-metamodel/basic' but transformation 'sql-tutorial-basic'
+expects 'rel-tutorial-metamodel'.
 ```
 
 **A paragraph with an empty string in it.** Page 1's idiom exists for

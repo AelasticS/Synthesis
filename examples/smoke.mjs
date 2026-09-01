@@ -5,11 +5,13 @@
  *   node ../smoke.mjs
  *
  * The script expects the package to be built (rush build does that) and
- * exercises the full CLI loop in an isolated workspace: init, import
- * every model in sample/, transformation install, and one run against
- * the first sample (with --default-configs when the package is
- * configuration-based; with --out-dir when it is m2t). It fails loudly if
- * any step fails or no output is produced.
+ * exercises the full CLI loop in an isolated workspace: init,
+ * transformation install, import every model in sample/, and one run
+ * against the first sample (with --default-configs when the package is
+ * configuration-based; with --out-dir when it is m2t). Install comes
+ * first because the sample models import the package's metamodel
+ * dependencies, which resolve through the installed transformation. It
+ * fails loudly if any step fails or no output is produced.
  */
 import { execFileSync } from 'node:child_process'
 import { existsSync, mkdtempSync, readFileSync, readdirSync, rmSync } from 'node:fs'
@@ -18,11 +20,11 @@ import { tmpdir } from 'node:os'
 
 const pkgDir = process.cwd()
 // Resolved through the package's own node_modules link, so the script
-// works wherever the package is checked out, as long as @synthesis/cli
+// works wherever the package is checked out, as long as @aelastics/synthesis-cli
 // is a (dev) dependency.
-const cliBin = join(pkgDir, 'node_modules', '@synthesis', 'cli', 'bin', 'run.js')
+const cliBin = join(pkgDir, 'node_modules', '@aelastics', 'synthesis-cli', 'bin', 'run.js')
 if (!existsSync(cliBin)) {
-  console.error(`@synthesis/cli not found at ${cliBin}; add it as a devDependency and run rush update`)
+  console.error(`@aelastics/synthesis-cli not found at ${cliBin}; add it as a devDependency and run rush update`)
   process.exit(1)
 }
 
@@ -42,6 +44,7 @@ const cli = (args) =>
 try {
   cli(['init'])
   cli(['namespace', 'mk', 'demo'])
+  cli(['transformation', 'install', pkgDir])
 
   const samples = readdirSync(join(pkgDir, 'sample')).filter((f) => f.endsWith('.tsx'))
   if (samples.length === 0) {
@@ -52,8 +55,6 @@ try {
     cli(['model', 'import', join(pkgDir, 'sample', file), '--as', ref])
     return ref
   })
-
-  cli(['transformation', 'install', pkgDir])
 
   const runArgs = ['transformation', 'run', txName, '--in', refs[0]]
   if (manifest.parts && manifest.parts.decisionModel) {

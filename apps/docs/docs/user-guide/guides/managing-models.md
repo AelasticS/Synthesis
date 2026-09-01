@@ -18,14 +18,14 @@ executed), not a JSON data file:
 ```tsx
 /** @jsx createExprNode */
 
-import { createExprNode } from '@synthesis/jsx-runtime'
-import type { ExprNode } from '@synthesis/jsx-runtime'
-import type { ModelStore } from '@synthesis/engine'
-import { EERSchema, Entity, Attribute, Domain } from '@synthesis/standard-metamodels/eer'
+import { createExprNode } from '@aelastics/synthesis/jsx'
+import type { ExprNode } from '@aelastics/synthesis/jsx'
+import type { ModelStore } from '@aelastics/synthesis/store'
+import { EERSchema, Entity, Attribute, Domain } from 'eer-metamodel'
 
 export const $synth = {
   kind: 'model',
-  metamodel: '@synthesis/standard-metamodels/eer',
+  metamodel: 'eer-metamodel',
   references: {},
   author: 'Jane Doe <jane@example.org>',
   version: '0.1.0',

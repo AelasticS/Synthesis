@@ -1,0 +1,28 @@
+{
+  "kind": "m2m",
+  "entry": "./dist/transformation.js",
+  "exportName": "EER2RelDomainWithDecisionTransformation",
+  "source": {
+    "metamodel": "eer-metamodel"
+  },
+  "target": {
+    "metamodel": "relational-metamodel",
+    "components": "relational-metamodel"
+  },
+  "parts": {
+    "metamodels": [
+      {
+        "module": "eer-metamodel/as-model",
+        "exportName": "EERModel"
+      }
+    ],
+    "decisionModel": {
+      "module": "./dist/decision-model.js",
+      "exportName": "RelationSchemaDesignIssues"
+    },
+    "bindingModel": {
+      "module": "./dist/binding-model.js",
+      "exportName": "ER_Bindings"
+    }
+  }
+}

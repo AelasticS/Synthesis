@@ -8,7 +8,7 @@ The design space is declared and bound. This page is the other half:
 the rule that stops answering the question, and the manifest entry that
 makes the package configuration-based.
 
-Every listing is from `examples/model-to-model/eer-tutorial-configuration-based`.
+Every listing is from `examples/tutorial/eer-tutorial-configuration-based`.
 
 ## The class becomes decision-aware
 
@@ -44,9 +44,9 @@ exactly that path.
 The imports the new machinery needs:
 
 ```tsx
-import { E2E, SpecPoint, SpecOption, M2M } from '@synthesis/engine'
-import { DecisionAwareM2M, VarPoint, VarOption, Default, Option } from '@synthesis/decision-framework'
-import * as cm from '@synthesis/decision-framework/decisions/3.configuration-model/configuration-meta.model'
+import { E2E, SpecPoint, SpecOption, M2M } from '@aelastics/synthesis/m2m'
+import { DecisionAwareM2M, VarPoint, VarOption, Default, Option } from '@aelastics/synthesis/variability'
+import * as cm from '@aelastics/synthesis/metamodels/configuration/model'
 ```
 
 Note the `Option` in that second line. It is not the `<Option />` tag
@@ -312,16 +312,16 @@ and a `parts` block is added:
   "entry": "./dist/transformation.js",
   "exportName": "EER2RelConfigurableTransformation",
   "source": {
-    "metamodel": "@synthesis/standard-metamodels/eer-tutorial/advanced"
+    "metamodel": "eer-tutorial-metamodel/advanced"
   },
   "target": {
-    "metamodel": "@synthesis/standard-metamodels/rel-tutorial",
-    "components": "@synthesis/standard-metamodels/rel-tutorial/components"
+    "metamodel": "rel-tutorial-metamodel",
+    "components": "rel-tutorial-metamodel"
   },
   "parts": {
     "metamodels": [
       {
-        "module": "./dist/eer-metamodel.js",
+        "module": "eer-tutorial-metamodel/advanced/as-model",
         "exportName": "EERTutorialMetamodel"
       }
     ],
@@ -338,9 +338,13 @@ and a `parts` block is added:
 ```
 
 Each entry has the same two fields as the top-level entry point: a
-`module` pointing into `dist`, and the `exportName` inside it. These
-are compiled modules too, so a change to any of the three source files
-needs a rebuild before it takes effect.
+`module` and the `exportName` inside it. The `module` comes in two
+shapes. The decision model and the binding model are the
+transformation's own files, so their entries are package-relative
+paths into `dist`, and a change to either source file needs a rebuild
+before it takes effect. The metamodel-as-model belongs to the
+metamodel package, so its entry is the package's `as-model` subpath, a
+bare specifier resolved exactly like the imports in the code.
 
 **Order matters, and it is the order written above.** The parts are
 rendered into the store before every run: metamodels first, then the

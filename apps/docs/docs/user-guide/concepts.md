@@ -109,7 +109,6 @@ pure shortcut with identical behavior:
 | model | `model` | (none) |
 | config | `config` | (none) |
 | workspace | `workspace` | (none) |
-| example | `example` | (none) |
 
 `synth tx run` and `synth transformation run` are the same command.
 

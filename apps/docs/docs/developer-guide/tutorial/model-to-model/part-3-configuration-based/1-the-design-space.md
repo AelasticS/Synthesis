@@ -45,8 +45,8 @@ export const RelationshipDesignIssues = (store: ModelStore): ExprNode<t.IDecisio
 )
 ```
 
-Its imports come from the decision framework rather than from a
-metamodel package:
+Its imports come from the library's internal decision metamodel rather
+than from a domain metamodel package:
 
 ```tsx
 import {
@@ -54,7 +54,7 @@ import {
   ElementIssue,
   Option,
   SimpleOption,
-} from '@synthesis/decision-framework/decisions/1.decision-model/decision-meta.model-components'
+} from '@aelastics/synthesis/metamodels/decision'
 ```
 
 Everything else about the file is the shape Part 1 established: the

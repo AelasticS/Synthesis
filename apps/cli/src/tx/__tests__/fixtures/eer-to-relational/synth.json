@@ -3,25 +3,25 @@
   "entry": "./lib/transformation.js",
   "exportName": "EER2RelDomainWithDecisionTransformation",
   "source": {
-    "metamodel": "@synthesis/standard-metamodels/eer"
+    "metamodel": "eer-metamodel"
   },
   "target": {
-    "metamodel": "@synthesis/standard-metamodels/relational",
-    "components": "@synthesis/standard-metamodels/relational/components-legacy"
+    "metamodel": "relational-metamodel",
+    "components": "relational-metamodel"
   },
   "parts": {
     "metamodels": [
       {
-        "module": "@synthesis/examples/lib/eer-to-rel-small/er-metamodel.js",
+        "module": "./lib/eer-to-rel-small/er-metamodel.js",
         "exportName": "EERModel"
       }
     ],
     "decisionModel": {
-      "module": "@synthesis/examples/lib/eer-to-rel-small/02-decision-model.js",
+      "module": "./lib/eer-to-rel-small/02-decision-model.js",
       "exportName": "RelationSchemaDesignIssues"
     },
     "bindingModel": {
-      "module": "@synthesis/examples/lib/eer-to-rel-small/03-binding-model.js",
+      "module": "./lib/eer-to-rel-small/03-binding-model.js",
       "exportName": "ER_Bindings"
     }
   }

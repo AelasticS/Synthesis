@@ -71,7 +71,7 @@ name, because once a 1:N relationship may also become a join table, one
 schema can hold two join tables referencing the same entity.
 
 The finished package exists in the repository as
-`examples/model-to-model/eer-tutorial-configuration-based`. Use it as the answer key;
+`examples/tutorial/eer-tutorial-configuration-based`. Use it as the answer key;
 every listing on the following pages is taken from it verbatim.
 
 ## Prerequisites
@@ -81,9 +81,10 @@ every listing on the following pages is taken from it verbatim.
   template, or a specialization point works.
 - The same repository checkout, built once with `rush install` and
   `rush build`, and the `synth` CLI.
-- One new dependency in the package, `@synthesis/decision-framework`,
-  which is where all four new decorators and all three decision-side
-  metamodels come from.
+- No new dependency. All four new decorators come from
+  `@aelastics/synthesis/variability`, and the three decision-side
+  metamodels from `@aelastics/synthesis/metamodels/...`, both subpaths
+  of the library the package already depends on.
 - `"experimentalDecorators": true` in `tsconfig.json`, unchanged from
   Part 2.
 

@@ -33,7 +33,7 @@ install, and run. The relationship mapping is decided by one plain
 foreign key on the N side. That conditional is deliberate, and the next
 two parts each dissolve it in a different way.
 
-Answer key: `examples/model-to-model/eer-tutorial-basic`.
+Answer key: `examples/tutorial/eer-tutorial-basic`.
 
 ### Part 2: Advanced
 
@@ -49,8 +49,8 @@ mechanism when the variants are determined by the source model: a weak
 entity is a weak entity, and no configuration should be able to say
 otherwise.
 
-Answer key: `examples/model-to-model/eer-tutorial-advanced`, which uses
-`@synthesis/standard-metamodels/eer-tutorial/advanced` as its source
+Answer key: `examples/tutorial/eer-tutorial-advanced`, which uses
+`eer-tutorial-metamodel/advanced` as its source
 metamodel.
 
 ### Part 3: Configuration-based
@@ -69,7 +69,7 @@ dispatches on the configuration rather than on an `if` statement. The
 same source model and the same transformation then produce different
 relational architectures.
 
-Answer key: `examples/model-to-model/eer-tutorial-configuration-based`.
+Answer key: `examples/tutorial/eer-tutorial-configuration-based`.
 
 ### Part 4: Higher-order templates
 

@@ -1,0 +1,28 @@
+{
+  "kind": "m2m",
+  "entry": "./dist/transformation.js",
+  "exportName": "EER2RelConfigurableTransformation",
+  "source": {
+    "metamodel": "eer-tutorial-metamodel/advanced"
+  },
+  "target": {
+    "metamodel": "rel-tutorial-metamodel",
+    "components": "rel-tutorial-metamodel"
+  },
+  "parts": {
+    "metamodels": [
+      {
+        "module": "eer-tutorial-metamodel/advanced/as-model",
+        "exportName": "EERTutorialMetamodel"
+      }
+    ],
+    "decisionModel": {
+      "module": "./dist/decision-model.js",
+      "exportName": "RelationshipDesignIssues"
+    },
+    "bindingModel": {
+      "module": "./dist/binding-model.js",
+      "exportName": "EERTutorialBindings"
+    }
+  }
+}

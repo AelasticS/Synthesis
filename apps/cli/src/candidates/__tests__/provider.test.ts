@@ -21,8 +21,8 @@ import {
 const packageRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../../..')
 const fixturesDir = join(packageRoot, 'src/tx/__tests__/fixtures')
 
-const EER = '@synthesis/standard-metamodels/eer'
-const REL = '@synthesis/standard-metamodels/relational'
+const EER = 'eer-metamodel'
+const REL = 'relational-metamodel'
 
 let workspaceDir: string
 let modelsDir: string
@@ -118,7 +118,11 @@ describe('installedTransformations', () => {
 describe('chainNext', () => {
   it('offers exactly the transformations whose source matches the previous target', async () => {
     const next = await chainNext(config, 'eer-to-relational')
-    expect(next.map((tx) => tx.name)).toEqual(['rel-copy', 'rel-to-sql-ddl'])
+    expect(next.map((tx) => tx.name)).toEqual(['rel-to-sql-ddl'])
+    // rel-copy consumes the tutorial relational metamodel: only its own
+    // (endogenous) output feeds it
+    const afterCopy = await chainNext(config, 'rel-copy')
+    expect(afterCopy.map((tx) => tx.name)).toEqual(['rel-copy'])
   })
 
   it('offers nothing after an m2t step (text is terminal) or an unknown one', async () => {

@@ -3,7 +3,7 @@
   "entry": "./lib/transformation.js",
   "exportName": "Rel2DdlTransformation",
   "source": {
-    "metamodel": "@synthesis/standard-metamodels/relational"
+    "metamodel": "relational-metamodel"
   },
   "target": {
     "metamodel": "text"
@@ -11,16 +11,16 @@
   "parts": {
     "metamodels": [
       {
-        "module": "@synthesis/examples/lib/eer-to-rel-to-text/rel-metamodel.js",
+        "module": "./lib/eer-to-rel-to-text/rel-metamodel.js",
         "exportName": "RELModel"
       }
     ],
     "decisionModel": {
-      "module": "@synthesis/examples/lib/eer-to-rel-to-text/02-decision-model.js",
+      "module": "./lib/eer-to-rel-to-text/02-decision-model.js",
       "exportName": "DdlGenerationIssues"
     },
     "bindingModel": {
-      "module": "@synthesis/examples/lib/eer-to-rel-to-text/03-binding-model.js",
+      "module": "./lib/eer-to-rel-to-text/03-binding-model.js",
       "exportName": "Rel_Bindings"
     }
   }

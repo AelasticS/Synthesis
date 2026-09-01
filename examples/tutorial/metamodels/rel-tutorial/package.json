@@ -1,0 +1,43 @@
+{
+  "name": "rel-tutorial-metamodel",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Simplified relational metamodel shared by the Synthesis tutorial examples",
+  "author": "Sinisa Neskovic",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./model": {
+      "types": "./dist/REL-tutorial.meta.model.type.d.ts",
+      "default": "./dist/REL-tutorial.meta.model.type.js"
+    },
+    "./as-model": {
+      "types": "./dist/as-model.d.ts",
+      "default": "./dist/as-model.js"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "model": ["dist/REL-tutorial.meta.model.type.d.ts"],
+      "as-model": ["dist/as-model.d.ts"]
+    }
+  },
+  "dependencies": {
+    "@aelastics/types": "workspace:*",
+    "@aelastics/synthesis": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "~5.9.3"
+  }
+}

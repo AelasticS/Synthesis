@@ -35,8 +35,18 @@ const IMPORT_SPECIFIER_RE = /^[ \t]*import\b([^'"]*)['"]([^'"]+)['"]/gm
 // form starting with the keyword (a default import bound to `type`).
 const TYPE_ONLY_CLAUSE_RE = /^\s*type\s(?!\s*from\s*$)/
 
-// Support packages every model imports for rendering; never its metamodel.
-const NON_METAMODEL_PACKAGES = ['@synthesis/jsx-runtime', '@synthesis/engine']
+// Support namespaces every model imports for rendering; never its metamodel.
+const NON_METAMODEL_PACKAGES = [
+  '@aelastics/synthesis/jsx',
+  '@aelastics/synthesis/store',
+  '@aelastics/synthesis/m2m',
+  '@aelastics/synthesis/m2t',
+  '@aelastics/synthesis/variability'
+]
+
+// Metamodels bundled into the merged library live under this subpath; they
+// are metamodel candidates even though the rest of @aelastics/ is support.
+const MERGED_METAMODELS_PREFIX = '@aelastics/synthesis/metamodels/'
 
 function isBareSpecifier(specifier: string): boolean {
   return !specifier.startsWith('.') && !specifier.startsWith('/') && !specifier.startsWith('node:')
@@ -51,9 +61,12 @@ function isNonMetamodelPackage(specifier: string): boolean {
 
 /**
  * Derive the metamodel specifier from a model file's imports: the first
- * import resolving under @synthesis/standard-metamodels anywhere in the
- * imports wins; otherwise the first bare import that is not the jsx
- * runtime, the engine, or an @aelastics support package. Statement-level
+ * import under the merged library's @aelastics/synthesis/metamodels
+ * subpath anywhere in the imports wins; otherwise the first bare import
+ * that is not one of the library's support namespaces (jsx, store, m2m,
+ * m2t, variability) or any other @aelastics support package. Metamodel
+ * packages (eer-metamodel, rel-tutorial-metamodel, ...) are ordinary bare
+ * imports and are found by that second rule. Statement-level
  * `import type ...` declarations are erased at compile time and ignored
  * entirely. Returns null when the file has no candidate.
  */
@@ -68,13 +81,9 @@ export function deriveMetamodel(fileText: string): string | null {
       bare.push(specifier)
     }
   }
-  const standard = bare.find(
-    (specifier) =>
-      specifier === '@synthesis/standard-metamodels' ||
-      specifier.startsWith('@synthesis/standard-metamodels/')
-  )
-  if (standard !== undefined) {
-    return standard
+  const merged = bare.find((specifier) => specifier.startsWith(MERGED_METAMODELS_PREFIX))
+  if (merged !== undefined) {
+    return merged
   }
   return bare.find((specifier) => !isNonMetamodelPackage(specifier)) ?? null
 }

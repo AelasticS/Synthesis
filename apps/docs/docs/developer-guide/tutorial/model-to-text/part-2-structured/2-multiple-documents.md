@@ -186,7 +186,7 @@ second, both as fragments. Here is the finished `template()`, embedded
 from the companion package itself rather than copied, so it cannot
 drift from the code that actually runs:
 
-```tsx file=<rootDir>/examples/model-to-text/sql-tutorial-structured/src/transformation.tsx#L40-L98
+```tsx file=<rootDir>/examples/tutorial/sql-tutorial-structured/src/transformation.tsx#L41-L99
 ```
 
 Read it top to bottom and it is four steps with nothing hidden between

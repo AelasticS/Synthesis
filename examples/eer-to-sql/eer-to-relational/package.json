@@ -1,0 +1,27 @@
+{
+  "name": "eer-to-relational",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Configuration-based Synthesis m2m transformation: EER schema to relational schema",
+  "author": "Sinisa Neskovic",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "dist/transformation.js",
+  "files": [
+    "dist",
+    "synth.json"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "node ../../smoke.mjs"
+  },
+  "dependencies": {
+    "@aelastics/synthesis": "workspace:*",
+    "eer-metamodel": "workspace:*",
+    "relational-metamodel": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "~5.9.3",
+    "@aelastics/synthesis-cli": "workspace:*"
+  }
+}

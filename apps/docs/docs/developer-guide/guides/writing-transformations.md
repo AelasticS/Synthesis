@@ -12,8 +12,9 @@ Every transformation extends `abstractM2M<Source, Destination, ExtraModels, Conf
 
 ```typescript
 /** @jsx createExprNode */
-import { createExprNode, ExprNode } from '@synthesis/jsx-runtime'
-import { abstractM2M, M2M, E2E, ModelStore } from '@synthesis/engine'
+import { createExprNode, ExprNode } from '@aelastics/synthesis/jsx'
+import { abstractM2M, M2M, E2E } from '@aelastics/synthesis/m2m'
+import type { ModelStore } from '@aelastics/synthesis/store'
 import * as et from './EER.meta.model.type'
 import * as rt from './REL.meta.model.type'
 import * as e from './EER.jsx-comps'
@@ -189,7 +190,7 @@ When a rule needs to reference a target element that was produced by another rul
 `Resolve` must have exactly one child, and that child must be a function. The function receives the resolved target model element as its argument and returns a JSX expression.
 
 ```typescript
-import { Resolve } from '@synthesis/jsx-runtime'
+import { Resolve } from '@aelastics/synthesis/jsx'
 
 @E2E()
 Relationship2ForeignKey(rel: et.IRelationship): ExprNode<rt.IForeignKey> {

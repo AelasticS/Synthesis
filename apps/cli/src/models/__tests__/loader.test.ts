@@ -4,7 +4,7 @@ import { dirname, join, resolve } from 'node:path'
 import { createRequire } from 'node:module'
 import { fileURLToPath } from 'node:url'
 
-import { ModelStore } from '@synthesis/engine'
+import { ModelStore } from '@aelastics/synthesis/store'
 
 import {
   ModelClosureError,
@@ -37,10 +37,13 @@ describe('transpileModel', () => {
     expect(existsSync(outPath)).toBe(true)
 
     const text = readFileSync(outPath, 'utf8')
-    // No bare metamodel specifier may remain: a bundled copy of a metamodel
-    // package would break aelastics type identity with the CLI process.
-    expect(text).not.toMatch(/from\s*["']@synthesis\//)
-    const eerModulePath = testRequire.resolve('@synthesis/standard-metamodels/eer')
+    // No bare workspace specifier may remain (neither the @aelastics scope
+    // nor an unscoped metamodel package): a bundled copy of a metamodel or
+    // support package would break aelastics type identity with the CLI
+    // process.
+    expect(text).not.toMatch(/from\s*["']@(?:synthesis|aelastics)\//)
+    expect(text).not.toMatch(/from\s*["']eer-metamodel/)
+    const eerModulePath = testRequire.resolve('eer-metamodel')
     expect(text).toContain(eerModulePath)
   })
 
@@ -66,7 +69,7 @@ describe('importModel', () => {
     expect(typeof mod.default).toBe('function')
     expect(header).toMatchObject({
       kind: 'model',
-      metamodel: '@synthesis/standard-metamodels/eer'
+      metamodel: 'eer-metamodel'
     })
   })
 })
@@ -77,7 +80,7 @@ describe('renderModel', () => {
     expect((root as { name: string }).name).toBe('Persons')
     expect((header as { kind: string }).kind).toBe('model')
     // Rendered models register under their qualified name below the
-    // jsx-runtime top-level namespace.
+    // jsx module's top-level namespace.
     expect(store.getByName('//www.aelastics.org/Persons')).toBe(root)
   })
 

@@ -9,7 +9,7 @@ template that decides nothing, three options that each build a complete
 output model, a second variation point three lines long, and the
 manifest entry that ties the package together.
 
-Every listing is from `examples/model-to-text/sql-tutorial-configuration-based`.
+Every listing is from `examples/tutorial/sql-tutorial-configuration-based`.
 
 ## The class becomes decision-aware
 
@@ -53,9 +53,9 @@ The imports the new machinery needs, alongside the ones Parts 1 and 2
 already had:
 
 ```tsx
-import { M2M, M2T, Doc, Sec, P } from '@synthesis/engine'
-import { DecisionAwareM2M, VarPoint, VarOption, Default, Option } from '@synthesis/decision-framework'
-import * as cm from '@synthesis/decision-framework/decisions/3.configuration-model/configuration-meta.model'
+import { M2M } from '@aelastics/synthesis/m2m'
+import { DecisionAwareM2M, VarPoint, VarOption, Default, Option } from '@aelastics/synthesis/variability'
+import * as cm from '@aelastics/synthesis/metamodels/configuration/model'
 ```
 
 `Option` in the second line is a predicate builder, not the `<Option />`
@@ -330,7 +330,7 @@ unchanged, and a `parts` block is added:
   "entry": "./dist/transformation.js",
   "exportName": "RelToSqlConfigurableTransformation",
   "source": {
-    "metamodel": "@synthesis/standard-metamodels/rel-tutorial"
+    "metamodel": "rel-tutorial-metamodel"
   },
   "target": {
     "metamodel": "text"
@@ -338,7 +338,7 @@ unchanged, and a `parts` block is added:
   "parts": {
     "metamodels": [
       {
-        "module": "./dist/rel-metamodel.js",
+        "module": "rel-tutorial-metamodel/as-model",
         "exportName": "RelTutorialMetamodel"
       }
     ],
@@ -356,13 +356,14 @@ unchanged, and a `parts` block is added:
 
 `"target": { "metamodel": "text" }` is Parts 1 and 2's, untouched. The
 `parts` block is identical in shape to the model-to-model package's, and
-the rules are the same ones its page 3 states: each entry names a
-compiled module in `dist` and an export inside it, so a change to any of
-the three sources needs a rebuild; the parts are rendered into the store
-in the order written, metamodels first, then the decision model, then
-the binding model, because the binding model's absolute paths point at
-both; and the decision model and the binding model are declared
-together, even when, as here, one of them is empty.
+the rules are the same ones its page 3 states: the decision and binding
+model entries name compiled modules in `dist`, so a change to either
+source needs a rebuild, while the metamodel-as-model entry is the
+metamodel package's own `as-model` subpath; the parts are rendered into
+the store in the order written, metamodels first, then the decision
+model, then the binding model, because the binding model's absolute
+paths point at both; and the decision model and the binding model are
+declared together, even when, as here, one of them is empty.
 
 Their presence is the whole declaration. Nothing in the manifest says a
 transformation is configuration-based, and nothing needs to: a `parts`

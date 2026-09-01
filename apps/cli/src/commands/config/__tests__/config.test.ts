@@ -11,8 +11,7 @@ const packageRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../../../.
 const fixturesDir = join(packageRoot, 'src/tx/__tests__/fixtures')
 const personsFixture = join(packageRoot, 'src/models/__tests__/fixtures/persons.tsx')
 
-const CONFIGURATION_METAMODEL =
-  '@synthesis/decision-framework/decisions/3.configuration-model/configuration-meta.model'
+const CONFIGURATION_METAMODEL = '@aelastics/synthesis/metamodels/configuration/model'
 
 // Isolated HOME so tests neither read nor mutate the developer's ~/.synth
 // workspace; the workspace lives at <home>/.synth (init default path).
@@ -68,8 +67,8 @@ describe('config init', () => {
         kind: 'm2m',
         entry: './lib/transformation.js',
         exportName: 'PlainTransformation',
-        source: { metamodel: '@synthesis/standard-metamodels/eer' },
-        target: { metamodel: '@synthesis/standard-metamodels/relational' }
+        source: { metamodel: 'eer-metamodel' },
+        target: { metamodel: 'relational-metamodel' }
       })
     )
     await run(['tx', 'install', plainDir])

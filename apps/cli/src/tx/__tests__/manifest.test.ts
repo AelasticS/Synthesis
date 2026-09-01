@@ -249,21 +249,21 @@ describe('loadTxManifest: fixture packages', () => {
       kind: 'm2m',
       entry: './lib/transformation.js',
       exportName: 'EER2RelDomainWithDecisionTransformation',
-      source: { metamodel: '@synthesis/standard-metamodels/eer' },
+      source: { metamodel: 'eer-metamodel' },
       target: {
-        metamodel: '@synthesis/standard-metamodels/relational',
-        components: '@synthesis/standard-metamodels/relational/components-legacy'
+        metamodel: 'relational-metamodel',
+        components: 'relational-metamodel'
       },
       parts: {
         metamodels: [
-          { module: '@synthesis/examples/lib/eer-to-rel-small/er-metamodel.js', exportName: 'EERModel' }
+          { module: './lib/eer-to-rel-small/er-metamodel.js', exportName: 'EERModel' }
         ],
         decisionModel: {
-          module: '@synthesis/examples/lib/eer-to-rel-small/02-decision-model.js',
+          module: './lib/eer-to-rel-small/02-decision-model.js',
           exportName: 'RelationSchemaDesignIssues'
         },
         bindingModel: {
-          module: '@synthesis/examples/lib/eer-to-rel-small/03-binding-model.js',
+          module: './lib/eer-to-rel-small/03-binding-model.js',
           exportName: 'ER_Bindings'
         }
       },
@@ -279,18 +279,18 @@ describe('loadTxManifest: fixture packages', () => {
       kind: 'm2t',
       entry: './lib/transformation.js',
       exportName: 'Rel2DdlTransformation',
-      source: { metamodel: '@synthesis/standard-metamodels/relational' },
+      source: { metamodel: 'relational-metamodel' },
       target: { metamodel: 'text' },
       parts: {
         metamodels: [
-          { module: '@synthesis/examples/lib/eer-to-rel-to-text/rel-metamodel.js', exportName: 'RELModel' }
+          { module: './lib/eer-to-rel-to-text/rel-metamodel.js', exportName: 'RELModel' }
         ],
         decisionModel: {
-          module: '@synthesis/examples/lib/eer-to-rel-to-text/02-decision-model.js',
+          module: './lib/eer-to-rel-to-text/02-decision-model.js',
           exportName: 'DdlGenerationIssues'
         },
         bindingModel: {
-          module: '@synthesis/examples/lib/eer-to-rel-to-text/03-binding-model.js',
+          module: './lib/eer-to-rel-to-text/03-binding-model.js',
           exportName: 'Rel_Bindings'
         }
       },

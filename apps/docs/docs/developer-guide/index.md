@@ -44,8 +44,9 @@ graph LR
 - **Transformations** are classes whose rules map source elements to target
   JSX; the engine executes them with automatic tracing, reporting failures
   through [`@aelastics/result`](../result/intro.md).
-- Ready-made metamodels (EER, Relational, BPM) ship in
-  `@synthesis/standard-metamodels`, and the
+- Ready-made metamodels (EER and Relational, in tutorial and full-size
+  variants) ship as packages owned by the
+  [example suites](./examples/index.md), and the
   [`synth` CLI](../user-guide/index.md) runs, packages, and distributes the result.
 
 ## Developer Workflow

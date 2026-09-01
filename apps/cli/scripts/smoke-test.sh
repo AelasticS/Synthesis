@@ -58,7 +58,7 @@ run "ns mk creates nested namespace"      0 -                      ns mk com.exa
 run "model import through the gate"       0 "Imported"             model import "$FIXTURE" --as com.example/persons
 test -f "$MODELS/com/example/persons.tsx" && ok "nested path on disk" || bad "nested path on disk"
 run "model ls shows header columns"       0 "com.example/persons"  model ls
-run "model show displays metamodel"       0 "standard-metamodels/eer" model show com.example/persons
+run "model show displays metamodel"       0 "eer-metamodel" model show com.example/persons
 run "model validate renders for real"     0 "is valid"             model validate com.example/persons
 run "doctor clean on healthy workspace"   0 "0 errors"             doctor
 

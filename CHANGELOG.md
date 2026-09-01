@@ -12,6 +12,34 @@ overall version history.
 
 ### Changed
 
+- **Repository consolidated around one Synthesis library.** The former
+  packages `@synthesis/engine`, `@synthesis/jsx-runtime`,
+  `@synthesis/metamodel-core`, `@synthesis/decision-framework`, and the
+  types metamodel of `@synthesis/standard-metamodels` are now one package,
+  `@aelastics/synthesis`, with a namespaced export surface (`./jsx`,
+  `./metamodel`, `./store`, `./m2m`, `./m2t`, `./variability`,
+  `./metamodels/*`; the root exports nothing). The CLI package is renamed
+  `@aelastics/synthesis-cli`; the binary remains `synth`. Decision record:
+  `design/consolidation.md`.
+- **Metamodels are packages owned by the example suites.**
+  `@synthesis/standard-metamodels` is dissolved: the tutorial metamodels
+  live in `examples/tutorial/metamodels` (`eer-tutorial-metamodel`,
+  `rel-tutorial-metamodel`), the full-example metamodels in
+  `examples/eer-to-sql/metamodels` (`eer-metamodel`,
+  `relational-metamodel`). Each owns its type schemas (`/model`), JSX
+  components (flat), and metamodel-as-model (`/as-model`); manifests
+  reference these package specifiers. The accidental relational variants
+  (v1, v2) are deleted; git history preserves them. bpm is now an engine
+  test fixture.
+- **CLI: bare imports resolve from the CLI installation first, then from
+  installed transformation packages' dependencies**, one resolution per
+  specifier per process, preserving aelastics type identity. This lets a
+  transformation ship its metamodel as an ordinary dependency. Manifest
+  `parts` may reference bare package specifiers.
+- **Examples regrouped by suite** (`examples/tutorial/`,
+  `examples/eer-to-sql/`) and the starter template now uses the tutorial
+  relational metamodel.
+
 - **CLI (breaking): `synth.json` is the only transformation manifest
   location.** The fallback that read a `synth` object from `package.json`
   is removed. A package that still carries a `synth` block fails
@@ -39,18 +67,25 @@ overall version history.
   user documentation. The duplicated Contributing page on the site was
   dropped in favor of the repository's CONTRIBUTING.md.
 
+### Removed
+
+- **`synth example` command group**, together with the in-process example
+  registry (`@synthesis/examples`) and `@synthesis/runner`. The
+  installable packages under `examples/` are the example story; they run
+  through `synth transformation install` and `run`.
+
 ### Added
 
 - **Top-level `examples/` catalog of installable transformation
   packages.** Each example is shaped like a package an author would
   publish: TypeScript sources, a `synth.json` manifest, a sample model,
-  and a walkthrough README. The catalog holds three tutorial companions
-  (`eer-tutorial-basic`, `eer-tutorial-advanced`,
-  `eer-tutorial-configuration-based`) and two standalone examples
-  (`eer-to-relational`, a configuration-based m2m with package-relative
-  manifest parts, and `rel-to-sql-ddl`, an m2t generator). A generic
-  smoke harness (`examples/smoke.mjs`) runs the full install-and-run
-  loop for every example from its `test` script.
+  and a walkthrough README. The catalog is grouped by suite:
+  `examples/tutorial` (the six tutorial companions and the tutorial
+  metamodel packages) and `examples/eer-to-sql` (`eer-to-relational`, a
+  configuration-based m2m, and `rel-to-sql-ddl`, an m2t generator, with
+  their metamodel packages). A generic smoke harness
+  (`examples/smoke.mjs`) runs the full install-and-run loop for every
+  example from its `test` script.
 - **Transformation-authoring tutorial in the developer guide.** The
   Tutorial section holds two tutorials. The model-to-model tutorial
   teaches one growing transformation, each part a folder of sub-pages
@@ -62,14 +97,14 @@ overall version history.
   binding model, and manifest parts. The model-to-text tutorial is
   reserved while its structure is designed. Every listing and command
   output was executed against the real tools.
-- **`@synthesis/standard-metamodels/eer-tutorial`**, a simplified EER
-  metamodel in two complete stages: `basic` (entities with attributes
-  over domains, binary relationships with cardinality roles) and
-  `advanced` (adds the `Kernel` and `Weak` entity subtypes, weak
-  entities carrying an owner link). A type metamodel has to be an
-  importable package, because workspace model rendering resolves bare
-  imports against the CLI installation so that models, transformations,
-  and the engine share the same type instances.
+- **`eer-tutorial-metamodel`**, a simplified EER metamodel in two
+  complete stages: `basic` (entities with attributes over domains,
+  binary relationships with cardinality roles) and `advanced` (adds the
+  `Kernel` and `Weak` entity subtypes, weak entities carrying an owner
+  link). A type metamodel has to be an importable package, because
+  workspace model rendering resolves bare imports centrally so that
+  models, transformations, and the engine share the same type
+  instances.
 - **`templates/transformation-template`**, a working starter for new
   transformation packages: it builds, installs, and runs on day zero,
   uses the smoke harness as its `test` script, and carries a CI workflow

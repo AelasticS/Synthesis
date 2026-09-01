@@ -52,7 +52,7 @@ jobs:
         run: node common/scripts/install-run-rush.js install
 
       - name: Build CLI and its dependencies
-        run: node common/scripts/install-run-rush.js build --to @synthesis/cli
+        run: node common/scripts/install-run-rush.js build --to @aelastics/synthesis-cli
 
       - name: Pack platform tarballs
         working-directory: apps/cli

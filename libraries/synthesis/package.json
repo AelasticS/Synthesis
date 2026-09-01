@@ -1,0 +1,129 @@
+{
+  "name": "@aelastics/synthesis",
+  "version": "0.1.0",
+  "description": "The Synthesis model transformation library: JSX authoring runtime, model store, model-to-model and model-to-text engines, and configuration-based variability",
+  "author": "Sinisa Neskovic",
+  "license": "Apache-2.0",
+  "main": "lib/index.js",
+  "typings": "lib/index.d.ts",
+  "scripts": {
+    "build": "heft build --clean",
+    "test": "heft test --clean"
+  },
+  "exports": {
+    ".": {
+      "types": "./lib/index.d.ts",
+      "default": "./lib/index.js"
+    },
+    "./jsx": {
+      "types": "./lib/jsx.d.ts",
+      "default": "./lib/jsx.js"
+    },
+    "./metamodel": {
+      "types": "./lib/metamodel.d.ts",
+      "default": "./lib/metamodel.js"
+    },
+    "./store": {
+      "types": "./lib/store.d.ts",
+      "default": "./lib/store.js"
+    },
+    "./m2m": {
+      "types": "./lib/m2m.d.ts",
+      "default": "./lib/m2m.js"
+    },
+    "./m2t": {
+      "types": "./lib/m2t.d.ts",
+      "default": "./lib/m2t.js"
+    },
+    "./variability": {
+      "types": "./lib/variability.d.ts",
+      "default": "./lib/variability.js"
+    },
+    "./metamodels/decision": {
+      "types": "./lib/metamodels/decision/index.d.ts",
+      "default": "./lib/metamodels/decision/index.js"
+    },
+    "./metamodels/decision/model": {
+      "types": "./lib/metamodels/decision/model.d.ts",
+      "default": "./lib/metamodels/decision/model.js"
+    },
+    "./metamodels/binding": {
+      "types": "./lib/metamodels/binding/index.d.ts",
+      "default": "./lib/metamodels/binding/index.js"
+    },
+    "./metamodels/binding/model": {
+      "types": "./lib/metamodels/binding/model.d.ts",
+      "default": "./lib/metamodels/binding/model.js"
+    },
+    "./metamodels/configuration": {
+      "types": "./lib/metamodels/configuration/index.d.ts",
+      "default": "./lib/metamodels/configuration/index.js"
+    },
+    "./metamodels/configuration/model": {
+      "types": "./lib/metamodels/configuration/model.d.ts",
+      "default": "./lib/metamodels/configuration/model.js"
+    },
+    "./metamodels/trace": {
+      "types": "./lib/metamodels/trace/index.d.ts",
+      "default": "./lib/metamodels/trace/index.js"
+    },
+    "./metamodels/trace-extensions": {
+      "types": "./lib/metamodels/trace-extensions/index.d.ts",
+      "default": "./lib/metamodels/trace-extensions/index.js"
+    },
+    "./metamodels/types/model": {
+      "types": "./lib/metamodels/types/types-meta.model.d.ts",
+      "default": "./lib/metamodels/types/types-meta.model.js"
+    },
+    "./metamodels/types/components": {
+      "types": "./lib/metamodels/types/types-components.d.ts",
+      "default": "./lib/metamodels/types/types-components.js"
+    },
+    "./metamodels/types/predefined-model": {
+      "types": "./lib/metamodels/types/predefined-model.d.ts",
+      "default": "./lib/metamodels/types/predefined-model.js"
+    },
+    "./metamodels/types/predefined-types": {
+      "types": "./lib/metamodels/types/predefined-types.d.ts",
+      "default": "./lib/metamodels/types/predefined-types.js"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "jsx": ["lib/jsx.d.ts"],
+      "metamodel": ["lib/metamodel.d.ts"],
+      "store": ["lib/store.d.ts"],
+      "m2m": ["lib/m2m.d.ts"],
+      "m2t": ["lib/m2t.d.ts"],
+      "variability": ["lib/variability.d.ts"],
+      "metamodels/decision": ["lib/metamodels/decision/index.d.ts"],
+      "metamodels/decision/model": ["lib/metamodels/decision/model.d.ts"],
+      "metamodels/binding": ["lib/metamodels/binding/index.d.ts"],
+      "metamodels/binding/model": ["lib/metamodels/binding/model.d.ts"],
+      "metamodels/configuration": ["lib/metamodels/configuration/index.d.ts"],
+      "metamodels/configuration/model": ["lib/metamodels/configuration/model.d.ts"],
+      "metamodels/trace": ["lib/metamodels/trace/index.d.ts"],
+      "metamodels/trace-extensions": ["lib/metamodels/trace-extensions/index.d.ts"],
+      "metamodels/types/model": ["lib/metamodels/types/types-meta.model.d.ts"],
+      "metamodels/types/components": ["lib/metamodels/types/types-components.d.ts"],
+      "metamodels/types/predefined-model": ["lib/metamodels/types/predefined-model.d.ts"],
+      "metamodels/types/predefined-types": ["lib/metamodels/types/predefined-types.d.ts"]
+    }
+  },
+  "dependencies": {
+    "@aelastics/result": "workspace:*",
+    "@aelastics/types": "workspace:*",
+    "@aelastics/store": "workspace:*"
+  },
+  "devDependencies": {
+    "@rushstack/eslint-config": "~4.6.4",
+    "eslint": "~10.0.2",
+    "@rushstack/heft": "~1.2.6",
+    "@rushstack/heft-jest-plugin": "~1.2.6",
+    "@rushstack/heft-typescript-plugin": "~1.3.1",
+    "@types/node": "~25.3.3",
+    "@types/heft-jest": "~1.0.6",
+    "tslib": "^2.6.0",
+    "typescript": "~5.9.3"
+  }
+}

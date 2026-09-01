@@ -1,0 +1,27 @@
+{
+  "kind": "m2t",
+  "entry": "./dist/transformation.js",
+  "exportName": "RelToSqlConfigurableTransformation",
+  "source": {
+    "metamodel": "rel-tutorial-metamodel"
+  },
+  "target": {
+    "metamodel": "text"
+  },
+  "parts": {
+    "metamodels": [
+      {
+        "module": "rel-tutorial-metamodel/as-model",
+        "exportName": "RelTutorialMetamodel"
+      }
+    ],
+    "decisionModel": {
+      "module": "./dist/decision-model.js",
+      "exportName": "SqlGenerationIssues"
+    },
+    "bindingModel": {
+      "module": "./dist/binding-model.js",
+      "exportName": "RelTutorialSqlBindings"
+    }
+  }
+}

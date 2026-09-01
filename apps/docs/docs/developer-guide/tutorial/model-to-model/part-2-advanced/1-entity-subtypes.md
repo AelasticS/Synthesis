@@ -9,9 +9,9 @@ element, so the source metamodel has to have types to dispatch on. That
 is what this page is: the advanced tutorial EER metamodel, the second
 of the tutorial's metamodel stages.
 
-It ships as `@synthesis/standard-metamodels/eer-tutorial/advanced`, and
-its sources live in
-`libraries/standard-metamodels/src/eer-tutorial/advanced/`. The shape
+It ships as `eer-tutorial-metamodel/advanced`, the second subpath of
+the same `eer-tutorial-metamodel` package, and its sources live in
+`examples/tutorial/metamodels/eer-tutorial/src/advanced/`. The shape
 is the one Part 1 described: a types file
 (`EER-advanced.meta.model.type.ts`), a components file
 (`EER-advanced-components.ts`), and an `index.ts` tying the two
@@ -128,7 +128,7 @@ stays exported too, and the next section shows what it is still for.
 
 The Part 2 sample is Part 1's Library schema with the entity tags made
 specific and one entity added. Here are the parts that matter, from
-`examples/model-to-model/eer-tutorial-advanced/sample/library.tsx`:
+`examples/tutorial/eer-tutorial-advanced/sample/library.tsx`:
 
 ```tsx
     <Kernel name="Book">

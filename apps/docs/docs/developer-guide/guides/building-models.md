@@ -11,8 +11,8 @@ With metamodels defined and JSX components created, you can build model instance
 Every model lives in a `ModelStore`. The store manages element identity, naming, and type checking. A `Context` carries the store and rendering state through the JSX evaluation.
 
 ```typescript
-import { ModelStore } from '@synthesis/engine'
-import { Context } from '@synthesis/jsx-runtime'
+import { ModelStore } from '@aelastics/synthesis/store'
+import { Context } from '@aelastics/synthesis/jsx'
 
 const store = new ModelStore()
 ```
@@ -23,7 +23,7 @@ Use your JSX components to build a model expression, then call `.render()` to ev
 
 ```typescript
 /** @jsx createExprNode */
-import { createExprNode, Context } from '@synthesis/jsx-runtime'
+import { createExprNode, Context } from '@aelastics/synthesis/jsx'
 import * as e from './EER.jsx-comps'
 
 const store = new ModelStore()
@@ -253,7 +253,7 @@ console.log(model.elements[0].attributes)  // [IAttribute, IAttribute]
 You can also use the convenience function:
 
 ```typescript
-import { render } from '@synthesis/jsx-runtime'
+import { render } from '@aelastics/synthesis/jsx'
 
 const model = render(eerModel)
 ```

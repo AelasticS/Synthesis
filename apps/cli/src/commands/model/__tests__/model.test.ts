@@ -124,7 +124,7 @@ describe('model import', () => {
     expect(error).toBeUndefined()
     const { header } = JSON.parse(stdout)
     expect(header.kind).toBe('model')
-    expect(header.metamodel).toBe('@synthesis/standard-metamodels/eer')
+    expect(header.metamodel).toBe('eer-metamodel')
     // Human fields from the fixture's hand-written header survive the merge
     expect(header.author).toBe('Test Author <test@example.org>')
     expect(header.version).toBe('0.1.0')
@@ -239,7 +239,7 @@ describe('model show', () => {
     expect(stdout).toContain(join(modelsDir, 'com', 'example', 'persons.tsx'))
     expect(stdout).toContain('bytes')
     expect(stdout).toContain('model')
-    expect(stdout).toContain('@synthesis/standard-metamodels/eer')
+    expect(stdout).toContain('eer-metamodel')
   })
 
   it('reports a missing header but still shows path and size', async () => {
@@ -300,7 +300,7 @@ describe('model validate', () => {
       'validate',
       'com.example/persons',
       '--against',
-      '@synthesis/standard-metamodels/eer'
+      'eer-metamodel'
     ])
     expect(error).toBeUndefined()
     expect(stdout).toContain('[ok] header.metamodel matches --against')
@@ -327,7 +327,7 @@ describe('model validate', () => {
     // as a warning instead of failing
     const declaredFile = join(tempDir, 'declared.tsx')
     const text = readFileSync(personsFixture, 'utf-8').replace(
-      "metamodel: '@synthesis/standard-metamodels/eer'",
+      "metamodel: 'eer-metamodel'",
       "metamodel: '@example/custom-metamodel'"
     )
     writeFileSync(declaredFile, text)
@@ -349,7 +349,7 @@ describe('model validate', () => {
       'validate',
       'com.example/declared',
       '--against',
-      '@synthesis/standard-metamodels/eer'
+      'eer-metamodel'
     ])
     expect(against.error).toBeDefined()
     expect(against.code).toBe(2)
@@ -457,7 +457,7 @@ describe('model export', () => {
     const { stdout: showOut } = await run(['model', 'show', 'com.example/persons2', '--json'])
     const { header } = JSON.parse(showOut)
     expect(header.kind).toBe('model')
-    expect(header.metamodel).toBe('@synthesis/standard-metamodels/eer')
+    expect(header.metamodel).toBe('eer-metamodel')
   })
 
   it('errors on non-existent model', async () => {

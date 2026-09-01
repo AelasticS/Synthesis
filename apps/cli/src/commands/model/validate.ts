@@ -20,7 +20,7 @@ Configuration models reference their transformation's decision/binding models; p
 
   static override examples = [
     '<%= config.bin %> <%= command.id %> com.example/persons',
-    '<%= config.bin %> <%= command.id %> com.example/persons --against @synthesis/standard-metamodels/eer',
+    '<%= config.bin %> <%= command.id %> com.example/persons --against eer-metamodel',
     '<%= config.bin %> <%= command.id %> com.example/persons-cfg --tx eer-to-relational'
   ]
 

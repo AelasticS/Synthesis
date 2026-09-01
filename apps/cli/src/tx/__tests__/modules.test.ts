@@ -21,14 +21,16 @@ afterAll(() => {
 describe('importTxModule', () => {
   it('imports a bare package specifier through the CLI module registry', async () => {
     const dir = makePackageDir()
-    const mod = await importTxModule(dir, '@synthesis/engine')
+    const mod = await importTxModule(dir, '@aelastics/synthesis/store')
     expect(typeof mod.ModelStore).toBe('function')
   })
 
   it('wraps an unresolvable bare specifier in a clear error', async () => {
     const dir = makePackageDir()
     await expect(importTxModule(dir, '@synthesis/no-such-package-anywhere')).rejects.toThrow(
-      `Cannot resolve module '@synthesis/no-such-package-anywhere': package imports must be resolvable from the Synthesis CLI installation`
+      `Cannot resolve module '@synthesis/no-such-package-anywhere': Cannot resolve import ` +
+        `'@synthesis/no-such-package-anywhere'. Package imports must be resolvable from the ` +
+        `Synthesis CLI installation or from an installed transformation package.`
     )
   })
 

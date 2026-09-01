@@ -91,7 +91,7 @@ The source model does not change either, and neither does the build,
 install, run loop, beyond the run gaining a configuration.
 
 The finished package is in the repository as
-`examples/model-to-text/sql-tutorial-configuration-based`. Use it as the answer key;
+`examples/tutorial/sql-tutorial-configuration-based`. Use it as the answer key;
 every listing on the following pages is taken from it verbatim, and
 every command output was produced by running it.
 
@@ -106,7 +106,9 @@ every command output was produced by running it.
   there in full, and referenced rather than restated here.
 - The same repository checkout, built once with `rush install` and
   `rush build`, and the `synth` CLI.
-- One new dependency in the package, `@synthesis/decision-framework`.
+- No new dependency: the decorators come from
+  `@aelastics/synthesis/variability`, a subpath of the library the
+  package already depends on.
 - `"experimentalDecorators": true` in `tsconfig.json`, which Parts 1
   and 2 did not need.
 
