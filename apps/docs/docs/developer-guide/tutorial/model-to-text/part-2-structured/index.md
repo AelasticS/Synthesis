@@ -14,11 +14,11 @@ separating them at the start.
 
 ## What changes
 
-**Content is placed, not nested.** The documents declare empty named
-sections, and the rules that produce statements sit at the top level of
-the `<M2T>` model, each naming the section it belongs to with
-`<SecParent $refByName="..." />`. A rule no longer has to be written
-where its output ends up.
+**The template is composed, not written as one expression.** The
+statements are built first, as named arrays of sections, and the
+documents are composed from them. The template's last expression then
+states the whole output, a model of two files, and each document states
+its own content.
 
 **There are two documents, so there are two files.** Every `<Doc>` in
 the result becomes one file, so a second document is the entire
@@ -60,10 +60,10 @@ listing on the following pages is taken from it verbatim.
 
 ## In this part
 
-1. **[Sections](./1-sections.md)**: named sections as addresses,
-   `SecParent` and the inverse property it writes, what happens when a
-   rule forgets to place its output, and what decides the order inside
-   a section.
+1. **[Sections and composition](./1-sections.md)**: sections as
+   grouping inside a document, expression nodes as ordinary values you
+   can name and compose, what decides the order, and when the
+   `SecParent` alternative earns its place.
 2. **[Multiple documents](./2-multiple-documents.md)**: why the foreign
    keys move to a second file, the rules that produce the `ALTER TABLE`
    statements, the finished template and the two lines that fill both
