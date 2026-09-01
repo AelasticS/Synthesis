@@ -21,21 +21,32 @@ another column.
 The **target** half is the text-document metamodel, and it is the
 subject of this page.
 
-## A metamodel that describes documents
+## What the target metamodel models
 
 Generating text in Synthesis is not a separate feature with its own
-template language. It is an ordinary transformation whose target
-metamodel happens to describe documents rather than a domain. Your
-rules build a model, as always. That model just says "a file called
-`Library_rel.sql` containing these lines" instead of "a table called
-`Book` containing these columns".
+template language. It is an ordinary transformation, and the only part
+worth studying before you write a rule is what its target metamodel
+describes.
+
+It describes a **file system subtree**: folders, the files inside them,
+and the content inside each file. A model written in it is a plan of
+what to put on disk. One file called `Library_rel.sql`, or
+`ddl/tables/book.sql` three levels down, are both just shapes in that
+model.
+
+That is also the reason an m2t transformation is run with `--out-dir`
+and not `--out`. A model-to-model transformation produces exactly one
+model, and the CLI stores it as one workspace model, which is what
+`--out` names. A model-to-text transformation produces a tree, possibly
+many files in many folders, so there is nothing single to name. You
+give it a directory, and the tree described by the model is written
+underneath it.
 
 The metamodel ships with the engine rather than with the standard
-metamodels, in
-`libraries/engine/src/m2t/m2t-model/`, and is imported from
-`@synthesis/engine`. That location is a statement about what it is: not
-a domain language somebody chose, but part of the machinery, because
-the CLI has to understand it in order to write files.
+metamodels, in `libraries/engine/src/m2t/m2t-model/`, and is imported
+from `@synthesis/engine`. That location is a statement about what it
+is: not a domain language somebody chose, but part of the machinery,
+because the CLI has to understand it in order to write files.
 
 ## The concepts
 
@@ -54,6 +65,10 @@ export const M2T_Item = t.subtype(ModelElement, {
 export const M2T_Model = t.subtype(Model, {
     items: t.arrayOf(M2T_Item)
 }, "FS_Model", M2T_Schema);
+
+export const Directory = t.subtype(M2T_Item, {
+    items:t.arrayOf(M2T_Item, "items"),
+}, "Directory", M2T_Schema);
 
 export const DocElement = t.subtype(ModelElement, {
     parentDocument: t.optional(t.link(M2T_Schema, 'Document'), 'parentDocument'),
@@ -76,22 +91,26 @@ t.inverseProps(Document, 'elements', DocElement, 'parentDocument');
 t.inverseProps(Section, 'elements', DocElement, 'parentSection');
 ```
 
-The listing is abridged in one place: the file also declares
-`Directory` as a second kind of item. Part 2 says what it is currently
-good for, which is not much; this tutorial does not use it.
+Read the declarations as two layers, because the metamodel is two
+things stacked on each other.
 
-Read the declarations as two layers, because that is what they are.
+**The file system layer** answers "which files, and where". An
+`M2T_Model` holds `items`, and an item is either a `Document` or a
+`Directory`. A document becomes one file. A directory becomes one
+folder and holds items of its own, so directories nest and a model can
+describe a tree of any depth. Nothing else in the metamodel affects
+where a file lands.
 
-**The item layer.** An `M2T_Model` holds `items`. A `Document` is an
-item, and it is the only kind of item this tutorial produces. Every
-document in the result becomes exactly one file, which makes `items`
-the top-level structure of your output.
+**The document layer** answers "what is inside each file". Within a
+document, a `DocElement` is either a `Paragraph`, which carries a
+string in `txtContent`, or a `Section`, which holds further document
+elements. Sections nest, so a file's content is a tree whose leaves are
+paragraphs, and the file's text is those leaves concatenated in order.
 
-**The document layer.** A `DocElement` is something that lives inside a
-document: either a `Paragraph`, which carries a string in
-`txtContent`, or a `Section`, which carries further `DocElement`
-children. Sections nest, so a document is a tree of sections whose
-leaves are paragraphs.
+Part 1 uses the smallest case the first layer allows: one document and
+no directories, so one file written directly under `--out-dir`. Part 2
+adds a second document, so two files, and shows how a directory groups
+them.
 
 Two things join the layers, and both are worth naming.
 
