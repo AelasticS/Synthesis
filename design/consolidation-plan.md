@@ -171,11 +171,12 @@ Execution notes (agreed shape, decided at execution time):
 - [x] gates, docs build green with the broken-link check
 
 ### Stage 7: merge
-- [ ] full gate run from clean state in the worktree
-- [ ] merge feat/consolidation into main with --no-ff (from the main
-      checkout; never switch branches inside a live worktree session)
-- [ ] full gate run on merged main
-- [ ] update the memory file and this plan's log; do not push
+- [x] full gate run from clean state in the worktree
+- [x] merge feat/consolidation into main with --no-ff (merge commit
+      9120197)
+- [x] full gate run on merged main: build, CLI 438 tests, 86 smoke, nine
+      example/template smokes, docs build with the link check
+- [x] memory file and this log updated; NOT pushed (the user pushes)
 
 ## Parallelization notes
 
@@ -224,3 +225,7 @@ import rewrites fan out safely to subagents by directory.
   reconciled against the real migrated example sources; architecture,
   examples catalog, root README, CHANGELOG, engine-follow-ups updated;
   docs build green including the broken-link check.
+- 2026-09-01: stage 7 complete. Merged into main as 9120197 with --no-ff;
+  the full gate suite is green on merged main. The consolidation is done.
+  Follow-ups recorded in design/engine-follow-ups.md (production dedupe
+  of framework packages) and deferred items in consolidation.md.
