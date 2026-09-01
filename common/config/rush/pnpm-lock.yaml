@@ -138,166 +138,166 @@ importers:
         specifier: ~5.9.3
         version: 5.9.3
 
-  ../../examples/eer-to-relational:
+  ../../examples/model-to-model/eer-to-relational:
     dependencies:
       '@synthesis/decision-framework':
         specifier: workspace:*
-        version: link:../../libraries/decision-framework
+        version: link:../../../libraries/decision-framework
       '@synthesis/engine':
         specifier: workspace:*
-        version: link:../../libraries/engine
+        version: link:../../../libraries/engine
       '@synthesis/jsx-runtime':
         specifier: workspace:*
-        version: link:../../libraries/jsx-runtime
+        version: link:../../../libraries/jsx-runtime
       '@synthesis/standard-metamodels':
         specifier: workspace:*
-        version: link:../../libraries/standard-metamodels
+        version: link:../../../libraries/standard-metamodels
     devDependencies:
       '@synthesis/cli':
         specifier: workspace:*
-        version: link:../../apps/cli
+        version: link:../../../apps/cli
       typescript:
         specifier: ~5.9.3
         version: 5.9.3
 
-  ../../examples/eer-tutorial-advanced:
+  ../../examples/model-to-model/eer-tutorial-advanced:
     dependencies:
       '@synthesis/engine':
         specifier: workspace:*
-        version: link:../../libraries/engine
+        version: link:../../../libraries/engine
       '@synthesis/jsx-runtime':
         specifier: workspace:*
-        version: link:../../libraries/jsx-runtime
+        version: link:../../../libraries/jsx-runtime
       '@synthesis/standard-metamodels':
         specifier: workspace:*
-        version: link:../../libraries/standard-metamodels
+        version: link:../../../libraries/standard-metamodels
     devDependencies:
       '@synthesis/cli':
         specifier: workspace:*
-        version: link:../../apps/cli
+        version: link:../../../apps/cli
       typescript:
         specifier: ~5.9.3
         version: 5.9.3
 
-  ../../examples/eer-tutorial-basic:
+  ../../examples/model-to-model/eer-tutorial-basic:
     dependencies:
       '@synthesis/engine':
         specifier: workspace:*
-        version: link:../../libraries/engine
+        version: link:../../../libraries/engine
       '@synthesis/jsx-runtime':
         specifier: workspace:*
-        version: link:../../libraries/jsx-runtime
+        version: link:../../../libraries/jsx-runtime
       '@synthesis/standard-metamodels':
         specifier: workspace:*
-        version: link:../../libraries/standard-metamodels
+        version: link:../../../libraries/standard-metamodels
     devDependencies:
       '@synthesis/cli':
         specifier: workspace:*
-        version: link:../../apps/cli
+        version: link:../../../apps/cli
       typescript:
         specifier: ~5.9.3
         version: 5.9.3
 
-  ../../examples/eer-tutorial-configuration-based:
-    dependencies:
-      '@synthesis/decision-framework':
-        specifier: workspace:*
-        version: link:../../libraries/decision-framework
-      '@synthesis/engine':
-        specifier: workspace:*
-        version: link:../../libraries/engine
-      '@synthesis/jsx-runtime':
-        specifier: workspace:*
-        version: link:../../libraries/jsx-runtime
-      '@synthesis/standard-metamodels':
-        specifier: workspace:*
-        version: link:../../libraries/standard-metamodels
-    devDependencies:
-      '@synthesis/cli':
-        specifier: workspace:*
-        version: link:../../apps/cli
-      typescript:
-        specifier: ~5.9.3
-        version: 5.9.3
-
-  ../../examples/rel-to-sql-ddl:
+  ../../examples/model-to-model/eer-tutorial-configuration-based:
     dependencies:
       '@synthesis/decision-framework':
         specifier: workspace:*
-        version: link:../../libraries/decision-framework
+        version: link:../../../libraries/decision-framework
       '@synthesis/engine':
         specifier: workspace:*
-        version: link:../../libraries/engine
+        version: link:../../../libraries/engine
       '@synthesis/jsx-runtime':
         specifier: workspace:*
-        version: link:../../libraries/jsx-runtime
+        version: link:../../../libraries/jsx-runtime
       '@synthesis/standard-metamodels':
         specifier: workspace:*
-        version: link:../../libraries/standard-metamodels
+        version: link:../../../libraries/standard-metamodels
     devDependencies:
       '@synthesis/cli':
         specifier: workspace:*
-        version: link:../../apps/cli
+        version: link:../../../apps/cli
       typescript:
         specifier: ~5.9.3
         version: 5.9.3
 
-  ../../examples/sql-tutorial-basic:
-    dependencies:
-      '@synthesis/engine':
-        specifier: workspace:*
-        version: link:../../libraries/engine
-      '@synthesis/jsx-runtime':
-        specifier: workspace:*
-        version: link:../../libraries/jsx-runtime
-      '@synthesis/standard-metamodels':
-        specifier: workspace:*
-        version: link:../../libraries/standard-metamodels
-    devDependencies:
-      '@synthesis/cli':
-        specifier: workspace:*
-        version: link:../../apps/cli
-      typescript:
-        specifier: ~5.9.3
-        version: 5.9.3
-
-  ../../examples/sql-tutorial-configuration-based:
+  ../../examples/model-to-text/rel-to-sql-ddl:
     dependencies:
       '@synthesis/decision-framework':
         specifier: workspace:*
-        version: link:../../libraries/decision-framework
+        version: link:../../../libraries/decision-framework
       '@synthesis/engine':
         specifier: workspace:*
-        version: link:../../libraries/engine
+        version: link:../../../libraries/engine
       '@synthesis/jsx-runtime':
         specifier: workspace:*
-        version: link:../../libraries/jsx-runtime
+        version: link:../../../libraries/jsx-runtime
       '@synthesis/standard-metamodels':
         specifier: workspace:*
-        version: link:../../libraries/standard-metamodels
+        version: link:../../../libraries/standard-metamodels
     devDependencies:
       '@synthesis/cli':
         specifier: workspace:*
-        version: link:../../apps/cli
+        version: link:../../../apps/cli
       typescript:
         specifier: ~5.9.3
         version: 5.9.3
 
-  ../../examples/sql-tutorial-structured:
+  ../../examples/model-to-text/sql-tutorial-basic:
     dependencies:
       '@synthesis/engine':
         specifier: workspace:*
-        version: link:../../libraries/engine
+        version: link:../../../libraries/engine
       '@synthesis/jsx-runtime':
         specifier: workspace:*
-        version: link:../../libraries/jsx-runtime
+        version: link:../../../libraries/jsx-runtime
       '@synthesis/standard-metamodels':
         specifier: workspace:*
-        version: link:../../libraries/standard-metamodels
+        version: link:../../../libraries/standard-metamodels
     devDependencies:
       '@synthesis/cli':
         specifier: workspace:*
-        version: link:../../apps/cli
+        version: link:../../../apps/cli
+      typescript:
+        specifier: ~5.9.3
+        version: 5.9.3
+
+  ../../examples/model-to-text/sql-tutorial-configuration-based:
+    dependencies:
+      '@synthesis/decision-framework':
+        specifier: workspace:*
+        version: link:../../../libraries/decision-framework
+      '@synthesis/engine':
+        specifier: workspace:*
+        version: link:../../../libraries/engine
+      '@synthesis/jsx-runtime':
+        specifier: workspace:*
+        version: link:../../../libraries/jsx-runtime
+      '@synthesis/standard-metamodels':
+        specifier: workspace:*
+        version: link:../../../libraries/standard-metamodels
+    devDependencies:
+      '@synthesis/cli':
+        specifier: workspace:*
+        version: link:../../../apps/cli
+      typescript:
+        specifier: ~5.9.3
+        version: 5.9.3
+
+  ../../examples/model-to-text/sql-tutorial-structured:
+    dependencies:
+      '@synthesis/engine':
+        specifier: workspace:*
+        version: link:../../../libraries/engine
+      '@synthesis/jsx-runtime':
+        specifier: workspace:*
+        version: link:../../../libraries/jsx-runtime
+      '@synthesis/standard-metamodels':
+        specifier: workspace:*
+        version: link:../../../libraries/standard-metamodels
+    devDependencies:
+      '@synthesis/cli':
+        specifier: workspace:*
+        version: link:../../../apps/cli
       typescript:
         specifier: ~5.9.3
         version: 5.9.3

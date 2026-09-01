@@ -6,7 +6,7 @@ sidebar_position: 2
 
 The whole transformation is one class in `src/transformation.tsx`, and
 every listing below is taken from
-`examples/sql-tutorial-basic/src/transformation.tsx`.
+`examples/model-to-text/sql-tutorial-basic/src/transformation.tsx`.
 
 The file opens the way every JSX authoring file does, with the pragma
 and the imports:

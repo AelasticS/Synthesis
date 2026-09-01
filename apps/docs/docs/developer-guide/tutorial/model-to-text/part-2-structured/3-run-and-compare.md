@@ -148,10 +148,10 @@ schema existing only in memory between the steps.
 ## The complete source
 
 Every listing in this part is a fragment of one file. Here it is whole,
-embedded from `examples/sql-tutorial-structured` at build time, so what
+embedded from `examples/model-to-text/sql-tutorial-structured` at build time, so what
 you read is exactly what the smoke test runs:
 
-```tsx file=<rootDir>/examples/sql-tutorial-structured/src/transformation.tsx
+```tsx file=<rootDir>/examples/model-to-text/sql-tutorial-structured/src/transformation.tsx
 ```
 
 The package around it is four more files: `package.json`,

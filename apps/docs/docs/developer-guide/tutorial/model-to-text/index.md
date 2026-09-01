@@ -51,7 +51,7 @@ its components (`M2T`, `Doc`, `Sec`, `P`), the manifest fields that
 make a package `m2t`, and a run that writes files. Placement is nesting
 here: a rule's output ends up where the rule was written.
 
-Answer key: `examples/sql-tutorial-basic`.
+Answer key: `examples/model-to-text/sql-tutorial-basic`.
 
 ### Part 2: Structured
 
@@ -71,7 +71,7 @@ so no ordering of `CREATE TABLE` statements satisfies every inline
 first and constrains them afterwards. The document structure is the
 deployment order made structural.
 
-Answer key: `examples/sql-tutorial-structured`.
+Answer key: `examples/model-to-text/sql-tutorial-structured`.
 
 ### Part 3: Configuration-based
 
@@ -87,7 +87,7 @@ layouts into `@VarOption` methods behind a `@VarPoint`. The choice then
 lives in a configuration model, is reported on every run, and changes
 what files exist without touching code.
 
-Answer key: `examples/sql-tutorial-configuration-based`.
+Answer key: `examples/model-to-text/sql-tutorial-configuration-based`.
 
 ## At a glance
 

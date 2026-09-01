@@ -1,0 +1,28 @@
+{
+  "name": "sql-tutorial-configuration-based",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Model-to-text tutorial Part 3 companion: output layout and identifier quoting decided by a configuration model",
+  "author": "Sinisa Neskovic",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "dist/transformation.js",
+  "files": [
+    "dist",
+    "synth.json"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "node ../../smoke.mjs"
+  },
+  "dependencies": {
+    "@synthesis/jsx-runtime": "workspace:*",
+    "@synthesis/engine": "workspace:*",
+    "@synthesis/standard-metamodels": "workspace:*",
+    "@synthesis/decision-framework": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "~5.9.3",
+    "@synthesis/cli": "workspace:*"
+  }
+}
