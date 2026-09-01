@@ -98,7 +98,7 @@
    * and set projectFolderMaxDepth to a large number.
    */
   // "projectFolderMinDepth": 2,
-  "projectFolderMaxDepth": 3,
+  "projectFolderMaxDepth": 4,
 
   /**
    * Today the npmjs.com registry enforces fairly strict naming rules for packages, but in the early
@@ -345,10 +345,6 @@
       "projectFolder": "libraries/synthesis"
     },
     {
-      "packageName": "@synthesis/standard-metamodels",
-      "projectFolder": "libraries/standard-metamodels"
-    },
-    {
       "packageName": "@synthesis/docs",
       "projectFolder": "apps/docs"
     },
@@ -358,11 +354,11 @@
     },
     {
       "packageName": "eer-to-relational",
-      "projectFolder": "examples/model-to-model/eer-to-relational"
+      "projectFolder": "examples/eer-to-sql/eer-to-relational"
     },
     {
       "packageName": "rel-to-sql-ddl",
-      "projectFolder": "examples/model-to-text/rel-to-sql-ddl"
+      "projectFolder": "examples/eer-to-sql/rel-to-sql-ddl"
     },
     {
       "packageName": "transformation-template",
@@ -370,27 +366,43 @@
     },
     {
       "packageName": "eer-tutorial-basic",
-      "projectFolder": "examples/model-to-model/eer-tutorial-basic"
+      "projectFolder": "examples/tutorial/eer-tutorial-basic"
     },
     {
       "packageName": "eer-tutorial-advanced",
-      "projectFolder": "examples/model-to-model/eer-tutorial-advanced"
+      "projectFolder": "examples/tutorial/eer-tutorial-advanced"
     },
     {
       "packageName": "eer-tutorial-configuration-based",
-      "projectFolder": "examples/model-to-model/eer-tutorial-configuration-based"
+      "projectFolder": "examples/tutorial/eer-tutorial-configuration-based"
     },
     {
       "packageName": "sql-tutorial-basic",
-      "projectFolder": "examples/model-to-text/sql-tutorial-basic"
+      "projectFolder": "examples/tutorial/sql-tutorial-basic"
     },
     {
       "packageName": "sql-tutorial-structured",
-      "projectFolder": "examples/model-to-text/sql-tutorial-structured"
+      "projectFolder": "examples/tutorial/sql-tutorial-structured"
     },
     {
       "packageName": "sql-tutorial-configuration-based",
-      "projectFolder": "examples/model-to-text/sql-tutorial-configuration-based"
+      "projectFolder": "examples/tutorial/sql-tutorial-configuration-based"
+    },
+    {
+      "packageName": "rel-tutorial-metamodel",
+      "projectFolder": "examples/tutorial/metamodels/rel-tutorial"
+    },
+    {
+      "packageName": "eer-tutorial-metamodel",
+      "projectFolder": "examples/tutorial/metamodels/eer-tutorial"
+    },
+    {
+      "packageName": "eer-metamodel",
+      "projectFolder": "examples/eer-to-sql/metamodels/eer"
+    },
+    {
+      "packageName": "relational-metamodel",
+      "projectFolder": "examples/eer-to-sql/metamodels/relational"
     }
 
     // {

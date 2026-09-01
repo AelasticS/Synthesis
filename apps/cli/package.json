@@ -79,13 +79,15 @@
     "@oclif/plugin-plugins": "~5.4.67",
     "@oclif/plugin-not-found": "~3.2.85",
     "@oclif/plugin-autocomplete": "~3.2.40",
-    "@synthesis/standard-metamodels": "workspace:*",
     "@aelastics/synthesis": "workspace:*",
     "@aelastics/types": "workspace:*",
     "@aelastics/result": "workspace:*",
     "esbuild": "~0.25.0"
   },
   "devDependencies": {
+    "eer-metamodel": "workspace:*",
+    "relational-metamodel": "workspace:*",
+    "rel-tutorial-metamodel": "workspace:*",
     "@rushstack/eslint-config": "~4.6.4",
     "eslint": "~10.0.2",
     "@rushstack/heft": "~1.2.6",

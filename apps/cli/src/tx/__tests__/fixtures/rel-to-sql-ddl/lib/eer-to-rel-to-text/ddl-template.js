@@ -8,7 +8,7 @@ var __decorate = function (decorators, target, key, desc) {
 import * as jsx_1 from "@aelastics/synthesis/jsx";
 import * as m2t_1 from "@aelastics/synthesis/m2t";
 import * as m2m_1 from "@aelastics/synthesis/m2m";
-import * as rmT from "@synthesis/standard-metamodels/relational/model-legacy";
+import * as rmT from "relational-metamodel/model";
 import * as variability_1 from "@aelastics/synthesis/variability";
 /**
  * Model-to-text transformation that turns a relational schema into a

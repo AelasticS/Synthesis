@@ -266,9 +266,9 @@ describe('fixture transformation packages', () => {
     const { stdout, error } = await runCli(['tx', 'show', 'eer-to-relational'], { home: testHome })
     expect(error).toBeUndefined()
     expect(stdout).toContain('kind: m2m')
-    expect(stdout).toContain('source metamodel: @synthesis/standard-metamodels/eer')
-    expect(stdout).toContain('target metamodel: @synthesis/standard-metamodels/relational')
-    expect(stdout).toContain('target components: @synthesis/standard-metamodels/relational/components-legacy')
+    expect(stdout).toContain('source metamodel: eer-metamodel')
+    expect(stdout).toContain('target metamodel: relational-metamodel')
+    expect(stdout).toContain('target components: relational-metamodel')
     expect(stdout).toContain('variability: yes')
     expect(stdout).toContain('entry: ./lib/transformation.js (export: EER2RelDomainWithDecisionTransformation)')
     expect(stdout).toContain(
@@ -293,7 +293,7 @@ describe('fixture transformation packages', () => {
     expect(parsed.name).toBe('rel-to-sql-ddl')
     expect(parsed.kind).toBe('m2t')
     expect(parsed.exportName).toBe('Rel2DdlTransformation')
-    expect(parsed.sourceMetamodel).toBe('@synthesis/standard-metamodels/relational')
+    expect(parsed.sourceMetamodel).toBe('relational-metamodel')
     expect(parsed.targetMetamodel).toBe('text')
     // The m2t fixture is configuration-based (IdentifierQuoting) since Phase 4
     expect(parsed.variability).toBe(true)

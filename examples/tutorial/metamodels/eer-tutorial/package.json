@@ -1,0 +1,53 @@
+{
+  "name": "eer-tutorial-metamodel",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Tutorial EER metamodel in its basic and advanced stages, shared by the model-to-model tutorial examples",
+  "author": "Sinisa Neskovic",
+  "license": "Apache-2.0",
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc"
+  },
+  "exports": {
+    "./basic": {
+      "types": "./dist/basic/index.d.ts",
+      "default": "./dist/basic/index.js"
+    },
+    "./basic/model": {
+      "types": "./dist/basic/EER-basic.meta.model.type.d.ts",
+      "default": "./dist/basic/EER-basic.meta.model.type.js"
+    },
+    "./advanced": {
+      "types": "./dist/advanced/index.d.ts",
+      "default": "./dist/advanced/index.js"
+    },
+    "./advanced/model": {
+      "types": "./dist/advanced/EER-advanced.meta.model.type.d.ts",
+      "default": "./dist/advanced/EER-advanced.meta.model.type.js"
+    },
+    "./advanced/as-model": {
+      "types": "./dist/advanced/as-model.d.ts",
+      "default": "./dist/advanced/as-model.js"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "basic": ["dist/basic/index.d.ts"],
+      "basic/model": ["dist/basic/EER-basic.meta.model.type.d.ts"],
+      "advanced": ["dist/advanced/index.d.ts"],
+      "advanced/model": ["dist/advanced/EER-advanced.meta.model.type.d.ts"],
+      "advanced/as-model": ["dist/advanced/as-model.d.ts"]
+    }
+  },
+  "dependencies": {
+    "@aelastics/types": "workspace:*",
+    "@aelastics/synthesis": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "~5.9.3"
+  }
+}

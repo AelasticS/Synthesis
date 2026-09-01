@@ -2,21 +2,25 @@
  * Import of transformation-package modules (entry point and parts).
  *
  * A manifest references modules in two forms:
- *   - bare package specifiers are imported directly: they resolve against
- *     the CLI installation itself (the CLI's dependencies are the runtime
- *     the packages compile against), honour the packages' ESM export
- *     conditions, and share the module registry (and with it aelastics
- *     type/schema identity) with the CLI process;
+ *   - bare package specifiers that resolve from the CLI installation are
+ *     imported directly: they honour the packages' ESM export conditions
+ *     and share the module registry (and with it aelastics type/schema
+ *     identity) with the CLI process. A bare specifier the CLI cannot
+ *     resolve falls back to the installed transformations' own
+ *     dependencies (e.g. a metamodel package shipped with an example)
+ *     and is then loaded through the transpile pipeline, whose
+ *     externalization keeps framework imports on the CLI's instances;
  *   - './'-relative paths resolve against the installed package directory.
- *     An installed package has no node_modules of its own, so the file is
- *     bundled with its bare imports externalized to CLI-resolved absolute
- *     paths (same mechanism the model loader uses).
+ *     An installed package has no live node_modules of its own, so the
+ *     file is bundled with its bare imports externalized to resolved
+ *     absolute paths (same mechanism the model loader uses).
  */
 
 import { existsSync } from 'node:fs'
 import { resolve } from 'node:path'
 
 import { importModel } from '../models/loader.js'
+import { resolveBareSpecifier } from '../models/resolution.js'
 import { errorMessage } from '../support/errors.js'
 
 /** Import a manifest-referenced module of an installed transformation package. */
@@ -37,10 +41,16 @@ export async function importTxModule(
   try {
     return (await import(moduleSpec)) as Record<string, unknown>
   } catch (err) {
-    throw new Error(
-      `Cannot resolve module '${moduleSpec}': package imports must be resolvable from the Synthesis CLI installation (${errorMessage(err)})`,
-      { cause: err }
-    )
+    let resolved: string
+    try {
+      resolved = resolveBareSpecifier(moduleSpec)
+    } catch (resolveErr) {
+      throw new Error(`Cannot resolve module '${moduleSpec}': ${errorMessage(resolveErr)}`, {
+        cause: err
+      })
+    }
+    const { mod } = await importModel(resolved)
+    return mod
   }
 }
 

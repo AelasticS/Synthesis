@@ -2,7 +2,7 @@
   "name": "rel-copy",
   "version": "0.1.0",
   "private": true,
-  "description": "Endogenous relational-to-relational copy transformation (installable fixture)",
+  "description": "Endogenous copy transformation over the tutorial relational metamodel (installable fixture)",
   "author": "Sinisa Neskovic",
   "license": "Apache-2.0",
   "type": "module"

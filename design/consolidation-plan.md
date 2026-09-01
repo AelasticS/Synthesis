@@ -99,27 +99,53 @@ and prefix replacement over subpaths is collision-free.
 - [x] gates
 
 ### Stage 4: examples own their metamodels
-- [ ] create the four metamodel packages (eer-tutorial-metamodel,
-      rel-tutorial-metamodel, eer-metamodel, relational-metamodel) from the
-      corresponding standard-metamodels sources, each with /model, flat
-      components, and the metamodel-as-model export (deduplicating the
-      compiled copies now inside eer-tutorial-configuration-based,
-      sql-tutorial-configuration-based, eer-to-relational, rel-to-sql-ddl)
-- [ ] relational-metamodel carries the current legacy content under the
-      honest name; delete nothing until all consumers are repointed
-- [ ] move example packages into the suite layout (examples/tutorial/,
-      examples/eer-to-sql/); update rush.json folders and smoke.mjs paths
-- [ ] repoint every example, sample model, and manifest to the metamodel
-      packages; manifest metamodel strings become the package specifiers
-- [ ] repoint templates/transformation-template and the rel-copy fixture to
-      rel-tutorial-metamodel
-- [ ] loader fallback in the CLI (models/loader.ts resolver order:
-      CLI installation, then installed transformation dependencies, memoized
-      per specifier per process; tx/modules.ts routes bare parts through it)
-- [ ] deriveMetamodel rule change (models/stamp.ts) and `transformation
-      init` scaffold placeholders
-- [ ] delete libraries/standard-metamodels; remove from rush.json
-- [ ] gates, including every example smoke
+Execution notes (agreed shape, decided at execution time):
+- Package subpaths follow the uniform convention: bare package = JSX
+  components flat, `/model` = type schemas. eer-tutorial-metamodel has
+  `/basic`, `/basic/model`, `/advanced`, `/advanced/model`.
+- The duplicated metamodel-as-model part files move into their metamodel
+  packages as an `/as-model` subpath; manifests reference them by bare
+  specifier, and `importTxModule` routes bare specifiers through the same
+  resolve-then-transpile pipeline as relative ones, so their framework
+  imports still externalize to the CLI's instances.
+- Loader fallback: `externalizeBareImports` delegates to a central
+  resolver that tries the CLI installation first, then a require anchored
+  at each installed transformation directory (workspace config knows
+  them), memoizing one absolute path per specifier per process so all
+  importers share one module instance. Roots are registered by the
+  commands that load transformations or models.
+- apps/cli gains devDependencies on eer-metamodel, relational-metamodel
+  and rel-tutorial-metamodel purely so its test fixtures resolve under
+  jest; this is a test crutch, documented here, not a runtime dependency.
+- Metamodel packages have no smoke test; they are libraries, built by
+  rush, exercised through every example that depends on them.
+- [x] create the four metamodel packages, each with /model, flat
+      components, and the /as-model export (the compiled copies inside
+      four example packages are deduplicated into them)
+- [x] relational-metamodel carries the current legacy content under the
+      honest name
+- [x] move example packages into the suite layout; rush.json folders
+      updated (projectFolderMaxDepth raised to 4 for the metamodels/
+      folders); smoke.mjs unchanged in path but reordered: install before
+      model import, because sample models resolve their metamodel through
+      the installed transformation (template smoke mirrored)
+- [x] repoint every example, sample model, and manifest; parts entries for
+      the moved as-model files are now bare specifiers
+- [x] template and rel-copy fixture ported to rel-tutorial-metamodel: a
+      semantic adaptation (no isForeignKey concept; references is a typed
+      Column link re-established with $refByName). Consequence: the
+      eer-to-relational to rel-copy chain fixture pairing dissolved; chain
+      tests use rel-copy self-chains and the real eer-to-relational to
+      rel-to-sql-ddl pair
+- [x] loader fallback implemented in models/resolution.ts (kept light so
+      the base command can register roots without loading esbuild), used
+      by the loader plugin and by tx/modules.ts for bare parts; four unit
+      tests lock the contract; the tutorial smokes exercise it end to end
+      since the CLI has no dependency on eer-tutorial-metamodel
+- [x] deriveMetamodel rule change and `transformation init` placeholders
+- [x] delete libraries/standard-metamodels; remove from rush.json
+- [x] gates, including every example smoke (CLI baseline now 438 tests:
+      434 plus 4 resolution tests; 86 smoke)
 
 ### Stage 5: CLI rename
 - [ ] apps/cli package.json name `@aelastics/synthesis-cli`; binary stays
@@ -185,3 +211,8 @@ import rewrites fan out safely to subagents by directory.
   (vendored parts, CJS converted to ESM). New CLI baseline: 434 tests
   (was 441; the seven example-command tests went with the commands),
   86 smoke unchanged. All gates green.
+- 2026-09-01: stage 4 complete. Four metamodel packages own their
+  domains, examples live in suite folders, standard-metamodels is gone,
+  and the loader fallback landed with unit tests plus end-to-end proof
+  through the tutorial smokes. All gates green on the first chain run:
+  build, CLI 438 tests, 86 smoke, nine example/template smokes.

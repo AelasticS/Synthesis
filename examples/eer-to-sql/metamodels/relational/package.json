@@ -1,0 +1,43 @@
+{
+  "name": "relational-metamodel",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Full relational metamodel owned by the eer-to-sql example suite",
+  "author": "Sinisa Neskovic",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./model": {
+      "types": "./dist/model.d.ts",
+      "default": "./dist/model.js"
+    },
+    "./as-model": {
+      "types": "./dist/as-model.d.ts",
+      "default": "./dist/as-model.js"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "model": ["dist/model.d.ts"],
+      "as-model": ["dist/as-model.d.ts"]
+    }
+  },
+  "dependencies": {
+    "@aelastics/types": "workspace:*",
+    "@aelastics/synthesis": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "~5.9.3"
+  }
+}

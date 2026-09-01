@@ -11,9 +11,9 @@ var __decorate = function (decorators, target, key, desc) {
 // const EER = getEER({} as IModel, null)
 import * as jsx_1 from "@aelastics/synthesis/jsx";
 import * as variability_1 from "@aelastics/synthesis/variability";
-import * as model_1 from "@synthesis/standard-metamodels/eer/model";
+import * as model_1 from "eer-metamodel/model";
 import * as m2m_1 from "@aelastics/synthesis/m2m";
-import * as components_legacy_1 from "@synthesis/standard-metamodels/relational/components-legacy";
+import * as components_legacy_1 from "relational-metamodel";
 let EER2RelDomainWithDecisionTransformation = class EER2RelDomainWithDecisionTransformation extends variability_1.DecisionAwareM2M {
     constructor(store, {}, configModel) {
         super(store, {}, configModel);

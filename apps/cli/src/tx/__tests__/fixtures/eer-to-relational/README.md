@@ -43,8 +43,8 @@ eer-to-relational/
 The package ships its own compiled ESM modules under
 `lib/eer-to-rel-small/`; `lib/transformation.js` and the `parts` entries
 reference them by package-relative paths. Those modules import only
-runtime packages (`@aelastics/synthesis/*`,
-`@synthesis/standard-metamodels/*`), which resolve through the CLI
+runtime packages (`@aelastics/synthesis/*` and the metamodel packages
+`eer-metamodel` / `relational-metamodel`), which resolve through the CLI
 installation at execution time. A standalone transformation package
 would declare such dependencies in `package.json`; the layout and the
 manifest stay exactly the same.

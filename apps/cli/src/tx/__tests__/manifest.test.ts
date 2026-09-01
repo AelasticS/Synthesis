@@ -249,10 +249,10 @@ describe('loadTxManifest: fixture packages', () => {
       kind: 'm2m',
       entry: './lib/transformation.js',
       exportName: 'EER2RelDomainWithDecisionTransformation',
-      source: { metamodel: '@synthesis/standard-metamodels/eer' },
+      source: { metamodel: 'eer-metamodel' },
       target: {
-        metamodel: '@synthesis/standard-metamodels/relational',
-        components: '@synthesis/standard-metamodels/relational/components-legacy'
+        metamodel: 'relational-metamodel',
+        components: 'relational-metamodel'
       },
       parts: {
         metamodels: [
@@ -279,7 +279,7 @@ describe('loadTxManifest: fixture packages', () => {
       kind: 'm2t',
       entry: './lib/transformation.js',
       exportName: 'Rel2DdlTransformation',
-      source: { metamodel: '@synthesis/standard-metamodels/relational' },
+      source: { metamodel: 'relational-metamodel' },
       target: { metamodel: 'text' },
       parts: {
         metamodels: [

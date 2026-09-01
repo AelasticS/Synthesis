@@ -2,7 +2,6 @@ import { existsSync } from 'node:fs'
 import { mkdtemp, readFile, rename, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { basename, dirname, join, resolve } from 'node:path'
-import { createRequire } from 'node:module'
 import { pathToFileURL } from 'node:url'
 
 import { build } from 'esbuild'
@@ -12,6 +11,7 @@ import { Context } from '@aelastics/synthesis/jsx'
 
 import { errorMessage } from '../support/errors.js'
 import { parseSynthHeader } from './header.js'
+import { resolveBareSpecifier } from './resolution.js'
 import { normalizeRef, refToModelPath } from '../support/refs.js'
 
 /** Result of importing a transpiled workspace model module. */
@@ -27,27 +27,25 @@ export interface RenderedModel {
   header: unknown
 }
 
-const cliRequire = createRequire(import.meta.url)
-
 // Bare specifiers (packages and node builtins) are resolved against the
-// CLI's own node_modules and emitted as absolute-path externals. The
-// imported model therefore shares the exact module instances -- and with
-// them aelastics type/schema identity -- with the CLI process; bundling
-// copies of metamodel packages would break that identity. Relative imports
-// inside the model file are bundled as usual.
+// CLI's own node_modules first, then against installed transformation
+// packages, and emitted as absolute-path externals. The imported model
+// therefore shares the exact module instances -- and with them aelastics
+// type/schema identity -- with the CLI process and with every other
+// importer in this run; bundling copies of metamodel packages would break
+// that identity. Relative imports inside the model file are bundled as
+// usual.
 const externalizeBareImports: Plugin = {
   name: 'externalize-bare-imports',
   setup(pluginBuild) {
     pluginBuild.onResolve({ filter: /^[^./]/ }, (args) => {
       try {
-        return { path: cliRequire.resolve(args.path), external: true }
-      } catch {
+        return { path: resolveBareSpecifier(args.path), external: true }
+      } catch (err) {
         return {
           errors: [
             {
-              text:
-                `Cannot resolve import '${args.path}' (imported from ${args.importer}). ` +
-                'Package imports must be resolvable from the Synthesis CLI installation.'
+              text: `${errorMessage(err)} (imported from ${args.importer})`
             }
           ]
         }

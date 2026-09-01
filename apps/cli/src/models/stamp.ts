@@ -61,11 +61,12 @@ function isNonMetamodelPackage(specifier: string): boolean {
 
 /**
  * Derive the metamodel specifier from a model file's imports: the first
- * import resolving under @synthesis/standard-metamodels or under the
- * merged library's @aelastics/synthesis/metamodels subpath anywhere in
- * the imports wins; otherwise the first bare import that is not one of the
- * library's support namespaces (jsx, store, m2m, m2t, variability) or any
- * other @aelastics support package. Statement-level
+ * import under the merged library's @aelastics/synthesis/metamodels
+ * subpath anywhere in the imports wins; otherwise the first bare import
+ * that is not one of the library's support namespaces (jsx, store, m2m,
+ * m2t, variability) or any other @aelastics support package. Metamodel
+ * packages (eer-metamodel, rel-tutorial-metamodel, ...) are ordinary bare
+ * imports and are found by that second rule. Statement-level
  * `import type ...` declarations are erased at compile time and ignored
  * entirely. Returns null when the file has no candidate.
  */
@@ -80,14 +81,9 @@ export function deriveMetamodel(fileText: string): string | null {
       bare.push(specifier)
     }
   }
-  const standard = bare.find(
-    (specifier) =>
-      specifier === '@synthesis/standard-metamodels' ||
-      specifier.startsWith('@synthesis/standard-metamodels/') ||
-      specifier.startsWith(MERGED_METAMODELS_PREFIX)
-  )
-  if (standard !== undefined) {
-    return standard
+  const merged = bare.find((specifier) => specifier.startsWith(MERGED_METAMODELS_PREFIX))
+  if (merged !== undefined) {
+    return merged
   }
   return bare.find((specifier) => !isNonMetamodelPackage(specifier)) ?? null
 }

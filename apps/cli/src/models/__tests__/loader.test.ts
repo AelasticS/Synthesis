@@ -37,11 +37,13 @@ describe('transpileModel', () => {
     expect(existsSync(outPath)).toBe(true)
 
     const text = readFileSync(outPath, 'utf8')
-    // No bare specifier from either workspace scope may remain: a bundled
-    // copy of a metamodel or support package would break aelastics type
-    // identity with the CLI process.
+    // No bare workspace specifier may remain (neither the @aelastics scope
+    // nor an unscoped metamodel package): a bundled copy of a metamodel or
+    // support package would break aelastics type identity with the CLI
+    // process.
     expect(text).not.toMatch(/from\s*["']@(?:synthesis|aelastics)\//)
-    const eerModulePath = testRequire.resolve('@synthesis/standard-metamodels/eer')
+    expect(text).not.toMatch(/from\s*["']eer-metamodel/)
+    const eerModulePath = testRequire.resolve('eer-metamodel')
     expect(text).toContain(eerModulePath)
   })
 
@@ -67,7 +69,7 @@ describe('importModel', () => {
     expect(typeof mod.default).toBe('function')
     expect(header).toMatchObject({
       kind: 'model',
-      metamodel: '@synthesis/standard-metamodels/eer'
+      metamodel: 'eer-metamodel'
     })
   })
 })

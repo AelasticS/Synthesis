@@ -3,10 +3,10 @@
   "entry": "./dist/index.js",
   "exportName": "MyTransformation",
   "source": {
-    "metamodel": "@synthesis/standard-metamodels/relational"
+    "metamodel": "rel-tutorial-metamodel"
   },
   "target": {
-    "metamodel": "@synthesis/standard-metamodels/relational",
-    "components": "@synthesis/standard-metamodels/relational/components-legacy"
+    "metamodel": "rel-tutorial-metamodel",
+    "components": "rel-tutorial-metamodel"
   }
 }

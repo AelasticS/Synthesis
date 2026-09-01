@@ -3,7 +3,7 @@ import type { SynthHeader } from '../header.js'
 
 const completeHeaderText = `export const $synth = {
   kind: 'model',
-  metamodel: '@synthesis/standard-metamodels/eer',
+  metamodel: 'eer-metamodel',
   references: {},
   generatedBy: null,
   createdAt: '2026-08-27T10:00:00.000Z',
@@ -18,7 +18,7 @@ const completeHeaderText = `export const $synth = {
 
 const completeHeader: SynthHeader = {
   kind: 'model',
-  metamodel: '@synthesis/standard-metamodels/eer',
+  metamodel: 'eer-metamodel',
   references: {},
   generatedBy: null,
   createdAt: '2026-08-27T10:00:00.000Z',
@@ -32,7 +32,7 @@ const completeHeader: SynthHeader = {
 }
 
 const sampleFile = `import { ModelStore } from '@aelastics/synthesis/store'
-import { Entity } from '@synthesis/standard-metamodels/eer'
+import { Entity } from 'eer-metamodel'
 
 ${completeHeaderText}
 

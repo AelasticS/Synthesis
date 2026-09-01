@@ -67,8 +67,8 @@ describe('config init', () => {
         kind: 'm2m',
         entry: './lib/transformation.js',
         exportName: 'PlainTransformation',
-        source: { metamodel: '@synthesis/standard-metamodels/eer' },
-        target: { metamodel: '@synthesis/standard-metamodels/relational' }
+        source: { metamodel: 'eer-metamodel' },
+        target: { metamodel: 'relational-metamodel' }
       })
     )
     await run(['tx', 'install', plainDir])

@@ -3,11 +3,11 @@
   "entry": "./lib/transformation.js",
   "exportName": "EER2RelDomainWithDecisionTransformation",
   "source": {
-    "metamodel": "@synthesis/standard-metamodels/eer"
+    "metamodel": "eer-metamodel"
   },
   "target": {
-    "metamodel": "@synthesis/standard-metamodels/relational",
-    "components": "@synthesis/standard-metamodels/relational/components-legacy"
+    "metamodel": "relational-metamodel",
+    "components": "relational-metamodel"
   },
   "parts": {
     "metamodels": [

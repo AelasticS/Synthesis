@@ -1,18 +1,19 @@
 /**
- * Endogenous relational -> relational copy transformation. Exists so the
+ * Endogenous relational -> relational copy transformation over the
+ * tutorial relational metamodel (rel-tutorial-metamodel). Exists so the
  * CLI test suite has an m2m step whose source and target metamodels are
- * identical: it can follow eer-to-relational in a chain (testing
- * provenance of a step fed by an intermediate) and can be chained with
- * itself (testing ref-collision pre-flight checks).
+ * identical: chained with itself it exercises ref-collision pre-flight
+ * checks and the provenance of a step fed by an intermediate.
  *
- * Written as plain JS (no JSX, no decorators): the JSX factory is called
- * directly and abstractM2M provides transform(), trace handling, and the
- * serialized target JSX the CLI persists.
+ * Written as plain JS (no JSX, no decorators), the way a compiled package
+ * ships: the JSX factory is called directly and abstractM2M provides
+ * transform(), trace handling, and the serialized target JSX the CLI
+ * persists.
  */
 import { createExprNode } from '@aelastics/synthesis/jsx'
 import { abstractM2M } from '@aelastics/synthesis/m2m'
-import * as rmT from '@synthesis/standard-metamodels/relational/model-legacy'
-import { RelSchema, Table, Column } from '@synthesis/standard-metamodels/relational/components-legacy'
+import * as rmT from 'rel-tutorial-metamodel/model'
+import { RelSchema, Table, Column } from 'rel-tutorial-metamodel'
 
 export class RelCopyTransformation extends abstractM2M {
   constructor(store) {
@@ -32,9 +33,11 @@ export class RelCopyTransformation extends abstractM2M {
               type: c.type,
               isKey: c.isKey,
               isAutoincrement: c.isAutoincrement,
-              isForeignKey: c.isForeignKey,
               isNullable: c.isNullable,
-              ...(c.references ? { references: c.references } : {})
+              // A column is a foreign key exactly when it references the
+              // key column of another table; the copy re-links by name
+              // inside the copied schema (column names are copied 1:1).
+              ...(c.references ? { references: createExprNode(Column, { $refByName: c.references.name }) } : {})
             })
           )
         )

@@ -68,8 +68,8 @@ describe('pipeline mk (static authoring, nothing executes)', () => {
     expect(message).toContain('Chain type mismatch')
     expect(message).toContain('step 1 (eer-to-relational)')
     expect(message).toContain('step 2 (eer-to-relational)')
-    expect(message).toContain('@synthesis/standard-metamodels/relational')
-    expect(message).toContain('@synthesis/standard-metamodels/eer')
+    expect(message).toContain('relational-metamodel')
+    expect(message).toContain('eer-metamodel')
     expect(existsSync(join(pipelinesDir, 'bad-chain.json'))).toBe(false)
   })
 

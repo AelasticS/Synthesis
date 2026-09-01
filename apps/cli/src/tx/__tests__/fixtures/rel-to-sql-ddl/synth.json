@@ -3,7 +3,7 @@
   "entry": "./lib/transformation.js",
   "exportName": "Rel2DdlTransformation",
   "source": {
-    "metamodel": "@synthesis/standard-metamodels/relational"
+    "metamodel": "relational-metamodel"
   },
   "target": {
     "metamodel": "text"

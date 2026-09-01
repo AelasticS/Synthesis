@@ -154,7 +154,7 @@ describe('doctor model checks', () => {
       [
         'export const $synth = {',
         "  kind: 'model',",
-        "  metamodel: '@synthesis/standard-metamodels/eer',",
+        "  metamodel: 'eer-metamodel',",
         "  references: { sourceModel: 'nope/missing' }",
         '} as const',
         '',
@@ -196,7 +196,7 @@ describe('doctor model checks', () => {
       plainFile,
       [
         "import { createExprNode } from '@aelastics/synthesis/jsx'",
-        "import { EERSchema } from '@synthesis/standard-metamodels/eer'",
+        "import { EERSchema } from 'eer-metamodel'",
         '',
         'export default () => null',
         ''
@@ -209,7 +209,7 @@ describe('doctor model checks', () => {
 
     const text = readFileSync(plainFile, 'utf-8')
     expect(text).toContain('export const $synth')
-    expect(text).toContain("metamodel: '@synthesis/standard-metamodels/eer'")
+    expect(text).toContain("metamodel: 'eer-metamodel'")
     expect(text).toContain("kind: 'model'")
 
     const second = await run(['doctor'])

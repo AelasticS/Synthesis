@@ -47,13 +47,13 @@ try {
   if (samples.length === 0) {
     throw new Error('no sample model found in sample/')
   }
+  cli(['transformation', 'install', pkgDir])
+
   const refs = samples.map((file) => {
     const ref = `demo/${file.replace(/\.tsx$/, '')}`
     cli(['model', 'import', join(pkgDir, 'sample', file), '--as', ref])
     return ref
   })
-
-  cli(['transformation', 'install', pkgDir])
 
   const runArgs = ['transformation', 'run', txName, '--in', refs[0]]
   if (manifest.parts && manifest.parts.decisionModel) {

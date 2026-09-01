@@ -1,0 +1,27 @@
+{
+  "kind": "m2t",
+  "entry": "./dist/transformation.js",
+  "exportName": "Rel2DdlTransformation",
+  "source": {
+    "metamodel": "relational-metamodel"
+  },
+  "target": {
+    "metamodel": "text"
+  },
+  "parts": {
+    "metamodels": [
+      {
+        "module": "relational-metamodel/as-model",
+        "exportName": "RELModel"
+      }
+    ],
+    "decisionModel": {
+      "module": "./dist/decision-model.js",
+      "exportName": "DdlGenerationIssues"
+    },
+    "bindingModel": {
+      "module": "./dist/binding-model.js",
+      "exportName": "Rel_Bindings"
+    }
+  }
+}

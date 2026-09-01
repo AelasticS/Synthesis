@@ -566,7 +566,7 @@ DESCRIPTION
 EXAMPLES
   $ synth model validate com.example/persons
 
-  $ synth model validate com.example/persons --against @synthesis/standard-metamodels/eer
+  $ synth model validate com.example/persons --against eer-metamodel
 
   $ synth model validate com.example/persons-cfg --tx eer-to-relational
 ```

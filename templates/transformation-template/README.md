@@ -2,9 +2,11 @@
 
 A batteries-included starting point for a new Synthesis transformation
 package. Unlike a blank scaffold, it works on day zero: the starter
-transformation builds, installs, runs against the bundled sample model,
-and is smoke tested, so every change you make is a step from a working
-state to a working state.
+transformation, a schema copy over the tutorial relational metamodel
+(`rel-tutorial-metamodel`, the same one the tutorial examples use),
+builds, installs, runs against the bundled sample model, and is smoke
+tested, so every change you make is a step from a working state to a
+working state.
 
 `synth transformation init` gives you the same layout as a minimal
 generator; this template adds a working transformation, a sample model,
@@ -18,7 +20,7 @@ transformation-template/
 ├── synth.json            the transformation manifest
 ├── tsconfig.json
 ├── src/
-│   └── index.tsx         starter transformation (relational copy)
+│   └── index.tsx         starter transformation (rel-tutorial copy)
 ├── sample/
 │   └── example-model.tsx sample input model
 ├── scripts/

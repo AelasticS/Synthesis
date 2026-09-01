@@ -1,0 +1,12 @@
+{
+  "kind": "m2m",
+  "entry": "./dist/transformation.js",
+  "exportName": "EER2RelBasicTransformation",
+  "source": {
+    "metamodel": "eer-tutorial-metamodel/basic"
+  },
+  "target": {
+    "metamodel": "rel-tutorial-metamodel",
+    "components": "rel-tutorial-metamodel"
+  }
+}
