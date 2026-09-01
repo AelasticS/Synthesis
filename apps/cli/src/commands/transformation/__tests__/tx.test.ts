@@ -272,13 +272,13 @@ describe('fixture transformation packages', () => {
     expect(stdout).toContain('variability: yes')
     expect(stdout).toContain('entry: ./lib/transformation.js (export: EER2RelDomainWithDecisionTransformation)')
     expect(stdout).toContain(
-      'metamodel: @synthesis/examples/lib/eer-to-rel-small/er-metamodel.js (export: EERModel)'
+      'metamodel: ./lib/eer-to-rel-small/er-metamodel.js (export: EERModel)'
     )
     expect(stdout).toContain(
-      'decision model: @synthesis/examples/lib/eer-to-rel-small/02-decision-model.js (export: RelationSchemaDesignIssues)'
+      'decision model: ./lib/eer-to-rel-small/02-decision-model.js (export: RelationSchemaDesignIssues)'
     )
     expect(stdout).toContain(
-      'binding model: @synthesis/examples/lib/eer-to-rel-small/03-binding-model.js (export: ER_Bindings)'
+      'binding model: ./lib/eer-to-rel-small/03-binding-model.js (export: ER_Bindings)'
     )
   })
 

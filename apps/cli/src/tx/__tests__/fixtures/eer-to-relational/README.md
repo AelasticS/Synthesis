@@ -5,14 +5,16 @@ as the authoring reference for the transformation package layout.
 
 ## Layout
 
-```
+```text
 eer-to-relational/
 ├── package.json        name, version, author (standard npm metadata)
 ├── synth.json          the transformation manifest (takes precedence over
 │                       a `synth` block in package.json)
 ├── README.md
 └── lib/
-    └── transformation.js   compiled entry module named by `entry`
+    ├── transformation.js   compiled entry module named by `entry`
+    └── eer-to-rel-small/   vendored compiled modules (metamodel,
+                            decision model, binding model, transformation)
 ```
 
 ## Manifest (`synth.json`)
@@ -38,8 +40,11 @@ eer-to-relational/
 
 ## Note on dependencies
 
-`lib/transformation.js` and the `parts` modules re-export compiled code
-from `@synthesis/examples`, which works here because the CLI itself
-depends on that package. A standalone transformation package would ship
-its own compiled modules and declare its dependencies in `package.json`;
-the layout and the manifest stay exactly the same.
+The package ships its own compiled ESM modules under
+`lib/eer-to-rel-small/`; `lib/transformation.js` and the `parts` entries
+reference them by package-relative paths. Those modules import only
+runtime packages (`@aelastics/synthesis/*`,
+`@synthesis/standard-metamodels/*`), which resolve through the CLI
+installation at execution time. A standalone transformation package
+would declare such dependencies in `package.json`; the layout and the
+manifest stay exactly the same.

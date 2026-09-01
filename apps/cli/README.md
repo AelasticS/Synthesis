@@ -27,9 +27,6 @@ synth --help
 * [`synth config rm REF`](#synth-config-rm-ref)
 * [`synth config show REF`](#synth-config-show-ref)
 * [`synth doctor`](#synth-doctor)
-* [`synth example describe ID`](#synth-example-describe-id)
-* [`synth example ls`](#synth-example-ls)
-* [`synth example run ID`](#synth-example-run-id)
 * [`synth help [COMMAND]`](#synth-help-command)
 * [`synth init`](#synth-init)
 * [`synth model export REF`](#synth-model-export-ref)
@@ -333,87 +330,6 @@ EXAMPLES
   $ synth doctor
 
   $ synth doctor --fix
-```
-
-## `synth example describe ID`
-
-Show full details of a single example.
-
-```
-USAGE
-  $ synth example describe ID [--workspace <value>] [--ns <value>] [--json] [-q] [-v]
-
-ARGUMENTS
-  ID  Example identifier (use `synth example ls` to see available ids).
-
-GLOBAL FLAGS
-  -q, --quiet              Suppress informational output.
-  -v, --verbose            Print debug-level logs.
-      --json               Emit machine-readable JSON.
-      --ns=<value>         Namespace context override (otherwise resolved from config).
-      --workspace=<value>  Override active workspace for this invocation.
-
-DESCRIPTION
-  Show full details of a single example.
-
-EXAMPLES
-  $ synth example describe eer-to-rel-small
-
-  $ synth example describe eer-to-rel-to-text --json
-```
-
-## `synth example ls`
-
-List all available bundled examples.
-
-```
-USAGE
-  $ synth example ls [--workspace <value>] [--ns <value>] [--json] [-q] [-v]
-
-GLOBAL FLAGS
-  -q, --quiet              Suppress informational output.
-  -v, --verbose            Print debug-level logs.
-      --json               Emit machine-readable JSON.
-      --ns=<value>         Namespace context override (otherwise resolved from config).
-      --workspace=<value>  Override active workspace for this invocation.
-
-DESCRIPTION
-  List all available bundled examples.
-
-EXAMPLES
-  $ synth example ls
-
-  $ synth example ls --json
-```
-
-## `synth example run ID`
-
-Execute a bundled example and write its artifacts to disk.
-
-```
-USAGE
-  $ synth example run ID [--workspace <value>] [--ns <value>] [--json] [-q] [-v] [--out <value>]
-
-ARGUMENTS
-  ID  Example identifier (use `synth example ls` to see available ids).
-
-FLAGS
-  --out=<value>  [default: out] Output directory for artifacts. The example id is appended to it.
-
-GLOBAL FLAGS
-  -q, --quiet              Suppress informational output.
-  -v, --verbose            Print debug-level logs.
-      --json               Emit machine-readable JSON.
-      --ns=<value>         Namespace context override (otherwise resolved from config).
-      --workspace=<value>  Override active workspace for this invocation.
-
-DESCRIPTION
-  Execute a bundled example and write its artifacts to disk.
-
-EXAMPLES
-  $ synth example run eer-to-rel-to-text
-
-  $ synth example run eer-to-rel-to-text --out ./generated
 ```
 
 ## `synth help [COMMAND]`

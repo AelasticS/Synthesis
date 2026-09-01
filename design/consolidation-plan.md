@@ -87,13 +87,16 @@ and prefix replacement over subpaths is collision-free.
 - [x] gates
 
 ### Stage 3: retire the old example machinery
-- [ ] delete libraries/runner, libraries/examples; remove from rush.json
-- [ ] delete `synth example` command group and its tests
-- [ ] make the two CLI fixtures self-contained (their parts currently
-      deep-import `@synthesis/examples/lib/...`; give them package-local
-      parts like the real examples have today)
-- [ ] record the new CLI test/smoke baseline here: ____ tests, ____ smoke
-- [ ] gates
+- [x] delete libraries/runner, libraries/examples; remove from rush.json
+- [x] delete `synth example` command group and its tests
+- [x] make the two CLI fixtures self-contained: the compiled parts they
+      deep-imported were vendored into each fixture's lib/ and converted
+      from CJS to ESM (raw CJS breaks both CLI load paths: the fixtures
+      are type module, and esbuild's externalized-require shim throws);
+      synth.json parts now use ./lib/... paths; nine test assertions on
+      the printed module strings updated
+- [x] record the new CLI test/smoke baseline here: 434 tests, 86 smoke
+- [x] gates
 
 ### Stage 4: examples own their metamodels
 - [ ] create the four metamodel packages (eer-tutorial-metamodel,
@@ -177,3 +180,8 @@ import rewrites fan out safely to subagents by directory.
   silently missed apps/cli/src/tx/decisions.ts twice), and never pipe a
   gate through tail without pipefail, since it masks the exit code (also
   the source of the rush-warnings note under Gates).
+- 2026-09-01: stage 3 complete. runner and libraries/examples deleted,
+  `synth example` command group removed, both CLI fixtures self-contained
+  (vendored parts, CJS converted to ESM). New CLI baseline: 434 tests
+  (was 441; the seven example-command tests went with the commands),
+  86 smoke unchanged. All gates green.

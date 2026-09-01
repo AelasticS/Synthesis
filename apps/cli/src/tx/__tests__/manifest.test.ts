@@ -256,14 +256,14 @@ describe('loadTxManifest: fixture packages', () => {
       },
       parts: {
         metamodels: [
-          { module: '@synthesis/examples/lib/eer-to-rel-small/er-metamodel.js', exportName: 'EERModel' }
+          { module: './lib/eer-to-rel-small/er-metamodel.js', exportName: 'EERModel' }
         ],
         decisionModel: {
-          module: '@synthesis/examples/lib/eer-to-rel-small/02-decision-model.js',
+          module: './lib/eer-to-rel-small/02-decision-model.js',
           exportName: 'RelationSchemaDesignIssues'
         },
         bindingModel: {
-          module: '@synthesis/examples/lib/eer-to-rel-small/03-binding-model.js',
+          module: './lib/eer-to-rel-small/03-binding-model.js',
           exportName: 'ER_Bindings'
         }
       },
@@ -283,14 +283,14 @@ describe('loadTxManifest: fixture packages', () => {
       target: { metamodel: 'text' },
       parts: {
         metamodels: [
-          { module: '@synthesis/examples/lib/eer-to-rel-to-text/rel-metamodel.js', exportName: 'RELModel' }
+          { module: './lib/eer-to-rel-to-text/rel-metamodel.js', exportName: 'RELModel' }
         ],
         decisionModel: {
-          module: '@synthesis/examples/lib/eer-to-rel-to-text/02-decision-model.js',
+          module: './lib/eer-to-rel-to-text/02-decision-model.js',
           exportName: 'DdlGenerationIssues'
         },
         bindingModel: {
-          module: '@synthesis/examples/lib/eer-to-rel-to-text/03-binding-model.js',
+          module: './lib/eer-to-rel-to-text/03-binding-model.js',
           exportName: 'Rel_Bindings'
         }
       },

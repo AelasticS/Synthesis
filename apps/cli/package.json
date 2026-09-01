@@ -79,8 +79,6 @@
     "@oclif/plugin-plugins": "~5.4.67",
     "@oclif/plugin-not-found": "~3.2.85",
     "@oclif/plugin-autocomplete": "~3.2.40",
-    "@synthesis/runner": "workspace:*",
-    "@synthesis/examples": "workspace:*",
     "@synthesis/standard-metamodels": "workspace:*",
     "@aelastics/synthesis": "workspace:*",
     "@aelastics/types": "workspace:*",

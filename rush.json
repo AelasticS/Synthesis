@@ -349,14 +349,6 @@
       "projectFolder": "libraries/standard-metamodels"
     },
     {
-      "packageName": "@synthesis/runner",
-      "projectFolder": "libraries/runner"
-    },
-    {
-      "packageName": "@synthesis/examples",
-      "projectFolder": "libraries/examples"
-    },
-    {
       "packageName": "@synthesis/docs",
       "projectFolder": "apps/docs"
     },
