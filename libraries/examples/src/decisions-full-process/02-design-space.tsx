@@ -1,7 +1,7 @@
 /** @jsx createExprNode */
 
-import { createExprNode } from "@synthesis/jsx-runtime"
-import { ModelStore } from "@synthesis/engine"
+import { createExprNode } from "@aelastics/synthesis/jsx-runtime"
+import { ModelStore } from "@aelastics/synthesis/engine"
 import {
   CompositeOption,
   DecisionModel,
@@ -9,8 +9,8 @@ import {
   ModelIssue,
   Option,
   SimpleOption,
-} from "@synthesis/decision-framework/decisions/1.decision-model/decision-meta.model-components"
-import { TypeNumber, TypeString, TypeBoolean } from "@synthesis/standard-metamodels/types-metamodel/predefined-types"
+} from "@aelastics/synthesis/decision-framework/decisions/1.decision-model/decision-meta.model-components"
+import { TypeNumber, TypeString, TypeBoolean } from "@aelastics/synthesis/metamodels/types/predefined-types"
 
 export const createPersistenceDesignSpace = (store: ModelStore) => (
   <DecisionModel

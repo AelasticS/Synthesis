@@ -1,17 +1,17 @@
 /** @jsx createExprNode */
 
-import { ModelStore } from "@synthesis/engine"
-import { ExprNode } from "@synthesis/jsx-runtime"
-import { createExprNode } from "@synthesis/jsx-runtime"
+import { ModelStore } from "@aelastics/synthesis/engine"
+import { ExprNode } from "@aelastics/synthesis/jsx-runtime"
+import { createExprNode } from "@aelastics/synthesis/jsx-runtime"
 import {
   Property,
   PropertyDomain,
   TypeArray,
   TypeModel,
   TypeObject,
-} from "@synthesis/standard-metamodels/types-metamodel/components"
-import * as t from "@synthesis/standard-metamodels/types-metamodel/model"
-import { TypeBoolean, TypeString } from "@synthesis/standard-metamodels/types-metamodel/predefined-types"
+} from "@aelastics/synthesis/metamodels/types/components"
+import * as t from "@aelastics/synthesis/metamodels/types/model"
+import { TypeBoolean, TypeString } from "@aelastics/synthesis/metamodels/types/predefined-types"
 
 /**
  * Minimal relational metamodel model, mirroring `er-metamodel.tsx` of the

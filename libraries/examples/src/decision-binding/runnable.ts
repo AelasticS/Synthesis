@@ -1,6 +1,6 @@
 import type { Runnable, RunResult } from "@synthesis/runner";
-import { Context } from "@synthesis/jsx-runtime";
-import { ModelStore } from "@synthesis/engine";
+import { Context } from "@aelastics/synthesis/jsx-runtime";
+import { ModelStore } from "@aelastics/synthesis/engine";
 
 import { EERModel } from "../eer-as-types-metamodel/eer-metamodel-aelasticTypes";
 import { NamingConventionGDM } from "./generic-decision-model-example";

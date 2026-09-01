@@ -8,10 +8,10 @@
  * a foreign key on the N side. Later tutorial parts dissolve exactly
  * this conditional into specialized and configuration-based rules.
  */
-import { createExprNode } from '@synthesis/jsx-runtime'
-import type { ExprNode } from '@synthesis/jsx-runtime'
-import { abstractM2M } from '@synthesis/engine'
-import type { ModelStore } from '@synthesis/engine'
+import { createExprNode } from '@aelastics/synthesis/jsx-runtime'
+import type { ExprNode } from '@aelastics/synthesis/jsx-runtime'
+import { abstractM2M } from '@aelastics/synthesis/engine'
+import type { ModelStore } from '@aelastics/synthesis/engine'
 import * as em from '@synthesis/standard-metamodels/eer-tutorial/basic/model'
 import * as rmT from '@synthesis/standard-metamodels/rel-tutorial/model'
 import { RelSchema, Table, Column } from '@synthesis/standard-metamodels/rel-tutorial/components'

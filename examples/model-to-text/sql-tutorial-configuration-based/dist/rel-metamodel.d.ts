@@ -11,7 +11,7 @@
  * vocabulary the decision machinery talks about, not a second definition
  * of the language.
  */
-import type { ModelStore } from '@synthesis/engine';
-import type { ExprNode } from '@synthesis/jsx-runtime';
-import type * as t from '@synthesis/standard-metamodels/types-metamodel/model';
+import type { ModelStore } from '@aelastics/synthesis/engine';
+import type { ExprNode } from '@aelastics/synthesis/jsx-runtime';
+import type * as t from '@aelastics/synthesis/metamodels/types/model';
 export declare const RelTutorialMetamodel: (store: ModelStore) => ExprNode<t.ITypeModel>;

@@ -16,8 +16,7 @@
     "test": "node scripts/smoke.mjs"
   },
   "dependencies": {
-    "@synthesis/jsx-runtime": "workspace:*",
-    "@synthesis/engine": "workspace:*",
+    "@aelastics/synthesis": "workspace:*",
     "@synthesis/standard-metamodels": "workspace:*"
   },
   "devDependencies": {

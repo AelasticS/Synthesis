@@ -1,9 +1,9 @@
 import type { Runnable, RunResult } from "@synthesis/runner";
-import { Context } from "@synthesis/jsx-runtime";
-import { ModelStore } from "@synthesis/engine";
+import { Context } from "@aelastics/synthesis/jsx-runtime";
+import { ModelStore } from "@aelastics/synthesis/engine";
 import type * as eerT from "@synthesis/standard-metamodels/eer/model";
-import * as bmT from "@synthesis/decision-framework/decisions/2.binding-model/binding-meta.model";
-import * as sm2ddm from "@synthesis/decision-framework/decisions/4.source-model-2-default-configuration-model/SourceModel2DefaultConfigurationModel";
+import * as bmT from "@aelastics/synthesis/decision-framework/decisions/2.binding-model/binding-meta.model";
+import * as sm2ddm from "@aelastics/synthesis/decision-framework/decisions/4.source-model-2-default-configuration-model/SourceModel2DefaultConfigurationModel";
 
 import * as eerMMFn from "./er-metamodel";
 import * as smFn from "./01-source-model";

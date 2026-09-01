@@ -11,15 +11,15 @@
  * configuration does not choose explicitly. It has to agree with the
  * @Default() decorators in transformation.tsx.
  */
-import { createExprNode } from '@synthesis/jsx-runtime'
-import type { ExprNode, ModelStore } from '@synthesis/engine'
+import { createExprNode } from '@aelastics/synthesis/jsx-runtime'
+import type { ExprNode, ModelStore } from '@aelastics/synthesis/engine'
 import {
   DecisionModel,
   GlobalIssue,
   Option,
   SimpleOption
-} from '@synthesis/decision-framework/decisions/1.decision-model/decision-meta.model-components'
-import type * as t from '@synthesis/decision-framework/decisions/1.decision-model/decision-meta.model'
+} from '@aelastics/synthesis/decision-framework/decisions/1.decision-model/decision-meta.model-components'
+import type * as t from '@aelastics/synthesis/decision-framework/decisions/1.decision-model/decision-meta.model'
 
 export const SqlGenerationIssues = (store: ModelStore): ExprNode<t.IDecisionModel> => (
   <DecisionModel

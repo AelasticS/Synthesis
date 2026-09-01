@@ -13,10 +13,10 @@
  * only the 1:N relationships, so those are the only elements a
  * configuration model ever offers a choice for.
  */
-import { createExprNode } from '@synthesis/jsx-runtime';
-import { Model, Element as ModelElement } from '@synthesis/jsx-runtime';
-import { BindingModel, Binding } from '@synthesis/decision-framework/decisions/2.binding-model/binding-meta.model-components';
-import { DecisionModel, ElementIssue } from '@synthesis/decision-framework/decisions/1.decision-model/decision-meta.model-components';
+import { createExprNode } from '@aelastics/synthesis/jsx-runtime';
+import { Model, Element as ModelElement } from '@aelastics/synthesis/jsx-runtime';
+import { BindingModel, Binding } from '@aelastics/synthesis/decision-framework/decisions/2.binding-model/binding-meta.model-components';
+import { DecisionModel, ElementIssue } from '@aelastics/synthesis/decision-framework/decisions/1.decision-model/decision-meta.model-components';
 export const EERTutorialBindings = (store) => (createExprNode(BindingModel, { name: "EERTutorialBindings", description: "Binding the tutorial EER concepts to relational design issues", sourceModel: createExprNode(Model, { "$refByName": "//www.aelastics.org/EERTutorialMetamodel" }), decisionModel: createExprNode(DecisionModel, { "$refByName": "//www.aelastics.org/RelationshipDesign" }), store: store },
     createExprNode(Binding, { name: "OneToManyBinding", description: "OneToManyStrategy applies to 1:N relationships only", element: createExprNode(ModelElement, { "$refByName": "//www.aelastics.org/EERTutorialMetamodel/Relationship" }), issues: [
             createExprNode(ElementIssue, { "$refByName": "//www.aelastics.org/RelationshipDesign/OneToManyStrategy" }),

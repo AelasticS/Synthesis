@@ -1,10 +1,10 @@
-import { Context } from "@synthesis/jsx-runtime"
-import { ModelStore, generate } from "@synthesis/engine"
+import { Context } from "@aelastics/synthesis/jsx-runtime"
+import { ModelStore, generate } from "@aelastics/synthesis/engine"
 import { isSuccess } from "@aelastics/result"
 import type * as eerT from "@synthesis/standard-metamodels/eer/model"
 import type * as rmT from "@synthesis/standard-metamodels/relational/model-legacy"
-import type * as bmT from "@synthesis/decision-framework/decisions/2.binding-model/binding-meta.model"
-import { SourceModelToDefaultConfigurationModel } from "@synthesis/decision-framework/decisions/4.source-model-2-default-configuration-model/SourceModel2DefaultConfigurationModel"
+import type * as bmT from "@aelastics/synthesis/decision-framework/decisions/2.binding-model/binding-meta.model"
+import { SourceModelToDefaultConfigurationModel } from "@aelastics/synthesis/decision-framework/decisions/4.source-model-2-default-configuration-model/SourceModel2DefaultConfigurationModel"
 
 // Reuse the engine pieces of the existing eer-to-rel-small example.
 // We intentionally do NOT duplicate the transformation logic — this

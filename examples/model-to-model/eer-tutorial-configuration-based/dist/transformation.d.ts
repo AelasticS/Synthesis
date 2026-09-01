@@ -1,8 +1,8 @@
 /** @jsx createExprNode */
-import type { ExprNode } from '@synthesis/jsx-runtime';
-import type { ModelStore } from '@synthesis/engine';
-import { DecisionAwareM2M } from '@synthesis/decision-framework';
-import * as cm from '@synthesis/decision-framework/decisions/3.configuration-model/configuration-meta.model';
+import type { ExprNode } from '@aelastics/synthesis/jsx-runtime';
+import type { ModelStore } from '@aelastics/synthesis/engine';
+import { DecisionAwareM2M } from '@aelastics/synthesis/decision-framework';
+import * as cm from '@aelastics/synthesis/decision-framework/decisions/3.configuration-model/configuration-meta.model';
 import * as em from '@synthesis/standard-metamodels/eer-tutorial/advanced/model';
 import * as rmT from '@synthesis/standard-metamodels/rel-tutorial/model';
 export declare class EER2RelConfigurableTransformation extends DecisionAwareM2M<em.IEERSchema, rmT.IRelSchema, {}, cm.IConfigurationModel> {

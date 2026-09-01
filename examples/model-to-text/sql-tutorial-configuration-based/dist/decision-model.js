@@ -10,8 +10,8 @@
  * configuration does not choose explicitly. It has to agree with the
  * @Default() decorators in transformation.tsx.
  */
-import { createExprNode } from '@synthesis/jsx-runtime';
-import { DecisionModel, GlobalIssue, Option, SimpleOption } from '@synthesis/decision-framework/decisions/1.decision-model/decision-meta.model-components';
+import { createExprNode } from '@aelastics/synthesis/jsx-runtime';
+import { DecisionModel, GlobalIssue, Option, SimpleOption } from '@aelastics/synthesis/decision-framework/decisions/1.decision-model/decision-meta.model-components';
 export const SqlGenerationIssues = (store) => (createExprNode(DecisionModel, { name: "SqlGenerationDesign", description: "Design space for generating SQL DDL from a relational schema", store: store },
     createExprNode(GlobalIssue, { name: "OutputLayout", description: "How the generated DDL is laid out over files" },
         createExprNode(Option, { name: "SingleFile", description: "One file with every CREATE TABLE and inline REFERENCES clauses", isDefault: false, optionType: createExprNode(SimpleOption, { name: "SingleFileOption" }) }),

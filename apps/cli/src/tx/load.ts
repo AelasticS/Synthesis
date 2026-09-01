@@ -13,8 +13,8 @@ import { existsSync } from 'node:fs'
 import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 
-import { ModelStore } from '@synthesis/engine'
-import { Context } from '@synthesis/jsx-runtime'
+import { ModelStore } from '@aelastics/synthesis/engine'
+import { Context } from '@aelastics/synthesis/jsx-runtime'
 
 import type { WorkspaceConfig } from '../config/index.js'
 import { parseSynthHeader } from '../models/header.js'

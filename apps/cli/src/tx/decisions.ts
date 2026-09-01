@@ -6,7 +6,7 @@
  * transformation's decision model, binding model, and the input model.
  */
 
-import type { ModelStore } from '@synthesis/engine'
+import type { ModelStore } from '@aelastics/synthesis/engine'
 
 type StoreElement = Parameters<ModelStore['getTypeOf']>[0]
 

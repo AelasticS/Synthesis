@@ -1,10 +1,10 @@
 /** @jsx createExprNode */
-import { ExprNode } from "@synthesis/jsx-runtime";
-import { ModelStore } from "@synthesis/engine";
-import * as m2tmm from "@synthesis/engine";
+import { ExprNode } from "@aelastics/synthesis/jsx-runtime";
+import { ModelStore } from "@aelastics/synthesis/engine";
+import * as m2tmm from "@aelastics/synthesis/engine";
 import * as rmT from "@synthesis/standard-metamodels/relational/model-legacy";
-import { DecisionAwareM2M } from "@synthesis/decision-framework";
-import * as cm from "@synthesis/decision-framework/decisions/3.configuration-model/configuration-meta.model";
+import { DecisionAwareM2M } from "@aelastics/synthesis/decision-framework";
+import * as cm from "@aelastics/synthesis/decision-framework/decisions/3.configuration-model/configuration-meta.model";
 /**
  * Model-to-text transformation that turns a relational schema into a
  * single-document M2T model containing SQL DDL (CREATE TABLE statements).

@@ -8,14 +8,14 @@
  * element issue to the elements it really concerns; here,
  * OneToManyStrategy applies only to relationships that are 1:N.
  */
-import { createExprNode } from "@synthesis/jsx-runtime"
-import { ExprNode } from "@synthesis/jsx-runtime"
-import { ModelStore } from "@synthesis/engine"
+import { createExprNode } from "@aelastics/synthesis/jsx-runtime"
+import { ExprNode } from "@aelastics/synthesis/jsx-runtime"
+import { ModelStore } from "@aelastics/synthesis/engine"
 
-import { BindingModel, Binding } from "@synthesis/decision-framework/decisions/2.binding-model/binding-meta.model-components"
-import * as t from "@synthesis/decision-framework/decisions/2.binding-model/binding-meta.model"
-import { Model, Element as ModelElement } from "@synthesis/jsx-runtime"
-import { DecisionModel, ElementIssue } from "@synthesis/decision-framework/decisions/1.decision-model/decision-meta.model-components"
+import { BindingModel, Binding } from "@aelastics/synthesis/decision-framework/decisions/2.binding-model/binding-meta.model-components"
+import * as t from "@aelastics/synthesis/decision-framework/decisions/2.binding-model/binding-meta.model"
+import { Model, Element as ModelElement } from "@aelastics/synthesis/jsx-runtime"
+import { DecisionModel, ElementIssue } from "@aelastics/synthesis/decision-framework/decisions/1.decision-model/decision-meta.model-components"
 
 export const ER_Bindings = (store: ModelStore): ExprNode<t.IBindingModel> => (
   <BindingModel

@@ -1,7 +1,7 @@
 /** @jsx createExprNode */
-import { createExprNode } from '@synthesis/jsx-runtime';
-import { Property, PropertyDomain, TypeArray, TypeModel, TypeObject } from '@synthesis/standard-metamodels/types-metamodel/components';
-import { TypeBoolean, TypeString } from '@synthesis/standard-metamodels/types-metamodel/predefined-types';
+import { createExprNode } from '@aelastics/synthesis/jsx-runtime';
+import { Property, PropertyDomain, TypeArray, TypeModel, TypeObject } from '@aelastics/synthesis/metamodels/types/components';
+import { TypeBoolean, TypeString } from '@aelastics/synthesis/metamodels/types/predefined-types';
 export const RelTutorialMetamodel = (store) => (createExprNode(TypeModel, { name: "RelTutorialMetamodel", store: store },
     createExprNode(TypeString, { name: "string" }),
     createExprNode(TypeBoolean, { name: "boolean" }),

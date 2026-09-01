@@ -341,12 +341,8 @@
       "projectFolder": "libraries/aelastics-store"
     },
     {
-      "packageName": "@synthesis/metamodel-core",
-      "projectFolder": "libraries/metamodel-core"
-    },
-    {
-      "packageName": "@synthesis/jsx-runtime",
-      "projectFolder": "libraries/jsx-runtime"
+      "packageName": "@aelastics/synthesis",
+      "projectFolder": "libraries/synthesis"
     },
     {
       "packageName": "@synthesis/standard-metamodels",
@@ -355,14 +351,6 @@
     {
       "packageName": "@synthesis/runner",
       "projectFolder": "libraries/runner"
-    },
-    {
-      "packageName": "@synthesis/engine",
-      "projectFolder": "libraries/engine"
-    },
-    {
-      "packageName": "@synthesis/decision-framework",
-      "projectFolder": "libraries/decision-framework"
     },
     {
       "packageName": "@synthesis/examples",

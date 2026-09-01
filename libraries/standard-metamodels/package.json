@@ -66,16 +66,8 @@
       "default": "./lib/relational/index.js"
     },
     "./relational/model": {
-      "types": "./lib/relational/REL.meta.model.type.d.ts",
-      "default": "./lib/relational/REL.meta.model.type.js"
-    },
-    "./relational/model-v2": {
-      "types": "./lib/relational/REL.meta.model.type.v2.d.ts",
-      "default": "./lib/relational/REL.meta.model.type.v2.js"
-    },
-    "./relational/components-v2": {
-      "types": "./lib/relational/REL-components.v2.d.ts",
-      "default": "./lib/relational/REL-components.v2.js"
+      "types": "./lib/relational/REL.meta.model.type.legacy.d.ts",
+      "default": "./lib/relational/REL.meta.model.type.legacy.js"
     },
     "./relational/model-legacy": {
       "types": "./lib/relational/REL.meta.model.type.legacy.d.ts",
@@ -84,42 +76,6 @@
     "./relational/components-legacy": {
       "types": "./lib/relational/REL-components.legacy.d.ts",
       "default": "./lib/relational/REL-components.legacy.js"
-    },
-    "./bpm": {
-      "types": "./lib/bpm/index.d.ts",
-      "default": "./lib/bpm/index.js"
-    },
-    "./bpm/model": {
-      "types": "./lib/bpm/BPM.meta.model.type.d.ts",
-      "default": "./lib/bpm/BPM.meta.model.type.js"
-    },
-    "./bpm/organization": {
-      "types": "./lib/bpm/organization.model.type.d.ts",
-      "default": "./lib/bpm/organization.model.type.js"
-    },
-    "./bpm/example-department": {
-      "types": "./lib/bpm/example-department.d.ts",
-      "default": "./lib/bpm/example-department.js"
-    },
-    "./types-metamodel": {
-      "types": "./lib/types-metamodel/index.d.ts",
-      "default": "./lib/types-metamodel/index.js"
-    },
-    "./types-metamodel/model": {
-      "types": "./lib/types-metamodel/types-meta.model.d.ts",
-      "default": "./lib/types-metamodel/types-meta.model.js"
-    },
-    "./types-metamodel/components": {
-      "types": "./lib/types-metamodel/types-components.d.ts",
-      "default": "./lib/types-metamodel/types-components.js"
-    },
-    "./types-metamodel/predefined-model": {
-      "types": "./lib/types-metamodel/predefined-model.d.ts",
-      "default": "./lib/types-metamodel/predefined-model.js"
-    },
-    "./types-metamodel/predefined-types": {
-      "types": "./lib/types-metamodel/predefined-types.d.ts",
-      "default": "./lib/types-metamodel/predefined-types.js"
     }
   },
   "typesVersions": {
@@ -127,26 +83,14 @@
       "eer": ["lib/eer/index.d.ts"],
       "eer/model": ["lib/eer/EER.meta.model.type.d.ts"],
       "relational": ["lib/relational/index.d.ts"],
-      "relational/model": ["lib/relational/REL.meta.model.type.d.ts"],
-      "relational/model-v2": ["lib/relational/REL.meta.model.type.v2.d.ts"],
-      "relational/components-v2": ["lib/relational/REL-components.v2.d.ts"],
+      "relational/model": ["lib/relational/REL.meta.model.type.legacy.d.ts"],
       "relational/model-legacy": ["lib/relational/REL.meta.model.type.legacy.d.ts"],
-      "relational/components-legacy": ["lib/relational/REL-components.legacy.d.ts"],
-      "bpm": ["lib/bpm/index.d.ts"],
-      "bpm/model": ["lib/bpm/BPM.meta.model.type.d.ts"],
-      "bpm/organization": ["lib/bpm/organization.model.type.d.ts"],
-      "bpm/example-department": ["lib/bpm/example-department.d.ts"],
-      "types-metamodel": ["lib/types-metamodel/index.d.ts"],
-      "types-metamodel/model": ["lib/types-metamodel/types-meta.model.d.ts"],
-      "types-metamodel/components": ["lib/types-metamodel/types-components.d.ts"],
-      "types-metamodel/predefined-model": ["lib/types-metamodel/predefined-model.d.ts"],
-      "types-metamodel/predefined-types": ["lib/types-metamodel/predefined-types.d.ts"]
+      "relational/components-legacy": ["lib/relational/REL-components.legacy.d.ts"]
     }
   },
   "dependencies": {
     "@aelastics/types": "workspace:*",
-    "@synthesis/metamodel-core": "workspace:*",
-    "@synthesis/jsx-runtime": "workspace:*"
+    "@aelastics/synthesis": "workspace:*"
   },
   "devDependencies": {
     "@rushstack/eslint-config": "~4.6.4",

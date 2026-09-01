@@ -21,13 +21,13 @@
  * once per run rather than once per table, so the binding model has no
  * per-element bindings at all.
  */
-import { createExprNode } from '@synthesis/jsx-runtime'
-import type { ExprNode } from '@synthesis/jsx-runtime'
-import { M2M, M2T, Doc, Sec, P } from '@synthesis/engine'
-import type { ModelStore } from '@synthesis/engine'
-import * as m2tmm from '@synthesis/engine'
-import { DecisionAwareM2M, VarPoint, VarOption, Default, Option } from '@synthesis/decision-framework'
-import * as cm from '@synthesis/decision-framework/decisions/3.configuration-model/configuration-meta.model'
+import { createExprNode } from '@aelastics/synthesis/jsx-runtime'
+import type { ExprNode } from '@aelastics/synthesis/jsx-runtime'
+import { M2M, M2T, Doc, Sec, P } from '@aelastics/synthesis/engine'
+import type { ModelStore } from '@aelastics/synthesis/engine'
+import * as m2tmm from '@aelastics/synthesis/engine'
+import { DecisionAwareM2M, VarPoint, VarOption, Default, Option } from '@aelastics/synthesis/decision-framework'
+import * as cm from '@aelastics/synthesis/decision-framework/decisions/3.configuration-model/configuration-meta.model'
 import * as rmT from '@synthesis/standard-metamodels/rel-tutorial/model'
 
 /** One foreign key: the column that points, and the column it points at. */

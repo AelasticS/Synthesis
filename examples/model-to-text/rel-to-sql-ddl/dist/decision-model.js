@@ -1,6 +1,6 @@
 /** @jsx createExprNode */
-import { createExprNode } from "@synthesis/jsx-runtime";
-import { DecisionModel, GlobalIssue, Option, SimpleOption, } from "@synthesis/decision-framework/decisions/1.decision-model/decision-meta.model-components";
+import { createExprNode } from "@aelastics/synthesis/jsx-runtime";
+import { DecisionModel, GlobalIssue, Option, SimpleOption, } from "@aelastics/synthesis/decision-framework/decisions/1.decision-model/decision-meta.model-components";
 /**
  * Design space of the Rel to DDL text generation. One global (model-wide)
  * issue: how SQL identifiers are emitted. `Unquoted` is the default and

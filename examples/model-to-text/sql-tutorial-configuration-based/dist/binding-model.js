@@ -12,9 +12,9 @@
  * before this model in the order the manifest's `parts` block lists
  * them.
  */
-import { createExprNode } from '@synthesis/jsx-runtime';
-import { Model } from '@synthesis/jsx-runtime';
-import { BindingModel } from '@synthesis/decision-framework/decisions/2.binding-model/binding-meta.model-components';
-import { DecisionModel } from '@synthesis/decision-framework/decisions/1.decision-model/decision-meta.model-components';
+import { createExprNode } from '@aelastics/synthesis/jsx-runtime';
+import { Model } from '@aelastics/synthesis/jsx-runtime';
+import { BindingModel } from '@aelastics/synthesis/decision-framework/decisions/2.binding-model/binding-meta.model-components';
+import { DecisionModel } from '@aelastics/synthesis/decision-framework/decisions/1.decision-model/decision-meta.model-components';
 export const RelTutorialSqlBindings = (store) => (createExprNode(BindingModel, { name: "RelTutorialSqlBindings", description: "Binding the tutorial relational concepts to SQL generation issues", sourceModel: createExprNode(Model, { "$refByName": "//www.aelastics.org/RelTutorialMetamodel" }), decisionModel: createExprNode(DecisionModel, { "$refByName": "//www.aelastics.org/SqlGenerationDesign" }), store: store }));
 //# sourceMappingURL=binding-model.js.map

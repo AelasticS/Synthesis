@@ -7,16 +7,16 @@
 
 
 
-import { createExprNode } from "@synthesis/jsx-runtime";
-import { VarPoint, VarOption, Option, Or, Not, And, DecisionAwareM2M } from "@synthesis/decision-framework";
+import { createExprNode } from "@aelastics/synthesis/jsx-runtime";
+import { VarPoint, VarOption, Option, Or, Not, And, DecisionAwareM2M } from "@aelastics/synthesis/decision-framework";
 import * as et from "@synthesis/standard-metamodels/eer/model";
-import * as rt from "@synthesis/standard-metamodels/relational/model-v2";
+import * as rt from "@synthesis/standard-metamodels/relational/model-legacy";
 import * as e from "@synthesis/standard-metamodels/eer";
-import * as r from "@synthesis/standard-metamodels/relational/components-v2";
-import { ExprNode, Resolve } from "@synthesis/jsx-runtime";
-import { Context } from "@synthesis/jsx-runtime";
-import { E2E, ModelStore, M2M, SpecPoint, SpecOption } from "@synthesis/engine"
-import * as cmT from "@synthesis/decision-framework/decisions/3.configuration-model/configuration-meta.model"; // import decision model types for decision model transformation
+import * as r from "@synthesis/standard-metamodels/relational/components-legacy";
+import { ExprNode, Resolve } from "@aelastics/synthesis/jsx-runtime";
+import { Context } from "@aelastics/synthesis/jsx-runtime";
+import { E2E, ModelStore, M2M, SpecPoint, SpecOption } from "@aelastics/synthesis/engine"
+import * as cmT from "@aelastics/synthesis/decision-framework/decisions/3.configuration-model/configuration-meta.model"; // import decision model types for decision model transformation
 
 
 const testStore = new ModelStore();
@@ -84,7 +84,7 @@ export class EER2RelDomainWithDecisionTransformation extends DecisionAwareM2M<et
     );
   }
 
-  // @E2E({ input: et.WeakMapping, output: rt.ForeignKey })
+  // @E2E({ input: et.WeakMapping, output: rt.Column })
   WeekMappingToFK(wm: et.IWeakMapping) {
 
     // override table name from super rule
@@ -99,19 +99,16 @@ export class EER2RelDomainWithDecisionTransformation extends DecisionAwareM2M<et
       {(refTable: rt.ITable) => (
         <Resolve name="res2" input={wm.codomain} ruleName="Entity2Table">
           {(ownerTable: rt.ITable) => (
-            <r.ForeignKey name={`for_key_ref_${refTable.name}`}
-              referencedTable={<r.Table $refByName={refTable.name}></r.Table>}
-              ownerTable={<r.Table $refByName={ownerTable.name}></r.Table>}
-            >
+            <r.Table $refByName={ownerTable.name}>
               {parentKeyAttributes.map((attribute) => (
                 this.Attribute2PKColumn(attribute, ownerTable)
               ))}
 
               {parentKeyAttributes.map((attribute) => (
-                this.Attribute2FKColumn(attribute)
+                this.Attribute2FKColumn(attribute, refTable)
               ))}
 
-            </r.ForeignKey>
+            </r.Table>
           )}
         </Resolve>)}
     </Resolve>
@@ -135,18 +132,18 @@ export class EER2RelDomainWithDecisionTransformation extends DecisionAwareM2M<et
     return <r.Column name={`fk_${a.name}`} isKey={true} ownerTable={<r.Table $refByName={ownerTable.name}></r.Table>}></r.Column >;
   }
 
-  // @E2E({ input: et.Attribute, output: rt.ForeignKeyColumn })
-  Attribute2FKColumn(a: et.IAttribute): ExprNode<rt.IForeignKeyColumn> {
+  // @E2E({ input: et.Attribute, output: rt.Column })
+  Attribute2FKColumn(a: et.IAttribute, refTable: rt.ITable): ExprNode<rt.IColumn> {
 
     return <Resolve input={a} ruleName="Attribute2Column">
       {(refColumn: rt.IColumn) => (
         <Resolve input={a} ruleName="Attribute2PKColumn">
           {(fkColumn: rt.IColumn) => (
-            <r.ForeignKeyColumn name={`fk_col_${a.name}`}
-              fkColumn={<r.Column $refByName={fkColumn.name}></r.Column>}
-              refColumn={<r.Column $refByName={refColumn.name}></r.Column>}
+            <r.Column name={`fk_col_${a.name}`}
+              isForeignKey={true}
+              references={refTable.name}
             >
-            </r.ForeignKeyColumn >
+            </r.Column >
           )}
         </Resolve>
       )}
@@ -156,20 +153,20 @@ export class EER2RelDomainWithDecisionTransformation extends DecisionAwareM2M<et
   @VarPoint('Neki Issue')
   RelationshipToElement(
     rel: et.IRelationship
-  ): ExprNode<rt.IForeignKey> | ExprNode<rt.ITable> {
+  ): ExprNode<rt.IColumn> | ExprNode<rt.ITable> {
     throw new Error("Not implemented VarOptions for VarPoint FKorTable");
-    // return null as unknown as ExprNode<rt.IForeignKey> | ExprNode<rt.ITable>;
+    // return null as unknown as ExprNode<rt.IColumn> | ExprNode<rt.ITable>;
   }
 
   // TODO Input for this rule expression should be DecisionForElement OR array of SelectedOption
   @VarOption("RelationshipToElement", Option('nekiOption'))
-  RelatioshipToFK(rel: et.IRelationship): ExprNode<rt.IForeignKey> {
+  RelatioshipToFK(rel: et.IRelationship): ExprNode<rt.IColumn> {
     // const aaa = this.context.resolve(rel.ordinaryMapping[0]);
 
     return (
-      <r.ForeignKey >
-        <r.Table $refByName=""></r.Table>
-      </r.ForeignKey >
+      <r.Table $refByName="">
+        <r.Column isForeignKey={true}></r.Column>
+      </r.Table >
     );
   }
 

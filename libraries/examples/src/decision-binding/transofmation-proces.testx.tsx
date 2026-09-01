@@ -1,7 +1,7 @@
 // /** @jsx createExprNode */
 //
-// import { Context } from "@synthesis/jsx-runtime"
-// import { ModelStore } from "@synthesis/engine"
+// import { Context } from "@aelastics/synthesis/jsx-runtime"
+// import { ModelStore } from "@aelastics/synthesis/engine"
 //
 // import * as etT from "../../types-metamodel/types-meta.model"
 // import * as eerM from "../../types-metamodel/models/eer-metamodel-aelasticTypes"

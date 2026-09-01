@@ -12,7 +12,7 @@ const fixturesDir = join(packageRoot, 'src/tx/__tests__/fixtures')
 const personsFixture = join(packageRoot, 'src/models/__tests__/fixtures/persons.tsx')
 
 const CONFIGURATION_METAMODEL =
-  '@synthesis/decision-framework/decisions/3.configuration-model/configuration-meta.model'
+  '@aelastics/synthesis/decision-framework/decisions/3.configuration-model/configuration-meta.model'
 
 // Isolated HOME so tests neither read nor mutate the developer's ~/.synth
 // workspace; the workspace lives at <home>/.synth (init default path).

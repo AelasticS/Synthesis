@@ -1,8 +1,8 @@
 /** @jsx createExprNode */
-import { createExprNode } from "@synthesis/jsx-runtime";
-import { BindingModel } from "@synthesis/decision-framework/decisions/2.binding-model/binding-meta.model-components";
-import { Model } from "@synthesis/jsx-runtime";
-import { DecisionModel } from "@synthesis/decision-framework/decisions/1.decision-model/decision-meta.model-components";
+import { createExprNode } from "@aelastics/synthesis/jsx-runtime";
+import { BindingModel } from "@aelastics/synthesis/decision-framework/decisions/2.binding-model/binding-meta.model-components";
+import { Model } from "@aelastics/synthesis/jsx-runtime";
+import { DecisionModel } from "@aelastics/synthesis/decision-framework/decisions/1.decision-model/decision-meta.model-components";
 /**
  * Binding of the relational metamodel to the DDL generation design space.
  * The only issue (IdentifierQuoting) is a global one, so there are no

@@ -1,8 +1,8 @@
 /** @jsx createExprNode */
 
-import { Context, ModelStore } from "@synthesis/engine"
-import { ExprNode } from "@synthesis/jsx-runtime"
-import { createExprNode } from "@synthesis/jsx-runtime"
+import { Context, ModelStore } from "@aelastics/synthesis/engine"
+import { ExprNode } from "@aelastics/synthesis/jsx-runtime"
+import { createExprNode } from "@aelastics/synthesis/jsx-runtime"
 import {
   InverseProperty,
   Property,
@@ -12,9 +12,9 @@ import {
   TypeObject,
   TypeOptional,
   TypeSubtype,
-} from "@synthesis/standard-metamodels/types-metamodel/components"
-import * as t from "@synthesis/standard-metamodels/types-metamodel/model"
-import { TypeBoolean, TypeNumber, TypeString } from "@synthesis/standard-metamodels/types-metamodel/predefined-types"
+} from "@aelastics/synthesis/metamodels/types/components"
+import * as t from "@aelastics/synthesis/metamodels/types/model"
+import { TypeBoolean, TypeNumber, TypeString } from "@aelastics/synthesis/metamodels/types/predefined-types"
 
 const store = new ModelStore()
 

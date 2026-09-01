@@ -1,21 +1,21 @@
 /** @jsx createExprNode */
 
-import { createExprNode } from "@synthesis/jsx-runtime";
-import { ExprNode } from "@synthesis/jsx-runtime";
+import { createExprNode } from "@aelastics/synthesis/jsx-runtime";
+import { ExprNode } from "@aelastics/synthesis/jsx-runtime";
 
-import { Context } from "@synthesis/jsx-runtime";
-import { ModelStore } from "@synthesis/engine";
+import { Context } from "@aelastics/synthesis/jsx-runtime";
+import { ModelStore } from "@aelastics/synthesis/engine";
 
-import * as gdmC from "@synthesis/decision-framework/decisions/1.decision-model/decision-meta.model-components";
-import * as gdmT from "@synthesis/decision-framework/decisions/1.decision-model/decision-meta.model";
+import * as gdmC from "@aelastics/synthesis/decision-framework/decisions/1.decision-model/decision-meta.model-components";
+import * as gdmT from "@aelastics/synthesis/decision-framework/decisions/1.decision-model/decision-meta.model";
 import * as gdmM from "./generic-decision-model-example"
 
-import * as etC from "@synthesis/standard-metamodels/types-metamodel/components"
-import * as etT from "@synthesis/standard-metamodels/types-metamodel/model";
+import * as etC from "@aelastics/synthesis/metamodels/types/components"
+import * as etT from "@aelastics/synthesis/metamodels/types/model";
 import * as eerM from "../eer-as-types-metamodel/eer-metamodel-aelasticTypes";
 
-import * as dbmT from "@synthesis/decision-framework/decisions/2.binding-model/binding-meta.model";
-import * as dbmC from "@synthesis/decision-framework/decisions/2.binding-model/binding-meta.model-components";
+import * as dbmT from "@aelastics/synthesis/decision-framework/decisions/2.binding-model/binding-meta.model";
+import * as dbmC from "@aelastics/synthesis/decision-framework/decisions/2.binding-model/binding-meta.model-components";
 
 const context = new Context();
 // const store = new ModelStore();

@@ -7,17 +7,17 @@
  * configuration does not choose explicitly. Option names correspond to
  * the @VarOption methods of the transformation class.
  */
-import { createExprNode } from "@synthesis/jsx-runtime"
-import { ExprNode, ModelStore } from "@synthesis/engine"
+import { createExprNode } from "@aelastics/synthesis/jsx-runtime"
+import { ExprNode, ModelStore } from "@aelastics/synthesis/engine"
 import {
   DecisionModel,
   ElementIssue,
   ModelIssue,
   Option,
   SimpleOption,
-} from "@synthesis/decision-framework/decisions/1.decision-model/decision-meta.model-components"
+} from "@aelastics/synthesis/decision-framework/decisions/1.decision-model/decision-meta.model-components"
 
-import * as t from "@synthesis/decision-framework/decisions/1.decision-model/decision-meta.model"
+import * as t from "@aelastics/synthesis/decision-framework/decisions/1.decision-model/decision-meta.model"
 
 export const RelationSchemaDesignIssues = (store: ModelStore): ExprNode<t.IDecisionModel> => (
   <DecisionModel

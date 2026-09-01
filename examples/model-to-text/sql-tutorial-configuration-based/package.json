@@ -16,10 +16,8 @@
     "test": "node ../../smoke.mjs"
   },
   "dependencies": {
-    "@synthesis/jsx-runtime": "workspace:*",
-    "@synthesis/engine": "workspace:*",
-    "@synthesis/standard-metamodels": "workspace:*",
-    "@synthesis/decision-framework": "workspace:*"
+    "@aelastics/synthesis": "workspace:*",
+    "@synthesis/standard-metamodels": "workspace:*"
   },
   "devDependencies": {
     "typescript": "~5.9.3",

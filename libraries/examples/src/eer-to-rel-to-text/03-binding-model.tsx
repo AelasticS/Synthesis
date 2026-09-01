@@ -1,13 +1,13 @@
 /** @jsx createExprNode */
 
-import { createExprNode } from "@synthesis/jsx-runtime"
-import { ExprNode } from "@synthesis/jsx-runtime"
-import { ModelStore } from "@synthesis/engine"
+import { createExprNode } from "@aelastics/synthesis/jsx-runtime"
+import { ExprNode } from "@aelastics/synthesis/jsx-runtime"
+import { ModelStore } from "@aelastics/synthesis/engine"
 
-import { BindingModel } from "@synthesis/decision-framework/decisions/2.binding-model/binding-meta.model-components"
-import * as t from "@synthesis/decision-framework/decisions/2.binding-model/binding-meta.model"
-import { Model } from "@synthesis/jsx-runtime"
-import { DecisionModel } from "@synthesis/decision-framework/decisions/1.decision-model/decision-meta.model-components"
+import { BindingModel } from "@aelastics/synthesis/decision-framework/decisions/2.binding-model/binding-meta.model-components"
+import * as t from "@aelastics/synthesis/decision-framework/decisions/2.binding-model/binding-meta.model"
+import { Model } from "@aelastics/synthesis/jsx-runtime"
+import { DecisionModel } from "@aelastics/synthesis/decision-framework/decisions/1.decision-model/decision-meta.model-components"
 
 /**
  * Binding of the relational metamodel to the DDL generation design space.

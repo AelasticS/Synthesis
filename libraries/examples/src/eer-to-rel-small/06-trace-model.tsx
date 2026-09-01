@@ -1,13 +1,13 @@
 /** @jsx createExprNode */
 
-import { createExprNode } from "@synthesis/jsx-runtime"
-import { ModelStore } from "@synthesis/engine"
-import { TraceEntry } from "@synthesis/engine"
-import { DecisionAwareTraceModel as TraceModel, VarPointTraceEntry } from "@synthesis/decision-framework/decisions/trace-extensions/trace-extensions-components"
+import { createExprNode } from "@aelastics/synthesis/jsx-runtime"
+import { ModelStore } from "@aelastics/synthesis/engine"
+import { TraceEntry } from "@aelastics/synthesis/engine"
+import { DecisionAwareTraceModel as TraceModel, VarPointTraceEntry } from "@aelastics/synthesis/decision-framework/decisions/trace-extensions/trace-extensions-components"
 import { EERSchema as ERSchema, Attribute, Kernel as Entity, Relationship } from "@synthesis/standard-metamodels/eer"
 import { RelSchema, Column, Table } from "@synthesis/standard-metamodels/relational/components-legacy"
-import { ConfigurationModel, Choice } from "@synthesis/decision-framework/decisions/3.configuration-model/configuration-meta.model-components"
-import { ElementIssue, Option } from "@synthesis/decision-framework/decisions/1.decision-model/decision-meta.model-components"
+import { ConfigurationModel, Choice } from "@aelastics/synthesis/decision-framework/decisions/3.configuration-model/configuration-meta.model-components"
+import { ElementIssue, Option } from "@aelastics/synthesis/decision-framework/decisions/1.decision-model/decision-meta.model-components"
 
 
 export const traceModel = (store: ModelStore) => (

@@ -7,8 +7,8 @@ import { pathToFileURL } from 'node:url'
 
 import { build } from 'esbuild'
 import type { Plugin } from 'esbuild'
-import { ModelStore } from '@synthesis/engine'
-import { Context } from '@synthesis/jsx-runtime'
+import { ModelStore } from '@aelastics/synthesis/engine'
+import { Context } from '@aelastics/synthesis/jsx-runtime'
 
 import { errorMessage } from '../support/errors.js'
 import { parseSynthHeader } from './header.js'

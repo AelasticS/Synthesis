@@ -1,9 +1,9 @@
 /** @jsx createExprNode */
 
 
-import { createExprNode } from "@synthesis/jsx-runtime"
-import { ExprNode } from "@synthesis/jsx-runtime"
-import * as gdmT from "@synthesis/decision-framework/decisions/1.decision-model/decision-meta.model"
+import { createExprNode } from "@aelastics/synthesis/jsx-runtime"
+import { ExprNode } from "@aelastics/synthesis/jsx-runtime"
+import * as gdmT from "@aelastics/synthesis/decision-framework/decisions/1.decision-model/decision-meta.model"
 import {
   CompositeOption,
   DecisionModel,
@@ -12,15 +12,15 @@ import {
   ModelIssue, ModelSubIssue,
   Option,
   SimpleOption,
-} from "@synthesis/decision-framework/decisions/1.decision-model/decision-meta.model-components"
+} from "@aelastics/synthesis/decision-framework/decisions/1.decision-model/decision-meta.model-components"
 
 
-import { Context } from "@synthesis/jsx-runtime"
-import { ModelStore } from "@synthesis/engine"
+import { Context } from "@aelastics/synthesis/jsx-runtime"
+import { ModelStore } from "@aelastics/synthesis/engine"
 import * as t from "@aelastics/types"
-import { TypeObject, Property, PropertyDomain } from "@synthesis/standard-metamodels/types-metamodel/components"
-import { importPredefinedTypes } from "@synthesis/standard-metamodels/types-metamodel/predefined-model"
-import { TypeString } from "@synthesis/standard-metamodels/types-metamodel/predefined-types"
+import { TypeObject, Property, PropertyDomain } from "@aelastics/synthesis/metamodels/types/components"
+import { importPredefinedTypes } from "@aelastics/synthesis/metamodels/types/predefined-model"
+import { TypeString } from "@aelastics/synthesis/metamodels/types/predefined-types"
 
 const testStore = new ModelStore()
 const context = new Context()

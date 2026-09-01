@@ -1,15 +1,15 @@
 /** @jsx createExprNode */
 
-import { createExprNode } from "@synthesis/jsx-runtime"
-import { ExprNode, ModelStore } from "@synthesis/engine"
+import { createExprNode } from "@aelastics/synthesis/jsx-runtime"
+import { ExprNode, ModelStore } from "@aelastics/synthesis/engine"
 import {
   DecisionModel,
   GlobalIssue,
   Option,
   SimpleOption,
-} from "@synthesis/decision-framework/decisions/1.decision-model/decision-meta.model-components"
+} from "@aelastics/synthesis/decision-framework/decisions/1.decision-model/decision-meta.model-components"
 
-import * as t from "@synthesis/decision-framework/decisions/1.decision-model/decision-meta.model"
+import * as t from "@aelastics/synthesis/decision-framework/decisions/1.decision-model/decision-meta.model"
 
 /**
  * Design space of the Rel->DDL text generation. One global (model-wide)

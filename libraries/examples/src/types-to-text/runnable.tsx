@@ -1,8 +1,8 @@
 /** @jsx createExprNode */
 import type { Runnable, RunResult } from "@synthesis/runner";
-import { Context, createExprNode } from "@synthesis/jsx-runtime";
-import { ModelStore } from "@synthesis/engine";
-import { TypeModel } from "@synthesis/standard-metamodels/types-metamodel/components";
+import { Context, createExprNode } from "@aelastics/synthesis/jsx-runtime";
+import { ModelStore } from "@aelastics/synthesis/engine";
+import { TypeModel } from "@aelastics/synthesis/metamodels/types/components";
 
 import { Types2TextModelTransformations } from "./types2text.model-transformation";
 

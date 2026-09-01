@@ -1,19 +1,19 @@
 /** @jsx createExprNode */
 
-import { createExprNode } from "@synthesis/jsx-runtime"
-import { ExprNode } from "@synthesis/jsx-runtime"
-import { ModelStore } from "@synthesis/engine"
-import { Model, Element } from "@synthesis/jsx-runtime"
+import { createExprNode } from "@aelastics/synthesis/jsx-runtime"
+import { ExprNode } from "@aelastics/synthesis/jsx-runtime"
+import { ModelStore } from "@aelastics/synthesis/engine"
+import { Model, Element } from "@aelastics/synthesis/jsx-runtime"
 
-import { ElementIssue, GlobalIssue, Option } from "@synthesis/decision-framework/decisions/1.decision-model/decision-meta.model-components"
-import { BindingModel } from "@synthesis/decision-framework/decisions/2.binding-model/binding-meta.model-components"
+import { ElementIssue, GlobalIssue, Option } from "@aelastics/synthesis/decision-framework/decisions/1.decision-model/decision-meta.model-components"
+import { BindingModel } from "@aelastics/synthesis/decision-framework/decisions/2.binding-model/binding-meta.model-components"
 import {
   ElementChoice,
   Choice,
   ConfigurationModel,
   GlobalChoice,
-} from "@synthesis/decision-framework/decisions/3.configuration-model/configuration-meta.model-components"
-import * as cm from "@synthesis/decision-framework/decisions/3.configuration-model/configuration-meta.model"
+} from "@aelastics/synthesis/decision-framework/decisions/3.configuration-model/configuration-meta.model-components"
+import * as cm from "@aelastics/synthesis/decision-framework/decisions/3.configuration-model/configuration-meta.model"
 
 /**
  * Configuration model for the Persons EER source. Selects:

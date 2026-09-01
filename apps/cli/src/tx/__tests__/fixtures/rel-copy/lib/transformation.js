@@ -9,8 +9,8 @@
  * directly and abstractM2M provides transform(), trace handling, and the
  * serialized target JSX the CLI persists.
  */
-import { createExprNode } from '@synthesis/jsx-runtime'
-import { abstractM2M } from '@synthesis/engine'
+import { createExprNode } from '@aelastics/synthesis/jsx-runtime'
+import { abstractM2M } from '@aelastics/synthesis/engine'
 import * as rmT from '@synthesis/standard-metamodels/relational/model-legacy'
 import { RelSchema, Table, Column } from '@synthesis/standard-metamodels/relational/components-legacy'
 

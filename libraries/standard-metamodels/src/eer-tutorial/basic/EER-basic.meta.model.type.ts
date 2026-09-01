@@ -7,7 +7,7 @@
  */
 import * as t from "@aelastics/types"
 
-import { ModelElement, Model } from "@synthesis/metamodel-core"
+import { ModelElement, Model } from "@aelastics/synthesis/metamodel-core"
 
 export const EERTutorialBasic_TypeSchema = t.schema("EERTutorialBasicSchema")
 

@@ -34,22 +34,37 @@ Run after every stage; a stage is done only when all pass.
 
 ### Stage 1: physical consolidation of @aelastics/synthesis
 Goal: one package, everything compiles, behavior identical. Consumer
-imports are rewritten mechanically to the temporary root barrel; the
-namespaced surface comes in stage 2.
-- [ ] create libraries/synthesis with src/jsx-runtime/, src/metamodel-core/,
+imports are rewritten mechanically to temporary compatibility subpaths
+that mirror the pre-merge package layout (./jsx-runtime, ./metamodel-core,
+./engine, ./decision-framework, ./metamodels/types); the final namespaced
+surface comes in stage 2. Compatibility subpaths were chosen over a root
+barrel because the schema `Model` and the JSX `Model` collide at a root,
+and prefix replacement over subpaths is collision-free.
+- [x] create libraries/synthesis with src/jsx-runtime/, src/metamodel-core/,
       src/engine/, src/decision-framework/, src/metamodels/types/ moved from
       the five source packages (git mv to preserve history)
-- [ ] temporary root barrel re-exporting the union of the old barrels
-      (excluding the colliding schema `Model`, reachable via a named export
-      until stage 2)
-- [ ] merge tsconfig/jest/heft config; keep `.testx` files excluded as today
-- [ ] move bpm (src + its two engine tests) into the engine test tree as a
-      fixture; delete relational v1/v2 variant files and the two disabled
-      `.testx` files that were their only consumers
-- [ ] rush.json: remove the five old projects, add libraries/synthesis
-- [ ] rewrite all imports of the five old package names across libraries/,
-      apps/, examples/, templates/ to `@aelastics/synthesis` (mechanical)
-- [ ] gates
+- [x] compatibility subpath exports and typesVersions mirroring the old
+      package layout; root index exports nothing
+- [x] merge tsconfig/jest/heft config; keep `.testx` files excluded as today
+- [x] move bpm (src + its two engine tests) into the engine test tree as a
+      fixture (src/engine/test/bpm-metamodel); delete relational v1/v2
+      variant files and the two disabled `.testx` files that were their only
+      consumers; rewire the relational barrel and `./relational/model` to
+      the surviving (legacy) files, keeping the model-legacy and
+      components-legacy subpaths temporarily; the engine's ModelStore test
+      fixtures now use the internal bpm metamodel instead of eer, so the
+      merged library has no domain-metamodel dependency
+- [x] rush.json: remove the four old projects, add libraries/synthesis
+- [x] rewrite all imports of the old package names across libraries/,
+      apps/, examples/, templates/ to the compatibility subpaths
+      (three parallel subagents on disjoint trees; verified by
+      fixed-string sweeps). Includes the CLI emit sites (generated models
+      now import @aelastics/synthesis/jsx-runtime, generated configuration
+      models the decision-framework compatibility paths) and a
+      deriveMetamodel extension so @aelastics/synthesis/metamodels/* still
+      counts as a metamodel while other @aelastics/* imports are support
+      packages
+- [x] gates
 
 ### Stage 2: the namespaced export surface
 - [ ] add subpath exports: ./jsx, ./metamodel, ./store, ./m2m, ./m2t,
@@ -135,3 +150,14 @@ import rewrites fan out safely to subagents by directory.
 ## Stage log
 
 - 2026-09-01: branch and worktree created; agreement recorded (stage 0).
+- 2026-09-01: stage 1 complete. Physical consolidation done by hand
+  (skeleton, git mv, rush.json), import rewrites by three parallel
+  subagents on disjoint trees, verified by fixed-string sweeps plus one
+  straggler fixed in apps/cli/src/tx/decisions.ts. Gates green: rush
+  build; CLI 441 tests, 86 smoke; all 9 example/template smokes; docs
+  built within rush build. Notable: the merged library has no
+  domain-metamodel dependency (ModelStore test fixtures rewired to the
+  internal bpm metamodel); eer-to-rel-with-decisions in the retiring
+  libraries/examples was adapted from the deleted v2 relational variant
+  to the surviving content, which diminishes its FK demonstration; that
+  package retires in stage 3, so no action.

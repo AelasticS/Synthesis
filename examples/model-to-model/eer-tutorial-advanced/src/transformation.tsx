@@ -9,10 +9,10 @@
  * relationship logic is still the plain conditional of Part 1; Part 3
  * turns that one into a configuration-based rule.
  */
-import { createExprNode } from '@synthesis/jsx-runtime'
-import type { ExprNode } from '@synthesis/jsx-runtime'
-import { abstractM2M, E2E, SpecPoint, SpecOption } from '@synthesis/engine'
-import type { ModelStore } from '@synthesis/engine'
+import { createExprNode } from '@aelastics/synthesis/jsx-runtime'
+import type { ExprNode } from '@aelastics/synthesis/jsx-runtime'
+import { abstractM2M, E2E, SpecPoint, SpecOption } from '@aelastics/synthesis/engine'
+import type { ModelStore } from '@aelastics/synthesis/engine'
 import * as em from '@synthesis/standard-metamodels/eer-tutorial/advanced/model'
 import * as rmT from '@synthesis/standard-metamodels/rel-tutorial/model'
 import { RelSchema, Table, Column } from '@synthesis/standard-metamodels/rel-tutorial/components'

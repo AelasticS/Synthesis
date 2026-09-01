@@ -18,10 +18,10 @@
  * transformation produces can be read without following a rule anywhere
  * else.
  */
-import { createExprNode } from '@synthesis/jsx-runtime'
-import { abstractM2M, M2T, Doc, Sec, P } from '@synthesis/engine'
-import type { ModelStore } from '@synthesis/engine'
-import * as m2tmm from '@synthesis/engine'
+import { createExprNode } from '@aelastics/synthesis/jsx-runtime'
+import { abstractM2M, M2T, Doc, Sec, P } from '@aelastics/synthesis/engine'
+import type { ModelStore } from '@aelastics/synthesis/engine'
+import * as m2tmm from '@aelastics/synthesis/engine'
 import * as rmT from '@synthesis/standard-metamodels/rel-tutorial/model'
 
 /** One foreign key: the column that points, and the column it points at. */

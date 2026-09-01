@@ -13,13 +13,13 @@
  * before this model in the order the manifest's `parts` block lists
  * them.
  */
-import { createExprNode } from '@synthesis/jsx-runtime'
-import type { ExprNode } from '@synthesis/jsx-runtime'
-import type { ModelStore } from '@synthesis/engine'
-import { Model } from '@synthesis/jsx-runtime'
-import { BindingModel } from '@synthesis/decision-framework/decisions/2.binding-model/binding-meta.model-components'
-import type * as t from '@synthesis/decision-framework/decisions/2.binding-model/binding-meta.model'
-import { DecisionModel } from '@synthesis/decision-framework/decisions/1.decision-model/decision-meta.model-components'
+import { createExprNode } from '@aelastics/synthesis/jsx-runtime'
+import type { ExprNode } from '@aelastics/synthesis/jsx-runtime'
+import type { ModelStore } from '@aelastics/synthesis/engine'
+import { Model } from '@aelastics/synthesis/jsx-runtime'
+import { BindingModel } from '@aelastics/synthesis/decision-framework/decisions/2.binding-model/binding-meta.model-components'
+import type * as t from '@aelastics/synthesis/decision-framework/decisions/2.binding-model/binding-meta.model'
+import { DecisionModel } from '@aelastics/synthesis/decision-framework/decisions/1.decision-model/decision-meta.model-components'
 
 export const RelTutorialSqlBindings = (store: ModelStore): ExprNode<t.IBindingModel> => (
   <BindingModel

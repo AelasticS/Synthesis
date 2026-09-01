@@ -11,8 +11,8 @@
  * configuration does not choose explicitly. It has to agree with the
  * @Default() decorator in transformation.tsx.
  */
-import { createExprNode } from '@synthesis/jsx-runtime';
-import { DecisionModel, ElementIssue, Option, SimpleOption, } from '@synthesis/decision-framework/decisions/1.decision-model/decision-meta.model-components';
+import { createExprNode } from '@aelastics/synthesis/jsx-runtime';
+import { DecisionModel, ElementIssue, Option, SimpleOption, } from '@aelastics/synthesis/decision-framework/decisions/1.decision-model/decision-meta.model-components';
 export const RelationshipDesignIssues = (store) => (createExprNode(DecisionModel, { name: "RelationshipDesign", description: "Design space for implementing EER relationships in a relational schema", store: store },
     createExprNode(ElementIssue, { name: "OneToManyStrategy", description: "How to implement a 1:N relationship" },
         createExprNode(Option, { name: "ForeignKey", description: "Put a foreign key column on the N side table", isDefault: true, optionType: createExprNode(SimpleOption, { name: "FK" }) }),

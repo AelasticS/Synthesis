@@ -1,7 +1,7 @@
 /** @jsx createExprNode */
-import type { ExprNode } from '@synthesis/jsx-runtime';
-import { abstractM2M } from '@synthesis/engine';
-import type { ModelStore } from '@synthesis/engine';
+import type { ExprNode } from '@aelastics/synthesis/jsx-runtime';
+import { abstractM2M } from '@aelastics/synthesis/engine';
+import type { ModelStore } from '@aelastics/synthesis/engine';
 import * as em from '@synthesis/standard-metamodels/eer-tutorial/basic/model';
 import * as rmT from '@synthesis/standard-metamodels/rel-tutorial/model';
 export declare class EER2RelBasicTransformation extends abstractM2M<em.IEERSchema, rmT.IRelSchema> {

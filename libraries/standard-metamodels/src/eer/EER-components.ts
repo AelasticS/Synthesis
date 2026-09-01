@@ -5,7 +5,7 @@ import {
   IStore,
   Template,
   WithRefProps,
-} from "@synthesis/jsx-runtime"
+} from "@aelastics/synthesis/jsx-runtime"
 
 export type IModelProps = WithRefProps<e.IEERSchema> & { store?: IStore };
 

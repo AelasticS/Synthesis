@@ -26,9 +26,9 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
  * once per run rather than once per table, so the binding model has no
  * per-element bindings at all.
  */
-import { createExprNode } from '@synthesis/jsx-runtime';
-import { M2M, M2T, Doc, Sec, P } from '@synthesis/engine';
-import { DecisionAwareM2M, VarPoint, VarOption, Default, Option } from '@synthesis/decision-framework';
+import { createExprNode } from '@aelastics/synthesis/jsx-runtime';
+import { M2M, M2T, Doc, Sec, P } from '@aelastics/synthesis/engine';
+import { DecisionAwareM2M, VarPoint, VarOption, Default, Option } from '@aelastics/synthesis/decision-framework';
 import * as rmT from '@synthesis/standard-metamodels/rel-tutorial/model';
 let RelToSqlConfigurableTransformation = class RelToSqlConfigurableTransformation extends DecisionAwareM2M {
     // A configuration-based transformation takes the run's configuration

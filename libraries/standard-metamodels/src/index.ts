@@ -4,6 +4,4 @@
 // Consumers should import from the dedicated subpaths:
 //   @synthesis/standard-metamodels/eer
 //   @synthesis/standard-metamodels/relational
-//   @synthesis/standard-metamodels/bpm
-//   @synthesis/standard-metamodels/types-metamodel
 export {}

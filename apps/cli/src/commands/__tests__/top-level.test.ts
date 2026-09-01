@@ -195,7 +195,7 @@ describe('doctor model checks', () => {
     writeFileSync(
       plainFile,
       [
-        "import { createExprNode } from '@synthesis/jsx-runtime'",
+        "import { createExprNode } from '@aelastics/synthesis/jsx-runtime'",
         "import { EERSchema } from '@synthesis/standard-metamodels/eer'",
         '',
         'export default () => null',

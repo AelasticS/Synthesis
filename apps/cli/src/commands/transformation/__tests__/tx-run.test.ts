@@ -535,8 +535,8 @@ describe('tx run --config with deleted choices (default materialization)', () =>
     const helper = [
       '/** @jsx createExprNode */',
       '',
-      "import { createExprNode } from '@synthesis/jsx-runtime'",
-      "import { DecisionModel, ModelIssue, Option, SimpleOption } from '@synthesis/decision-framework/decisions/1.decision-model/decision-meta.model-components'",
+      "import { createExprNode } from '@aelastics/synthesis/jsx-runtime'",
+      "import { DecisionModel, ModelIssue, Option, SimpleOption } from '@aelastics/synthesis/decision-framework/decisions/1.decision-model/decision-meta.model-components'",
       '',
       'export const $synth = {',
       "  kind: 'decision-model',",

@@ -23,8 +23,8 @@ import { mkdir, writeFile } from 'node:fs/promises'
 import { dirname, isAbsolute, join, resolve } from 'node:path'
 
 import { isSuccess } from '@aelastics/result'
-import { generate, ModelStore } from '@synthesis/engine'
-import { Context } from '@synthesis/jsx-runtime'
+import { generate, ModelStore } from '@aelastics/synthesis/engine'
+import { Context } from '@aelastics/synthesis/jsx-runtime'
 
 import type { WorkspaceConfig } from '../config/index.js'
 import { serializeSynthHeader } from '../models/header.js'
@@ -90,7 +90,7 @@ function buildModelModule(jsx: string, tags: string[], componentsSpec: string, h
   const rooted = jsx.replace(/^<([A-Z][A-Za-z0-9_$]*)/, '<$1 store={store}')
   return buildModelModuleSource(
     [
-      "import { createExprNode } from '@synthesis/jsx-runtime'",
+      "import { createExprNode } from '@aelastics/synthesis/jsx-runtime'",
       `import { ${tags.join(', ')} } from '${componentsSpec}'`
     ],
     serializeSynthHeader(header),

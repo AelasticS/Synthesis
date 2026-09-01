@@ -10,7 +10,7 @@
 // (which transitively load metamodel schemas with global side effects) are
 // only required when `.run()` is actually invoked. This prevents conflicts
 // between sibling examples that pull in different REL metamodel variants
-// (v1/legacy vs v2) at module-init time. The CLI walks this registry for
+// at module-init time. The CLI walks this registry for
 // list/describe without paying the load cost.
 
 import type { Runnable, RunResult } from "@synthesis/runner";
@@ -36,7 +36,7 @@ const metas: ReadonlyArray<RunnableMeta> = [
     id: "eer-to-rel-with-decisions",
     name: "EER to Relational (decision-aware, full mapping)",
     description:
-      "Defines a decision-aware M2M transformation from the EER metamodel to the Relational metamodel (v2), with variability points for the 1:N relationship strategy and other choices. Demonstrates @SpecPoint/@SpecOption and @VarPoint/@VarOption working together.",
+      "Defines a decision-aware M2M transformation from the EER metamodel to the Relational metamodel, with variability points for the 1:N relationship strategy and other choices. Demonstrates @SpecPoint/@SpecOption and @VarPoint/@VarOption working together.",
     load: () => require("./eer-to-rel-with-decisions/runnable").runnable as Runnable,
   },
   {

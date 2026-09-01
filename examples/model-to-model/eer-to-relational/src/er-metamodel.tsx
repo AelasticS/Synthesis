@@ -6,9 +6,9 @@
  * before the decision and binding models, so the binding model can
  * reference its concepts (Attribute, Relationship) by absolute path.
  */
-import { ModelStore } from "@synthesis/engine"
-import { ExprNode } from "@synthesis/jsx-runtime"
-import { createExprNode } from "@synthesis/jsx-runtime"
+import { ModelStore } from "@aelastics/synthesis/engine"
+import { ExprNode } from "@aelastics/synthesis/jsx-runtime"
+import { createExprNode } from "@aelastics/synthesis/jsx-runtime"
 import {
   InverseProperty,
   Property,
@@ -18,9 +18,9 @@ import {
   TypeObject,
   TypeOptional,
   TypeSubtype,
-} from "@synthesis/standard-metamodels/types-metamodel/components"
-import * as t from "@synthesis/standard-metamodels/types-metamodel/model"
-import { TypeBoolean, TypeNumber, TypeString } from "@synthesis/standard-metamodels/types-metamodel/predefined-types"
+} from "@aelastics/synthesis/metamodels/types/components"
+import * as t from "@aelastics/synthesis/metamodels/types/model"
+import { TypeBoolean, TypeNumber, TypeString } from "@aelastics/synthesis/metamodels/types/predefined-types"
 
 export const EERModel = (store: ModelStore): ExprNode<t.ITypeModel> => (
   <TypeModel name="ERMetamodel" store={store}>

@@ -5,7 +5,7 @@
  * before the decision and binding models, so the binding model can
  * reference its concepts (Attribute, Relationship) by absolute path.
  */
-import { ModelStore } from "@synthesis/engine";
-import { ExprNode } from "@synthesis/jsx-runtime";
-import * as t from "@synthesis/standard-metamodels/types-metamodel/model";
+import { ModelStore } from "@aelastics/synthesis/engine";
+import { ExprNode } from "@aelastics/synthesis/jsx-runtime";
+import * as t from "@aelastics/synthesis/metamodels/types/model";
 export declare const EERModel: (store: ModelStore) => ExprNode<t.ITypeModel>;

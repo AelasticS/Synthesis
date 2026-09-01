@@ -36,7 +36,11 @@ const IMPORT_SPECIFIER_RE = /^[ \t]*import\b([^'"]*)['"]([^'"]+)['"]/gm
 const TYPE_ONLY_CLAUSE_RE = /^\s*type\s(?!\s*from\s*$)/
 
 // Support packages every model imports for rendering; never its metamodel.
-const NON_METAMODEL_PACKAGES = ['@synthesis/jsx-runtime', '@synthesis/engine']
+const NON_METAMODEL_PACKAGES = ['@aelastics/synthesis/jsx-runtime', '@aelastics/synthesis/engine']
+
+// Metamodels bundled into the merged library live under this subpath; they
+// are metamodel candidates even though the rest of @aelastics/ is support.
+const MERGED_METAMODELS_PREFIX = '@aelastics/synthesis/metamodels/'
 
 function isBareSpecifier(specifier: string): boolean {
   return !specifier.startsWith('.') && !specifier.startsWith('/') && !specifier.startsWith('node:')
@@ -51,8 +55,9 @@ function isNonMetamodelPackage(specifier: string): boolean {
 
 /**
  * Derive the metamodel specifier from a model file's imports: the first
- * import resolving under @synthesis/standard-metamodels anywhere in the
- * imports wins; otherwise the first bare import that is not the jsx
+ * import resolving under @synthesis/standard-metamodels or under the
+ * merged library's @aelastics/synthesis/metamodels subpath anywhere in
+ * the imports wins; otherwise the first bare import that is not the jsx
  * runtime, the engine, or an @aelastics support package. Statement-level
  * `import type ...` declarations are erased at compile time and ignored
  * entirely. Returns null when the file has no candidate.
@@ -71,7 +76,8 @@ export function deriveMetamodel(fileText: string): string | null {
   const standard = bare.find(
     (specifier) =>
       specifier === '@synthesis/standard-metamodels' ||
-      specifier.startsWith('@synthesis/standard-metamodels/')
+      specifier.startsWith('@synthesis/standard-metamodels/') ||
+      specifier.startsWith(MERGED_METAMODELS_PREFIX)
   )
   if (standard !== undefined) {
     return standard

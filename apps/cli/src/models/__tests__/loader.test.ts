@@ -4,7 +4,7 @@ import { dirname, join, resolve } from 'node:path'
 import { createRequire } from 'node:module'
 import { fileURLToPath } from 'node:url'
 
-import { ModelStore } from '@synthesis/engine'
+import { ModelStore } from '@aelastics/synthesis/engine'
 
 import {
   ModelClosureError,
@@ -37,9 +37,10 @@ describe('transpileModel', () => {
     expect(existsSync(outPath)).toBe(true)
 
     const text = readFileSync(outPath, 'utf8')
-    // No bare metamodel specifier may remain: a bundled copy of a metamodel
-    // package would break aelastics type identity with the CLI process.
-    expect(text).not.toMatch(/from\s*["']@synthesis\//)
+    // No bare specifier from either workspace scope may remain: a bundled
+    // copy of a metamodel or support package would break aelastics type
+    // identity with the CLI process.
+    expect(text).not.toMatch(/from\s*["']@(?:synthesis|aelastics)\//)
     const eerModulePath = testRequire.resolve('@synthesis/standard-metamodels/eer')
     expect(text).toContain(eerModulePath)
   })
