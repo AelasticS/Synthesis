@@ -13,33 +13,50 @@ demonstrates and how to run it. Every example is smoke tested through
 the real CLI in CI, so the catalog stays executable truth rather than
 prose.
 
-## Tutorial companions
+Packages are grouped by suite, because that is where metamodels are
+shared: every suite owns its metamodels in a `metamodels/` folder, and
+its examples depend on them like any other dependency. A metamodel
+package owns all its facets under one convention: the bare package
+exports the JSX components, `/model` the type schemas, and `/as-model`
+the metamodel-as-model factory that manifests reference in `parts`.
 
-Each part of both tutorials has its own complete package, which is the
-finished state of that part.
+## The tutorial suite
+
+Each part of both tutorials has its own complete package under
+`examples/tutorial/`, which is the finished state of that part. All six
+companions pivot on `rel-tutorial-metamodel`: the model-to-model parts
+target it, and the model-to-text parts read from it. The suite's
+`metamodels/` folder holds `eer-tutorial-metamodel` (the teaching EER
+stages, `basic` and `advanced`) and `rel-tutorial-metamodel`.
 
 From the [model-to-model tutorial](../tutorial/model-to-model/index.md):
 
 | Example | Kind | What it shows |
 | --- | --- | --- |
-| `examples/model-to-model/eer-tutorial-basic` | m2m | Part 1: a simple EER to relational transformation with fixed logic. |
-| `examples/model-to-model/eer-tutorial-advanced` | m2m | Part 2: the entity rule specialized per entity subtype with `@SpecPoint` and `@SpecOption`. |
-| `examples/model-to-model/eer-tutorial-configuration-based` | m2m | Part 3: the relationship mapping decided by a configuration model. |
+| `examples/tutorial/eer-tutorial-basic` | m2m | Part 1: a simple EER to relational transformation with fixed logic. |
+| `examples/tutorial/eer-tutorial-advanced` | m2m | Part 2: the entity rule specialized per entity subtype with `@SpecPoint` and `@SpecOption`. |
+| `examples/tutorial/eer-tutorial-configuration-based` | m2m | Part 3: the relationship mapping decided by a configuration model. |
 
 From the [model-to-text tutorial](../tutorial/model-to-text/index.md):
 
 | Example | Kind | What it shows |
 | --- | --- | --- |
-| `examples/model-to-text/sql-tutorial-basic` | m2t | Part 1: a relational schema becomes one SQL DDL file. |
-| `examples/model-to-text/sql-tutorial-structured` | m2t | Part 2: named sections, and output split across two files so constraints are applied after the tables exist. |
-| `examples/model-to-text/sql-tutorial-configuration-based` | m2t | Part 3: the file layout and identifier quoting chosen by configuration. |
+| `examples/tutorial/sql-tutorial-basic` | m2t | Part 1: a relational schema becomes one SQL DDL file. |
+| `examples/tutorial/sql-tutorial-structured` | m2t | Part 2: named sections, and output split across two files so constraints are applied after the tables exist. |
+| `examples/tutorial/sql-tutorial-configuration-based` | m2t | Part 3: the file layout and identifier quoting chosen by configuration. |
 
-## Full examples
+## The full-example suite
+
+Larger packages under `examples/eer-to-sql/` that stand on their own
+rather than teaching one concept at a time. The two form a chain:
+`eer-to-relational` produces exactly what `rel-to-sql-ddl` consumes.
+The suite's `metamodels/` folder holds `eer-metamodel` (the full EER
+metamodel) and `relational-metamodel` (the full relational one).
 
 | Example | Kind | What it shows |
 | --- | --- | --- |
-| `examples/model-to-model/eer-to-relational` | m2m | A configuration-based transformation over the full EER metamodel: decision model, binding model, manifest `parts`, and configurations. |
-| `examples/model-to-text/rel-to-sql-ddl` | m2t | Text generation: a relational schema becomes a SQL DDL file, with one global issue (identifier quoting). |
+| `examples/eer-to-sql/eer-to-relational` | m2m | A configuration-based transformation over the full EER metamodel: decision model, binding model, manifest `parts`, and configurations. |
+| `examples/eer-to-sql/rel-to-sql-ddl` | m2t | Text generation: a relational schema becomes a SQL DDL file, with one global issue (identifier quoting). |
 
 ## Running an example
 
@@ -47,7 +64,7 @@ Every example follows the same loop, spelled out in its README. For the
 Part 1 companion:
 
 ```bash
-cd examples/model-to-model/eer-tutorial-basic
+cd examples/tutorial/eer-tutorial-basic
 
 synth init
 synth namespace mk demo
@@ -62,8 +79,14 @@ synth model show demo/library-rel
 
 - `synth.json` at the package root is the transformation manifest, the
   only supported location.
-- Manifest `entry` and `parts` point into `dist/` (the `tsc` output)
-  with package-relative paths; `files` ships `dist` and `synth.json`.
+- Manifest `entry` points into `dist/` (the `tsc` output) with a
+  package-relative path; `files` ships `dist` and `synth.json`. In
+  `parts`, the transformation's own decision and binding models are
+  `dist/` paths too, while metamodel-as-model entries are the metamodel
+  packages' `as-model` subpaths.
+- Metamodel packages are declared as ordinary dependencies of the
+  examples that use them, which is how the CLI resolves them at run
+  time.
 - Sample input models live under `sample/`, importable with
   `synth model import`.
 - Each example's `test` script runs the shared smoke harness

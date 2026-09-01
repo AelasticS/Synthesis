@@ -5,12 +5,12 @@ sidebar_position: 3
 # Quick Start
 
 The session below goes from an empty workspace to generated SQL. It assumes
-`synth` is [installed](./installation.md). The two transformation packages are
-placeholders: `synth transformation install` accepts any npm name, git URL,
-local directory, or tarball that contains a transformation package (see
+`synth` is [installed](./installation.md). `synth transformation install`
+takes a local directory containing a built transformation package (see
 [Packaging Transformations](../../developer-guide/guides/packaging-transformations.md));
-here `eer-to-relational` (model-to-model) and `rel-to-sql-ddl`
-(model-to-text) are assumed to be installable from local directories.
+the two used here, `eer-to-relational` (model-to-model) and `rel-to-sql-ddl`
+(model-to-text), ship in the repository under `examples/eer-to-sql/`, and
+any built example package installs the same way.
 
 ```bash
 # Create the workspace at ~/.synth

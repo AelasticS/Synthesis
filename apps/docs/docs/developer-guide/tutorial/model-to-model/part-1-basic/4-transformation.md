@@ -6,7 +6,7 @@ sidebar_position: 4
 
 Now the mapping itself. The whole transformation is one class in
 `src/transformation.tsx`, and every listing below is taken from
-`examples/model-to-model/eer-tutorial-basic/src/transformation.tsx`.
+`examples/tutorial/eer-tutorial-basic/src/transformation.tsx`.
 
 The file opens the way every JSX authoring file does, with the pragma
 and the imports:
@@ -14,18 +14,18 @@ and the imports:
 ```tsx
 /** @jsx createExprNode */
 
-import { createExprNode } from '@synthesis/jsx-runtime'
-import type { ExprNode } from '@synthesis/jsx-runtime'
-import { abstractM2M } from '@synthesis/engine'
-import type { ModelStore } from '@synthesis/engine'
-import * as em from '@synthesis/standard-metamodels/eer-tutorial/basic/model'
-import * as rmT from '@synthesis/standard-metamodels/rel-tutorial/model'
-import { RelSchema, Table, Column } from '@synthesis/standard-metamodels/rel-tutorial/components'
+import { createExprNode } from '@aelastics/synthesis/jsx'
+import type { ExprNode } from '@aelastics/synthesis/jsx'
+import { abstractM2M } from '@aelastics/synthesis/m2m'
+import type { ModelStore } from '@aelastics/synthesis/store'
+import * as em from 'eer-tutorial-metamodel/basic/model'
+import * as rmT from 'rel-tutorial-metamodel/model'
+import { RelSchema, Table, Column } from 'rel-tutorial-metamodel'
 ```
 
 Notice the asymmetry, and that it is exactly the asymmetry of a
 transformation. From the **source** metamodel it imports only the
-`model` namespace: `em` gives the interfaces to type against and the
+`/model` subpath: `em` gives the interfaces to type against and the
 type objects to test elements with. From the **target** metamodel it
 imports both, `rmT` for the interfaces and the tags for building. You
 read the source and you write the target, so only the target needs JSX

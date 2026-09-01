@@ -8,38 +8,42 @@ This page explains how to take a transformation you have written (see
 [Writing Transformations](./writing-transformations.md)) and turn it
 into a package others can install with `synth transformation install`.
 
-A transformation package is npm-compatible (`transformation install`
-accepts npm names, git URLs, local directories, and `.tgz` tarballs) plus a
+A transformation package is an ordinary npm-compatible package
+(`transformation install` takes a local package directory) plus a
 Synthesis **manifest** that declares everything the CLI needs to discover,
 type-check, and run the transformation without loading code.
 
 ## The manifest
 
-The manifest is a JSON object. Here is the manifest of an EER-to-relational
-model-to-model transformation, as installed by the CLI's own test suite:
+The manifest is a JSON object. Here is the manifest of the
+`eer-to-relational` example (`examples/eer-to-sql/eer-to-relational`),
+a configuration-based EER-to-relational model-to-model transformation:
 
 ```json
 {
   "kind": "m2m",
-  "entry": "./lib/transformation.js",
+  "entry": "./dist/transformation.js",
   "exportName": "EER2RelDomainWithDecisionTransformation",
   "source": {
-    "metamodel": "@synthesis/standard-metamodels/eer"
+    "metamodel": "eer-metamodel"
   },
   "target": {
-    "metamodel": "@synthesis/standard-metamodels/relational",
-    "components": "@synthesis/standard-metamodels/relational/components-legacy"
+    "metamodel": "relational-metamodel",
+    "components": "relational-metamodel"
   },
   "parts": {
     "metamodels": [
-      { "module": "@synthesis/examples/lib/eer-to-rel-small/er-metamodel.js", "exportName": "EERModel" }
+      {
+        "module": "eer-metamodel/as-model",
+        "exportName": "EERModel"
+      }
     ],
     "decisionModel": {
-      "module": "@synthesis/examples/lib/eer-to-rel-small/02-decision-model.js",
+      "module": "./dist/decision-model.js",
       "exportName": "RelationSchemaDesignIssues"
     },
     "bindingModel": {
-      "module": "@synthesis/examples/lib/eer-to-rel-small/03-binding-model.js",
+      "module": "./dist/binding-model.js",
       "exportName": "ER_Bindings"
     }
   }
@@ -51,12 +55,12 @@ model-to-model transformation, as installed by the CLI's own test suite:
 | Field | Type | Purpose |
 |---|---|---|
 | `kind` | `"m2m"` or `"m2t"` | Model-to-model or model-to-text. Decides the whole run shape (`--out` vs `--out-dir`); never guessed from the command name. |
-| `entry` | module specifier | The module exporting the transformation class, package-relative (`./lib/transformation.js`) or a bare package specifier. |
+| `entry` | module specifier | The module exporting the transformation class, package-relative (`./dist/transformation.js`) or a bare package specifier. |
 | `exportName` | string | Named export of the transformation class inside `entry`. |
-| `source.metamodel` | string | Metamodel the input model must instantiate; checked against the input's `$synth` header before running, and used for chain type-checking and completion filtering. |
-| `target.metamodel` | string | Metamodel of the result (`"text"` for m2t). |
-| `target.components` | module specifier | m2m only: the JSX component module used to write the result model back as a workspace `.tsx` file. Required for an m2m result to be written. |
-| `parts.metamodels` | array of `{ module, exportName }` | The package's own metamodel module(s), registered before rendering. |
+| `source.metamodel` | string | The source metamodel package's specifier. The input model must instantiate it; checked against the input's `$synth` header before running, and used for chain type-checking and completion filtering. |
+| `target.metamodel` | string | The target metamodel package's specifier (`"text"` for m2t). |
+| `target.components` | module specifier | m2m only: the JSX component module used to write the result model back as a workspace `.tsx` file. By convention this is the target metamodel package itself, whose bare specifier exports the components flat. Required for an m2m result to be written. |
+| `parts.metamodels` | array of `{ module, exportName }` | The metamodel-as-model module(s), rendered into the store before the decision and binding models. By convention a metamodel package exports its own under the `as-model` subpath (`eer-metamodel/as-model`). |
 | `parts.decisionModel` | `{ module, exportName }` | The decision model declaring the transformation's open issues, options, and defaults. |
 | `parts.bindingModel` | `{ module, exportName }` | The binding model attaching those issues to source-model element types. |
 | `name` | string | Optional override; otherwise the package.json `name` is the transformation's name. |
@@ -81,7 +85,29 @@ remember to include it in `package.json`'s `files` list.
 `transformation install` validates the manifest with precise per-field
 errors and refuses packages without a valid one. The modules the manifest
 names (`entry`, `parts.*`) are resolved and imported when the transformation
-actually runs.
+actually runs: package-relative paths against the installed package
+directory, bare specifiers through the CLI's resolver.
+
+## Metamodels are dependencies
+
+Every metamodel a transformation names, in its manifest or in its code,
+must be an importable package; the tutorial's
+[source metamodel page](../tutorial/model-to-model/part-1-basic/1-source-metamodel.md#why-a-metamodel-must-be-an-importable-package)
+explains why. When the CLI runs an installed transformation, it
+resolves each bare specifier against its own installation first, so
+framework packages keep their single module instance, and falls back
+to the installed transformation packages' own dependencies. Shipping
+the metamodel package as an ordinary dependency of the transformation
+is therefore the normal way to distribute one: installing the
+transformation brings the metamodel with it, and every importer in a
+run shares one module instance, which is what keeps aelastics type
+identity intact.
+
+The manifest's metamodel strings (`source.metamodel`,
+`target.metamodel`, `parts.metamodels[].module`) are those package
+specifiers. They are also the identities the chain type-check
+compares, which is why two transformations chain only when one's
+target names the same metamodel package as the other's source.
 
 ## Project layout
 
@@ -132,14 +158,12 @@ synth transformation publish
 
 ## Install resolution
 
-`synth transformation install <package>` accepts any of:
+`synth transformation install <dir>` takes a **local package
+directory**, built and ready to load:
 
-| Source | Example |
-|---|---|
-| Published npm package | `synth transformation install @aelastics/eer-to-relational` |
-| Git URL | `synth transformation install git+https://github.com/user/tx.git` |
-| Local directory | `synth transformation install ./my-transformation` |
-| Local tarball | `synth transformation install ./my-transformation-0.1.0.tgz` |
+```bash
+synth transformation install ./my-transformation
+```
 
 After install, the package lands under `<workspace>/transformations/<name>/`
 with its bundled dependencies; the workspace `config.json` records the

@@ -26,7 +26,7 @@ workarounds for all of them; none blocks the cli-v0.1.0 release.
   (`apps/cli/src/tx/config-model.ts`). An engine `serializeModel` API
   should cover configuration models too (emit `$refByName` references for
   cross-model links instead of inlining).
-- **Typed DanglingReferenceError in `@synthesis/jsx-runtime`**: the CLI
+- **Typed DanglingReferenceError in the JSX runtime (`@aelastics/synthesis/jsx`)**: the CLI
   classifies missing-dependency render failures by matching the engine's
   error message text; a typed error carrying the missing name as data
   would make that robust.
@@ -36,7 +36,7 @@ workarounds for all of them; none blocks the cli-v0.1.0 release.
   but within a model every non-Model concept shares one flat name scope:
   the renderer pushes only Model nodes onto the namespace stack (the
   Namespace branch in `ExprNode.render` is commented out,
-  `jsx-runtime/src/element.ts` ~336), and no standard-metamodel container
+  `libraries/synthesis/src/jsx-runtime/element.ts` ~336), and no domain-metamodel container
   (EER `Entity`/`Submodel`, relational `Table`) is Namespace-typed. Hence
   attribute/column names must be unique per model, which is the reason
   for table-qualified naming conventions. Activating nesting is a
@@ -46,6 +46,16 @@ workarounds for all of them; none blocks the cli-v0.1.0 release.
   or absolute paths; the resolver already understands the stack and
   `..`), binding-model element references, and the CLI's element-name
   resolution in configuration checks.
+
+- **Production dedupe of framework packages for installed transformations.**
+  The loader's fallback resolution keeps one module instance per bare
+  specifier within a process, but an end-user npm installation that
+  physically vendors its own copy of `@aelastics/synthesis` inside an
+  installed transformation would still load framework schemas natively
+  from that copy when a fallback-resolved module imports them. In the
+  monorepo and with linked installs the realpaths converge, so this is a
+  production-packaging follow-up: `transformation install` should verify
+  (or rewire) that framework dependencies dedupe to the CLI's instances.
 
 ## CLI-side, consciously postponed
 

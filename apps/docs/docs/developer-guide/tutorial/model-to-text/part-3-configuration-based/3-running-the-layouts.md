@@ -38,12 +38,12 @@ Transformation: sql-tutorial-configuration-based
   version: 0.1.0
   description: Model-to-text tutorial Part 3 companion: output layout and identifier quoting decided by a configuration model
   kind: m2t
-  source metamodel: @synthesis/standard-metamodels/rel-tutorial
+  source metamodel: rel-tutorial-metamodel
   target metamodel: text
   variability: yes
   entry: ./dist/transformation.js (export: RelToSqlConfigurableTransformation)
   parts:
-    metamodel: ./dist/rel-metamodel.js (export: RelTutorialMetamodel)
+    metamodel: rel-tutorial-metamodel/as-model (export: RelTutorialMetamodel)
     decision model: ./dist/decision-model.js (export: SqlGenerationIssues)
     binding model: ./dist/binding-model.js (export: RelTutorialSqlBindings)
   author: Sinisa Neskovic

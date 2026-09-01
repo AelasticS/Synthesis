@@ -12,9 +12,9 @@ metamodel's elements. So this is where Part 1 starts.
 The source metamodel here is the **basic tutorial EER metamodel**. It
 carries exactly the concepts this part needs and nothing more: entities
 with attributes over domains, and binary relationships with cardinality
-roles. It ships in the repository as
-`@synthesis/standard-metamodels/eer-tutorial/basic`, and its sources
-live in `libraries/standard-metamodels/src/eer-tutorial/basic/`. Read
+roles. It ships in the repository as the `eer-tutorial-metamodel`
+package, imported as `eer-tutorial-metamodel/basic`, and its sources
+live in `examples/tutorial/metamodels/eer-tutorial/src/basic/`. Read
 this page as if you were writing those two files yourself, because that
 is exactly what authoring a metamodel looks like.
 
@@ -39,12 +39,12 @@ TypeScript you write once per metamodel.
 ## Declaration one: the concepts as aelastics types
 
 Here is the complete type declaration, from
-`libraries/standard-metamodels/src/eer-tutorial/basic/EER-basic.meta.model.type.ts`:
+`examples/tutorial/metamodels/eer-tutorial/src/basic/EER-basic.meta.model.type.ts`:
 
 ```ts
 import * as t from "@aelastics/types"
 
-import { ModelElement, Model } from "@synthesis/metamodel-core"
+import { ModelElement, Model } from "@aelastics/synthesis/metamodel"
 
 export const EERTutorialBasic_TypeSchema = t.schema("EERTutorialBasicSchema")
 
@@ -120,7 +120,7 @@ last argument to every `t.subtype` call, and it is what makes the types
 resolvable by name later on.
 
 **`t.subtype` and the base types.** Every concept extends either
-`Model` or `ModelElement`, both from `@synthesis/metamodel-core`. Those
+`Model` or `ModelElement`, both from `@aelastics/synthesis/metamodel`. Those
 base types supply what all model elements have in common, `name` above
 all, which is why no concept here declares a `name` property of its
 own. `EERSchema` extends `Model` because it is the root container;
@@ -191,14 +191,14 @@ The types above cannot be written as JSX yet. That is the second file's
 job, `EER-basic-components.ts`, complete:
 
 ```ts
-import * as e from "./EER-basic.meta.model.type"
+import * as e from "./EER-basic.meta.model.type.js"
 import {
   CpxTemplate,
   ExprNode,
   IStore,
   Template,
   WithRefProps,
-} from "@synthesis/jsx-runtime"
+} from "@aelastics/synthesis/jsx"
 
 export type IModelProps = WithRefProps<e.IEERSchema> & { store?: IStore };
 
@@ -279,28 +279,37 @@ Two smaller points in the same listing:
 
 ## The package's entry point
 
-The two files are tied together by an `index.ts`:
+The two files are tied together by an `index.ts` and the package's
+subpath exports:
 
 ```ts
-export * from "./EER-basic-components"
-export * as components from "./EER-basic-components"
-export * as model from "./EER-basic.meta.model.type"
+// Basic tutorial EER metamodel (model-to-model tutorial, Part 1).
+// Package convention: "eer-tutorial-metamodel/basic" exports the JSX
+// template components flat. The data-type schemas live behind
+// "eer-tutorial-metamodel/basic/model" to avoid identifier clashes (e.g.
+// `EERSchema` is both an @aelastics/types Type and a JSX template).
+export * from "./EER-basic-components.js"
 ```
 
 The components are re-exported flat, so an author can write
 
 ```ts
-import { EERSchema, Entity, Attribute, Domain, Relationship, Role } from '@synthesis/standard-metamodels/eer-tutorial/basic'
+import { EERSchema, Entity, Attribute, Domain, Relationship, Role } from 'eer-tutorial-metamodel/basic'
 ```
 
-and get the JSX tags. The data types are exposed only under the `model`
-namespace:
+and get the JSX tags. The data types live behind the `/model` subpath,
+which the package's `exports` map points straight at the types file:
 
 ```ts
-import * as em from '@synthesis/standard-metamodels/eer-tutorial/basic/model'
+import * as em from 'eer-tutorial-metamodel/basic/model'
 ```
 
-The namespacing is not decoration. `EERSchema` is both an aelastics
+This is the convention every metamodel package in the repository
+follows, from the framework's internal metamodels to the example
+suites' domain metamodels: the flat subpath exports the JSX
+components, and `<subpath>/model` exports the type schemas.
+
+The split is not decoration. `EERSchema` is both an aelastics
 type and a JSX tag function, and the two would clash if both were
 exported flat from the same module. The transformation on page 4 uses
 both at once, the tags to build output and `em.Entity` to test source
@@ -308,29 +317,33 @@ element types, so it imports them under different names.
 
 ## Why a metamodel must be an importable package
 
-You may be wondering why the metamodel lives in a published package
+You may be wondering why the metamodel lives in a package of its own
 rather than in a folder next to the transformation. The answer is the
 single most useful thing to understand about how the CLI runs your
 code.
 
 When the CLI loads a workspace model, it transpiles the `.tsx` file and
 then does something specific with its imports: **every bare package
-specifier is resolved against the CLI's own installation and left
+specifier is resolved against the CLI's own installation first, then
+against the installed transformation packages' dependencies, and left
 external.** Only relative imports inside the model file are bundled.
 The loader in `apps/cli/src/models/loader.ts` says so in as many words:
 
 ```ts
 // Bare specifiers (packages and node builtins) are resolved against the
-// CLI's own node_modules and emitted as absolute-path externals. The
-// imported model therefore shares the exact module instances -- and with
-// them aelastics type/schema identity -- with the CLI process; bundling
-// copies of metamodel packages would break that identity. Relative imports
-// inside the model file are bundled as usual.
+// CLI's own node_modules first, then against installed transformation
+// packages, and emitted as absolute-path externals. The imported model
+// therefore shares the exact module instances -- and with them aelastics
+// type/schema identity -- with the CLI process and with every other
+// importer in this run; bundling copies of metamodel packages would break
+// that identity. Relative imports inside the model file are bundled as
+// usual.
 ```
 
 Transformation packages are loaded the same way: bare specifiers in the
-manifest's `entry` and `parts` are imported directly, so they resolve
-against the CLI installation and share its module registry.
+manifest's `entry` and `parts` route through the same resolver, and
+each specifier is resolved at most once per process, so every importer
+in a run shares one module instance.
 
 The consequence is the point. The source model, the transformation
 class, and the engine all end up holding *the same* aelastics type
@@ -345,20 +358,24 @@ type identity is how the system works:
 - Reference resolution, schema lookup, and validation all key off the
   same schema instance.
 
-A metamodel in an unimportable location cannot participate in that. So
-a metamodel is a package, resolvable by a bare specifier from the CLI
-installation, and it is named that way in model headers and in
-manifests. If the CLI cannot resolve one, it says so explicitly:
+A metamodel reached only through relative paths cannot participate in
+that: relative imports are bundled per transpiled module, so even two
+parts of one package would end up with private copies. So a metamodel
+is a package, resolvable by a bare specifier, and it is named that way
+in model headers and in manifests. If the CLI cannot resolve one, it
+says so explicitly:
 
 ```text
-Cannot resolve import '<specifier>' (imported from <file>).
-Package imports must be resolvable from the Synthesis CLI installation.
+Cannot resolve import '<specifier>'. Package imports must be resolvable
+from the Synthesis CLI installation or from an installed transformation package.
 ```
 
-For Part 1 this costs you nothing, because the tutorial metamodel is
-already published as part of `@synthesis/standard-metamodels`. When you
-author a metamodel of your own, publish it (or link it into the CLI's
-resolution scope) before you try to import a model that uses it.
+For Part 1 this costs you nothing. `eer-tutorial-metamodel` is a
+package in the tutorial suite's `metamodels/` folder, and the tutorial
+transformation declares it as an ordinary dependency, so installing the
+transformation brings the metamodel with it and the CLI resolves it
+from there. When you author a metamodel of your own, do the same: make
+it a package and ship it as a dependency of your transformation.
 
 ## Next
 

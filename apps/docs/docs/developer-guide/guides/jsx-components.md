@@ -12,7 +12,7 @@ Every file that uses JSX for model construction must declare the custom JSX prag
 
 ```typescript
 /** @jsx createExprNode */
-import { createExprNode } from '@synthesis/jsx-runtime'
+import { createExprNode } from '@aelastics/synthesis/jsx'
 ```
 
 This tells TypeScript to route JSX expressions through `createExprNode` instead of React's `createElement`. When you write `<Kernel name="Person">`, TypeScript compiles it into `createExprNode(Kernel, { name: "Person" })`, which calls your `Kernel` component function.
@@ -31,7 +31,7 @@ The pattern is similar to React. In React, you define a component function and t
 A component is a function that returns `new ExprNode(type, props, connectionInfo)`. The `connectionInfo` tells the framework which metamodel association to use when connecting this element to its parent in a JSX expression:
 
 ```typescript
-import { ExprNode, Template } from '@synthesis/jsx-runtime'
+import { ExprNode, Template } from '@aelastics/synthesis/jsx'
 import * as e from './EER.meta.model.type'
 
 export const Attribute: Template<e.IAttribute> = (props) => {
@@ -99,7 +99,7 @@ Some components are used both **nested** inside a structural parent (where a con
 For these cases, declare the connector propName **and** opt the component in to top-level placement using the `allowedAsTopLevelElement` helper:
 
 ```typescript
-import { allowedAsTopLevelElement, Element, Template } from '@synthesis/jsx-runtime'
+import { allowedAsTopLevelElement, Element, Template } from '@aelastics/synthesis/jsx'
 
 // Sequence can be nested in another Node (connects via 'children')
 // OR appear at the top of a Process/Model (no 'children' on Process; goes to model.elements)
@@ -167,7 +167,7 @@ The framework provides two main component signatures:
 
 ```typescript
 import * as e from './EER.meta.model.type'
-import { CpxTemplate, ExprNode, IStore, Template, WithRefProps } from '@synthesis/jsx-runtime'
+import { CpxTemplate, ExprNode, IStore, Template, WithRefProps } from '@aelastics/synthesis/jsx'
 
 export type IModelProps = WithRefProps<e.IEERSchema> & { store?: IStore }
 
@@ -214,7 +214,7 @@ The nesting directly mirrors the metamodel structure. `Domain` goes inside `Attr
 
 ```typescript
 import * as r from './REL.meta.model.type'
-import { CpxTemplate, ExprNode, IStore, Template, WithRefProps } from '@synthesis/jsx-runtime'
+import { CpxTemplate, ExprNode, IStore, Template, WithRefProps } from '@aelastics/synthesis/jsx'
 
 export type IModelProps = WithRefProps<r.IRelSchema> & { store?: IStore }
 

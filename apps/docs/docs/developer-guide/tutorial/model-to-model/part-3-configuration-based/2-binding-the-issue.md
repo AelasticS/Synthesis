@@ -29,9 +29,12 @@ the store. The real source metamodel is a TypeScript package of
 aelastics type objects, imported and compared by identity; there is
 nothing in the store for a reference to land on.
 
-So the package ships the concepts a second time, as a model. That is
-`src/eer-metamodel.tsx`, and its header states exactly what it is and
-what it is not:
+So the metamodel package ships its concepts a second time, as a model:
+the metamodel-as-model, its third facet next to the type schemas and
+the JSX components. It is exported as
+`eer-tutorial-metamodel/advanced/as-model`, its source is
+`examples/tutorial/metamodels/eer-tutorial/src/advanced/as-model.tsx`,
+and its header states exactly what it is and what it is not:
 
 ```tsx
 /**
@@ -42,9 +45,9 @@ what it is not:
  *
  * Only the concepts the binding model has to name are declared here.
  * The transformation itself works against the real metamodel package
- * (@synthesis/standard-metamodels/eer-tutorial/advanced); this model is
- * the vocabulary the decision machinery talks about, not a second
- * definition of the language.
+ * (eer-tutorial-metamodel/advanced); this model is the vocabulary the
+ * decision machinery talks about, not a second definition of the
+ * language.
  */
 ```
 
@@ -58,7 +61,7 @@ import {
   TypeArray,
   TypeModel,
   TypeObject,
-} from '@synthesis/standard-metamodels/types-metamodel/components'
+} from '@aelastics/synthesis/metamodels/types/components'
 ```
 
 The two concepts that matter to this binding are `Role`, because the

@@ -154,20 +154,21 @@ Execution notes (agreed shape, decided at execution time):
 - [x] gates
 
 ### Stage 6: docs and catalog
-- [ ] design/architecture.md rewritten for the new structure
-- [ ] developer-guide pages: new import specifiers and the new metamodel
-      rule (replace "a metamodel must be an @synthesis/standard-metamodels
-      subpath" with the metamodel-package rule)
-- [ ] the two `file=` fences follow the moved example paths; re-check the
-      line-pinned one (part-2-structured/2-multiple-documents.md pins
-      L40-L98 of sql-tutorial-structured's transformation)
-- [ ] examples/README.md rewritten for the suite layout (also fixes the
-      broken catalog links and removes the phantom higher-order row until
-      that example exists)
-- [ ] grep the whole repo for `@synthesis/` and `standard-metamodels`;
-      nothing may remain except historical design notes and CHANGELOG
-- [ ] CHANGELOG entry
-- [ ] gates, docs build last
+- [x] design/architecture.md rewritten for the new structure
+- [x] developer-guide pages: new import specifiers and the new metamodel
+      rule; user guide loses `synth example`; packaging guide stops
+      advertising npm/git/tarball install (local directory is the truth)
+- [x] the two `file=` fences follow the moved example paths; the pinned
+      one re-pinned to #L41-L99, verified in the built HTML to bracket
+      exactly the template method
+- [x] examples/README.md rewritten for the suite layout (broken catalog
+      links fixed, phantom higher-order row removed)
+- [x] repo grep: only historical design notes, CHANGELOG history, and
+      the untracked typedoc mirrors of the README remain (the mirrors
+      regenerate from the updated README on the next docs build)
+- [x] CHANGELOG entries (consolidation, metamodel ownership, resolver,
+      removals; historical Unreleased bullets reconciled to net state)
+- [x] gates, docs build green with the broken-link check
 
 ### Stage 7: merge
 - [ ] full gate run from clean state in the worktree
@@ -219,3 +220,7 @@ import rewrites fan out safely to subagents by directory.
   build, CLI 438 tests, 86 smoke, nine example/template smokes.
 - 2026-09-01: stage 5 complete. CLI renamed @aelastics/synthesis-cli,
   binary still synth. Gates green.
+- 2026-09-01: stage 6 complete. Docs site swept (42 files) with listings
+  reconciled against the real migrated example sources; architecture,
+  examples catalog, root README, CHANGELOG, engine-follow-ups updated;
+  docs build green including the broken-link check.

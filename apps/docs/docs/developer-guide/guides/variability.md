@@ -137,7 +137,7 @@ When each option's predicate is a single `Option(name)` reference (the common ca
 The configuration model is passed to the transformation constructor as the fourth type parameter of `DecisionAwareM2M`.
 
 ```typescript
-import * as cm from '@synthesis/decision-framework/decisions/3.configuration-model/configuration-meta.model'
+import * as cm from '@aelastics/synthesis/metamodels/configuration/model'
 
 @M2M()
 class EER2RelWithConfig
@@ -184,13 +184,14 @@ const mixedResult = new EER2RelWithConfig(store, {}, mixedConfig).transform(sour
 
 ```typescript
 /** @jsx createExprNode */
-import { createExprNode, ExprNode } from '@synthesis/jsx-runtime'
-import { E2E, M2M, ModelStore } from '@synthesis/engine'
-import { DecisionAwareM2M, VarPoint, VarOption, Default, Option } from '@synthesis/decision-framework'
+import { createExprNode, ExprNode } from '@aelastics/synthesis/jsx'
+import { E2E, M2M } from '@aelastics/synthesis/m2m'
+import type { ModelStore } from '@aelastics/synthesis/store'
+import { DecisionAwareM2M, VarPoint, VarOption, Default, Option } from '@aelastics/synthesis/variability'
 import * as et from './EER.meta.model.type'
 import * as rt from './REL.meta.model.type'
 import * as r from './REL.jsx-comps'
-import * as cm from '@synthesis/decision-framework/decisions/3.configuration-model/configuration-meta.model'
+import * as cm from '@aelastics/synthesis/metamodels/configuration/model'
 
 @M2M()
 class EER2RelWithConfig

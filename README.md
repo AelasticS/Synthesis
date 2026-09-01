@@ -39,23 +39,24 @@ Synthesis/
 │   ├── aelastics-result/      # Result/error handling utilities
 │   ├── aelastics-types/       # Runtime type system + transducers
 │   ├── aelastics-store/       # Reactive model store (MobX-based)
-│   ├── jsx-runtime/           # JSX runtime for model construction
-│   ├── metamodel-core/        # Repository / Model / ModelElement base types
-│   ├── standard-metamodels/   # Reusable metamodels (BPM, EER, REL, types)
-│   ├── engine/                # Transformation engine + ModelStore
-│   ├── runner/                # Transformation runner registry
-│   ├── decision-framework/    # Variability and design-decision support
-│   └── examples/              # End-to-end example pipelines
+│   └── synthesis/             # @aelastics/synthesis: JSX runtime, core
+│                              #   metamodel, model store, m2m and m2t
+│                              #   engines, configuration-based variability
 ├── apps/
-│   ├── cli/                   # synth CLI (oclif)
+│   ├── cli/                   # @aelastics/synthesis-cli: the synth CLI (oclif)
 │   └── docs/                  # Docusaurus documentation site
+├── examples/
+│   ├── tutorial/              # tutorial suite + its metamodel packages
+│   └── eer-to-sql/            # full-example suite + its metamodel packages
+├── templates/
+│   └── transformation-template/  # starter transformation package
 ├── common/                    # Rush shared configuration
 ├── .github/workflows/         # CI: docs deploy, CLI release
 └── rush.json                  # Rush workspace definition
 ```
 
-The package layering, dependency graph, and the rules behind them are
-documented in
+The package structure, the export surface of `@aelastics/synthesis`, and
+the rules behind them are documented in
 [design/architecture.md](https://github.com/AelasticS/Synthesis/blob/main/design/architecture.md).
 
 ## Contributing

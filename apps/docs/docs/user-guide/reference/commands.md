@@ -151,7 +151,7 @@ and binding model parts) without loading code.
 
 | Command | Description |
 |---|---|
-| `synth transformation install <package>` | Install from an npm name, git URL, local directory, or tarball; the manifest's claims are verified against the loaded transformation class. |
+| `synth transformation install <dir>` | Install from a local package directory; the manifest's claims are verified against the loaded transformation class. |
 | `synth transformation uninstall <name>` | Remove an installed transformation. Refused (exit 2) while any saved pipeline lists it as a step; update or `pipeline rm` those pipelines first. |
 | `synth transformation ls` | List installed transformations with versions. |
 | `synth transformation show <name>` | Print kind, source/target metamodels, and, for configuration-based transformations, every issue with its options and defaults (loaded from the package's decision model). |
@@ -270,21 +270,6 @@ stored consents. Every run names its own data. Full guide:
 | `synth pipeline show <name>` | Show every field of a pipeline. |
 | `synth pipeline rm <name>` | Delete a pipeline (nothing references pipelines, so no dependency check). |
 | `synth pipeline edit <name>` | Edit the JSON in `$EDITOR`; afterwards the file is re-validated like `pipeline mk` and problems are reported as warnings. |
-
-## Examples
-
-Bundled, self-contained showcases that run without any workspace content.
-
-| Command | Description |
-|---|---|
-| `synth example ls` | List the bundled examples. |
-| `synth example describe <id>` | Show full details of one example. |
-| `synth example run <id> [--out <dir>]` | Execute an example and write its artifacts to disk (default `./out/<id>`). |
-
-```bash
-synth example ls
-synth example run eer-to-rel-to-text --out ./generated
-```
 
 ## Shell completion
 

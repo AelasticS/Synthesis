@@ -6,8 +6,8 @@ sidebar_position: 2
 
 A transformation's signature has two halves. Page 1 covered the source
 half. The target half is a relational metamodel, and there is one thing
-to say about it before anything else: you do not author it. It ships in
-`@synthesis/standard-metamodels` and you consume it exactly as an
+to say about it before anything else: you do not author it. It ships as
+the `rel-tutorial-metamodel` package and you consume it exactly as an
 application developer consumes a library. What follows is a reading of
 somebody else's metamodel, which is a skill of its own.
 
@@ -17,9 +17,11 @@ models, workflow graphs), so they are written once and reused. Source
 metamodels tend to be domain-specific and are more often written by
 you.
 
-The one the tutorial targets is `rel-tutorial`, a simplified relational
-metamodel that carries only what the tutorial needs. Its sources live in
-`libraries/standard-metamodels/src/rel-tutorial/`, in the same three
+The one the tutorial targets is `rel-tutorial-metamodel`, a simplified
+relational metamodel that carries only what the tutorial needs. It is
+the pivot of the whole tutorial suite: the model-to-model parts target
+it, and the model-to-text parts read from it. Its sources live in
+`examples/tutorial/metamodels/rel-tutorial/src/`, in the same three
 files page 1 described on the source side: a types file
 (`REL-tutorial.meta.model.type.ts`), a components file
 (`REL-tutorial-components.ts`), and an `index.ts` tying them together.
@@ -29,12 +31,12 @@ omission is a choice rather than a shortcut.
 
 ## The concepts
 
-From `libraries/standard-metamodels/src/rel-tutorial/REL-tutorial.meta.model.type.ts`:
+From `examples/tutorial/metamodels/rel-tutorial/src/REL-tutorial.meta.model.type.ts`:
 
 ```ts
 import * as t from "@aelastics/types"
 
-import { ModelElement, Model } from "@synthesis/metamodel-core"
+import { ModelElement, Model } from "@aelastics/synthesis/metamodel"
 
 export const RelTutorial_TypeSchema = t.schema("RelTutorialSchema")
 
@@ -170,7 +172,8 @@ They belong to the same later stage as constraint naming, and none of
 the three tutorial parts has anything to say about them.
 
 All three are present in the full relational metamodel,
-`@synthesis/standard-metamodels/relational`, where `ForeignKey` and
+`relational-metamodel`, owned by the `eer-to-sql` example suite, where
+`ForeignKey` and
 `Index` are declared as concepts beside `Table` and `Column`, and a
 foreign key holds a list of columns rather than a single one. That is
 the metamodel the standalone `eer-to-relational` example names as its
@@ -204,18 +207,18 @@ that reason.
 
 ## The tag functions
 
-From `libraries/standard-metamodels/src/rel-tutorial/REL-tutorial-components.ts`,
+From `examples/tutorial/metamodels/rel-tutorial/src/REL-tutorial-components.ts`,
 complete:
 
 ```ts
-import * as r from "./REL-tutorial.meta.model.type"
+import * as r from "./REL-tutorial.meta.model.type.js"
 import {
   CpxTemplate,
   ExprNode,
   IStore,
   Template,
   WithRefProps,
-} from "@synthesis/jsx-runtime"
+} from "@aelastics/synthesis/jsx"
 
 export type IModelProps = WithRefProps<r.IRelSchema> & { store?: IStore };
 
@@ -256,11 +259,12 @@ it is calling exactly these functions.
 
 ## Import paths
 
-The metamodel is reached through two subpath exports:
+The metamodel is reached through the package convention page 1
+described:
 
 ```ts
-import * as rmT from '@synthesis/standard-metamodels/rel-tutorial/model'
-import { RelSchema, Table, Column } from '@synthesis/standard-metamodels/rel-tutorial/components'
+import * as rmT from 'rel-tutorial-metamodel/model'
+import { RelSchema, Table, Column } from 'rel-tutorial-metamodel'
 ```
 
 The first gives you the aelastics types and the derived interfaces
@@ -271,13 +275,12 @@ means one thing in each, and the package's `index.ts` says so:
 
 ```ts
 // Simplified relational metamodel for the developer-guide tutorial.
-// JSX template components are re-exported flat and under the `components`
-// namespace. The data-type model is exposed only under the `model`
-// namespace to avoid identifier clashes (e.g. `RelSchema` is both an
-// @aelastics/types Type and a JSX template).
-export * from "./REL-tutorial-components"
-export * as components from "./REL-tutorial-components"
-export * as model from "./REL-tutorial.meta.model.type"
+// Package convention: the bare specifier ("rel-tutorial-metamodel") exports
+// the JSX template components flat. The data-type schemas live behind
+// "rel-tutorial-metamodel/model" to avoid identifier clashes (e.g.
+// `RelSchema` is both an @aelastics/types Type and a JSX template), and
+// "rel-tutorial-metamodel/as-model" exports the metamodel-as-model factory.
+export * from "./REL-tutorial-components.js"
 ```
 
 ## What the manifest needs from it
@@ -287,8 +290,8 @@ entries do different jobs:
 
 ```json
 "target": {
-  "metamodel": "@synthesis/standard-metamodels/rel-tutorial",
-  "components": "@synthesis/standard-metamodels/rel-tutorial/components"
+  "metamodel": "rel-tutorial-metamodel",
+  "components": "rel-tutorial-metamodel"
 }
 ```
 
@@ -306,7 +309,7 @@ You can see the effect directly in the generated output on page 5,
 which opens with
 
 ```tsx
-import { Column, RelSchema, Table } from '@synthesis/standard-metamodels/rel-tutorial/components'
+import { Column, RelSchema, Table } from 'rel-tutorial-metamodel'
 ```
 
 That is `target.components` showing up in the artifact. Omit it and the

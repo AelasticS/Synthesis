@@ -11,11 +11,10 @@ compresses the same journey into a dozen commands; here every step is
 explained.
 
 Prerequisites: `synth` is [installed](./getting-started/installation.md). As in
-the Quick Start, the two transformation packages are placeholders:
-`synth transformation install` accepts any npm name, git URL, local
-directory, or tarball containing a transformation package; here
-`eer-to-relational` (model-to-model) and `rel-to-sql-ddl` (model-to-text)
-are assumed to be installable from local directories.
+the Quick Start, `synth transformation install` takes a local directory
+containing a built transformation package; the two used here,
+`eer-to-relational` (model-to-model) and `rel-to-sql-ddl`
+(model-to-text), ship in the repository under `examples/eer-to-sql/`.
 
 ## 1. Create the workspace
 

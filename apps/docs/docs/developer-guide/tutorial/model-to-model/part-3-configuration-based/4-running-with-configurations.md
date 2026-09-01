@@ -36,13 +36,13 @@ Transformation: eer-tutorial-configuration-based
   version: 0.1.0
   description: Tutorial Part 3 companion: EER to relational transformation whose 1:N relationship mapping is a configured decision
   kind: m2m
-  source metamodel: @synthesis/standard-metamodels/eer-tutorial/advanced
-  target metamodel: @synthesis/standard-metamodels/rel-tutorial
-  target components: @synthesis/standard-metamodels/rel-tutorial/components
+  source metamodel: eer-tutorial-metamodel/advanced
+  target metamodel: rel-tutorial-metamodel
+  target components: rel-tutorial-metamodel
   variability: yes
   entry: ./dist/transformation.js (export: EER2RelConfigurableTransformation)
   parts:
-    metamodel: ./dist/eer-metamodel.js (export: EERTutorialMetamodel)
+    metamodel: eer-tutorial-metamodel/advanced/as-model (export: EERTutorialMetamodel)
     decision model: ./dist/decision-model.js (export: RelationshipDesignIssues)
     binding model: ./dist/binding-model.js (export: EERTutorialBindings)
   author: Sinisa Neskovic

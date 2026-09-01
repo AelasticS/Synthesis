@@ -19,20 +19,20 @@ nonexistent element is caught rather than tolerated.
 
 Create `sample/library.tsx` in your package. Any location works; the
 examples keep sample inputs under `sample/`. Here is the file complete,
-from `examples/model-to-model/eer-tutorial-basic/sample/library.tsx`:
+from `examples/tutorial/eer-tutorial-basic/sample/library.tsx`:
 
 ```tsx
 /** @jsx createExprNode */
 
-import { createExprNode } from '@synthesis/jsx-runtime'
-import type { ExprNode } from '@synthesis/jsx-runtime'
-import type { ModelStore } from '@synthesis/engine'
-import { EERSchema, Entity, Attribute, Domain, Relationship, Role } from '@synthesis/standard-metamodels/eer-tutorial/basic'
-import type * as em from '@synthesis/standard-metamodels/eer-tutorial/basic/model'
+import { createExprNode } from '@aelastics/synthesis/jsx'
+import type { ExprNode } from '@aelastics/synthesis/jsx'
+import type { ModelStore } from '@aelastics/synthesis/store'
+import { EERSchema, Entity, Attribute, Domain, Relationship, Role } from 'eer-tutorial-metamodel/basic'
+import type * as em from 'eer-tutorial-metamodel/basic/model'
 
 export const $synth = {
   kind: 'model',
-  metamodel: '@synthesis/standard-metamodels/eer-tutorial/basic',
+  metamodel: 'eer-tutorial-metamodel/basic',
   author: 'Sinisa Neskovic',
   version: '0.1.0',
   description: 'Sample EER schema for tutorial Part 1: one 1:N and one M:N relationship'
@@ -87,9 +87,9 @@ TypeScript to compile JSX through `createExprNode` instead of React's
 `createElement`. Page 5 adds the matching `tsconfig.json` options. Miss
 either and the compiler will complain about `React` not being defined.
 
-**The imports.** The tags come flat from the metamodel package; the
-interfaces come from its `model` subpath and are imported with `import
-type`, since they exist only at compile time.
+**The imports.** The tags come flat from the metamodel package's
+`basic` subpath; the interfaces come from `basic/model` and are
+imported with `import type`, since they exist only at compile time.
 
 **The `$synth` header.** This exported constant declares what the file
 is: its kind (`model`), the metamodel it is written in, and its

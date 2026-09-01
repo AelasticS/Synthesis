@@ -6,7 +6,7 @@ sidebar_position: 2
 
 The whole transformation is one class in `src/transformation.tsx`, and
 every listing below is taken from
-`examples/model-to-text/sql-tutorial-basic/src/transformation.tsx`.
+`examples/tutorial/sql-tutorial-basic/src/transformation.tsx`.
 
 The file opens the way every JSX authoring file does, with the pragma
 and the imports:
@@ -14,25 +14,26 @@ and the imports:
 ```tsx
 /** @jsx createExprNode */
 
-import { createExprNode } from '@synthesis/jsx-runtime'
-import type { ExprNode } from '@synthesis/jsx-runtime'
-import { abstractM2M, M2T, Doc, Sec, P } from '@synthesis/engine'
-import type { ModelStore } from '@synthesis/engine'
-import * as m2tmm from '@synthesis/engine'
-import * as rmT from '@synthesis/standard-metamodels/rel-tutorial/model'
+import { createExprNode } from '@aelastics/synthesis/jsx'
+import type { ExprNode } from '@aelastics/synthesis/jsx'
+import { abstractM2M } from '@aelastics/synthesis/m2m'
+import { M2T, Doc, Sec, P } from '@aelastics/synthesis/m2t'
+import type { ModelStore } from '@aelastics/synthesis/store'
+import * as m2tmm from '@aelastics/synthesis/m2t'
+import * as rmT from 'rel-tutorial-metamodel/model'
 ```
 
 The asymmetry is the same as in any transformation, only the addresses
-have changed. From the **source** metamodel it imports the `model`
-namespace alone: `rmT` gives the interfaces to type against and the
+have changed. From the **source** metamodel it imports the `/model`
+subpath alone: `rmT` gives the interfaces to type against and the
 type objects to test elements with. Everything the **target** needs
-comes from `@synthesis/engine`: the tags `M2T`, `Doc`, `Sec`, and `P`
-for building, and the `m2tmm` namespace for the interfaces.
+comes from `@aelastics/synthesis/m2t`: the tags `M2T`, `Doc`, `Sec`,
+and `P` for building, and the `m2tmm` namespace for the interfaces.
 
-Notice that there is no import of any target `components` module. In a
+Notice that there is no import of any target components package. In a
 model-to-model transformation the target tags come from the target
-metamodel's package. Here they are part of the engine, because the
-engine is what turns the resulting model into files.
+metamodel's package. Here they are part of the library's text side,
+because the engine is what turns the resulting model into files.
 
 ## The class
 
