@@ -124,7 +124,7 @@ tables in schema order and the columns in table order, so the
 statements come out grouped by table without anything sorting them.
 
 Each statement is two lines and a separator, because
-`foreignKeyToAlter` emits three paragraphs. The continuation line is
+each statement section holds three paragraphs. The continuation line is
 indented by the two spaces at the front of its template literal.
 
 Applied in order, the two files produce the schema Part 1's single file
