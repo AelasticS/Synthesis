@@ -7,9 +7,12 @@
  *     and share the module registry (and with it aelastics type/schema
  *     identity) with the CLI process. A bare specifier the CLI cannot
  *     resolve falls back to the installed transformations' own
- *     dependencies (e.g. a metamodel package shipped with an example)
- *     and is then loaded through the transpile pipeline, whose
- *     externalization keeps framework imports on the CLI's instances;
+ *     dependencies (e.g. a metamodel package shipped with an example) and
+ *     the resolved file is imported natively by absolute path. Native,
+ *     not transpiled: everything else that references the same specifier
+ *     externalizes to the same absolute path, so one module instance
+ *     serves all importers; bundling here would evaluate a second copy of
+ *     the module's relative imports and break schema identity;
  *   - './'-relative paths resolve against the installed package directory.
  *     An installed package has no live node_modules of its own, so the
  *     file is bundled with its bare imports externalized to resolved
@@ -18,6 +21,7 @@
 
 import { existsSync } from 'node:fs'
 import { resolve } from 'node:path'
+import { pathToFileURL } from 'node:url'
 
 import { importModel } from '../models/loader.js'
 import { resolveBareSpecifier } from '../models/resolution.js'
@@ -49,8 +53,7 @@ export async function importTxModule(
         cause: err
       })
     }
-    const { mod } = await importModel(resolved)
-    return mod
+    return (await import(pathToFileURL(resolved).href)) as Record<string, unknown>
   }
 }
 

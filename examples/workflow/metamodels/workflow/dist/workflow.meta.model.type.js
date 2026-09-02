@@ -1,0 +1,23 @@
+/*
+ * Block-structured workflow metamodel: the domain the documentation's
+ * template examples are written in. A process is a tree of activities:
+ * tasks, sequences, parallels, and sub-processes (whose body is
+ * implicitly sequential). There are no edges here; the graph view is
+ * what the workflow-to-bpmn transformation produces.
+ */
+import * as t from "@aelastics/types";
+import { ModelElement, Model } from "@aelastics/synthesis/metamodel";
+export const Workflow_TypeSchema = t.schema("WorkflowSchema");
+export const Activity = t.subtype(ModelElement, {
+    children: t.arrayOf(t.link(Workflow_TypeSchema, "Activity")),
+    parent: t.optional(t.link(Workflow_TypeSchema, "Activity")),
+}, "Activity", Workflow_TypeSchema);
+export const Process = t.subtype(Model, {}, "Process", Workflow_TypeSchema);
+export const Task = t.subtype(Activity, {}, "Task", Workflow_TypeSchema);
+export const Sequence = t.subtype(Activity, {}, "Sequence", Workflow_TypeSchema);
+export const Parallel = t.subtype(Activity, {}, "Parallel", Workflow_TypeSchema);
+// A sub-process contains its own activities; the body is implicitly a
+// sequence.
+export const SubProcess = t.subtype(Activity, {}, "SubProcess", Workflow_TypeSchema);
+t.inverseProps(Activity, "children", Activity, "parent");
+//# sourceMappingURL=workflow.meta.model.type.js.map

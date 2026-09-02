@@ -324,6 +324,51 @@ importers:
         specifier: ~5.9.3
         version: 5.9.3
 
+  ../../examples/workflow/metamodels/bpmn:
+    dependencies:
+      '@aelastics/synthesis':
+        specifier: workspace:*
+        version: link:../../../../libraries/synthesis
+      '@aelastics/types':
+        specifier: workspace:*
+        version: link:../../../../libraries/aelastics-types
+    devDependencies:
+      typescript:
+        specifier: ~5.9.3
+        version: 5.9.3
+
+  ../../examples/workflow/metamodels/workflow:
+    dependencies:
+      '@aelastics/synthesis':
+        specifier: workspace:*
+        version: link:../../../../libraries/synthesis
+      '@aelastics/types':
+        specifier: workspace:*
+        version: link:../../../../libraries/aelastics-types
+    devDependencies:
+      typescript:
+        specifier: ~5.9.3
+        version: 5.9.3
+
+  ../../examples/workflow/workflow-to-bpmn:
+    dependencies:
+      '@aelastics/synthesis':
+        specifier: workspace:*
+        version: link:../../../libraries/synthesis
+      bpmn-metamodel:
+        specifier: workspace:*
+        version: link:../metamodels/bpmn
+      workflow-metamodel:
+        specifier: workspace:*
+        version: link:../metamodels/workflow
+    devDependencies:
+      '@aelastics/synthesis-cli':
+        specifier: workspace:*
+        version: link:../../../apps/cli
+      typescript:
+        specifier: ~5.9.3
+        version: 5.9.3
+
   ../../libraries/aelastics-result:
     devDependencies:
       '@rushstack/eslint-config':
