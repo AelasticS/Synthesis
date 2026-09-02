@@ -113,3 +113,46 @@ bpmn-to-mermaid (m2t; SubProcess becomes a Mermaid subgraph), the
 executable higher-order template illustrations (a sample model defining
 the Approval template with the write step as a task or a subprocess),
 and the catalog README row.
+
+
+## Design v2, agreed 2026-09-02 (supersedes the v1 mapping implementation)
+
+Decisions from the review of the committed stage D code:
+
+- workflow-to-bpmn is an EXAMPLE, not tutorial material (too complex for
+  the tutorial). What the tutorial gets instead is a separate discussion
+  after the suite is done.
+- No planning phase, no bookkeeping interfaces: direct JSX composition.
+- Engine change 1 (spec-decorators.ts): pure-dispatch @SpecPoint. If the
+  base rule returns undefined/null there is no skeleton, so the chosen
+  option result is returned as is (single expression, array, or any
+  value). Skeleton + array option result throws a clear error. The
+  original annotation becomes
+  (...a: any[]) => ExprNode<any> | ExprNode<any>[] | undefined | null.
+  The existing skeleton-merge path is unchanged. @E2E needs no change
+  (already normalizes arrays).
+- Engine change 2 (element.ts): ConnectionInfo.propName may be a
+  candidate list (string | string[]); connectToParent connects via the
+  first property declared on the parent type. Single-string behavior
+  unchanged.
+- workflow-metamodel: Process gains MANDATORY single containment
+  body: t.link(schema, "Activity"). Activity components connect via
+  candidates ["body", "children"] with isReconnectAllowed: false, so a
+  second top-level block is an error. Authoring stays child-position.
+- bpmn-metamodel components gain reference tags FromNode and ToNode
+  (ExprNode over Node connecting into Flow.from / Flow.to, SecParent
+  idiom).
+- The transformation: three pure-dispatch @SpecPoint points
+  (activityToGraph with Task/SubProcess/Sequence/Parallel options,
+  toEntryOf and fromExitOf returning reference expressions, an entry is
+  always a flow target and an exit always a flow source), rootOf(p) reads
+  p.body, chainFlows writes <Flow>{fromExitOf}{toEntryOf}</Flow>, baseOf
+  memoizes generated parallel names, nextFlowName counts f1..fn. No
+  isTypeOf anywhere; the exact agreed source is in
+  workflow-to-bpmn-v2.tsx.txt next to this file.
+
+Execution order (user-fixed): (1) engine changes + engine tests + full
+gates + CHANGELOG + commit; (2) metamodel changes + transformation
+rework + verification + commit; (3) discuss the tutorial story, then
+stage E (bpmn-to-mermaid, higher-order illustration file, catalog row),
+then the documentation pass.
