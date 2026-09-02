@@ -115,9 +115,11 @@ the Approval template with the write step as a task or a subprocess),
 and the catalog README row.
 
 
-## Design v2, agreed 2026-09-02 (supersedes the v1 mapping implementation)
+## Agreed design, 2026-09-02 (review outcome; the sections above describe the superseded first implementation)
 
-Decisions from the review of the committed stage D code:
+There is exactly ONE transformation, revised in place at
+examples/workflow/workflow-to-bpmn/src/transformation.tsx. Decisions
+from the review:
 
 - workflow-to-bpmn is an EXAMPLE, not tutorial material (too complex for
   the tutorial). What the tutorial gets instead is a separate discussion
@@ -148,11 +150,23 @@ Decisions from the review of the committed stage D code:
   always a flow target and an exit always a flow source), rootOf(p) reads
   p.body, chainFlows writes <Flow>{fromExitOf}{toEntryOf}</Flow>, baseOf
   memoizes generated parallel names, nextFlowName counts f1..fn. No
-  isTypeOf anywhere; the exact agreed source is in
-  workflow-to-bpmn-v2.tsx.txt next to this file.
+  isTypeOf anywhere; the transformation source itself is the record.
 
 Execution order (user-fixed): (1) engine changes + engine tests + full
 gates + CHANGELOG + commit; (2) metamodel changes + transformation
 rework + verification + commit; (3) discuss the tutorial story, then
 stage E (bpmn-to-mermaid, higher-order illustration file, catalog row),
 then the documentation pass.
+
+## Status 2026-09-02, session handoff
+
+Engine changes COMMITTED (ee98d25) with all gates green. Metamodel
+changes and the reworked transformation are APPLIED in the worktree,
+UNCOMMITTED, and compile; the CLI run currently fails at the
+generated-model write gate: "Transformation output uses component
+'Node', but 'bpmn-metamodel' does not export it". Cause: the serializer
+emits the flow endpoints with the link's declared type (Node), and the
+gate requires target.components to export every emitted tag. Planned
+fix: export a Node component from bpmn-metamodel (reference use over
+the supertype; resolution accepts subtype instances), then rerun the
+manual sessions, the smoke, and commit step 2.
