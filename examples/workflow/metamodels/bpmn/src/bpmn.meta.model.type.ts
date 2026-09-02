@@ -8,6 +8,7 @@
  * ones, because the block-structured source has no conditional construct
  * yet.
  */
+
 import * as t from "@aelastics/types"
 
 import { ModelElement, Model } from "@aelastics/synthesis/metamodel"
