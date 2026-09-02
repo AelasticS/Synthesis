@@ -158,24 +158,22 @@ First define the writing step as a template of its own, outside any
 workflow:
 
 ```tsx
-const Write = () => <Task name="Write document" />
+const Write = () => <Task name="Write" />
 
 const ReviewedWrite = () => (
-  <SubProcess name="Write document">
-    <Sequence>
-      <Task name="Draft" />
-      <Task name="Review draft" />
-    </Sequence>
+  <SubProcess name="WriteDocument">
+    <Task name="Draft" />
+    <Task name="ReviewDraft" />
   </SubProcess>
 )
 ```
 
 Then define the workflow as a higher-order template whose parameter is
-the whole task template (`SubProcess` is a subtype of `Task`, so both
-definitions above qualify as `Template<ITask>`):
+the whole task template (both definitions above qualify as
+`Template<IActivity>`, the common activity supertype):
 
 ```tsx
-const Approval = (WriteStep: Template<ITask>) =>
+const Approval = (WriteStep: Template<IActivity>) =>
   ({ doc, approvers }: { doc: string; approvers: number }) => (
     <Process name={`${doc} Approval`}>
       <Sequence>
@@ -217,9 +215,10 @@ template already contains; a template parameter *supplies* the shape.
 (A fixed step can also be passed as a ready-made expression value,
 `const write = <Task … />`, and embedded with `{write}`; the template
 form shown here is the general one, constructing the step fresh at
-every use and admitting parameters of its own.) See
-[Higher-Order Templates](./guides/templates.md#higher-order-templates)
-for a worked example.
+every use and admitting parameters of its own.) This exact
+construction ships executable in the workflow example suite; the
+[Templates guide](./guides/templates.md#higher-order-templates) embeds
+it and shows how to run it.
 
 ## Transformations are templates over a source model
 

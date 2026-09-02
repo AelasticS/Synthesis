@@ -106,65 +106,32 @@ the model expression.
 ## Higher-Order Templates
 
 A higher-order template is a function that takes another template as a
-parameter. This lets you abstract over the structure of sub-expressions:
-a value parameter selects among shapes the template already contains,
-while a template parameter supplies the shape itself.
+parameter, abstracting over the structure of sub-expressions: a value
+parameter selects among shapes a template already contains, while a
+template parameter supplies the shape itself. The example below is the
+workflow suite's executable sample, embedded from its source: the
+writing step is defined outside as a template (a plain task, or a
+two-task sub-process), the workflow takes the whole step template as a
+parameter, and evaluation happens in two steps, from higher-order
+template to template to model literal.
 
-```typescript
-/** @jsx createExprNode */
-
-const GenericApproval = (WorkerTask: Template<ITask>) =>
-  (config: IApprovalConfig) => {
-    const tasks = Array.from({ length: config.howManyApprovers }, (_, i) =>
-      <Task name={`approval ${i + 1}`} />
-    )
-    return (
-      <Sequence>
-        <WorkerTask />
-        {config.isParallel
-          ? <Parallel>{tasks}</Parallel>
-          : <Sequence>{tasks}</Sequence>
-        }
-      </Sequence>
-    )
-  }
+```tsx file=<rootDir>/examples/workflow/workflow-to-bpmn/sample/templated-approval.tsx
 ```
 
-The worker templates are defined outside, as values of their own:
+Because it is a workspace model like any other, you can run it and see
+the higher-order construction come out the other end as a diagram:
 
-```typescript
-// A simple worker
-const SimpleWrite = () => <Task name="Write document" />
-
-// A complex worker
-const GroupWork = () => (
-  <Sequence>
-    <Task name="Research" />
-    <Parallel>
-      <Task name="Draft section A" />
-      <Task name="Draft section B" />
-    </Parallel>
-  </Sequence>
-)
+```bash
+synth transformation install <path-to>/workflow-to-bpmn
+synth transformation install <path-to>/bpmn-to-mermaid
+synth model import <path-to>/sample/templated-approval.tsx --as demo/templated
+synth transformation run workflow-to-bpmn bpmn-to-mermaid --in demo/templated --out-dir ./generated
 ```
 
-Evaluation then happens in two steps: applying the higher-order template
-to a worker template yields an ordinary template, and supplying the
-remaining parameters closes the expression into a model literal:
-
-```typescript
-// Step 1: specialized approval workflows (ordinary templates)
-const SimpleApproval = GenericApproval(SimpleWrite)
-const GroupApproval  = GenericApproval(GroupWork)
-
-// Step 2: model literals, ready to render
-const model1 = <SimpleApproval processName="Simple" howManyApprovers={2} isParallel={true} />
-const model2 = <GroupApproval processName="Group" howManyApprovers={3} isParallel={false} />
-```
-
-`GenericApproval` does not know what the worker task looks like. It
-accepts any template that produces a Task element. The caller decides
-the structure. This is compositional model construction.
+The generated Mermaid flowchart shows the swapped structure: the
+sub-process write step from `ReviewedWrite`, then the parallel
+approvals. Replace `Approval(ReviewedWrite)` with `Approval(Write)` and
+only the writing step changes; the workflow skeleton is untouched.
 
 ## Templates and transformation rules
 
