@@ -5,7 +5,7 @@ sidebar_class_name: hidden
 
 # Synthesis
 
-Synthesis is a TypeScript monorepo for model-driven software engineering. Its core is the **Synthesis transformation language**, an embedded domain-specific language implemented within TypeScript, for defining metamodels, constructing model instances with JSX, and writing model-to-model transformations. Supporting libraries handle runtime type validation, reactive state management, and typed error handling. The `synth` CLI ties everything together for code generation workflows.
+Synthesis is a TypeScript environment for model-driven software engineering, developed by the [AelasticS group](https://github.com/AelasticS). Its core is the **Synthesis transformation language**, an embedded domain-specific language implemented within TypeScript, for defining metamodels, constructing model instances with JSX, and writing model-to-model transformations. Supporting libraries handle runtime type validation, reactive state management, and typed error handling. The `synth` CLI ties everything together for code generation workflows. The source code lives in the [Synthesis repository](https://github.com/AelasticS/Synthesis) on GitHub.
 
 ## Where to start
 
@@ -13,13 +13,15 @@ Synthesis is a TypeScript monorepo for model-driven software engineering. Its co
 |---|---|
 | **Run transformations**: install the CLI, import my models, run and chain published transformations, save pipelines | [User Guide](./user-guide/index.md) |
 | **Build transformations**: define metamodels, build models with JSX, write transformation rules, package and publish them | [Developer Guide](./developer-guide/index.md) |
+| **See working code**: complete, installable example packages with their metamodels | [Examples](./developer-guide/examples/index.md) |
 
 ## Libraries
 
-Three `@aelastics/*` libraries underpin Synthesis and are independently usable in any TypeScript project:
+Everything ships under the `@aelastics` scope: the Synthesis library itself, and three foundation libraries that are independently usable in any TypeScript project:
 
 | Library | Description |
 |---|---|
+| [@aelastics/synthesis](./developer-guide/index.md) | The Synthesis library: the JSX authoring runtime, core metamodel, model store, model-to-model and model-to-text engines, and configuration-based variability. Documented in the Developer Guide |
 | [@aelastics/types](./types/intro.md) | Runtime type system with schemas, validation, annotations, and graph transducers; usable for defining schemas and creating validated instances with or without the rest of Synthesis |
 | [@aelastics/store](./store/intro.md) | Reactive model store built on MobX with runtime type conformance |
 | [@aelastics/result](./result/intro.md) | Typed success/failure result handling without exceptions |
