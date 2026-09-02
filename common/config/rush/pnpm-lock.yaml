@@ -324,6 +324,22 @@ importers:
         specifier: ~5.9.3
         version: 5.9.3
 
+  ../../examples/workflow/bpmn-to-mermaid:
+    dependencies:
+      '@aelastics/synthesis':
+        specifier: workspace:*
+        version: link:../../../libraries/synthesis
+      bpmn-metamodel:
+        specifier: workspace:*
+        version: link:../metamodels/bpmn
+    devDependencies:
+      '@aelastics/synthesis-cli':
+        specifier: workspace:*
+        version: link:../../../apps/cli
+      typescript:
+        specifier: ~5.9.3
+        version: 5.9.3
+
   ../../examples/workflow/metamodels/bpmn:
     dependencies:
       '@aelastics/synthesis':

@@ -72,7 +72,18 @@ rel-to-sql-ddl consumes.
 | [eer-to-relational](./eer-to-sql/eer-to-relational/) | m2m | Configuration-based transformation over the full EER metamodel: decision model, binding model, manifest `parts` |
 | [rel-to-sql-ddl](./eer-to-sql/rel-to-sql-ddl/) | m2t | Text generation with one global configuration issue (identifier quoting) |
 
-Further examples (text generation from EER models, Mermaid diagrams,
+### Workflow suite
+
+The documentation's workflow domain, executable: a chain from
+block-structured workflows to BPMN graphs to Mermaid diagrams. See
+[the suite README](./workflow/).
+
+| Example | Kind | Shows |
+| --- | --- | --- |
+| [workflow-to-bpmn](./workflow/workflow-to-bpmn/) | m2m | Block structure flattened into a node-and-flow graph by specialization rules |
+| [bpmn-to-mermaid](./workflow/bpmn-to-mermaid/) | m2t | The graph rendered as Mermaid flowchart text, sub-processes as subgraphs |
+
+Further examples (text generation from EER models,
 TypeScript declarations, pipeline composition) are under discussion and
 will be added as they are agreed. The catalog grows incrementally; each
 suite is self-contained, so new domains can be added at any time.
