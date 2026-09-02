@@ -299,7 +299,37 @@ back into the workspace as a model, with a provenance header recording
 what produced it. An m2t result is serialized to files in a directory.
 A transformation package declares which kind it is in its manifest, and
 the two compose: a chain may pass models from step to step and end with
-a text step, because text is terminal.
+a text step, because text is terminal. The
+[model-to-text tutorial](./tutorial/model-to-text/index.md) builds a
+generator this way, consuming exactly what the model-to-model tutorial
+produces.
+
+### Configuration-based transformations
+
+Some transformations contain genuinely open design choices: whether a
+1:N relationship becomes a foreign key or a join table, how identifiers
+are quoted, how generated output is laid out across files. Synthesis
+makes such a choice a first-class model rather than a hidden flag. A
+**decision model** declares the design space: its *issues* and the
+*options* each issue offers, globally or per source element. A
+**configuration model** records the choices made for one specific
+source model. A **configuration-based transformation** is then a
+template over two parameters, the source model and a configuration
+model: a rule with variants is written as a *variation point*, and the
+recorded choice selects which variant runs.
+
+Because configurations are models, everything already said about models
+applies: they are validated (against the decision model, its binding to
+metamodel concepts, and the input model), default configurations can be
+generated from the decision model's declared defaults, and every choice
+applied during a run is announced. The mechanism, decorators included,
+is in the
+[Design Decisions in Transformations](./guides/variability.md) guide;
+the tutorials each build one configuration-based rule, for
+[model-to-model](./tutorial/model-to-model/part-3-configuration-based/index.md)
+and
+[model-to-text](./tutorial/model-to-text/part-3-configuration-based/index.md)
+transformations.
 
 ## Metamodels are type schemas
 
@@ -311,7 +341,10 @@ dispatch over.
 Conformance is not an afterthought checked by a separate validator: a
 well-typed expression evaluates to a model that conforms to its schema.
 TypeScript checks what it can statically, and the model store enforces
-type conformance on every connection at runtime.
+type conformance on every connection at runtime. The authoring workflow
+is in [Defining Metamodels](./guides/defining-metamodels.md), and the
+components that give a metamodel its JSX tags are covered in
+[JSX Components](./guides/jsx-components.md).
 
 Two guarantees are worth knowing by name:
 
