@@ -166,7 +166,9 @@ UNCOMMITTED, and compile; the CLI run currently fails at the
 generated-model write gate: "Transformation output uses component
 'Node', but 'bpmn-metamodel' does not export it". Cause: the serializer
 emits the flow endpoints with the link's declared type (Node), and the
-gate requires target.components to export every emitted tag. Planned
-fix: export a Node component from bpmn-metamodel (reference use over
-the supertype; resolution accepts subtype instances), then rerun the
-manual sessions, the smoke, and commit step 2.
+gate requires target.components to export every emitted tag. Resolved:
+bpmn-metamodel exports a Node reference component connecting via
+candidates ["from", "to"] (first-available semantics added to the
+engine's candidate connection), and Flow.from/to are type-level optional
+for the same creation-order reason as Process.body. Both samples run end
+to end and round-trip the import gate.

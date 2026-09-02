@@ -1,38 +1,35 @@
-/** @jsx createExprNode */
 import type { ExprNode } from '@aelastics/synthesis/jsx';
 import { abstractM2M } from '@aelastics/synthesis/m2m';
 import type { ModelStore } from '@aelastics/synthesis/store';
 import * as wm from 'workflow-metamodel/model';
 import * as bm from 'bpmn-metamodel/model';
-/** A flow endpoint: the node's name and concept kind (for the reference tag). */
-interface Port {
-    name: string;
-    kind: 'task' | 'gateway' | 'subprocess' | 'start' | 'end';
-}
-/** What an activity contributes: nodes, flows, and its entry/exit ports. */
-interface Fragment {
-    nodes: ExprNode<bm.INode>[];
-    flows: ExprNode<bm.IFlow>[];
-    entry: Port;
-    exit: Port;
-}
+/** What an activity contributes to the enclosing graph: nodes and flows. */
+type GraphPart = ExprNode<bm.INode> | ExprNode<bm.IFlow>;
 export declare class WorkflowToBpmnTransformation extends abstractM2M<wm.IProcess, bm.IProcess> {
     private flowCount;
     private parCount;
+    private parNames;
     constructor(store: ModelStore);
     template(p: wm.IProcess): ExprNode<wm.IProcess, bm.IProcess>;
-    activityFragment(a: wm.IActivity): Fragment;
-    taskFragment(t: wm.ITask): Fragment;
-    sequenceFragment(children: wm.IActivity[]): Fragment;
-    parallelFragment(p: wm.IParallel): Fragment;
-    subProcessFragment(s: wm.ISubProcess): Fragment;
-    taskToNode(t: wm.ITask): ExprNode<bm.ITask>;
-    parallelToSplitGateway(p: wm.IParallel, name: string): ExprNode<bm.IGateway>;
-    parallelToJoinGateway(p: wm.IParallel, name: string): ExprNode<bm.IGateway>;
-    subProcessToNode(s: wm.ISubProcess): ExprNode<bm.ISubProcess>;
-    flow(from: Port, to: Port): ExprNode<bm.IFlow>;
-    private nodeRef;
+    activityToGraph(a: wm.IActivity): GraphPart | GraphPart[];
+    taskToGraph(t: wm.ITask): ExprNode<bm.ITask>;
+    subProcessToGraph(s: wm.ISubProcess): ExprNode<bm.ISubProcess>;
+    sequenceToGraph(q: wm.ISequence): GraphPart[];
+    parallelToGraph(p: wm.IParallel): GraphPart[];
+    toEntryOf(a: wm.IActivity): ExprNode<bm.INode>;
+    toEntryOfTask(t: wm.ITask): ExprNode<bm.INode>;
+    toEntryOfSubProcess(s: wm.ISubProcess): ExprNode<bm.INode>;
+    toEntryOfSequence(q: wm.ISequence): ExprNode<bm.INode>;
+    toEntryOfParallel(p: wm.IParallel): ExprNode<bm.INode>;
+    fromExitOf(a: wm.IActivity): ExprNode<bm.INode>;
+    fromExitOfTask(t: wm.ITask): ExprNode<bm.INode>;
+    fromExitOfSubProcess(s: wm.ISubProcess): ExprNode<bm.INode>;
+    fromExitOfSequence(q: wm.ISequence): ExprNode<bm.INode>;
+    fromExitOfParallel(p: wm.IParallel): ExprNode<bm.INode>;
+    private chainFlows;
+    private nextFlowName;
+    private baseOf;
     private childrenOf;
-    private topLevelActivities;
+    private rootOf;
 }
 export {};

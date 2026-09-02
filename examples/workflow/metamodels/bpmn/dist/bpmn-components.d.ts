@@ -10,3 +10,6 @@ export declare const EndEvent: Template<b.IEndEvent>;
 export declare const Gateway: Template<b.IGateway>;
 export declare const SubProcess: Template<b.ISubProcess>;
 export declare const Flow: Template<b.IFlow>;
+export declare const Node: Template<b.INode>;
+export declare const FromNode: Template<b.INode>;
+export declare const ToNode: Template<b.INode>;

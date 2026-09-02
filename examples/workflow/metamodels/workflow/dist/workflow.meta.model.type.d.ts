@@ -18,7 +18,9 @@ export declare const Activity: t.Subtype<{
     category: t.StringType;
     objectClassification: t.StringType;
 }, t.ObjectType<import("@aelastics/types/lib/complex-types/ObjectType.js").InterfaceDecl, readonly string[]>>;
-export declare const Process: t.Subtype<{}, {
+export declare const Process: t.Subtype<{
+    body: t.OptionalType<t.LinkType>;
+}, {
     MDA_level: t.OptionalType<t.StringType>;
     diagrams: t.ArrayType<t.Subtype<{
         text: t.StringType;

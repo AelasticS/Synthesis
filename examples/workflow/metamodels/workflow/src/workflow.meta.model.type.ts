@@ -21,7 +21,18 @@ export const Activity = t.subtype(
   Workflow_TypeSchema
 )
 
-export const Process = t.subtype(Model, {}, "Process", Workflow_TypeSchema)
+// The process owns exactly one top-level block. Optional at the type
+// level because the process is created before its body connects (the
+// store auto-initializes mandatory object properties, which would
+// occupy the slot); semantically mandatory, enforced by consumers.
+export const Process = t.subtype(
+  Model,
+  {
+    body: t.optional(t.link(Workflow_TypeSchema, "Activity")),
+  },
+  "Process",
+  Workflow_TypeSchema
+)
 
 export const Task = t.subtype(Activity, {}, "Task", Workflow_TypeSchema)
 

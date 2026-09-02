@@ -28,8 +28,12 @@ export const SubProcess = t.subtype(Node, {
     flows: t.arrayOf(t.link(Bpmn_TypeSchema, "Flow")),
 }, "SubProcess", Bpmn_TypeSchema);
 export const Flow = t.subtype(ModelElement, {
-    from: t.link(Bpmn_TypeSchema, "Node"),
-    to: t.link(Bpmn_TypeSchema, "Node"),
+    // Optional at the type level because a flow is created before its
+    // endpoint references resolve (the store auto-initializes mandatory
+    // object properties, which would occupy the slots); semantically both
+    // are mandatory.
+    from: t.optional(t.link(Bpmn_TypeSchema, "Node")),
+    to: t.optional(t.link(Bpmn_TypeSchema, "Node")),
     // Optional guard label, meaningful on flows out of an exclusive
     // gateway.
     guard: t.optional(t.string),

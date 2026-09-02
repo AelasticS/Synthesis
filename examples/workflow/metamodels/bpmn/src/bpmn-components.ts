@@ -1,6 +1,7 @@
 import * as b from "./bpmn.meta.model.type.js"
 import {
   CpxTemplate,
+  defaultConnectionInfo,
   ExprNode,
   IStore,
   Template,
@@ -35,4 +36,24 @@ export const SubProcess: Template<b.ISubProcess> = (props) => {
 
 export const Flow: Template<b.IFlow> = (props) => {
   return new ExprNode(b.Flow, props, "flows")
+}
+
+// The abstract supertype, exported for reference use: serialized models
+// name flow endpoints as <Node $refByName="..." />, whatever the
+// concrete kind of the target. Not meant for creating nodes.
+export const Node: Template<b.INode> = (props) => {
+  return new ExprNode(b.Node, props, {
+    ...defaultConnectionInfo(["from", "to"]),
+    isReconnectAllowed: false,
+  })
+}
+
+// Reference tags for flow endpoints: a flow names its source and target
+// nodes as children, whatever their concrete kind.
+export const FromNode: Template<b.INode> = (props) => {
+  return new ExprNode(b.Node, props, "from")
+}
+
+export const ToNode: Template<b.INode> = (props) => {
+  return new ExprNode(b.Node, props, "to")
 }

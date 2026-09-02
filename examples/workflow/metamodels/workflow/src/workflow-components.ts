@@ -1,7 +1,8 @@
 import * as w from "./workflow.meta.model.type.js"
 import {
-  allowedAsTopLevelElement,
+  ConnectionInfo,
   CpxTemplate,
+  defaultConnectionInfo,
   ExprNode,
   IStore,
   Template,
@@ -14,20 +15,25 @@ export const Process: CpxTemplate<IModelProps, w.IProcess> = (props) => {
   return new ExprNode(w.Process, props, undefined)
 }
 
-// Every activity may nest inside another activity (via `children`) or
-// sit at the top level of a process.
+// Every activity connects into the first containment its parent
+// declares: the process body at the top level, a block's children when
+// nested. A second top-level block is refused (the body is single).
+const activityConnection: ConnectionInfo = {
+  ...defaultConnectionInfo(["body", "children"]),
+  isReconnectAllowed: false,
+}
 export const Task: Template<w.ITask> = (props) => {
-  return new ExprNode(w.Task, props, allowedAsTopLevelElement("children"))
+  return new ExprNode(w.Task, props, activityConnection)
 }
 
 export const Sequence: Template<w.ISequence> = (props) => {
-  return new ExprNode(w.Sequence, props, allowedAsTopLevelElement("children"))
+  return new ExprNode(w.Sequence, props, activityConnection)
 }
 
 export const Parallel: Template<w.IParallel> = (props) => {
-  return new ExprNode(w.Parallel, props, allowedAsTopLevelElement("children"))
+  return new ExprNode(w.Parallel, props, activityConnection)
 }
 
 export const SubProcess: Template<w.ISubProcess> = (props) => {
-  return new ExprNode(w.SubProcess, props, allowedAsTopLevelElement("children"))
+  return new ExprNode(w.SubProcess, props, activityConnection)
 }

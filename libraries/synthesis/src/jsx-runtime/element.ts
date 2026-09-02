@@ -456,9 +456,29 @@ export class ExprNode<P extends WithRefProps<g.IModelElement>, R = P> {
           const declared = childElement.connectionInfo.propName;
           const candidates =
             declared === undefined ? [] : Array.isArray(declared) ? declared : [declared];
-          // connect parent and child via the first candidate property the
-          // parent's type declares
-          const propName = candidates.find((p) => mapPropTypes.get(p) !== undefined);
+          // connect parent and child via the first AVAILABLE candidate the
+          // parent's type declares: an occupied single-valued property that
+          // refuses reconnection is skipped in favor of the next candidate
+          // (e.g. flow endpoints connecting into from, then to). The last
+          // viable candidate is never skipped, so refusal still surfaces.
+          const viable = candidates.filter((p) => mapPropTypes.get(p) !== undefined);
+          let propName: string | undefined;
+          for (let i = 0; i < viable.length; i++) {
+            const cand = viable[i];
+            const category = t.findTypeCategory(mapPropTypes.get(cand)!);
+            const occupied = (parent.instance as Record<string, unknown>)[cand];
+            const isLast = i === viable.length - 1;
+            if (
+              category === "Object" &&
+              occupied &&
+              !childElement.connectionInfo.isReconnectAllowed &&
+              !isLast
+            ) {
+              continue;
+            }
+            propName = cand;
+            break;
+          }
           let propType = propName !== undefined ? mapPropTypes.get(propName) : undefined;
           if (propType)
             cnParentChild(

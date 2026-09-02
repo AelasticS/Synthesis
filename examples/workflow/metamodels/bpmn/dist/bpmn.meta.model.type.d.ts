@@ -174,8 +174,8 @@ export declare const SubProcess: t.Subtype<{
     objectClassification: t.StringType;
 }, t.ObjectType<import("@aelastics/types/lib/complex-types/ObjectType.js").InterfaceDecl, readonly string[]>>;
 export declare const Flow: t.Subtype<{
-    from: t.LinkType;
-    to: t.LinkType;
+    from: t.OptionalType<t.LinkType>;
+    to: t.OptionalType<t.LinkType>;
     guard: t.OptionalType<t.StringType>;
 }, {
     path: t.OptionalType<t.StringType>;

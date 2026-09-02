@@ -1,5 +1,5 @@
 import * as b from "./bpmn.meta.model.type.js";
-import { ExprNode, } from "@aelastics/synthesis/jsx";
+import { defaultConnectionInfo, ExprNode, } from "@aelastics/synthesis/jsx";
 export const Process = (props) => {
     return new ExprNode(b.Process, props, undefined);
 };
@@ -20,5 +20,22 @@ export const SubProcess = (props) => {
 };
 export const Flow = (props) => {
     return new ExprNode(b.Flow, props, "flows");
+};
+// The abstract supertype, exported for reference use: serialized models
+// name flow endpoints as <Node $refByName="..." />, whatever the
+// concrete kind of the target. Not meant for creating nodes.
+export const Node = (props) => {
+    return new ExprNode(b.Node, props, {
+        ...defaultConnectionInfo(["from", "to"]),
+        isReconnectAllowed: false,
+    });
+};
+// Reference tags for flow endpoints: a flow names its source and target
+// nodes as children, whatever their concrete kind.
+export const FromNode = (props) => {
+    return new ExprNode(b.Node, props, "from");
+};
+export const ToNode = (props) => {
+    return new ExprNode(b.Node, props, "to");
 };
 //# sourceMappingURL=bpmn-components.js.map

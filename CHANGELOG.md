@@ -85,7 +85,9 @@ overall version history.
   traces array results. Closes the engine's own TODO on array handling.
 - **JSX connection property candidates.** A component's parent-property
   connection may declare ordered candidates (`propName: string[]`); the
-  first property declared on the parent's type wins, so one tag can
+  first available property declared on the parent's type wins (an
+  occupied single-valued slot that refuses reconnection is skipped, so
+  flow endpoints can connect into `from`, then `to`), so one tag can
   connect into different containments under different parents (a
   workflow activity landing in a process body or a block's children).
   Single-string connections behave exactly as before.
