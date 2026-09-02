@@ -71,23 +71,13 @@ relational architectures.
 
 Answer key: `examples/tutorial/eer-tutorial-configuration-based`.
 
-### Part 4: Higher-order templates
-
-**In preparation.**
-
-Templates that take templates as parameters, so families of
-structurally different targets come from one definition. This is how
-recurring shapes (audit columns, history tables, naming schemes) are
-factored out of individual rules and applied uniformly.
-
 ## At a glance
 
-| Part | What decides the mapping | Mechanism | Status |
-| --- | --- | --- | --- |
-| 1: Basic | A hand written conditional in the rule | Plain TypeScript | Available |
-| 2: Advanced | The runtime type of the source element | `@SpecPoint` and `@SpecOption` | Available |
-| 3: Configuration-based | A configuration chosen for the run | Decision model, binding model, `@VarPoint` and `@VarOption` | Available |
-| 4: Higher-order templates | A template passed as a parameter | Parameterized templates | In preparation |
+| Part | What decides the mapping | Mechanism |
+| --- | --- | --- |
+| 1: Basic | A hand written conditional in the rule | Plain TypeScript |
+| 2: Advanced | The runtime type of the source element | `@SpecPoint` and `@SpecOption` |
+| 3: Configuration-based | A configuration chosen for the run | Decision model, binding model, `@VarPoint` and `@VarOption` |
 
 ## What happens after your transformation runs
 
