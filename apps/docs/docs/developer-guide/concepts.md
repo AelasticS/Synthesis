@@ -91,9 +91,14 @@ parameterization possible.
 ## Templates define families of models
 
 Add parameters to an expression and it stops describing one model and
-starts describing a **family** of models. A *template* is a function
-returning a model expression, in algebraic terms an open term with free
-variables:
+starts describing a **family** of models. A parameterized model
+expression is a **model template**: a function returning a model
+expression, in algebraic terms an open term with free variables. Seen
+this way, what we ordinarily call "a model" written in JSX is just the
+boundary case: an expression with no parameters and no computation is a
+**model literal**, and always evaluates to the same model. The approval
+process at the top of this page is a model literal; here is the same
+workflow as a template:
 
 ```tsx
 const Approval = ({ doc, approvers, parallel }: IApprovalConfig) => {
@@ -141,12 +146,76 @@ flowchart LR
     I2 --> E2([End])
 ```
 
-An expression with no parameters and no computation is a *model literal*:
-it always evaluates to the same model. And because templates are ordinary
-functions, they compose like functions: a **higher-order template** takes
-another template as a parameter and abstracts over the structure of its
-sub-expressions; see
-[Higher-Order Templates](./guides/building-models.md#higher-order-templates)
+### Higher-order templates
+
+Because templates are ordinary functions, they compose like functions,
+and nothing stops a parameter from itself being a template. A
+**higher-order template** takes another template as a parameter and
+abstracts over the *structure* of its sub-expressions, not just their
+property values.
+
+First define the writing step as a template of its own, outside any
+workflow:
+
+```tsx
+const Write = () => <Task name="Write document" />
+
+const ReviewedWrite = () => (
+  <SubProcess name="Write document">
+    <Sequence>
+      <Task name="Draft" />
+      <Task name="Review draft" />
+    </Sequence>
+  </SubProcess>
+)
+```
+
+Then define the workflow as a higher-order template whose parameter is
+the whole task template (`SubProcess` is a subtype of `Task`, so both
+definitions above qualify as `Template<ITask>`):
+
+```tsx
+const Approval = (WriteStep: Template<ITask>) =>
+  ({ doc, approvers }: { doc: string; approvers: number }) => (
+    <Process name={`${doc} Approval`}>
+      <Sequence>
+        <WriteStep />
+        <Parallel>
+          {Array.from({ length: approvers }, (_, i) => <Task name={`Approve ${i + 1}`} />)}
+        </Parallel>
+      </Sequence>
+    </Process>
+  )
+```
+
+Evaluation now happens in **two steps**. Applying the higher-order
+template to a task template yields an ordinary template; supplying the
+remaining parameters closes the expression into a model literal, which
+renders to the model:
+
+```tsx
+const SimpleApproval = Approval(Write)                            // a template
+const contract = <SimpleApproval doc="Contract" approvers={2} />  // a model literal
+const model = contract.render(new Context())                      // the model
+```
+
+Swapping the step swaps structure, not just values:
+`Approval(ReviewedWrite)` produces workflows whose writing step is a
+two-task sub-process, without touching the workflow skeleton:
+
+```mermaid
+flowchart LR
+    S([Start]) --> D[Draft] --> R[Review draft]
+    R --> A1[Approve 1]
+    R --> A2[Approve 2]
+    A1 --> E([End])
+    A2 --> E
+```
+
+A value parameter (like `parallel` above) selects among shapes the
+template already contains; a template parameter *supplies* the shape.
+See
+[Higher-Order Templates](./guides/templates.md#higher-order-templates)
 for a worked example.
 
 ## Transformations are templates over a source model
