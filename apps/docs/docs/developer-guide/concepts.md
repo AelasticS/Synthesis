@@ -154,14 +154,13 @@ and nothing stops a parameter from itself being a template. A
 abstracts over the *structure* of its sub-expressions, not just their
 property values.
 
-First define the writing step as a model expression of its own, outside
-any workflow. An expression is an ordinary value, so it can sit in a
-constant:
+First define the writing step as a template of its own, outside any
+workflow:
 
 ```tsx
-const write = <Task name="Write document" />
+const Write = () => <Task name="Write document" />
 
-const reviewedWrite = (
+const ReviewedWrite = () => (
   <SubProcess name="Write document">
     <Sequence>
       <Task name="Draft" />
@@ -171,17 +170,16 @@ const reviewedWrite = (
 )
 ```
 
-Then define the workflow as a template whose parameter is the whole
-task expression, embedded with the computation operator (`SubProcess`
-is a subtype of `Task`, so both values above qualify as
-`ExprNode<ITask>`):
+Then define the workflow as a higher-order template whose parameter is
+the whole task template (`SubProcess` is a subtype of `Task`, so both
+definitions above qualify as `Template<ITask>`):
 
 ```tsx
-const Approval = (writeStep: ExprNode<ITask>) =>
+const Approval = (WriteStep: Template<ITask>) =>
   ({ doc, approvers }: { doc: string; approvers: number }) => (
     <Process name={`${doc} Approval`}>
       <Sequence>
-        {writeStep}
+        <WriteStep />
         <Parallel>
           {Array.from({ length: approvers }, (_, i) => <Task name={`Approve ${i + 1}`} />)}
         </Parallel>
@@ -190,19 +188,19 @@ const Approval = (writeStep: ExprNode<ITask>) =>
   )
 ```
 
-Evaluation now happens in **two steps**. Applying `Approval` to a task
-expression yields an ordinary template; supplying the remaining
-parameters closes the expression into a model literal, which renders to
-the model:
+Evaluation now happens in **two steps**. Applying the higher-order
+template to a task template yields an ordinary template; supplying the
+remaining parameters closes the expression into a model literal, which
+renders to the model:
 
 ```tsx
-const SimpleApproval = Approval(write)                            // a template
+const SimpleApproval = Approval(Write)                            // a template
 const contract = <SimpleApproval doc="Contract" approvers={2} />  // a model literal
 const model = contract.render(new Context())                      // the model
 ```
 
 Swapping the step swaps structure, not just values:
-`Approval(reviewedWrite)` produces workflows whose writing step is a
+`Approval(ReviewedWrite)` produces workflows whose writing step is a
 two-task sub-process, without touching the workflow skeleton:
 
 ```mermaid
@@ -214,15 +212,14 @@ flowchart LR
     A2 --> E
 ```
 
-A plain parameter (like `parallel` above) selects among shapes the
-template already contains; an expression parameter *supplies* the
-shape. Here the step is a fixed expression, constructed once and passed
-as a value. When the step itself needs parameters, or must be
-constructed fresh at every use, the parameter becomes a function
-returning an expression, that is, a template, and the workflow is a
-higher-order template in the strict sense. See
+A value parameter (like `parallel` above) selects among shapes the
+template already contains; a template parameter *supplies* the shape.
+(A fixed step can also be passed as a ready-made expression value,
+`const write = <Task … />`, and embedded with `{write}`; the template
+form shown here is the general one, constructing the step fresh at
+every use and admitting parameters of its own.) See
 [Higher-Order Templates](./guides/templates.md#higher-order-templates)
-for a worked example in that form.
+for a worked example.
 
 ## Transformations are templates over a source model
 
