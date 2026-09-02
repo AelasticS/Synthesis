@@ -224,26 +224,50 @@ for a worked example.
 ## Transformations are templates over a source model
 
 A model-to-model transformation is a template whose parameter is a
-**source model**. It is written as a class of typed *rules*: each rule is
-a function from a source element to a target model expression:
+**source model**. It is written as a class: its `template` method is the
+top-level rule, receiving the whole source model and iterating over its
+elements with the computation operator, and every further *rule* is a
+typed method from one source element to a target model expression:
 
 ```tsx
-@E2E()
-Entity2Table(e: et.IEntity): ExprNode<rt.ITable> {
-  return (
-    <r.Table name={e.name}>
-      {e.attributes.map((a) => this.Attribute2Column(a))}
-    </r.Table>
-  )
+export class Eer2Rel extends abstractM2M<em.IEERSchema, rmT.IRelSchema> {
+  template(s: em.IEERSchema) {
+    return (
+      <RelSchema name={`${s.name}_rel`} store={this.context.store}>
+        {s.elements
+          .filter((el) => this.context.store.isTypeOf(el, em.Entity))
+          .map((el) => this.entityToTable(el as em.IEntity))}
+        ...
+      </RelSchema>
+    )
+  }
+
+  @E2E()
+  entityToTable(e: em.IEntity): ExprNode<rmT.ITable> {
+    return (
+      <Table name={e.name}>
+        {e.attributes.map((a) => this.attributeToColumn(a))}
+      </Table>
+    )
+  }
+
+  ...
 }
 ```
 
-Each rule is a template like any other, with the computation operator iterating over
-the source element's properties and invoking further rules. Executing the
-transformation evaluates the top-level rule's expression in a fresh
-target model; every rule invocation is recorded in a **trace** linking
-each target element back to the source elements it came from, giving
-bidirectional traceability for free.
+The three dots elide the rest of a real transformation: inside
+`template`, the sibling iterations (relationships, in this example),
+and below `entityToTable`, the further rules and helpers they invoke
+(`attributeToColumn`, the relationship rules, type mapping). The
+[model-to-model tutorial](./tutorial/model-to-model/part-1-basic/index.md)
+builds this exact class in full.
+
+Each rule is a template like any other, with the computation operator
+iterating over the source element's properties and invoking further
+rules. Executing the transformation evaluates `template`'s expression in
+a fresh target model; every rule invocation is recorded in a **trace**
+linking each target element back to the source elements it came from,
+giving bidirectional traceability for free.
 
 Rule selection can be made *subtype-aware*: a rule marked as a
 specialization point dispatches on the runtime type of its source
