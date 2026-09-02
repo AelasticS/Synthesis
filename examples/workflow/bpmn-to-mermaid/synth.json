@@ -1,0 +1,7 @@
+{
+  "kind": "m2t",
+  "entry": "./dist/transformation.js",
+  "exportName": "BpmnToMermaidTransformation",
+  "source": { "metamodel": "bpmn-metamodel" },
+  "target": { "metamodel": "text" }
+}

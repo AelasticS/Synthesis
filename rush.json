@@ -403,6 +403,22 @@
     {
       "packageName": "relational-metamodel",
       "projectFolder": "examples/eer-to-sql/metamodels/relational"
+    },
+    {
+      "packageName": "workflow-metamodel",
+      "projectFolder": "examples/workflow/metamodels/workflow"
+    },
+    {
+      "packageName": "bpmn-metamodel",
+      "projectFolder": "examples/workflow/metamodels/bpmn"
+    },
+    {
+      "packageName": "workflow-to-bpmn",
+      "projectFolder": "examples/workflow/workflow-to-bpmn"
+    },
+    {
+      "packageName": "bpmn-to-mermaid",
+      "projectFolder": "examples/workflow/bpmn-to-mermaid"
     }
 
     // {

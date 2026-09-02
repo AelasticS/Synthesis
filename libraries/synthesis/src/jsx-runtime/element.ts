@@ -68,7 +68,10 @@ export type Super<P extends {}, R extends g.IModelElement> =
   | CpxTemplate<P, R>;
 
 export type ConnectionInfo = {
-  propName?: string; // the name property used to connect with, if it exist
+  // The property used to connect with, if any. An array declares ordered
+  // candidates: the first property present on the parent's type wins,
+  // so one JSX tag can connect differently under different parents.
+  propName?: string | string[];
   isParentProp: boolean; // is it a parent property
   isReconnectAllowed: boolean; // is connection allowed if object is already connected
   textContentAllowed: boolean; // are textual sub-elements allowed
@@ -81,7 +84,7 @@ export type ConnectionInfo = {
   allowedAsTopLevelElement?: boolean;
 };
 
-export function defaultConnectionInfo(propName?: string): ConnectionInfo {
+export function defaultConnectionInfo(propName?: string | string[]): ConnectionInfo {
   return {
     propName: propName,
     isParentProp: true,
@@ -91,7 +94,7 @@ export function defaultConnectionInfo(propName?: string): ConnectionInfo {
   };
 }
 
-export function allowedAsTopLevelElement(propName: string): ConnectionInfo {
+export function allowedAsTopLevelElement(propName: string | string[]): ConnectionInfo {
   return { ...defaultConnectionInfo(propName), allowedAsTopLevelElement: true };
 }
 
@@ -450,8 +453,32 @@ export class ExprNode<P extends WithRefProps<g.IModelElement>, R = P> {
         }
 
         if (childElement.connectionInfo) {
-          const propName = childElement.connectionInfo.propName;
-          // connect parent and child if propName exit
+          const declared = childElement.connectionInfo.propName;
+          const candidates =
+            declared === undefined ? [] : Array.isArray(declared) ? declared : [declared];
+          // connect parent and child via the first AVAILABLE candidate the
+          // parent's type declares: an occupied single-valued property that
+          // refuses reconnection is skipped in favor of the next candidate
+          // (e.g. flow endpoints connecting into from, then to). The last
+          // viable candidate is never skipped, so refusal still surfaces.
+          const viable = candidates.filter((p) => mapPropTypes.get(p) !== undefined);
+          let propName: string | undefined;
+          for (let i = 0; i < viable.length; i++) {
+            const cand = viable[i];
+            const category = t.findTypeCategory(mapPropTypes.get(cand)!);
+            const occupied = (parent.instance as Record<string, unknown>)[cand];
+            const isLast = i === viable.length - 1;
+            if (
+              category === "Object" &&
+              occupied &&
+              !childElement.connectionInfo.isReconnectAllowed &&
+              !isLast
+            ) {
+              continue;
+            }
+            propName = cand;
+            break;
+          }
           let propType = propName !== undefined ? mapPropTypes.get(propName) : undefined;
           if (propType)
             cnParentChild(
@@ -461,7 +488,7 @@ export class ExprNode<P extends WithRefProps<g.IModelElement>, R = P> {
               childModelElement,
               childElement.connectionInfo.isReconnectAllowed
             );
-          else if (propName !== undefined) {
+          else if (candidates.length > 0) {
             // Opt-in: the JSX tag may declare allowedAsTopLevelElement to accept
             // missing propName on a Namespace parent when the child is a ModelElement
             // (already pushed into parent.elements by store.newModelElement).
@@ -470,7 +497,7 @@ export class ExprNode<P extends WithRefProps<g.IModelElement>, R = P> {
             const childIsModelElement = childElement.type.isOfType(g.ModelElement);
             if (!(opted && parentIsNamespace && childIsModelElement)) {
               throw new Error(
-                `Cannot connect child element of type "${childElement.type.fullPathName}" to parent "${parent.instance.name}" of type "${parent.type.fullPathName}": property "${propName}" is not declared in the parent's type schema. Fix the metamodel (add the property to the parent type) or the JSX tag declaration (use allowedAsTopLevelElement helper if the element is allowed at top level of a Namespace).`
+                `Cannot connect child element of type "${childElement.type.fullPathName}" to parent "${parent.instance.name}" of type "${parent.type.fullPathName}": property "${candidates.join('", "')}" is not declared in the parent's type schema. Fix the metamodel (add the property to the parent type) or the JSX tag declaration (use allowedAsTopLevelElement helper if the element is allowed at top level of a Namespace).`
               );
             }
           }

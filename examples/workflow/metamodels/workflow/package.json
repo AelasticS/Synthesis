@@ -1,0 +1,38 @@
+{
+  "name": "workflow-metamodel",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Block-structured workflow metamodel shared by the workflow example suite",
+  "author": "Sinisa Neskovic",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./model": {
+      "types": "./dist/workflow.meta.model.type.d.ts",
+      "default": "./dist/workflow.meta.model.type.js"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "model": ["dist/workflow.meta.model.type.d.ts"]
+    }
+  },
+  "dependencies": {
+    "@aelastics/types": "workspace:*",
+    "@aelastics/synthesis": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "~5.9.3"
+  }
+}

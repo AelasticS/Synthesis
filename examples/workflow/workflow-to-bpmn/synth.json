@@ -1,0 +1,12 @@
+{
+  "kind": "m2m",
+  "entry": "./dist/transformation.js",
+  "exportName": "WorkflowToBpmnTransformation",
+  "source": {
+    "metamodel": "workflow-metamodel"
+  },
+  "target": {
+    "metamodel": "bpmn-metamodel",
+    "components": "bpmn-metamodel"
+  }
+}

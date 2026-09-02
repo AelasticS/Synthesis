@@ -76,6 +76,21 @@ overall version history.
 
 ### Added
 
+- **`@SpecPoint` pure-dispatch mode.** A specialization point whose base
+  rule returns nothing now returns the chosen option's result as is:
+  one expression, an array of expressions, or any other value. A base
+  skeleton combined with an array-returning option (or a base returning
+  an array) raises a clear error instead of corrupting state. The
+  existing skeleton-merge behavior is unchanged, and `@E2E` already
+  traces array results. Closes the engine's own TODO on array handling.
+- **JSX connection property candidates.** A component's parent-property
+  connection may declare ordered candidates (`propName: string[]`); the
+  first available property declared on the parent's type wins (an
+  occupied single-valued slot that refuses reconnection is skipped, so
+  flow endpoints can connect into `from`, then `to`), so one tag can
+  connect into different containments under different parents (a
+  workflow activity landing in a process body or a block's children).
+  Single-string connections behave exactly as before.
 - **Top-level `examples/` catalog of installable transformation
   packages.** Each example is shaped like a package an author would
   publish: TypeScript sources, a `synth.json` manifest, a sample model,

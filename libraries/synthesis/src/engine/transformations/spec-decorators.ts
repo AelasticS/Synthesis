@@ -46,7 +46,7 @@ export const SpecPoint = () => {
     guardSpecPoint(descriptor.value, propertyKey);
 
     // Read from descriptor.value (not target[propertyKey]) to preserve any inner decorator wrappers.
-    const original: (...a: any[]) => ExprNode<any> = descriptor.value;
+    const original: (...a: any[]) => ExprNode<any> | ExprNode<any>[] | undefined | null = descriptor.value;
 
     descriptor.value = function (this: abstractM2M<any, any>, ...args: any[]) {
       const a: IModelElement = args[0];
@@ -62,24 +62,43 @@ export const SpecPoint = () => {
         throw new Error(`No specialized method found`);
       }
 
-      // TODO handle if orgResult and specResult are arrays
-      // TODO check typing for orgResults and specResult correspondingly
-
-      // get result form original method
+      // get result from original method (the base skeleton, if any)
       let orgResult = original.apply(this, args);
       // get result from specialized method
-      let specResult: ExprNode<IModelElement> = (this as any)[option.specMethod](
-        ...args
-      );
-      // connect corresponding results (elements)
-      orgResult.subElement = specResult;
-      orgResult.isAbstract = true;
+      let specResult = (this as any)[option.specMethod](...args);
 
       // Signal to @E2E (outer) that specialization occurred — analogous to VarPoint's lastVarResolution
       this.context.lastSpecResolution = {
         optionName: option.specMethod,
         sourceTypeName: aType.name,
       };
+
+      // A point whose base returns nothing is a pure dispatcher: the
+      // option's result is returned as is (one expression, an array of
+      // expressions, or any other value). The merge below exists solely
+      // to combine a base skeleton with an option refinement.
+      if (orgResult === undefined || orgResult === null) {
+        return specResult;
+      }
+
+      if (Array.isArray(orgResult)) {
+        throw new Error(
+          `@SpecPoint '${propertyKey}': the base rule returned an array; a base skeleton ` +
+            `must be a single expression. Return nothing to make the point a pure dispatcher.`
+        );
+      }
+
+      if (Array.isArray(specResult)) {
+        throw new Error(
+          `@SpecPoint '${propertyKey}': option '${option.specMethod}' returned an array, ` +
+            `but the point provides a base skeleton to merge. Make the point a pure ` +
+            `dispatcher (base returns nothing) to allow array results.`
+        );
+      }
+
+      // connect corresponding results (elements)
+      orgResult.subElement = specResult;
+      orgResult.isAbstract = true;
 
       // return result from original method
       return orgResult;
