@@ -1,9 +1,12 @@
 # The flagship eer-to-sql suite: full EER to relational
 
-Design record for approval, drafted 2026-09-02, amended the same day
-with the trace capture stage. Nothing is built; this document is the
-proposal for the dedicated flagship session that the consolidation
-reserved ("rich FK redesign stays reserved for the flagship session").
+Design record, drafted 2026-09-02, substantially amended 2026-09-04
+after the design discussion (outcome-shaped trace model, the rule
+granularity principle, the namespace feature, metamodel-core hygiene,
+platform alignment). Nothing is built beyond this record; stage 0 is
+this document on branch feat/eer-to-sql-flagship. The consolidation
+reserved this session ("rich FK redesign stays reserved for the
+flagship session").
 
 The flagship is a revision of the existing eer-to-sql example suite in
 place, not a new suite: the relational metamodel package gains the rich
@@ -13,9 +16,6 @@ The tutorial suite (eer-tutorial and rel-tutorial metamodels) is
 untouched; tutorial-simple and flagship-rich deliberately coexist.
 
 ## What the flagship must show
-
-Agreed requirements, carried from the 2026-08-29 and 2026-09-02
-sessions:
 
 - A rich relational metamodel: real `ForeignKey` and `Index` concepts,
   composite foreign keys. The old v2 variant files are raw material
@@ -32,11 +32,10 @@ sessions:
   (signature-preserving, columns step in, columns step out), so a future
   `withHistoryColumns` can stack without design changes; that is the
   whole concession to history in v1.
-- The trace story (agreed 2026-09-02): the decision-aware trace model
-  must capture, for each rule, which configuration option was selected,
-  including variability points fired inside other rules, and the CLI
-  must be able to persist the trace model. Engine and CLI groundwork in
-  stage 1; see the trace capture section.
+- The trace story (agreed 2026-09-03): the trace model records
+  OUTCOMES: one entry per executed rule, and every resolved
+  configuration option is recorded, always. The CLI can persist the
+  trace model. See the trace section.
 
 ## Layout (unchanged)
 
@@ -45,7 +44,7 @@ examples/eer-to-sql/
   metamodels/
     eer/               eer-metamodel: repaired where authoring is broken
     relational/        relational-metamodel: rich content replaces legacy
-  eer-to-relational/   m2m, all template kinds, six design issues
+  eer-to-relational/   m2m, all template kinds, seven design issues
   rel-to-sql-ddl/      m2t, reworked for constraints and indexes
 ```
 
@@ -66,8 +65,8 @@ conventions:
 Changes against the legacy content: `Column.isForeignKey` and
 `Column.references` (string) are deleted, replaced by the real
 `ForeignKey` concept. Changes against the v2 raw material: `Domain` is
-dropped and `Column` keeps a plain SQL `type` string (see open decision
-5); composite primary keys stay `isKey` booleans on several columns, no
+dropped and `Column` keeps a plain SQL `type` string (open decision 5);
+composite primary keys stay `isKey` booleans on several columns, no
 separate PrimaryKey concept (the DDL generator assembles the
 constraint).
 
@@ -80,73 +79,94 @@ first-available semantics):
 - `Column` connects via candidates `["columns", "fkColumn", "refColumn"]`:
   inside a `Table` it is a contained column; inside a
   `ForeignKeyColumn` the first `Column` reference fills `fkColumn`, the
-  second fills `refColumn` (the same first-available mechanics as
-  `Flow.from`/`Flow.to` in bpmn-metamodel); inside an `Index` it
-  appends to the link array `columns`. One component serves authoring
-  and the serializer's declared-type emission alike.
+  second fills `refColumn` (the `Flow.from`/`to` mechanics); inside an
+  `Index` it appends to the link array `columns`.
 - `referencedTable` is authored as a prop
-  (`referencedTable={<Table $refByName=.../>}`), like `domain` on EER
-  roles today. Risk checkpoint 2 verifies the serializer round-trip.
+  (`referencedTable={<Table $refByName=.../>}`). Risk checkpoint 2
+  verifies the serializer round-trip.
 - Single links (`fkColumn`, `refColumn`, `referencedTable`) are
-  type-level `t.optional` for the same creation-order reason as
-  `Process.body` and `Flow.from`/`to` in the workflow suite; semantic
-  mandatoriness is enforced by the transformation and checked by the
-  DDL generator.
+  type-level `t.optional` for the creation-order reason established by
+  `Process.body` and `Flow.from`/`to`; semantic mandatoriness is
+  enforced by the transformation and checked by the DDL generator.
+- Under open decision 7, `Table` is declared a namespace
+  (`declareNamespace(Table)`), so column names are unique per table,
+  not per model.
 
-Naming conventions (element names are unique per model, not per table,
-so every derived name is qualified):
+### Column naming for copies and foreign keys
 
-| Element | Name |
-| --- | --- |
-| foreign key column | `<rel>_<refEntity>Id_FK` (existing convention) |
-| weak entity's copy of an owner key column | `<owner>_<keyColumn>` |
-| foreign key | `FK_<ownerTable>_<rel or role>` |
-| foreign key column pair | `<fk name>_<n>` |
-| index | `IX_<fk name>` |
-| discriminator column (SingleTable strategy) | `<rootTable>_type` |
-| audit columns | `<table>_createdBy`, `<table>_createdAt` (fixed by the confirmed template) |
+Naming is collision-driven and itself a design option (the
+`ForeignKeyColumnNaming` issue), not an accumulating convention:
 
-All emitted names pass through the `NamingConvention` issue's
-`applyNaming`, as today.
+- `ShortNames` (default under namespaces): a copied or foreign key
+  column keeps its source column's name; a prefix appears only where it
+  is the meaning (`A.id` arriving in `B` becomes `a_id`, once), and
+  further hops copy the name as it stands. When one table would receive
+  two equally named columns (two foreign keys to the same target, a
+  diamond), a deterministic numbered suffix disambiguates (`a_id_1`,
+  `a_id_2`, in role order); relationship foreign keys additionally
+  carry the relationship name, as today. `ShortNames` is only sound
+  with per-table name scopes, so it presupposes decision 7.
+- `TablePrefixed`: every hop prefixes the owner table's name; unique by
+  construction in a flat model, verbose (`b_a_id`). The only sound
+  default if decision 7 defers namespaces.
+
+Fixed names either way: audit columns per the confirmed template;
+discriminator column `<rootTable>_type` under SingleTable. All emitted
+names pass through the `NamingConvention` issue's `applyNaming`.
+The uniqueness invariant: the store enforces uniqueness per scope
+(duplicate name error), the transformation disambiguates
+deterministically, never silently.
 
 ## The EER side
 
 The eer-metamodel already has everything the flagship needs: `Kernel`,
 `Weak` (with `WeakMapping`), `Subtype`/`Specialization` (with
 `SpecializationMapping`), `Relationship` with roles, `Aggregation`.
-No new concepts.
+Under open decision 8, `Entity` additionally gains `isAbstract`
+(optional boolean, a domain fact).
 
-However, only the Kernel/Attribute/Relationship authoring path is
-exercised by the current sample. The components file connects
-`Specialization` via a parent property `"specializations"` that no type
-declares, and `WeakMapping` via `undefined`; those paths have likely
-never rendered. Stage 1 is therefore a repair pass: an authoring test
-that renders every EER concept, with metamodel and component fixes as
-needed (fix the metamodel, not the sample).
+Only the Kernel/Attribute/Relationship authoring path is exercised by
+the current sample. The components file connects `Specialization` via a
+parent property no type declares, and `WeakMapping` via `undefined`;
+those paths have likely never rendered. The EER repair stage is
+therefore an authoring test covering every concept, with metamodel and
+component fixes as needed (fix the metamodel, not the sample).
 
 ## The design space (decision model)
 
-The decision model `RelationSchemaDesign` grows from three issues to
-six. Existing issues and bindings are retained unchanged:
+`RelationSchemaDesign` grows from three issues to seven:
 
 | Issue | Kind, bound to | Options (default first) |
 | --- | --- | --- |
 | `NamingConvention` | ModelIssue | `SnakeCase`, `CamelCase` (retained) |
-| `PrimaryKeyStrategy` | ElementIssue on `Attribute` | `UseAutoIncrement`, `UseManualIncrement` (retained; autoincrement is suppressed by rule logic for composite keys) |
+| `PrimaryKeyStrategy` | ElementIssue on `Attribute` | `UseAutoIncrement`, `UseManualIncrement` (retained; autoincrement suppressed by rule logic for composite keys) |
 | `OneToManyStrategy` | ElementIssue on `Relationship`, 1:N condition | `JoinTable`, `ForeignKey` (retained; now emits real `ForeignKey` elements) |
 | `TableAuditing` | ElementIssue on `Entity` | `AuditColumns`, `NoAuditColumns` (new; open decision 1 covers granularity and default) |
 | `InheritanceStrategy` | ElementIssue on `Specialization` | `JoinedTables`, `SingleTable`, `TablePerClass` (new, JPA-style, per hierarchy) |
 | `IndexOnForeignKey` | ModelIssue | `IndexAllForeignKeys`, `NoForeignKeyIndexes` (new; open decision 2 covers granularity) |
+| `ForeignKeyColumnNaming` | ModelIssue | `ShortNames`, `TablePrefixed` (new; defaults per decision 7, see naming section) |
 
 The binding model gains: `TableAuditing` bound to `Entity` (no
-condition), `InheritanceStrategy` bound to `Specialization`. ModelIssues
-need no binding, as with `NamingConvention` today.
+condition), `InheritanceStrategy` bound to `Specialization`.
+ModelIssues need no binding.
 
-## withAuditColumns, the confirmed form
+## The granularity principle (convention)
 
-Recorded verbatim as agreed on 2026-09-02 (the user re-pasted this form
-as confirmation). Zero-argument steps compose Approval-style: qualifier
-first, then a columns step in, a columns step out:
+The trace records rule executions plus the configuration options that
+selected them. Trace detail is therefore the AUTHOR'S dial: behavior
+factored into rules is recorded; behavior inlined into a rule's
+template is not. Choices that produce model elements should be
+rule-shaped (a stacked `@E2E` `@VarPoint`), so their entries carry real
+targets; choices that return plain values (booleans, strings) cannot be
+rules and are covered by the recording safety net (see the trace
+section). The flagship deliberately factors fine-grained rules, being
+the detail showcase.
+
+## withAuditColumns, the confirmed form, applied as a rule pair
+
+The confirmed zero-argument form, recorded verbatim as agreed
+2026-09-02 (qualifier first, then a columns step in, a columns step
+out):
 
 ```tsx
 withAuditColumns = (table: string) => (columns: () => ExprNode<rmT.IColumn>[]) =>
@@ -157,158 +177,362 @@ withAuditColumns = (table: string) => (columns: () => ExprNode<rmT.IColumn>[]) =
   ]
 ```
 
-It lives as a module-level export of the transformation package (it is
-pure target-domain: only relational `Column` expressions and a name, no
-source concepts), imported by the transformation class.
-
-The combination with the configuration issue: the `TableAuditing`
-VarPoint's options have identical signatures and return a columns step,
-so auditing is literally a design option choosing which step builds the
-table's columns:
+It lives as a module-level export of the transformation package (pure
+target-domain), used inside the audited option of a rule pair, per the
+granularity principle: the audited and plain column building are RULES
+selected by the configuration, so the choice has its own trace entry
+with real targets:
 
 ```tsx
 @E2E()
-@SpecPoint()
-entityToTable(e: em.IEntity): ExprNode<rmT.ITable> | undefined {
-  return undefined  // pure dispatch: Kernel, Weak, Subtype options below
-}
-
-@SpecOption("entityToTable", em.Kernel)
-kernelToTable(e: em.IKernel): ExprNode<rmT.ITable> {
-  const kernelColumns = () => e.attributes.map((a) => this.attributeToColumn(a))
-  const buildColumns = this.columnsStepFor(e, kernelColumns)
-  return <Table name={this.applyNaming(e.name)}>{buildColumns()}</Table>
-}
-
 @VarPoint("TableAuditing")
-columnsStepFor(e: em.IEntity, columns: () => ExprNode<rmT.IColumn>[]): () => ExprNode<rmT.IColumn>[] {
+tableColumns(e: em.IEntity): ExprNode<rmT.IColumn>[] {
   throw new Error("Not implemented VarOptions for VarPoint TableAuditing")
 }
 
-@VarOption("columnsStepFor", Option("AuditColumns"))
-auditedColumns(e: em.IEntity, columns: () => ExprNode<rmT.IColumn>[]) {
-  return withAuditColumns(this.applyNaming(e.name))(columns)
+@VarOption("tableColumns", Option("AuditColumns"))
+auditedColumns(e: em.IEntity) {
+  const base = () => e.attributes.map((a) => this.attributeToColumn(a))
+  return withAuditColumns(this.applyNaming(e.name))(base)()
 }
 
 @Default()
-@VarOption("columnsStepFor", Option("NoAuditColumns"))
-plainColumns(e: em.IEntity, columns: () => ExprNode<rmT.IColumn>[]) {
-  return columns
+@VarOption("tableColumns", Option("NoAuditColumns"))
+plainColumns(e: em.IEntity) {
+  return e.attributes.map((a) => this.attributeToColumn(a))
 }
 ```
 
-(The element is the VarPoint's first argument, which is what per-element
-resolution keys on. Which option is `@Default()` follows open
-decision 1; `@VarPoint` and `@SpecPoint` never share a method, the
-decorator guards forbid it, hence the separate `columnsStepFor` point.)
+Note under decision 7: the template's `table` qualifier argument exists
+only because of the flat name scope; with `Table` as a namespace the
+audit columns can be plain `created_by`/`created_at` and the qualifier
+becomes unnecessary. The confirmed form is NOT changed without the
+user's explicit re-confirmation of a simplified form.
 
 ## The transformation (eer-to-relational)
 
-`template(s)` assembles one `<RelSchema>` in fixed pass order, so grafts
-always find their targets: kernels, then weak entities, then subtypes,
-then relationships, then indexes.
+### The partition
 
-- `entityToTable` is the specialization point (pure dispatch, engine
-  feature ee98d25): options for `Kernel`, `Weak`, `Subtype`.
-- Kernel: table with attribute columns through the audit step,
-  `PrimaryKeyStrategy` decides autoincrement for single-column integer
-  keys.
-- Weak: table with copies of the owner's key columns (qualified,
-  `isKey`, forming the composite primary key together with the weak
-  entity's partial key) plus its own attribute columns through the audit
-  step, and one composite `ForeignKey` to the owner built by the shared
-  `foreignKeyTo` helper. A weak entity whose owner has a composite key
-  is the composite-foreign-key showcase.
-- Subtype: dispatches on the hierarchy's `InheritanceStrategy` (a
-  VarPoint keyed on the `Specialization` element):
-  - `JoinedTables` (default): own table with own columns; primary key
-    columns are copies of the root's key that are simultaneously a
-    `ForeignKey` to the root table.
-  - `SingleTable`: no own table; own attributes are grafted into the
-    root's table via `<Table $refByName>` as nullable columns, plus one
-    discriminator column `<rootTable>_type` grafted once per hierarchy.
-  - `TablePerClass`: own table with copies of the root's columns plus
-    own columns; no foreign key.
+There is no rule engine and no rule priority: rules run when the
+template calls them, so authority conflicts are dissolved at the
+composition site by partitioning the source elements. Every element
+belongs to exactly one pass:
+
+```tsx
+const entities = els.filter((el) =>
+  store.isTypeOf(el, em.Entity) && !store.isTypeOf(el, em.Subtype))
+const hierarchies = els.filter((el) => store.isTypeOf(el, em.Specialization))
+const relationships = els.filter((el) => store.isTypeOf(el, em.Relationship))
+```
+
+"Every entity becomes a table" is really "every entity the template
+routes to the entities pass becomes a table": kernels and weak
+entities, hierarchy roots included. Every Subtype belongs exclusively
+to its hierarchy's rule. The partition is machine-checked:
+`entityToTable`'s pure-dispatch SpecPoint declares options ONLY for
+`Kernel` and `Weak`, and dispatch is total, so a leaked Subtype fails
+loudly.
+
+### Emission order: topological sort over units
+
+Units are the table-producing rule invocations: `entityToTable(e)` per
+kernel and weak, `hierarchyToTables(h)` per specialization. Edges: a
+weak entity's unit depends on its owner's unit; a hierarchy's unit
+depends on its root's unit; transitively this covers weak-of-weak,
+weak-owned-by-subtype, and any depth. `template` orders the units with
+a plain Kahn sort (repeatedly emit a unit with no unprocessed
+dependencies; a leftover with none is a cycle, reported as a clear
+transformation error naming the cycle; ties broken by source order for
+deterministic output). This is a small pure ordering helper feeding
+direct JSX composition, the same category as `baseOf` in
+workflow-to-bpmn, not a planning phase. The relationships pass runs
+after all units, the index pass last; neither needs internal ordering.
+
+### The rules
+
+- `entityToTable`: pure-dispatch SpecPoint, options `kernelToTable` and
+  `weakToTable`. Both build their columns through the `tableColumns`
+  rule pair (auditing) and `attributeToColumn` (per attribute,
+  `PrimaryKeyStrategy` inside).
+- Weak: copies of the owner's key columns (named per the
+  `ForeignKeyColumnNaming` issue, `isKey`, forming the composite
+  primary key with the partial key), own attribute columns, and one
+  composite `ForeignKey` to the owner via `foreignKeyTo`.
+- `hierarchyToTables`: stacked `@E2E` `@VarPoint("InheritanceStrategy")`
+  whose SOURCE ELEMENT is the Specialization, so the strategy
+  resolution rides a real entry with real targets. It delegates per
+  subtype to traced sub-rules. Attribute accounting per strategy, the
+  invariant being that every source attribute is MAPPED by exactly one
+  rule and anything further is a copy created by the hierarchy rule:
+
+| Strategy | Root's attributes | Subtype's attributes |
+| --- | --- | --- |
+| `JoinedTables` (default) | Mapped once by the root's rule into the root table; the hierarchy copies only the KEY columns into each subtype table (PK plus FK to the root) | Mapped into the subtype's own table |
+| `SingleTable` | Mapped once by the root's rule, which stays ignorant of the hierarchy | Grafted by the hierarchy rule into the root's table as nullable columns, plus one discriminator column; subtypes get NO tables |
+| `TablePerClass` | Mapped once by the root's rule AND copied into each subtype table | Mapped into the subtype's own table |
+
+  Copies come from their own small rule (`copiedColumn`), never by
+  re-invoking `attributeToColumn` (whose name derives from the
+  attribute alone and would collide); the trace then shows original
+  mapping and copies as distinct entries. Under SingleTable the
+  hierarchy rule produces grafts into the root's table via
+  `<Table $refByName>`, the same cooperation mechanism the FK rule
+  uses; pass order guarantees the target exists. Under open decision 8,
+  an abstract root gets no own table under TablePerClass (one more
+  exclusion in the entities filter).
 - Relationships: M:N always a join table (two foreign keys,
-  composite-aware); 1:N per `OneToManyStrategy` (`ForeignKey` grafts
-  columns plus a `ForeignKey` element into the N-side table,
-  `JoinTable` builds a join table); 1:1 as a foreign key on the
-  optional side with `isUnique`. A relationship whose target is a weak
+  composite-aware); 1:N per `OneToManyStrategy`; 1:1 as a foreign key
+  on the optional side with `isUnique`. A relationship targeting a weak
   entity produces a composite foreign key naturally.
-- `foreignKeyTo(ownerTableName, refEntity, qualifier)` is the one
-  helper that builds foreign keys everywhere: it emits the qualified
-  fk columns (types mirroring the referenced key columns) and the
-  `<ForeignKey>` element whose `ForeignKeyColumn` children pair each fk
-  column with its referenced column by `$refByName` (flat name scope
-  makes column references unambiguous).
+- `tableFor(entity)`: the shared helper resolving "the table that holds
+  this entity's rows": own table for kernels and weaks; for a subtype,
+  whatever its hierarchy's strategy dictates (own table, or the root's
+  under SingleTable). `foreignKeyTo` and the topological edges are both
+  expressed against `tableFor`, so a strategy choice reroutes foreign
+  keys and dependencies consistently.
+- `foreignKeyTo(ownerTable, refEntity, qualifier)`: emits the fk
+  columns (types mirroring the referenced key columns, names per the
+  naming issue) and the `<ForeignKey>` element whose
+  `ForeignKeyColumn` children pair fk and referenced columns by
+  reference.
 - Index pass: under `IndexAllForeignKeys`, one `<Index>` per emitted
   foreign key over its fk columns, grafted into the owner table.
 - Domain-to-SQL-type mapping stays the fixed `getColumnType` logic.
 
-Everything else about the class (DecisionAwareM2M base, constructor
-shape, `@M2M()`) is as today. No `isTypeOf` dispatch outside the
-`template` method's element filtering; specialization and configuration
-machinery carry all variability.
+Auditing composes: `tableColumns` is consulted once per table-producing
+rule with that table's entity as the element; SingleTable subtypes are
+never consulted (no table). Scope notes: v1 assumes concrete hierarchy
+roots except where decision 8 adds the abstract case; v1 samples keep
+hierarchies one level deep (mixing strategies across nested hierarchies
+is a stated limitation, like Aggregation per open decision 4).
 
-## Trace capture: engine and CLI groundwork
+## The trace model, outcome-shaped
 
-Agreed 2026-09-02 after reviewing the engine. What exists today: the
-directly stacked case (`@E2E()` above `@VarPoint()`) is fully traced,
-`VarPointTraceEntry` carries the rule, the chosen option, and the
-per-element choices, `SpecPointTraceEntry` likewise for specialization,
-and `DecisionAwareTraceModel` records which configuration model the run
-used. Two gaps make that insufficient for the flagship:
+Agreed 2026-09-03, superseding the first amendment's frame-based
+proposal. The trace records outcomes, not execution mechanics: nothing
+about how dispatch selected a rule, no entries for abstract points,
+no repetition of a choice per consulting call site.
 
-- Nested resolutions are discarded by design: when a VarPoint fires
-  inside a rule instead of being directly wrapped by its `@E2E`,
-  `consumePointResolutions` (decorator-guards.ts) clears it and keeps
-  only the wrapping rule's own resolution, and `lastVarResolution` is a
-  single slot, so two nested VarPoints in one rule overwrite each
-  other. Today this already loses `PrimaryKeyStrategy` and
-  `NamingConvention`; in the flagship, `TableAuditing` and
-  `InheritanceStrategy` both fire inside SpecOptions, so the trace
-  would miss most of the design space.
-- The CLI never persists the trace: the engine renders the trace model
-  into the run's ephemeral store and dumps its JSX through console.log,
-  then everything is discarded. There is no flag to export it.
+What exists today, for the record: the directly stacked case (`@E2E`
+over `@VarPoint`) is traced with option and choices; nested resolutions
+are deliberately discarded (`consumePointResolutions`), the resolution
+slot is single, the recorded option name is the option METHOD name, and
+the CLI never persists the trace (rendered into the run's ephemeral
+store, dumped through console.log).
 
-The groundwork, stage 1 of the plan:
+### The shape
 
-- Engine: per-rule resolution frames replace the single slot. `@E2E`
-  pushes a frame on entry; every point resolution fired during the call
-  is recorded in the innermost frame; on exit the rule's trace entry
-  carries all of them (issue name, chosen option, choices). The
-  directly stacked case becomes the one-resolution special case.
-  Attribution is per innermost frame and therefore honest:
-  `PrimaryKeyStrategy` lands on `attributeToColumn`'s entry,
-  `TableAuditing` and `InheritanceStrategy` on `entityToTable`'s,
-  `NamingConvention` on whichever rule called `applyNaming`.
-- Trace metamodel: the base trace entry gains a `resolutions`
-  containment (`VariabilityResolution`: issue name, option name,
-  choices); the existing `VarPointTraceEntry` and `SpecPointTraceEntry`
-  subtypes stay for the directly stacked cases.
-- CLI: `transformation run --trace <ref>` writes the trace model to the
-  workspace the way `--out` writes the target model, for m2m and m2t
-  runs alike. The unconditional console.log dump of the trace JSX in
-  abstractM2M goes away in the same change (the CLI already has to wrap
-  it today).
-- Engine tests for frame attribution (nested VarPoint, VarPoint inside
-  SpecOption, two VarPoints in one rule), a CLI test for `--trace`,
-  CHANGELOG entry, own commit, full gates.
+- ONE entry kind. An entry: source element, `rule` (the executed
+  concrete method, e.g. `kernelToTable`, `joinedHierarchy`; that an
+  abstract point dispatched there is not recorded, the name is the
+  record), targets (the rule's returned roots), and `Resolution`
+  children. `VarPointTraceEntry`, `SpecPointTraceEntry`, and `ruleType`
+  are retired.
+- `Resolution`: issue name and option name in DECISION-MODEL language
+  (`Option("...")` carries its declared name into the registration), a
+  reference to the configuration's Choice element or `byDefault: true`,
+  and an OPTIONAL element reference for consultations scoped to an
+  element other than the entry's source.
+- Attribution: a resolution (issue, element) rides the entry whose
+  source is that element when one exists; otherwise it sits at model
+  level with an explicit element reference. Global (ModelIssue)
+  resolutions are recorded once, at model level. Design guidance: bind
+  each ElementIssue to an element some rule transforms and the trace
+  stays fully regular (the flagship achieves this via
+  `hierarchyToTables`).
+- The two-tier guarantee: every resolved option is recorded, always.
+  Tier one, rule-shaped choices (like `tableColumns`) carry their
+  resolution on their own entry with real targets. Tier two, non-rule
+  choices (`PrimaryKeyStrategy` a boolean, `NamingConvention` a
+  string): each VarPoint firing records one fact (issue, element or
+  global, option, choice or default) into a per-run map, deduplicated
+  (resolution is deterministic per issue and element), attached at
+  trace assembly per the attribution rule. This replaces today's
+  silent discard.
+- Trace references are FULL PATHS derived from the actual created
+  elements (never reconstructed as model path plus name), which also
+  makes them namespace-correct under decision 7.
 
-## rel-to-sql-ddl rework
+### Forward compatibility for incremental transformation
 
-The m2t transformation follows the metamodel:
+The trace's second purpose (user requirement): supporting future
+incremental transformation, per the design notes now merged to main at
+`design/synchronizing-transformations/` (MobX-inspired; the store is
+already MobX-observable end to end, so automatic per-rule read-set
+tracking is feasible later with no rule-code changes). The outcome
+trace is the right spine but not sufficient alone (cross-element and
+collection-membership reads are invisible), so v1 includes now, at
+near-zero cost:
 
-- CREATE TABLE with column lines (type, NOT NULL, AUTOINCREMENT) and a
-  table-level `PRIMARY KEY (col, ...)` clause, composite-aware.
-- Named foreign keys as `ALTER TABLE ... ADD CONSTRAINT <fk> FOREIGN KEY
-  (cols) REFERENCES <table> (cols)` in a separate constraints section,
-  because foreign keys can be circular (the lesson the m2t tutorial
-  already teaches).
-- `CREATE [UNIQUE] INDEX <ix> ON <table> (cols)`.
-- The `IdentifierQuoting` issue is retained unchanged; no new m2t
-  issues in v1.
+- stable entry identity: (executed rule name, source element path), not
+  timestamps;
+- the `Resolution` element reference and `byDefault` as above;
+- model-level slots: configuration reference (exists), source model
+  reference plus version/hash slot, transformation name plus version;
+- a RESERVED, empty-by-default `readSet` containment on the entry
+  (elements, properties, entry references, consulted issues), so tier
+  1/2 dependency data lands later without a metamodel migration;
+- optionally `parentRule` (the render walker knows the enclosing
+  entry).
+
+Full read-set capture is future work, not v1.
+
+### Per-element decision matching: a latent bug, fixed here
+
+Matching runs on `d.element.id === element.id`, but nothing in the
+mutable store path assigns `id`, so both sides are undefined and every
+ElementDecision matches every element. Invisible in the current example
+(one relationship), fatal for the flagship. Fix in the trace groundwork
+stage: match by object identity (the configuration's `element` is a
+link to the same store object), with path as the serialization-safe
+form; write the failing test first (two relationships, two different
+choices, assert divergence).
+
+### CLI: persisting the trace
+
+`transformation run --trace <ref>` writes the trace model to the
+workspace the way `--out` writes the target model, m2m and m2t alike.
+The trace metamodel gains a components subpath on `@aelastics/synthesis`
+(`./metamodels/trace`, uniform with decision/binding/configuration) so
+the write gate accepts its tags. With `--default-configs` the
+configuration is synthesized per run and the trace's config reference
+would dangle; recommendation: persist the effective configuration next
+to the trace. The engine's unconditional console.log dump of the trace
+JSX goes away in the same change.
+
+## The namespace feature (open decision 7)
+
+Analysis 2026-09-04 (recorded in memory; key evidence): hierarchical
+namespaces are HALF-BUILT. The store's name registry is keyed by full
+path, duplicate detection is path-scoped, the context has a working
+namespace stack; flatness comes from one commented-out renderer branch
+(element.ts:339-341, only Models are pushed). design/engine-follow-ups.md
+already records activation as a planned, deliberate decision.
+Difficulty medium, cleanly opt-in per concept.
+
+Settled semantics (user, 2026-09-04):
+
+- A reference is internally always a full path: a bare or relative
+  `$refByName` is canonicalized against the current namespace stack;
+  when not found under the innermost scope, resolution probes
+  progressively shorter prefixes outward to the model (each probe one
+  map lookup); innermost match wins, deterministic shadowing, no
+  ambiguity error needed. Absolute `//` references unchanged.
+- Namespace-ness is declared by CLASSIFICATION, not subtyping
+  (aelastics has single inheritance; `Entity` subtypes `ERConcept` and
+  could never also subtype a Namespace type): a helper in
+  metamodel-core, `declareNamespace(Type)`, registers the type in a
+  module-private WeakSet; the predicate `isNamespaceType(type)` walks
+  the supertype chain. Declared once, next to the type definition, in
+  the metamodel module (which already imports
+  `@aelastics/synthesis/metamodel`); nothing on instances, nothing
+  serialized, re-established at module load exactly like the types
+  themselves; correctness rests on the type-identity invariant the CLI
+  loader already enforces.
+- Consequently the `Namespace` TYPE is removed entirely (see hygiene):
+  `declareNamespace(Model)` in core is the only base declaration.
+
+If adopted for the flagship: `Table` is declared a namespace (columns
+unique per table, natural SQL names, `ShortNames` naming default), the
+`Entity` declaration on the EER side is optional (sub-decision), and
+the confirmed `withAuditColumns` qualifier becomes unnecessary pending
+the user's re-confirmation of a simplified form. If deferred: the
+flagship ships flat with `TablePrefixed` naming, and namespaces become
+their own later workstream.
+
+## Metamodel-core hygiene
+
+Agreed in substance 2026-09-04 (property-by-property usage analysis in
+memory). The core shrinks to what is actually load-bearing:
+
+```ts
+export const ModelElement = t.entity({
+  name: NameType,
+  label: t.optional(t.string),
+  description: t.optional(DescriptionType),
+  path: t.optional(t.string),
+  parentModel: t.optional(t.link(ModelSchema, "Model")),
+}, ['name'] as const, "ModelElement", ModelSchema)
+
+export const Model = t.subtype(ModelElement, {
+  elements: t.arrayOf(ModelElement),
+}, "Model", ModelSchema)
+declareNamespace(Model)
+```
+
+Dropped, with rationale:
+
+- `Namespace` type: replaced by classification (above); `elements`
+  moves to `Model`; `newNamespace` folds into element creation guarded
+  by the predicate; `INamespace` becomes `IModelElement`; behavior
+  neutral because nothing outside core ever subtyped it.
+- `RepositoryObject` chain (`ownerRepository`, `ownerPackage`,
+  `category`, `objectClassification`): zero readers; the fossil of
+  baking artifact management into the element type (see platform
+  alignment). The vestigial `objectClassification = "Model"` stamp in
+  the decision metamodel goes too.
+- `content` (mandatory, max 65535): zero readers; samples pass
+  `content=""` as pure ballast. Artifact serialization is envelope
+  content, not element data.
+- `MDA_level`: zero readers; superseded at the artifact level by the
+  conformsTo relationship (a model's level is its position in the
+  conformsTo chain, recorded between artifacts, not on elements).
+- `diagrams` plus diagram.type.ts: zero users; also on the wrong side
+  of the platform's model/diagram boundary (a diagram references model
+  elements from outside; the element graph does not contain diagrams).
+- `namespace` link on ModelElement: zero users; `path` serves.
+- `id`: dropped from the semantic core now (nothing assigns it; its
+  only consumer is the broken decision matching, fixed by
+  identity/path). Element identity legitimately returns later as a
+  STORAGE-ASSIGNED contract at the persistence boundary (platform
+  diagrams reference elements by id), never hand-authored.
+
+Kept: `name` (identity), `label` (store backfills the pre-normalization
+name; m2t displays it), `description` (used by decision models),
+`path`, `elements`/`parentModel` (ownership pair).
+
+Migration is mechanical: delete `content=""` and `MDA_level="M1"` from
+samples, fixtures, and tutorial snippets (docs build catches
+stragglers); rebuild through the gates.
+
+## Platform alignment
+
+Context recorded 2026-09-04: Synthesis is to be hosted by the user's
+agentic platform (platform-core repo; authoritative decision
+ADR-015-MODELS-AS-DMS-SUBTYPE.md, revised 2026-07-02). The ADR's base
+stance converges exactly with the cleaned core: "the base concept is
+the modeling element, and a model is a subtype of it (a composite
+element containing others)"; model is NOT a document; a model's
+serialized form lives in the models domain's own storage
+(model-per-row, a content column); diagrams are documents referencing
+elements from outside; the metamodel is data; the models domain
+reserves a transformation/generation seam that Synthesis is shaped to
+occupy.
+
+Binding rule going forward, the ENVELOPE rule: the semantic core
+describes what is INSIDE a model; everything about a model as an
+ARTIFACT (conformance, version, ownership, storage, relationships
+between models) lives in the envelope: today the `$synth` model header
+and `synth.json` manifest, tomorrow the models-domain row and registry
+edges. Nothing artifact-level returns to metamodel-core.
+
+Consequences noted for later, none blocking the flagship:
+
+- The CLI is one host, not the product: the load-bearing seam (loader
+  with type-identity preservation, renderModel, execute pipeline)
+  migrates from apps/cli into a documented library host API; the
+  platform backend becomes the second client. This is the named
+  successor of "publishing prep" in the deferred work list.
+- The type-identity invariant becomes a service contract: one loaded
+  metamodel module instance per metamodel version, versions pinned in
+  the envelope (the ADR's install discipline maps to versioned
+  metamodel packages).
+- The metamodel's dual representation (code module for execution,
+  metamodel-as-model for the registry) becomes a contract; the
+  namespace classification should eventually be expressible in
+  metamodel-as-model so the data form is complete.
+- Traces and configurations are models; the platform repository mints
+  the versions the incremental design needs (see trace section).
 
 ## Samples
 
@@ -323,129 +547,142 @@ final shape at build time):
 - M:N `writtenBy` between `Book` and `Author` (join table).
 - 1:N `borrows` between `Member` and `BookCopy` (the `OneToManyStrategy`
   playground; its target is weak, so the ForeignKey option emits a
-  composite foreign key).
+  composite foreign key; its source is a subtype, so `tableFor`
+  reroutes per the hierarchy's strategy).
 
-Plus one checked-in sample configuration model demonstrating non-default
-choices (per-table auditing, one alternative inheritance strategy, the
-FK option for `borrows`), run via `transformation run --config`.
+Plus one checked-in sample configuration model demonstrating
+non-default choices (per-table auditing, one alternative inheritance
+strategy, the FK option for `borrows`), run via
+`transformation run --config`.
 
 Verification asserts expected output the way the workflow suite did:
 for the default configuration and for the sample configuration, the
 exact table list and, for representative tables, the exact column,
-foreign key, and index sets, both after the m2m run and in the generated
+foreign key, and index sets, after the m2m run and in the generated
 DDL text. The trace model is asserted too, via `--trace`: the
-sample-configuration run's trace must record, per rule, the selected
-options (for example `AuditColumns` for `Person`, the `ForeignKey`
-option for `borrows`, `JoinedTables` for the `Person` hierarchy), which
-is the executable proof of the stage 1 groundwork.
+sample-configuration run's trace must record `AuditColumns` for
+`Person` on the `tableColumns` entry, `JoinedTables` on the hierarchy's
+entry, the `ForeignKey` option on the `borrows` entry, and the correct
+`byDefault` resolutions, which is the executable proof of the trace
+groundwork.
 
 ## Risk checkpoints
 
 Verified empirically before the approach is fixed, with fallbacks:
 
 1. EER authoring of `Specialization`, `Subtype`, `WeakMapping` renders
-   after the stage 1 repair pass. Fallback: adjust the eer-metamodel
-   schema (undeclared parent properties, missing inverses); samples are
-   never contorted around metamodel defects.
-2. The serializer round-trip of the rich relational model: links are
-   emitted with declared-type tags (`Column`, `Table`), so the
-   components' candidate lists must satisfy both authoring and import.
-   Checked in stage 2 with a hand-written rich model: render, export,
-   import (the bpmn `Node` lesson). Fallback: dedicated reference tags
-   (`FkColumn`, `RefColumn`) and, if `referencedTable` proves
-   problematic as a prop, a reference child component for it.
+   after the repair pass. Fallback: fix the metamodel, never the
+   sample.
+2. Serializer round-trip of the rich relational model: links are
+   emitted with declared-type tags, so the components' candidate lists
+   must satisfy authoring and import alike. Checked with a hand-written
+   rich model: render, export, import. Fallback: dedicated reference
+   tags (`FkColumn`, `RefColumn`); a reference child component for
+   `referencedTable` if the prop form proves problematic.
 3. First-available candidate connection fills `fkColumn` then
-   `refColumn` in child order (same mechanics as `Flow.from`/`to`).
-   Fallback as in 2.
-4. `@VarPoint` resolution keyed on `Specialization` elements (the
-   subtype rule passes the specialization, not the subtype, as the
-   element argument): confirm per-element choices resolve. Fallback:
-   key the issue on the root entity.
-5. Pure-dispatch `@SpecPoint` returning grafts and arrays for the
-   `SingleTable` strategy (engine already normalizes arrays in `@E2E`).
-6. Persisting the trace model through the CLI write gate: every emitted
-   tag must come from an exported components module, so the trace
-   metamodel needs a components subpath on `@aelastics/synthesis`
-   (uniform with the decision, binding, and configuration metamodels).
-   Checked in stage 1 by the `--trace` CLI test. Additive surface, no
-   fallback needed.
-7. Per-frame resolution attribution across decorator combinations
-   (nested VarPoint, VarPoint inside SpecOption, two VarPoints in one
-   rule): stage 1 engine tests fix the semantics before any flagship
-   rule relies on them.
+   `refColumn` in child order. Fallback as in 2.
+4. Per-element decision matching fixed by identity/path (the `id` bug):
+   failing test first, in the trace groundwork stage.
+5. Pure-dispatch SpecPoint returning grafts and arrays for the
+   SingleTable strategy (E2E already normalizes arrays).
+6. Persisting the trace model through the CLI write gate needs the
+   `./metamodels/trace` components subpath; checked by the `--trace`
+   CLI test. Additive surface.
+7. Namespace slices (if decision 7 adopts): renderer push/pop is
+   behavior-neutral for the existing corpus (nothing outside core is
+   declared a namespace until opt-in); reference canonicalization and
+   the hygiene removal of the Namespace type carry engine tests
+   (coexisting `//model/A/id` and `//model/B/id`, relative and
+   absolute refs, the `git grep -w Namespace` sweep).
 
-## Open decisions (for approval)
+## Open decisions
 
 1. `TableAuditing` granularity and default. Recommendation: per-element
-   `ElementIssue` bound to `Entity`, as previously recommended, since a
-   global boolean barely needs the machinery, and default
-   `AuditColumns`, so every default-configuration gate run exercises
-   the higher-order template and the sample configuration demonstrates
-   per-table opt-out. Alternative: default `NoAuditColumns` (the
-   conservative semantics), which pushes higher-order coverage entirely
-   onto the sample-configuration run.
-2. `IndexOnForeignKey` granularity. Recommendation: global `ModelIssue`
-   with default `IndexAllForeignKeys`; indexing foreign keys is a
-   schema-wide policy in practice, and a per-relationship issue would
-   double the configuration noise for little illustrative gain.
-   Alternative: `ElementIssue` on `Relationship`, mirroring
-   `OneToManyStrategy`.
+   ElementIssue on `Entity`, default `AuditColumns` so every
+   default-configuration gate run exercises the higher-order template.
+   Alternative: default `NoAuditColumns`.
+2. `IndexOnForeignKey` granularity. Recommendation: global ModelIssue,
+   default `IndexAllForeignKeys`. Alternative: per-element on
+   `Relationship`.
 3. `InheritanceStrategy` granularity. Recommendation: per-element on
-   `Specialization` (that is the JPA analogy: one strategy per
-   hierarchy). Alternative: global.
-4. Aggregation scope. Recommendation: out of v1 as a stated limitation
-   (like exclusive gateways in the workflow suite); the metamodel keeps
-   the concept, the sample does not use it, the transformation throws a
-   clear transformation error if it meets one. Alternative: map it like
-   a weak-style composite, which grows the rule set by roughly a third.
+   `Specialization` (the JPA analogy). Alternative: global.
+4. Aggregation scope. Recommendation: out of v1 as a stated limitation;
+   the transformation throws a clear error if it meets one.
+   Alternative: map it, growing the rule set by roughly a third.
 5. `Domain` in the relational metamodel. Recommendation: drop it;
-   `Column.type` stays a plain SQL type string, as in the legacy content
-   and the tutorial metamodel, keeping the DDL generator direct. The
-   v2 raw material's `Column.domain` indirection buys no configuration
-   payoff. Alternative: keep `Domain` for fidelity to classic relational
-   models, at the cost of an extra concept in every rule and in the DDL
-   generator.
-6. Sample domain. Recommendation: extend the existing Library sample as
-   sketched above, keeping continuity with the suite and the tutorial
-   narrative. Alternative: a fresh domain (for example
-   university or e-commerce) if Library feels overused.
+   `Column.type` stays a plain SQL type string. Alternative: keep the
+   v2 `Column.domain` indirection.
+6. Sample domain. Recommendation: extend the Library sample as
+   sketched. Alternative: a fresh domain.
+7. Namespaces in the flagship. Recommendation: adopt (engine slices in
+   the hygiene/groundwork stages, `Table` declared a namespace,
+   `ShortNames` naming default, simplified `withAuditColumns` pending
+   re-confirmation); sub-decisions: declare `Entity` on the EER side
+   too or not. Alternative: defer namespaces to their own workstream
+   and ship the flagship flat with `TablePrefixed`.
+8. `isAbstract` on EER `Entity`. Recommendation: a metamodel fact with
+   fixed strategy logic (TablePerClass skips the abstract root's
+   table); a design option for abstract-root table generation stays
+   v2 material. Alternative: model it as a configuration issue.
+
+Resolved during the discussion: bare-reference canonicalization
+semantics, full-path trace references, the classification mechanism,
+the FK naming rule set, the metamodel-core drop list (the user noted
+`MDA_level` "probably alright" to drop given the conformsTo argument),
+and the merge of design/synchronizing-transformations to main (done,
+1895b95).
 
 ## Execution order and gates
 
-On branch `feat/eer-to-sql-flagship` in a new worktree
-`/home/sinisa/Projects/Synthesis-wt-flagship`. Merge to main with
-`--no-ff` when green; do not push.
+On branch `feat/eer-to-sql-flagship` in the worktree
+`/home/sinisa/Projects/Synthesis-wt-flagship` (run `rush update` once
+before the first build). Merge to main with `--no-ff` when green; do
+not push. Stages, each gated (rush build with the "Operations
+succeeded" criterion, engine suite, CLI tests plus smoke, every example
+package smoke, docs build; never pipe gates through tail without
+pipefail):
 
-Stages, each gated (rush build with the "Operations succeeded"
-criterion, engine suite, CLI tests plus smoke, every example package
-smoke, docs build; never pipe gates through tail without pipefail):
-
-0. Record: this document committed on the branch; the open decisions
-   are resolved in place as the user answers them (none blocks
-   stage 1).
-1. Trace capture groundwork (see its section): engine per-rule
-   resolution frames, trace metamodel `resolutions` containment, CLI
-   `--trace`, engine and CLI tests, CHANGELOG, own commit. This comes
-   first because it is engine work the flagship's verification depends
-   on, the same ordering the workflow suite used for pure dispatch.
-2. EER repair pass: authoring test covering every EER concept,
-   metamodel and component fixes, existing smokes stay green.
-3. relational-metamodel rich rework: model, components with candidate
-   connections, regenerated metamodel-as-model, hand-written rich model
-   round-trip (risk checkpoints 2 and 3), version bump of dependents as
-   needed.
-4. eer-to-relational rework: decision model, binding model,
-   transformation, samples, sample configuration, expected-output and
+0. Record: this document on the branch (done); open decisions resolved
+   in place as the user answers them.
+1. Trace groundwork: outcome trace model (one entry kind, Resolution,
+   two-tier recording, retirements), decision-language option names,
+   full-path trace references, the per-element matching fix (id bug,
+   failing test first), forward-compatibility slots (identity,
+   versions, reserved readSet), CLI `--trace` with effective-config
+   persistence, removal of the console.log dump, engine and CLI tests,
+   CHANGELOG, own commit.
+2. Metamodel-core hygiene: `declareNamespace` classification +
+   predicate, `Namespace` type removal, `Model` re-base, the drop
+   list, decision-model stamp removal, sample/fixture/docs ceremony
+   sweep, engine tests. If decision 7 adopts namespaces: renderer
+   push/pop activation and reference canonicalization land here with
+   their tests.
+3. EER repair pass: authoring test covering every EER concept,
+   metamodel and component fixes; `isAbstract` if decision 8 confirms.
+4. relational-metamodel rich rework: model, components with candidate
+   connections, regenerated metamodel-as-model, hand-written rich
+   model round-trip; `declareNamespace(Table)` if decision 7 adopts.
+5. eer-to-relational rework: decision model (seven issues), binding
+   model, partitioned template with Kahn-ordered units, the rule set
+   (tableColumns pair, hierarchyToTables, copiedColumn, tableFor,
+   foreignKeyTo), samples, sample configuration, expected-output and
    trace verification, smoke.
-5. rel-to-sql-ddl rework: constraints and indexes, chain verification
-   end to end (EER model to DDL text), smoke.
-6. Documentation: both package READMEs, the suite and catalog README
-   rows, the variability guide's "Execution Trace" section rewritten
-   against the delivered behavior (today it promises per-step choice
-   capture that the engine does not deliver), docs build. Whether any
-   other guide or tutorial Part 3 embeds flagship or trace material is
-   a separate later discussion, as with the workflow suite.
-7. Merge `--no-ff`, full gate ladder repeated on merged main.
+6. rel-to-sql-ddl rework: composite PRIMARY KEY clauses, named FK
+   constraints via ALTER TABLE (order-independent by construction, no
+   topological sort needed in m2t), CREATE INDEX, `IdentifierQuoting`
+   retained, chain verification end to end, smoke.
+7. Documentation: package READMEs, suite and catalog rows, the
+   variability guide's "Execution Trace" section rewritten against
+   delivered behavior, docs build. Further guide or tutorial embedding
+   is a separate later discussion.
+8. Merge `--no-ff`, full gate ladder repeated on merged main.
+
+Deferred work recorded here so no session resurrects it ad hoc: full
+read-set capture for incremental transformation (see
+design/synchronizing-transformations/); the execution-seam extraction
+(library host API; the CLI becomes one host, the platform backend the
+second), which is the named successor of publishing prep; namespace
+representation in metamodel-as-model; `withHistoryColumns`.
 
 Conventions binding for all stages: no em dashes in user-facing text;
 "configuration-based", never "decision-based"; JSX notation is the
