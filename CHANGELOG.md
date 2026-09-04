@@ -49,6 +49,19 @@ overall version history.
   could not express; `Model` now declares it via the same call, and
   `INamespace` remains as a deprecated type alias).
 
+- **relational-metamodel carries the rich content.** `Table` now
+  contains real `ForeignKey` elements (composite capable: one
+  `ForeignKeyColumn` pair per participating column) and `Index`
+  elements, with `ownerTable` inverses throughout. `Table` is declared
+  a namespace, so column names are per-table (`book/id` and `copy/no`
+  coexist; a foreign key names a sibling table's column as
+  `copy/book_id` and outward probing resolves it). One `Column` tag
+  serves every context via ordered connection candidates (`columns`,
+  then `fkColumn`/`refColumn`, then an index's column list). The
+  authoring sample `rel-to-sql-ddl/sample/rich-db.tsx` guards it all on
+  every suite smoke. The legacy `Column.isForeignKey`/`references`
+  marks remain, now optional, until rel-to-sql-ddl adopts the rich
+  content; `Domain` stays untouched pending discussion.
 ### Changed
 
 - **metamodel-core reduced to the semantic core.** `ModelElement` now
@@ -65,22 +78,6 @@ overall version history.
   `content=""` and `MDA_level="M1"` ceremony. Per-element decision
   matching keys on element identity (ids were store-generated and
   remain matched when present on older data).
-
-### Fixed
-
-- **eer-metamodel authoring repaired for the full concept set.**
-  `Specialization` connects as a top-level schema element (it
-  previously named a parent property no type declares) and `Subtype`
-  nests inside its `Specialization` via `subtypes` (maintaining the
-  `supertype` inverse) while remaining valid at top level. A rich
-  all-concepts sample (`eer-to-relational/sample/rich-library.tsx`)
-  now renders kernels, a specialization with subtypes, a weak entity
-  with its weak mapping, an aggregation with its mapping, and a
-  relationship with roles on every suite smoke, so no authoring path
-  can silently rot again. `Entity` additionally carries `isAbstract`
-  (an optional domain fact: an abstract entity has no direct
-  instances), in this metamodel only; the tutorial metamodels stay
-  deliberately simple.
 
 - **Repository consolidated around one Synthesis library.** The former
   packages `@synthesis/engine`, `@synthesis/jsx-runtime`,
@@ -115,6 +112,22 @@ overall version history.
   is removed. A package that still carries a `synth` block fails
   manifest loading with a migration hint pointing at `synth.json`.
   Decision recorded in `design/engine-follow-ups.md`.
+
+### Fixed
+
+- **eer-metamodel authoring repaired for the full concept set.**
+  `Specialization` connects as a top-level schema element (it
+  previously named a parent property no type declares) and `Subtype`
+  nests inside its `Specialization` via `subtypes` (maintaining the
+  `supertype` inverse) while remaining valid at top level. A rich
+  all-concepts sample (`eer-to-relational/sample/rich-library.tsx`)
+  now renders kernels, a specialization with subtypes, a weak entity
+  with its weak mapping, an aggregation with its mapping, and a
+  relationship with roles on every suite smoke, so no authoring path
+  can silently rot again. `Entity` additionally carries `isAbstract`
+  (an optional domain fact: an abstract entity has no direct
+  instances), in this metamodel only; the tutorial metamodels stay
+  deliberately simple.
 - **Documentation site reorganized around two audience tracks.** The six
   parallel sections are replaced by a **User Guide** for CLI consumers
   (installation → quick start → concepts → tutorial → guides → command

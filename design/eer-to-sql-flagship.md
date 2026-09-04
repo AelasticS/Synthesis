@@ -614,9 +614,12 @@ Verified empirically before the approach is fixed, with fallbacks:
 4. Aggregation scope. Recommendation: out of v1 as a stated limitation;
    the transformation throws a clear error if it meets one.
    Alternative: map it, growing the rule set by roughly a third.
-5. `Domain` in the relational metamodel. Recommendation: drop it;
-   `Column.type` stays a plain SQL type string. Alternative: keep the
-   v2 `Column.domain` indirection.
+5. `Domain` in the relational metamodel. ON HOLD 2026-09-04 by user
+   instruction ("wait with domain dropping, we need to discuss"):
+   stage 4 keeps the existing Domain concept untouched (present,
+   unwired) and the transformation continues not to emit it, so the
+   discussion can still go either way. Recommendation stands: drop it;
+   alternative: keep or wire the v2 `Column.domain` indirection.
 6. Sample domain. Recommendation: extend the Library sample as
    sketched. Alternative: a fresh domain.
 7. Namespaces in the flagship. RESOLVED 2026-09-04: ADOPTED per the
@@ -694,7 +697,10 @@ pipefail):
 
 Deferred work recorded here so no session resurrects it ad hoc: full
 read-set capture for incremental transformation (see
-design/synchronizing-transformations/); the execution-seam extraction
+design/synchronizing-transformations/); per-type property scopes in
+the types metamodel (declareNamespace(Object), needs as-models
+restructured to top-level definitions and CLI fixtures regenerated);
+the execution-seam extraction
 (library host API; the CLI becomes one host, the platform backend the
 second), which is the named successor of publishing prep; namespace
 representation in metamodel-as-model; `withHistoryColumns`.
@@ -748,3 +754,24 @@ isAbstract (flagship metamodel only, Person is abstract in the
 sample); the tutorial metamodels stay structurally unchanged, with
 the namespace naming upgrade assigned to stage 7. Next: stage 4, the
 rich relational metamodel with declareNamespace(Table).
+
+Stage 4 (rich relational metamodel) COMPLETE 2026-09-04, gates green.
+Delivered: ForeignKey/ForeignKeyColumn/Index with ownerTable inverses,
+type-level optional single links, declareNamespace(Table), one Column
+tag with ordered candidates, the regenerated as-model, and the
+authoring sample rich-db.tsx (short per-table names, a composite
+foreign key whose references cross table scopes as copy/book_id, an
+index). Risk checkpoint 3 confirmed empirically (fkColumn then
+refColumn in child order); checkpoint 2's serializer half closes in
+stage 5. Deviations, both recorded above: the legacy Column
+isForeignKey/references marks stay (optional) until stage 6 so gates
+remain green between stages, and Domain is untouched per the user's
+hold on decision 5. A per-type property scope for the types
+metamodel (declareNamespace(Object)) was attempted and REVERTED: the
+existing as-models define types nested inside properties, so scoping
+moved their element paths and broke binding references and the CLI
+fixtures (48 CLI tests, 32 smoke checks). The rich as-model uses
+unique property names instead, and per-type property scopes are
+recorded as deferred work (they require restructuring every as-model
+to define types at top level and regenerating the CLI fixtures). Next:
+stage 5, the transformation rework.
