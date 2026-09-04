@@ -92,6 +92,15 @@ overall version history.
   of reconnecting it (the flow-endpoint idiom), so the first Column
   reference in a pair fills fkColumn and the second refColumn.
 
+- **Docs follow the delivered behavior.** The variability guide's
+  Execution Trace section describes the outcome trace and
+  `transformation run --trace`; the building-models guide documents
+  name scopes (`declareNamespace`, nested paths, outward-probing
+  references); the tutorial's unique-names lesson presents name scopes
+  as a metamodel choice (the tutorial's simplified metamodel keeps the
+  flat rule); the eer-to-sql READMEs and catalog rows describe the
+  flagship design space.
+
 ### Changed
 
 - **metamodel-core reduced to the semantic core.** `ModelElement` now

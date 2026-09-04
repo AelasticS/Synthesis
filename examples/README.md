@@ -69,8 +69,8 @@ rel-to-sql-ddl consumes.
 
 | Example | Kind | Shows |
 | --- | --- | --- |
-| [eer-to-relational](./eer-to-sql/eer-to-relational/) | m2m | Configuration-based transformation over the full EER metamodel: decision model, binding model, manifest `parts` |
-| [rel-to-sql-ddl](./eer-to-sql/rel-to-sql-ddl/) | m2t | Text generation with one global configuration issue (identifier quoting) |
+| [eer-to-relational](./eer-to-sql/eer-to-relational/) | m2m | The flagship: every template kind, seven design issues (per-table auditing via a higher-order template, JPA-style inheritance strategies, foreign key indexing and naming), a rich relational target with composite foreign keys, verified outputs and traces |
+| [rel-to-sql-ddl](./eer-to-sql/rel-to-sql-ddl/) | m2t | DDL from the rich content: composite PRIMARY KEY clauses, named ALTER TABLE constraints, CREATE INDEX, identifier quoting as a configuration issue |
 
 ### Workflow suite
 

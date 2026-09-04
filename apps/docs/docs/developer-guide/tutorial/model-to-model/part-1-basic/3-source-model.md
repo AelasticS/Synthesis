@@ -154,9 +154,12 @@ newModelElement: Duplicate name "//www.aelastics.org/Library/number"
 The path in the message shows the naming scheme. Attributes escape the
 problem here only because `bookId`, `authorId`, and `categoryId` are
 already distinct; had they all been called `id`, the model would need
-qualified names. Generated models follow the same convention, which is
-why the transformation on page 4 builds foreign key names like
-`AuthorId_FK` rather than a bare `id_fk`.
+qualified names. A metamodel may relax the rule by declaring further
+name scopes (the full relational metamodel of the eer-to-sql example
+declares `Table` one, so each table names its own columns); this
+tutorial's simplified metamodel keeps the flat rule, which is why the
+transformation on page 4 builds foreign key names like `AuthorId_FK`
+rather than a bare `id_fk`.
 
 ## Creating a workspace
 

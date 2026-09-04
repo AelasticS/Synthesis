@@ -806,3 +806,22 @@ Risk checkpoint 3's serializer half is closed empirically: the pair
 components needed the flow-endpoint isReconnectAllowed false so the
 second reference fills refColumn instead of reconnecting fkColumn.
 Next: stage 7, documentation and tutorial namespace adoption.
+
+Stage 7 (documentation and tutorial namespace adoption) COMPLETE
+2026-09-04. The variability guide's Execution Trace section now
+describes the delivered outcome trace and --trace; the building-models
+guide gains a Name scopes section (declareNamespace, nested paths,
+outward-probing references); the tutorial's unique-names lesson
+updated truthfully (it now presents name scopes as a metamodel choice
+the flagship makes, while the tutorial's simplified metamodel keeps
+the flat rule); both suite READMEs rewritten to the flagship's design
+space; catalog rows updated. Tutorial namespace ADOPTION was attempted
+and deliberately rolled back: declaring rel-tutorial's Table a scope
+breaks every bare cross-table references link in three companions, the
+template, the rel-copy fixture, and a dozen tutorial listings, so the
+adoption needs the user's pedagogical direction, with two shapes on
+offer: (a) keep the tutorial's qualified names and qualify only the
+references links as author/authorId, or (b) the full natural-naming
+rewrite of companions and listings. Recorded as an open item for the
+user's return. CHANGELOG carries the stage entries. Next: stage 8,
+merge.

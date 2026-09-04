@@ -47,7 +47,28 @@ A default configuration can be generated automatically from the source model. Ev
 
 ### Execution Trace
 
-During transformation execution, a **trace model** records which source elements were transformed to which target elements, which rules were applied, and which design choices guided each step. This provides full traceability from source through decisions to target.
+Every run records a **trace model**: one entry per executed rule,
+carrying the source element, the produced target elements (as full
+element paths), and the rule that actually ran. Dispatch machinery is
+not traced; when a specialization or variability point routed the call,
+the entry simply names the executed option method, which is the record.
+
+Every resolved configuration option is recorded, always. A choice that
+selects a rule sits on that rule's entry; a choice consulted inside
+another rule is attached to the entry of the element it was decided
+for; a global choice is recorded once on the trace model itself. Each
+resolution carries the issue and option names in decision-model
+language, a reference to the explicit `Choice` in the configuration, or
+a `byDefault` marker when the issue's default applied.
+
+Trace detail follows rule granularity: behavior factored into rules is
+recorded per rule, behavior inlined into a template is not, so the
+transformation author dials how fine the record is.
+
+Persist the trace with `transformation run --trace <ref>`: the trace is
+written as a workspace model whose header references the run's source,
+target, and configuration models (with generated defaults, the
+effective configuration is persisted next to it at `<ref>-config`).
 
 ## Implementation in Synthesis
 

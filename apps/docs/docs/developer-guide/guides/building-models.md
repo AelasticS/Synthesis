@@ -101,6 +101,27 @@ same model. Parameterizing them, and abstracting over their structure
 with higher-order templates, is the subject of the
 [Templates](./templates.md) guide.
 
+## Name scopes
+
+Element names are unique per name scope. The model is always a scope,
+and a metamodel may declare further concepts as scopes with one line
+next to the type definition:
+
+```ts
+import { ModelElement, declareNamespace } from "@aelastics/synthesis/metamodel"
+
+export const Table = t.subtype(ModelElement, { columns: t.arrayOf(Column) }, "Table", Schema)
+declareNamespace(Table)
+```
+
+Elements contained in a declared scope have nested paths
+(`//model/book/id` and `//model/copy/id` coexist), and a bare
+`$refByName` resolves against the nearest scope first, probing outward
+to the model: inside `copy`, `$refByName="no"` finds `copy`'s own
+column, while `$refByName="book/id"` reaches a sibling table's column.
+Metamodels that declare no scopes keep the flat one-name-per-model
+rule unchanged.
+
 ## Rendering
 
 The `render()` method on an `ExprNode` evaluates the entire expression tree:
