@@ -31,8 +31,6 @@ export declare const Column: t.Subtype<{
     isNullable: t.BooleanType;
     isAutoincrement: t.BooleanType;
     ownerTable: t.OptionalType<t.LinkType>;
-    isForeignKey: t.OptionalType<t.BooleanType>;
-    references: t.OptionalType<t.StringType>;
 }, {
     name: t.StringType;
     label: t.OptionalType<t.StringType>;
@@ -89,8 +87,6 @@ export declare const Table: t.Subtype<{
         isNullable: t.BooleanType;
         isAutoincrement: t.BooleanType;
         ownerTable: t.OptionalType<t.LinkType>;
-        isForeignKey: t.OptionalType<t.BooleanType>;
-        references: t.OptionalType<t.StringType>;
     }, {
         name: t.StringType;
         label: t.OptionalType<t.StringType>;

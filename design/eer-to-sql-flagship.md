@@ -792,3 +792,17 @@ found and fixed: the trace's jsxIndex credited only the last entry
 registered for a JSX node, so a rule result embedded in an enclosing
 rule's result lost its targets; the index now credits every registered
 entry. Next: stage 6, rel-to-sql-ddl adopting the rich content.
+
+Stage 6 (rel-to-sql-ddl rework) COMPLETE 2026-09-04. Composite-aware
+PRIMARY KEY clauses, named ALTER TABLE constraints in their own
+section, CREATE INDEX statements, IdentifierQuoting retained, clear
+errors for incomplete keys and indexes; library-db.tsx rewritten to
+rich content and the legacy Column marks removed from the metamodel.
+The chain verification (rel-to-sql-ddl/scripts/verify.mjs) runs
+eer-to-relational then rel-to-sql-ddl on the Library sample and
+asserts the composite constraint down the weak chain, the joined
+subtype constraint, indexes, and audit columns in the generated SQL.
+Risk checkpoint 3's serializer half is closed empirically: the pair
+components needed the flow-endpoint isReconnectAllowed false so the
+second reference fills refColumn instead of reconnecting fkColumn.
+Next: stage 7, documentation and tutorial namespace adoption.

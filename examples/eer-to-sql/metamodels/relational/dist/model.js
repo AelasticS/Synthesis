@@ -25,10 +25,6 @@ export const Column = t.subtype(ModelElement, {
     isNullable: t.boolean,
     isAutoincrement: t.boolean,
     ownerTable: t.optional(t.link(RelModel_TypeSchema, 'Table')),
-    // Legacy flat foreign-key marks, superseded by the ForeignKey
-    // concept; removed when rel-to-sql-ddl adopts the rich content.
-    isForeignKey: t.optional(t.boolean),
-    references: t.optional(t.string),
 }, "Column", RelModel_TypeSchema);
 // One pair per participating column; several pairs on one ForeignKey
 // form a composite foreign key. The links are type-level optional for

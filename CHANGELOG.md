@@ -79,6 +79,19 @@ overall version history.
   sample under the default and a patched configuration and asserts
   exact tables, keys, indexes, and trace resolutions.
 
+- **rel-to-sql-ddl generates DDL from the rich content.** CREATE TABLE
+  statements carry composite-aware PRIMARY KEY clauses; foreign keys
+  become named ALTER TABLE ADD CONSTRAINT statements in a separate
+  section (foreign keys can be circular, so no creation order can
+  satisfy them inline); indexes become CREATE INDEX statements. An
+  incomplete foreign key or index is a clear error. The legacy flat
+  `Column.isForeignKey`/`references` marks are now fully removed from
+  the relational metamodel. The suite's chain verification runs EER to
+  relational to DDL end to end and asserts the composite constraint
+  down the weak chain. Pair references skip an occupied slot instead
+  of reconnecting it (the flow-endpoint idiom), so the first Column
+  reference in a pair fills fkColumn and the second refColumn.
+
 ### Changed
 
 - **metamodel-core reduced to the semantic core.** `ModelElement` now

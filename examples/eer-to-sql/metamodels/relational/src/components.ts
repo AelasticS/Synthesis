@@ -26,7 +26,13 @@ export const Domain: Template<r.IDomain> = (props) => {
 // pair of a ForeignKeyColumn (the first Column reference fills
 // fkColumn, the second refColumn); an Index's column list.
 export const Column: Template<r.IColumn> = (props) => {
-  return new ExprNode(r.Column, props, defaultConnectionInfo(["columns", "fkColumn", "refColumn"]))
+  return new ExprNode(r.Column, props, {
+    ...defaultConnectionInfo(["columns", "fkColumn", "refColumn"]),
+    // the Flow.from/to idiom: an occupied pair slot is skipped, never
+    // reconnected, so the first reference fills fkColumn, the second
+    // refColumn
+    isReconnectAllowed: false,
+  })
 }
 
 export const Table: Template<r.ITable> = (props) => {
