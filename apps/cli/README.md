@@ -1663,8 +1663,8 @@ Run one transformation, or a chain of transformations, on a workspace model.
 ```
 USAGE
   $ synth transformation run TX... --in <value> [--workspace <value>] [--ns <value>] [--json] [-q] [-v] [--out <value>]
-    [--out-dir <value>] [--default-configs] [--save-config <value> | --config <value>] [--save-as <value>]
-    [--keep-intermediates] [--overwrite]
+    [--out-dir <value>] [--default-configs] [--save-config <value> | --config <value>] [--trace <value>] [--save-as
+    <value>] [--keep-intermediates] [--overwrite]
 
 ARGUMENTS
   TX...  Installed transformation(s) to run in order.
@@ -1686,6 +1686,10 @@ FLAGS
                          'pipeline run <name> --in <ref>'.
   --save-config=<value>  Persist the generated default configuration as a workspace model at this ref (single step with
                          --default-configs only).
+  --trace=<value>        Persist the run's trace model as a workspace model at this ref (single step only). The trace
+                         records, per executed rule, the source element, the produced targets, and every resolved
+                         configuration option; when the run used generated defaults, the effective configuration is
+                         persisted next to it at '<ref>-config'.
 
 GLOBAL FLAGS
   -q, --quiet              Suppress informational output.
@@ -1992,8 +1996,8 @@ Run one transformation, or a chain of transformations, on a workspace model.
 ```
 USAGE
   $ synth tx run TX... --in <value> [--workspace <value>] [--ns <value>] [--json] [-q] [-v] [--out <value>]
-    [--out-dir <value>] [--default-configs] [--save-config <value> | --config <value>] [--save-as <value>]
-    [--keep-intermediates] [--overwrite]
+    [--out-dir <value>] [--default-configs] [--save-config <value> | --config <value>] [--trace <value>] [--save-as
+    <value>] [--keep-intermediates] [--overwrite]
 
 ARGUMENTS
   TX...  Installed transformation(s) to run in order.
@@ -2015,6 +2019,10 @@ FLAGS
                          'pipeline run <name> --in <ref>'.
   --save-config=<value>  Persist the generated default configuration as a workspace model at this ref (single step with
                          --default-configs only).
+  --trace=<value>        Persist the run's trace model as a workspace model at this ref (single step only). The trace
+                         records, per executed rule, the source element, the produced targets, and every resolved
+                         configuration option; when the run used generated defaults, the effective configuration is
+                         persisted next to it at '<ref>-config'.
 
 GLOBAL FLAGS
   -q, --quiet              Suppress informational output.

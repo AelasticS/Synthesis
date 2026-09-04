@@ -377,16 +377,19 @@ near-zero cost:
 
 Full read-set capture is future work, not v1.
 
-### Per-element decision matching: a latent bug, fixed here
+### Per-element decision matching: suspected bug DISPROVED, matcher hardened
 
-Matching runs on `d.element.id === element.id`, but nothing in the
-mutable store path assigns `id`, so both sides are undefined and every
-ElementDecision matches every element. Invisible in the current example
-(one relationship), fatal for the flagship. Fix in the trace groundwork
-stage: match by object identity (the configuration's `element` is a
-link to the same store object), with path as the serialization-safe
-form; write the failing test first (two relationships, two different
-choices, assert divergence).
+Correction, stage 1 (2026-09-04): the suspected id bug does not exist.
+aelastics-store's `Repository.deepCreate` passes a uuid generator into
+the types layer's `newInstance`, so every created element carries a
+generated `id` and per-element matching works correctly (the earlier
+claim came from a truncated search that saw only the immutable store
+branch). The outcome-trace test now pins the behavior (two elements,
+two element decisions, divergent choices). The matcher was hardened
+anyway: object identity first, id equality only when both sides carry
+one. Consequence for the hygiene stage: if `id` is dropped from
+metamodel-core, matching must move fully to identity/path in the same
+change, since `id` is its only current mechanism.
 
 ### CLI: persisting the trace
 
@@ -581,8 +584,10 @@ Verified empirically before the approach is fixed, with fallbacks:
    `referencedTable` if the prop form proves problematic.
 3. First-available candidate connection fills `fkColumn` then
    `refColumn` in child order. Fallback as in 2.
-4. Per-element decision matching fixed by identity/path (the `id` bug):
-   failing test first, in the trace groundwork stage.
+4. Per-element decision matching: verified working in stage 1 (the
+   suspected id bug was disproved; ids are store-generated); matcher
+   hardened to identity-first. The hygiene stage must move matching
+   fully to identity/path before dropping `id`.
 5. Pure-dispatch SpecPoint returning grafts and arrays for the
    SingleTable strategy (E2E already normalizes arrays).
 6. Persisting the trace model through the CLI write gate needs the
@@ -688,3 +693,21 @@ representation in metamodel-as-model; `withHistoryColumns`.
 Conventions binding for all stages: no em dashes in user-facing text;
 "configuration-based", never "decision-based"; JSX notation is the
 authoring style; no AI attribution; `git grep` for sweeps.
+
+## Status
+
+Stage 1 (trace groundwork) COMPLETE 2026-09-04, all gates green on the
+branch: rush build, synthesis library 78 tests (baseline 70 plus the
+outcome-trace suite; one pre-existing pending test), CLI 441 tests
+(baseline 438 plus three --trace tests) and 86 smoke checks, all eleven
+example and template smokes, docs build. Delivered exactly per the
+trace section: outcome entries, two-tier resolution recording,
+decision-language option names, retirements, full-path references,
+forward-compatibility slots, context.traceJsx, CLI --trace with
+effective-config persistence, console.log dumps removed. Deviations
+from the drafted design, both recorded in place above: the suspected
+per-element id-matching bug was disproved (matcher hardened instead),
+and the trace file is written directly rather than through the
+self-contained import gate, carrying its run's models in the header
+references map. Next: stage 2, metamodel-core hygiene with the
+namespace activation (decision 7 adopted).

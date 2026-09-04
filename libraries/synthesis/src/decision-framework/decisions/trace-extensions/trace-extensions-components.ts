@@ -7,10 +7,12 @@ export const DecisionAwareTraceModel: CpxTemplate<IDecisionAwareTraceModelProps,
   return new ExprNode(tm.DecisionAwareTraceModel, props, undefined)
 }
 
-export const VarPointTraceEntry: Template<tm.IVarPointTraceEntry> = (props) => {
-  return new ExprNode(tm.VariabilityPointTraceEntry, props, "traceEntries")
+export const DecisionTraceEntry: Template<tm.IDecisionTraceEntry> = (props) => {
+  return new ExprNode(tm.DecisionTraceEntry, props, "traceEntries")
 }
 
-export const SpecPointTraceEntry: Template<tm.ISpecPointTraceEntry> = (props) => {
-  return new ExprNode(tm.SpecializationPointTraceEntry, props, "traceEntries")
+// Connects into `resolutions` on both carriers: a DecisionTraceEntry
+// and the DecisionAwareTraceModel itself declare the property.
+export const Resolution: Template<tm.IResolution> = (props) => {
+  return new ExprNode(tm.Resolution, props, "resolutions")
 }

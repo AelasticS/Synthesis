@@ -8,17 +8,20 @@ export {
   TraceModel_TypeSchema,
   TraceEntry as TraceEntryType,
   TraceModel as TraceModelType,
+  ReadRecord as ReadRecordType,
 } from "./trace-meta.model"
 
 export type {
   ITraceEntry,
   ITraceModel,
+  IReadRecord,
 } from "./trace-meta.model"
 
 export {
   TraceEntry,
   TraceModel,
   TargetElement,
+  ReadRecord,
 } from "./trace-model-meta.model-components"
 
 export type {

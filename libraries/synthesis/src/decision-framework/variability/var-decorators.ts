@@ -21,6 +21,10 @@ interface IVarOption {
   methodName: string
   evalCondition: EvalCondition
   isDefault?: boolean
+  // The decision-model option name, when the condition was built with
+  // Option("..."). Used so the trace records outcomes in decision
+  // language, not method names.
+  optionName?: string
 }
 
 const __VarOptionRef = "__VarOptionRef"
@@ -62,6 +66,15 @@ const setVarOptionReference = (method: DecoratedMethod, methodName: string): voi
 const getVarOptionReference = (method: DecoratedMethod | undefined): string | undefined =>
   method?.[__VarOptionRef]
 
+// Element-scoped decisions match by object identity first (the
+// configuration's `element` is a link to the very source element), with
+// the generated uuid `id` as the serialization-safe equality; both ids
+// must be present for the id comparison to count.
+const isSameElement = (a: any, b: any): boolean => {
+  if (a === undefined || b === undefined) return false
+  return a === b || (a?.id !== undefined && b?.id !== undefined && a.id === b.id)
+}
+
 const resolveConfiguredChoices = (
   transformation: DecisionAwareM2M<any, any, any, tcM.IConfigurationModel>,
   element: any,
@@ -75,7 +88,7 @@ const resolveConfiguredChoices = (
         !currentContext.store.isTypeOf(d, tcM.ElementDecision)
         || (
           currentContext.store.isTypeOf(d, tcM.ElementDecision)
-          && (d as unknown as tcM.IElementDecision).element.id === element.id
+          && isSameElement((d as unknown as tcM.IElementDecision).element, element)
         ),
     )
     .flatMap((d: tcM.IDecision) => d.choices)
@@ -166,6 +179,32 @@ export const VarPoint = (_issue: string) => {
           throw new Error(`No option condition evaluated to true and no default option provided`)
         }
 
+        // Record the resolution FACT: which option answered which issue,
+        // for which element, explicitly chosen or by default. The trace
+        // attaches these facts to entries (or the model) at assembly
+        // time; recording here is what guarantees that every resolved
+        // option is recorded, nested consultations included.
+        const declaredOption = chosenVarOption.optionName
+        const explicitChoice = configChoices.find(
+          (c: any) =>
+            c?.issue?.name === _issue
+            && (declaredOption === undefined || c?.selectedOption?.name === declaredOption),
+        )
+        if (typeof (currentContext as any).recordResolution === "function") {
+          ;(currentContext as any).recordResolution({
+            issue: _issue,
+            option: declaredOption ?? chosenVarOption.methodName,
+            optionMethod: chosenVarOption.methodName,
+            element:
+              element && typeof element === "object"
+              && typeof element.name === "string" && typeof element.path === "string"
+                ? element
+                : undefined,
+            choice: explicitChoice,
+            byDefault: !explicitChoice,
+          })
+        }
+
         // PUSH onto varResolutionStack BEFORE invocation
         currentContext.varResolutionStack[_privatePush]({
           optionName: chosenVarOption.methodName,
@@ -215,6 +254,7 @@ export const VarOption = (
       registerVarOption(target, methodName, {
         methodName: propertyKey,
         evalCondition: option,
+        optionName: (option as EvalCondition & { optionName?: string }).optionName,
       })
 
       // Čuvaj referencu na VarPoint metodu na ovoj metodi (potrebno za @Default)
@@ -256,9 +296,6 @@ registerPointDecorator({
   sentinel: __isVarPoint,
   getResolution: (ctx) => ctx.lastVarResolution,
   clearResolution: (ctx) => { ctx.lastVarResolution = undefined },
-  makeTrace: (ctx, source, elements, ruleName, resolution) => {
-    ctx.makeTrace(source, elements, ruleName, "VariabilityPoint", resolution.optionName, resolution.choices)
-  },
 })
 
 

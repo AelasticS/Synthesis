@@ -10,6 +10,33 @@ overall version history.
 
 ## [Unreleased]
 
+### Added
+
+- **The trace model records outcomes, and the CLI can persist it.** A
+  transformation's trace now has one entry per executed rule (named for
+  its rule and source element, the rule field carrying the executed
+  concrete method), and every resolved configuration option is recorded,
+  always: a choice consulted inside another rule is attached to the
+  entry of the element it was decided for, a global choice is recorded
+  once on the trace model, and each resolution carries decision-model
+  issue and option names, a reference to the explicit Choice or a
+  `byDefault` marker. The previous `VariabilityPointTraceEntry` /
+  `SpecializationPointTraceEntry` entry kinds and the `ruleType` field
+  are retired; trace references are full element paths. For future
+  incremental transformation (design/synchronizing-transformations/),
+  entries reserve a `reads` containment and an optional `parentRule`
+  link, and the trace model gains transformation and source version
+  slots. `transformation run --trace <ref>` persists the trace as a
+  workspace model (single step, m2m and m2t); when the run used
+  generated defaults, the effective configuration is persisted next to
+  it at `<ref>-config` so the trace's configuration reference resolves.
+  The trace file is written directly rather than through the
+  self-contained import gate: it is a provenance report whose
+  references resolve against the models of its run, named in its
+  header's `references` map. The engine no longer dumps trace and
+  target JSX through `console.log`; hosts read `context.traceJsx` and
+  `context.output.jsx`.
+
 ### Changed
 
 - **Repository consolidated around one Synthesis library.** The former

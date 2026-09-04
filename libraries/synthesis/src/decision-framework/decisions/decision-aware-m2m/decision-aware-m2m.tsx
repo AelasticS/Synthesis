@@ -4,9 +4,12 @@
  *
  * DecisionAwareM2M: a decision-aware specialization of the engine's
  * abstractM2M. It carries an optional configuration model, a per-element
- * decision stack, and a variability resolution stack. Trace rendering is
- * extended to emit VariabilityPoint / SpecializationPoint entries and a
- * DecisionAwareTraceModel that records the configuration in use.
+ * decision stack, and the run's resolution facts (every configuration
+ * option resolved by a @VarPoint, nested consultations included). Trace
+ * rendering is outcome-shaped: one entry per executed rule, each fact
+ * attached to the entry of the element it was decided for, or to the
+ * trace model itself (global issues, and element-scoped facts whose
+ * element no rule transformed).
  */
 
 import { IModel, IModelElement } from "../../../metamodel-core"
@@ -23,12 +26,9 @@ import {
   ModelStore,
   RawTraceEntryData,
   Stack,
-  _privatePop,
-  _privatePush,
-  TargetElement,
-  TraceEntry,
 } from "../../../engine"
 import { IConfigurationModel, IChoice } from "../3.configuration-model/configuration-meta.model"
+import { Choice as ChoiceRef } from "../3.configuration-model/configuration-meta.model-components"
 import {
   IDecisionAwareTraceModel,
 } from "../trace-extensions/trace-extensions.meta.model"
@@ -39,13 +39,17 @@ export interface IVarResolution {
   choices: IChoice[]
 }
 
-// Decision-aware raw trace entry — carries the extra metadata needed to
-// emit VariabilityPoint / SpecializationPoint trace JSX in createTraceModel().
-export interface DecisionAwareRawTraceEntryData extends RawTraceEntryData {
-  variabilityOption?: string
-  choices?: IChoice[]
-  specializationOption?: string
-  sourceTypeName?: string
+// One resolved configuration outcome, recorded by @VarPoint at dispatch
+// time. `issue` and `option` are decision-model names; `optionMethod`
+// is the executed option method, used to attach the fact to the entry
+// of the very rule that consulted it in the directly stacked case.
+export interface IResolutionFact {
+  issue: string
+  option: string
+  optionMethod: string
+  element?: IModelElement
+  choice?: IChoice
+  byDefault: boolean
 }
 
 export class DecisionAwareM2MContext<P = undefined> extends M2MContext<P> {
@@ -57,39 +61,23 @@ export class DecisionAwareM2MContext<P = undefined> extends M2MContext<P> {
   // Stack for nested VarPoint calls — VarPoint pushes/pops, E2E reads lastVarResolution
   public readonly varResolutionStack: Stack<IVarResolution> = new Stack<IVarResolution>()
 
-  // Last VarResolution — set by VarPoint in finally, read and cleared by E2E
+  // Last VarResolution — set by VarPoint in finally; @E2E consumes it and
+  // names the entry after the executed option method.
   public lastVarResolution?: IVarResolution
 
-  // Override makeTrace to carry decision-aware metadata into raw entries.
-  // The engine base just ignores the trailing args; here we store them so
-  // createTraceModel() can emit the correct trace JSX subtypes.
-  public override makeTrace(
-    sourceModelElement: IModelElement,
-    jsxElements: ExprNode<IModelElement>[],
-    ruleName: string,
-    ruleType: string,
-    variabilityOption?: string,
-    choices?: IChoice[],
-    specializationOption?: string,
-    sourceTypeName?: string,
-  ) {
-    if (ruleType === "VariabilityPoint" && (!variabilityOption || !choices)) {
-      throw new Error("VariabilityPoint trace entry requires variabilityOption and choices")
-    }
+  // The run's resolution facts, deduplicated per (issue, element):
+  // resolution is deterministic for a pair, so the first record stands.
+  // This is what guarantees that every resolved option is recorded,
+  // nested consultations included.
+  public readonly resolutionFacts: IResolutionFact[] = []
 
-    if (ruleType === "SpecializationPoint" && !specializationOption) {
-      throw new Error("SpecializationPoint trace entry requires specializationOption")
+  public recordResolution(fact: IResolutionFact): void {
+    const existing = this.resolutionFacts.find(
+      (f) => f.issue === fact.issue && f.element === fact.element,
+    )
+    if (!existing) {
+      this.resolutionFacts.push(fact)
     }
-
-    // Call base makeTrace to populate sourceIndex/jsxIndex bookkeeping and
-    // add the base raw entry; then enrich the last entry with decision-aware
-    // metadata.
-    super.makeTrace(sourceModelElement, jsxElements, ruleName, ruleType)
-    const last = this.rawTraceEntries[this.rawTraceEntries.length - 1] as DecisionAwareRawTraceEntryData
-    last.variabilityOption = variabilityOption
-    last.choices = choices
-    last.specializationOption = specializationOption
-    last.sourceTypeName = sourceTypeName
   }
 }
 
@@ -123,73 +111,69 @@ export abstract class DecisionAwareM2M<
   }
 
   /**
-   * Decision-aware trace model rendering.
+   * Outcome-shaped decision-aware trace rendering.
    *
-   * Emits VariabilityPoint / SpecializationPoint trace entries when the raw
-   * data carries the corresponding metadata, plus a DecisionAwareTraceModel
-   * that records the configuration model in use.
+   * Emits one DecisionTraceEntry per executed rule and Resolution
+   * elements for every recorded fact: on the entry whose source is the
+   * fact's element (preferring the entry of the rule that consulted it,
+   * the directly stacked case), or on the trace model for global issues
+   * and for elements no rule transformed. The configuration model in
+   * use is referenced on the trace model.
    */
   protected override createTraceModel(): ExprNode<IDecisionAwareTraceModel> {
-    const targetElementNamespace = this.context.output.instance
-      ? `${this.context.output.instance.path}/${this.context.output.instance.name}`
-      : ""
+    const data = this.traceEntryData()
+    const facts = this.context.resolutionFacts
 
-    const traceJSXEntries = this.context.rawTraceEntries.map((raw) => {
-      const r = raw as DecisionAwareRawTraceEntryData
-      const sourceElementNamespace = r.sourceModelElement.path
-
-      const targetElements = r.jsxElements.flatMap((jsx) => {
-        let resolved = jsx
-        while (resolved.isAbstract && resolved.subElement) {
-          resolved = resolved.subElement
-        }
-        // A rule may return a reference node ($refByName) that grafts
-        // children into an existing element; it has no `name` prop, so
-        // the trace target is the referenced element itself. Skip the
-        // target entirely when neither name is present: an absent trace
-        // target is recoverable, a dangling reference fails the render
-        // of the whole trace model.
-        const props = resolved.props as { name?: string; $refByName?: string }
-        const name = props.name ?? props.$refByName
-        if (name === undefined) {
-          return []
-        }
-        const ref = String(name).startsWith("//") ? String(name) : `${targetElementNamespace}/${name}`
-        return [<TargetElement $refByName={ref} />]
-      })
-
-      if (r.ruleType === "VariabilityPoint") {
-        return (
-          <tmC.VarPointTraceEntry
-            source={<CModelElement $refByName={`${sourceElementNamespace}/${r.sourceModelElement.name}`} />}
-            rule={r.ruleName}
-            ruleType={"VariabilityPoint"}
-            variabilityOption={r.variabilityOption}
-            choices={r.choices}
-            targets={targetElements}
-          />
-        )
-      } else if (r.ruleType === "SpecializationPoint") {
-        return (
-          <tmC.SpecPointTraceEntry
-            source={<CModelElement $refByName={`${sourceElementNamespace}/${r.sourceModelElement.name}`} />}
-            rule={r.ruleName}
-            ruleType={"SpecializationPoint"}
-            specializationOption={r.specializationOption}
-            sourceType={r.sourceTypeName}
-            targets={targetElements}
-          />
-        )
+    const perRaw = new Map<RawTraceEntryData, IResolutionFact[]>()
+    const attached = new Set<IResolutionFact>()
+    for (const fact of facts) {
+      if (!fact.element) continue
+      const candidates = data.filter((d) => d.raw.sourceModelElement === fact.element)
+      if (candidates.length === 0) continue
+      const chosen = candidates.find((d) => d.raw.ruleName === fact.optionMethod) ?? candidates[0]
+      const list = perRaw.get(chosen.raw)
+      if (list) {
+        list.push(fact)
       } else {
-        return (
-          <TraceEntry
-            source={<CModelElement $refByName={`${sourceElementNamespace}/${r.sourceModelElement.name}`} />}
-            rule={r.ruleName}
-            ruleType={"RegularRule"}
-            targets={targetElements}
-          />
-        )
+        perRaw.set(chosen.raw, [fact])
       }
+      attached.add(fact)
+    }
+    const modelFacts = facts.filter((f) => !attached.has(f))
+
+    // Resolution names live in the trace model's flat name scope; a
+    // running counter keeps them unique and deterministic.
+    let resolutionCounter = 0
+    const resolutionNode = (fact: IResolutionFact, elementImplied: boolean) => {
+      resolutionCounter += 1
+      return (
+        <tmC.Resolution
+          name={`r${resolutionCounter}_${fact.issue}`}
+          issue={fact.issue}
+          option={fact.option}
+          byDefault={fact.byDefault ? true : undefined}
+          element={!elementImplied && fact.element
+            ? <CModelElement $refByName={this.fullElementRef(fact.element)} />
+            : undefined}
+          choice={fact.choice
+            ? <ChoiceRef $refByName={this.fullElementRef(fact.choice)} />
+            : undefined}
+        />
+      )
+    }
+
+    const traceJSXEntries = data.map(({ raw, entryName, targetRefs }) => {
+      const entryFacts = perRaw.get(raw) ?? []
+      return (
+        <tmC.DecisionTraceEntry
+          name={entryName}
+          rule={raw.ruleName}
+          source={<CModelElement $refByName={this.fullElementRef(raw.sourceModelElement)} />}
+          targets={targetRefs}
+        >
+          {entryFacts.map((f) => resolutionNode(f, f.element === raw.sourceModelElement))}
+        </tmC.DecisionTraceEntry>
+      )
     })
 
     return (
@@ -197,10 +181,12 @@ export abstract class DecisionAwareM2M<
         name={`${this.context.input.instance?.name} to ${this.context.output.instance?.name}`}
         store={this.context.store}
         timestamp={new Date().toISOString()}
-        source={<Model $refByName={`${this.context.input.instance!.path}/${this.context.input.instance!.name}`} />}
-        config={this.configModel ? <Model $refByName={`${this.configModel.path}/${this.configModel.name}`} /> : null}
-        targets={[<Model $refByName={`${this.context.output.instance!.path}/${this.context.output.instance!.name}`} />]}
+        transformation={this.transformationName()}
+        source={<Model $refByName={this.fullElementRef(this.context.input.instance!)} />}
+        config={this.configModel ? <Model $refByName={this.fullElementRef(this.configModel)} /> : null}
+        targets={[<Model $refByName={this.fullElementRef(this.context.output.instance!)} />]}
       >
+        {modelFacts.map((f) => resolutionNode(f, false))}
         {traceJSXEntries}
       </tmC.DecisionAwareTraceModel>
     )

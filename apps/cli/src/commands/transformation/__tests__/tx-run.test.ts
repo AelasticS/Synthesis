@@ -633,3 +633,58 @@ describe('tx run m2t', () => {
     expect(sql).toContain('REFERENCES "organization"')
   })
 })
+
+describe('tx run --trace', () => {
+  it('persists the outcome trace and the effective configuration next to it', async () => {
+    const { code, stdout } = await run([
+      'tx', 'run', 'eer-to-relational', '--in', 'com.example/persons',
+      '--default-configs', '--out', 'com.example/persons-rel-traced',
+      '--trace', 'com.example/persons-trace'
+    ])
+    expect(code).toBe(0)
+    expect(stdout).toContain('Wrote com.example/persons-trace')
+    expect(stdout).toContain('Wrote com.example/persons-trace-config')
+
+    const tracePath = join(modelsDir, 'com', 'example', 'persons-trace.tsx')
+    expect(existsSync(tracePath)).toBe(true)
+    const trace = readFileSync(tracePath, 'utf-8')
+    // The outcome shape: one entry kind, resolutions in decision language.
+    expect(trace).toContain('<DecisionAwareTraceModel')
+    expect(trace).toContain('<DecisionTraceEntry')
+    // A nested consultation (primaryKeyStrategy fires inside the column
+    // rule) is recorded on the consulting element's entry.
+    expect(trace).toContain('issue="PrimaryKeyStrategy"')
+    expect(trace).toContain('byDefault={true}')
+    // The trace names its run's models so its references can resolve.
+    expect(trace).toContain("sourceModel: 'com.example/persons'")
+    expect(trace).toContain("targetModel: 'com.example/persons-rel-traced'")
+    expect(trace).toContain("configModel: 'com.example/persons-trace-config'")
+    // The effective configuration is a real workspace model.
+    expect(existsSync(join(modelsDir, 'com', 'example', 'persons-trace-config.tsx'))).toBe(true)
+  })
+
+  it('persists a trace for an m2t run, without a target model reference', async () => {
+    const genDir = join(tempDir, 'gen-traced')
+    const { code, stdout } = await run([
+      'tx', 'run', 'rel-to-sql-ddl', '--in', 'com.example/persons-rel',
+      '--default-configs', '--out-dir', genDir,
+      '--trace', 'com.example/ddl-trace'
+    ])
+    expect(code).toBe(0)
+    expect(stdout).toContain('Wrote com.example/ddl-trace')
+    const trace = readFileSync(join(modelsDir, 'com', 'example', 'ddl-trace.tsx'), 'utf-8')
+    expect(trace).toContain('<DecisionAwareTraceModel')
+    expect(trace).toContain("sourceModel: 'com.example/persons-rel'")
+    expect(trace).not.toContain('targetModel:')
+  })
+
+  it('rejects --trace on a multi-step chain, teaching the stepwise path', async () => {
+    const { code, stderr } = await run([
+      'tx', 'run', 'eer-to-relational', 'rel-to-sql-ddl', '--in', 'com.example/persons',
+      '--default-configs', '--out-dir', join(tempDir, 'never-traced'),
+      '--trace', 'com.example/never-trace'
+    ])
+    expect(code).toBe(1)
+    expect(flatten(stderr)).toContain('--trace is not supported for multi-step runs')
+  })
+})

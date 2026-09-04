@@ -40,16 +40,16 @@ export interface TraceEntryRecord {
 }
 
 // Raw data stored during template() execution; converted to trace JSX
-// in createTraceModel() when output.instance is available.
-//
-// Engine's base RawTraceEntryData carries only "RegularRule" entries.
-// Subclasses (e.g. DecisionAwareM2M in the decision framework) may
-// widen this to add variability/specialization metadata.
+// in createTraceModel() when output.instance is available. `ruleName`
+// is the EXECUTED concrete method (a dispatched option method when a
+// point decorator routed the call). `record` links the runtime lookup
+// record whose `targets` the renderer fills with the actual created
+// elements, so trace references can carry their real full paths.
 export interface RawTraceEntryData {
   sourceModelElement: IModelElement
   jsxElements: ExprNode<IModelElement>[]
   ruleName: string
-  ruleType: string
+  record: TraceEntryRecord
 }
 
 export const _privatePop = Symbol("privatePop")
@@ -85,6 +85,10 @@ export class M2MContext<P = undefined> extends Context implements IM2MContext {
   public output: IODescr = {}
   public transformation: TransformationDescr = {}
   public traceModel?: ExprNode<tmT.ITraceModel>
+  // The trace model serialized to JSX notation, kept by transform() the
+  // way output.jsx keeps the target model's serialization, so hosts can
+  // persist the trace without reaching into protected machinery.
+  public traceJsx?: string
 
   // Fast O(1) lookup by source element
   public readonly sourceIndex: Map<IModelElement, TraceEntryRecord[]> = new Map()
@@ -111,23 +115,21 @@ export class M2MContext<P = undefined> extends Context implements IM2MContext {
     sourceModelElement: IModelElement,
     jsxElements: ExprNode<IModelElement>[],
     ruleName: string,
-    ruleType: string,
-    ..._extra: any[]
   ) {
-    // Store raw data — JSX entries will be created lazily in createTraceModel()
-    // when output.instance is available and targetElementNamespace can be resolved.
-    this.rawTraceEntries.push({
-      sourceModelElement,
-      jsxElements,
-      ruleName,
-      ruleType,
-    })
-
     const entry: TraceEntryRecord = {
       rule: ruleName,
       targets: [],
       _jsxElements: jsxElements,
     }
+
+    // Store raw data — JSX entries will be created lazily in createTraceModel()
+    // when output.instance is available and entry.targets are resolved.
+    this.rawTraceEntries.push({
+      sourceModelElement,
+      jsxElements,
+      ruleName,
+      record: entry,
+    })
 
     // sourceIndex
     const existing = this.sourceIndex.get(sourceModelElement)
@@ -273,12 +275,11 @@ export abstract class abstractM2M<
     }
 
     this.context.traceModel = this.createTraceModel()
-    console.log("Generated Trace Model JSX:\n", this.renderToJsx(this.context.traceModel))
+    this.context.traceJsx = this.renderToJsx(this.context.traceModel)
     this.context.traceModel.render<tmT.ITraceModel>(this.context)
 
     // Serialize the target model to JSX notation
     this.context.output.jsx = this.renderToJsx(targetJSXTree)
-    console.log("Generated JSX:\n", this.context.output.jsx)
 
     return targetModel
   }
@@ -383,55 +384,101 @@ export abstract class abstractM2M<
     return parts.length > 0 ? " " + parts.join(" ") : ""
   }
 
+  /** The absolute store reference of an element: its full path. */
+  protected fullElementRef(el: { path?: string; name: string }): string {
+    return `${el.path}/${el.name}`
+  }
+
   /**
-   * Builds the trace JSX tree for the current transformation.
-   *
-   * Engine's base implementation handles only "RegularRule" entries. Subclasses
-   * (e.g. DecisionAwareM2M in the decision framework) override this to
-   * emit specialized entries (VariabilityPoint, SpecializationPoint) and a
-   * decision-aware trace model.
+   * The transformation's name for the trace record. Class decorators
+   * (@M2M) wrap the class in an anonymous subclass, so walk the
+   * prototype chain past decorator wrappers to the authored name.
    */
-  protected createTraceModel(): ExprNode<tmT.ITraceModel> {
-    // Now output.instance is available — build trace JSX entries from raw data
+  protected transformationName(): string {
+    let ctor: any = this.constructor
+    while (ctor && (ctor.name === "" || ctor.name === "decorated") && Object.getPrototypeOf(ctor)) {
+      ctor = Object.getPrototypeOf(ctor)
+    }
+    return ctor?.name || "transformation"
+  }
+
+  /**
+   * Assembles the per-entry data shared by all trace model builders:
+   * a deterministic entry name (rule and source, disambiguated per
+   * repeated execution of the same pair) and the target references.
+   * Targets come from the actual created elements recorded during
+   * render, so their references carry real full paths (correct under
+   * nested namespaces); rules that produced only references (grafts)
+   * fall back to the reference names on their result expressions.
+   */
+  protected traceEntryData(): Array<{
+    raw: RawTraceEntryData
+    entryName: string
+    targetRefs: any[]
+  }> {
     const targetElementNamespace = this.context.output.instance
       ? `${this.context.output.instance.path}/${this.context.output.instance.name}`
       : ""
+    const nameCounts = new Map<string, number>()
 
-    const traceJSXEntries = this.context.rawTraceEntries.map((raw) => {
-      const sourceElementNamespace = raw.sourceModelElement.path
+    return this.context.rawTraceEntries.map((raw) => {
+      const base = `${raw.ruleName}_${raw.sourceModelElement.name}`
+      const n = (nameCounts.get(base) ?? 0) + 1
+      nameCounts.set(base, n)
+      const entryName = n === 1 ? base : `${base}_${n}`
 
-      const targetElements = raw.jsxElements.map((jsx) => {
-        // For abstract elements (from @SpecPoint), the actual rendered element is the subElement.
-        // Use subElement's name since the abstract element itself is never created in the store.
-        let resolved = jsx
-        while (resolved.isAbstract && resolved.subElement) {
-          resolved = resolved.subElement
-        }
-        return (
-          <TargetElement $refByName={`${targetElementNamespace}/${resolved.props.name}`} />
-        )
-      })
+      let targetRefs: any[]
+      if (raw.record.targets.length > 0) {
+        targetRefs = raw.record.targets.map((el) => (
+          <TargetElement $refByName={this.fullElementRef(el)} />
+        ))
+      } else {
+        targetRefs = raw.jsxElements.flatMap((jsx) => {
+          // For abstract elements (from @SpecPoint), the rendered element
+          // is the subElement; the abstract element itself is never created.
+          let resolved = jsx
+          while (resolved.isAbstract && resolved.subElement) {
+            resolved = resolved.subElement
+          }
+          const props = resolved.props as { name?: string; $refByName?: string }
+          const name = props.name ?? props.$refByName
+          if (name === undefined) {
+            return []
+          }
+          const ref = String(name).startsWith("//") ? String(name) : `${targetElementNamespace}/${name}`
+          return [<TargetElement $refByName={ref} />]
+        })
+      }
 
-      // Pure engine's TraceEntry supports only "RegularRule".
-      // Decision-aware subclasses override createTraceModel() to emit
-      // VariabilityPoint / SpecializationPoint entries from richer raw data.
-      return (
-        <tmC.TraceEntry
-          source={<CModelElement $refByName={`${sourceElementNamespace}/${raw.sourceModelElement.name}`} />}
-          rule={raw.ruleName}
-          ruleType={"RegularRule"}
-          targets={targetElements}
-        />
-      )
+      return { raw, entryName, targetRefs }
     })
+  }
+
+  /**
+   * Builds the trace JSX tree for the current transformation: the
+   * outcome record. One entry per executed rule, named for its
+   * (rule, source) identity; the rule field carries the executed
+   * concrete method. Decision-aware subclasses override this to attach
+   * configuration resolutions.
+   */
+  protected createTraceModel(): ExprNode<tmT.ITraceModel> {
+    const traceJSXEntries = this.traceEntryData().map(({ raw, entryName, targetRefs }) => (
+      <tmC.TraceEntry
+        name={entryName}
+        rule={raw.ruleName}
+        source={<CModelElement $refByName={this.fullElementRef(raw.sourceModelElement)} />}
+        targets={targetRefs}
+      />
+    ))
 
     return (
       <tmC.TraceModel
         name={`${this.context.input.instance?.name} to ${this.context.output.instance?.name}`}
         store={this.context.store}
         timestamp={new Date().toISOString()}
-        source={<Model $refByName={`${this.context.input.instance!.path}/${this.context.input.instance!.name}`} />}
-        targets={[<Model $refByName={`${this.context.output.instance!.path}/${this.context.output.instance!.name}`} />]}
+        transformation={this.transformationName()}
+        source={<Model $refByName={this.fullElementRef(this.context.input.instance!)} />}
+        targets={[<Model $refByName={this.fullElementRef(this.context.output.instance!)} />]}
       >
         {traceJSXEntries}
       </tmC.TraceModel>

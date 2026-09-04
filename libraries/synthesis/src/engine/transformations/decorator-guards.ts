@@ -103,7 +103,10 @@ export function appendDecoratorHistory(
 // @E2E can:
 //   1. Detect (decoration time) that a point decorator is present — isAlsoXxx.
 //   2. Read + clear the resolution it left on the context (call time).
-//   3. Call makeTrace with the right arguments.
+// The resolution's `optionName` names the executed option method; @E2E
+// records it as the entry's rule (the trace records outcomes, not how
+// dispatch selected them). Resolution FACTS for configuration issues are
+// recorded independently by @VarPoint on the decision-aware context.
 //
 // context is typed `any` to avoid a circular import with abstractM2M.
 
@@ -114,8 +117,6 @@ export interface PointDecoratorRegistration {
   getResolution(context: any): any
   /** Clear the resolution — must always be called to prevent leaks. */
   clearResolution(context: any): void
-  /** Call context.makeTrace() with the correct arguments for this ruleType. */
-  makeTrace(context: any, source: any, elements: any[], ruleName: string, resolution: any): void
 }
 
 const pointDecoratorRegistry: PointDecoratorRegistration[] = []

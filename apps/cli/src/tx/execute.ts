@@ -64,9 +64,14 @@ type StoreElement = Parameters<ModelStore['getTypeOf']>[0]
 
 interface TransformationInstance {
   transform(input: unknown): unknown
-  /** abstractM2M keeps the serialized target-tree JSX here after transform(). */
-  context?: { output?: { jsx?: unknown } }
+  /** abstractM2M keeps the serialized target-tree JSX (and, after the
+   * outcome-trace groundwork, the serialized trace model) here after
+   * transform(). */
+  context?: { output?: { jsx?: unknown }; traceJsx?: unknown }
 }
+
+/** The components module a serialized trace model imports its tags from. */
+const TRACE_COMPONENTS_SPEC = '@aelastics/synthesis/metamodels/trace'
 
 type TransformationCtor = new (
   store: ModelStore,
@@ -113,6 +118,7 @@ export interface RunSurfaceFlags {
   config?: string
   'save-config'?: string
   'save-as'?: string
+  trace?: string
   'default-configs': boolean
   'keep-intermediates': boolean
   overwrite: boolean
@@ -155,6 +161,8 @@ export interface ExecuteRequest {
   outDir?: string
   config?: string
   saveConfig?: string
+  /** Persist the run's trace model as a workspace model at this ref (single step only). */
+  trace?: string
   defaultConfigs: boolean
   keepIntermediates: boolean
   overwrite: boolean
@@ -302,6 +310,12 @@ export async function executeRun(request: ExecuteRequest): Promise<void> {
       )
     }
   }
+  if (request.trace !== undefined && multi) {
+    fail(
+      EXIT_CODES.FAILURE,
+      `--trace is not supported for multi-step runs; a trace belongs to one transformation execution. Run the chain stepwise with 'transformation run' to trace each step.`
+    )
+  }
   // 5. Resolve the input model and gate on step 1's declared source metamodel
   let source: ResolvedSourceModel
   try {
@@ -414,6 +428,29 @@ export async function executeRun(request: ExecuteRequest): Promise<void> {
     }
   }
 
+  // 9b. The --trace target, and, when the step runs on generated defaults
+  // with no --save-config, an implicit '<trace>-config' target: the trace
+  // references its configuration, and a reference to a configuration that
+  // existed only for the run would dangle, so the effective configuration
+  // is persisted next to the trace.
+  let traceTarget: WritableTarget | undefined
+  let traceConfigTarget: WritableTarget | undefined
+  if (request.trace !== undefined) {
+    try {
+      traceTarget = resolveWritableRef(modelsDir, request.trace, request.overwrite, 'Trace model')
+      if (first.configSource === 'defaults' && saveConfigTarget === undefined) {
+        traceConfigTarget = resolveWritableRef(
+          modelsDir,
+          `${normalizeRef(request.trace)}-config`,
+          request.overwrite,
+          'Configuration model'
+        )
+      }
+    } catch (err) {
+      fail(EXIT_CODES.FAILURE, errorMessage(err), err)
+    }
+  }
+
   // 10. Every ref the run will write (kept intermediates, the final --out
   // target, the --save-config target) and the --in ref must be pairwise
   // distinct: a duplicate would make the run overwrite its own input or
@@ -443,6 +480,12 @@ export async function executeRun(request: ExecuteRequest): Promise<void> {
   }
   if (saveConfigTarget !== undefined) {
     claimRef(saveConfigTarget.ref, '--save-config target')
+  }
+  if (traceTarget !== undefined) {
+    claimRef(traceTarget.ref, '--trace target')
+  }
+  if (traceConfigTarget !== undefined) {
+    claimRef(traceConfigTarget.ref, "the effective configuration persisted next to the --trace target")
   }
 
   if (multi) {
@@ -550,6 +593,62 @@ export async function executeRun(request: ExecuteRequest): Promise<void> {
         err
       )
     }
+    written.push(target.path)
+    if (!json) {
+      request.log(`Wrote ${target.ref} (${target.path})`)
+    }
+  }
+
+  /**
+   * Write the run's trace model as a workspace model. The trace is a
+   * provenance REPORT: its references (source, target, configuration,
+   * and per-entry element references) resolve against the models of its
+   * run, recorded in the header's references map, so it is written
+   * directly rather than through the self-contained import gate. Tags
+   * are still verified against the trace components module so the file
+   * always renders when its referenced models are present.
+   */
+  const writeTraceResult = async (
+    current: Step,
+    txInstance: TransformationInstance,
+    target: WritableTarget,
+    references: Record<string, string>,
+    configProvenance: string,
+    stepSourceRefForTrace: string
+  ): Promise<void> => {
+    const { manifest } = current
+    const rawTraceJsx = txInstance.context?.traceJsx
+    if (typeof rawTraceJsx !== 'string' || rawTraceJsx.trim() === '') {
+      fail(
+        EXIT_CODES.FAILURE,
+        `Transformation '${manifest.name}' produced no trace model to persist; --trace requires a transformation class extending the engine's abstractM2M.`
+      )
+    }
+    const jsx = rawTraceJsx.trim()
+    const tags = uniqueJsxTags(jsx)
+    const componentsMod = await step(`Failed to import trace components module '${TRACE_COMPONENTS_SPEC}'`, () =>
+      importTxModule(current.packageDir, TRACE_COMPONENTS_SPEC)
+    )
+    for (const tag of tags) {
+      if (typeof moduleExport(componentsMod, tag) !== 'function') {
+        fail(
+          EXIT_CODES.FAILURE,
+          `Trace output uses component '${tag}', but '${TRACE_COMPONENTS_SPEC}' does not export it.`
+        )
+      }
+    }
+    const header = await makeGeneratedHeader({
+      metamodel: TRACE_COMPONENTS_SPEC,
+      references,
+      generatedBy: {
+        tx: manifest.name,
+        txVersion: manifest.version,
+        config: configProvenance
+      },
+      description: `Trace of ${manifest.name} on ${stepSourceRefForTrace}`
+    })
+    await mkdir(dirname(target.path), { recursive: true })
+    await writeFile(target.path, buildModelModule(jsx, tags, TRACE_COMPONENTS_SPEC, header), 'utf-8')
     written.push(target.path)
     if (!json) {
       request.log(`Wrote ${target.ref} (${target.path})`)
@@ -704,9 +803,11 @@ export async function executeRun(request: ExecuteRequest): Promise<void> {
             packageDir,
             sourceRef: stepSourceRef,
             modelsDir,
-            // Pre-flight rejects --save-config on multi-step runs, so a
-            // defined target here always belongs to the only step.
-            target: saveConfigTarget,
+            // Pre-flight rejects --save-config and --trace on multi-step
+            // runs, so a defined target here always belongs to the only
+            // step. With --trace and no --save-config, the effective
+            // configuration persists next to the trace.
+            target: saveConfigTarget ?? traceConfigTarget,
             announce: (line) => {
               if (!json) {
                 request.log(`${prefix}${line}`)
@@ -724,6 +825,9 @@ export async function executeRun(request: ExecuteRequest): Promise<void> {
         }
         if (saveConfigTarget !== undefined && !json) {
           request.log(`Wrote ${saveConfigTarget.ref} (${saveConfigTarget.path})`)
+        }
+        if (traceConfigTarget !== undefined && !json) {
+          request.log(`Wrote ${traceConfigTarget.ref} (${traceConfigTarget.path})`)
         }
       }
     }
@@ -767,6 +871,32 @@ export async function executeRun(request: ExecuteRequest): Promise<void> {
     } else {
       await writeM2tResult(result, outDirJoined as string)
     }
+
+    if (i === stepCount - 1 && traceTarget !== undefined) {
+      // The trace's reference roles: its source model, the persisted
+      // target model (m2m only; an m2t run persists text, not a model),
+      // and the configuration that steered the run (explicit, or the
+      // effective one persisted next to the trace / via --save-config).
+      const effectiveConfigRef =
+        current.configSource === 'explicit' && configTarget !== undefined
+          ? configTarget.ref
+          : current.configSource === 'defaults'
+            ? (saveConfigTarget ?? traceConfigTarget)?.ref
+            : undefined
+      const references: Record<string, string> = {
+        sourceModel: inRef,
+        ...(m2mTarget !== undefined ? { targetModel: m2mTarget.ref } : {}),
+        ...(effectiveConfigRef !== undefined ? { configModel: effectiveConfigRef } : {})
+      }
+      await writeTraceResult(
+        current,
+        txInstance,
+        traceTarget,
+        references,
+        effectiveConfigRef ?? (current.configSource === 'none' ? 'none' : 'defaults'),
+        stepSourceRef
+      )
+    }
   }
 
   // 13. The one place both output modes report success from
@@ -790,6 +920,8 @@ export async function executeRun(request: ExecuteRequest): Promise<void> {
               ...(first.manifest.variability ? { decisions: reports[0].decisions ?? [] } : {}),
               ...(configTarget !== undefined ? { config: configTarget.ref } : {}),
               ...(saveConfigTarget !== undefined ? { savedConfig: saveConfigTarget.ref } : {}),
+              ...(traceTarget !== undefined ? { trace: traceTarget.ref } : {}),
+              ...(traceConfigTarget !== undefined ? { traceConfig: traceConfigTarget.ref } : {}),
               written
             }
       )
