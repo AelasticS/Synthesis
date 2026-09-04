@@ -1,7 +1,7 @@
 {
   "kind": "m2m",
   "entry": "./dist/transformation.js",
-  "exportName": "EER2RelDomainWithDecisionTransformation",
+  "exportName": "EerToRelational",
   "source": {
     "metamodel": "eer-metamodel"
   },

@@ -13,7 +13,7 @@
   ],
   "scripts": {
     "build": "tsc",
-    "test": "node ../../smoke.mjs"
+    "test": "node ../../smoke.mjs && node scripts/verify.mjs"
   },
   "dependencies": {
     "@aelastics/synthesis": "workspace:*",

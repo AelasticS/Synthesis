@@ -7,6 +7,8 @@
  * order) and into the decision model. The optional condition narrows an
  * element issue to the elements it really concerns; here,
  * OneToManyStrategy applies only to relationships that are 1:N.
+ * Binding matches by the concrete type name of a source element, so
+ * TableAuditing binds Kernel, Weak, and Subtype separately.
  */
 import { createExprNode } from "@aelastics/synthesis/jsx"
 import { ExprNode } from "@aelastics/synthesis/jsx"
@@ -49,6 +51,42 @@ export const ER_Bindings = (store: ModelStore): ExprNode<t.IBindingModel> => (
                 return (m1.ub === "1" && m1.lb === "0" && m2.ub === "M") ||
                        (m1.ub === "M" && m2.ub === "1" && m2.lb === "0");
             }'
+    />
+
+    <Binding
+      name="KernelAuditingBinding"
+      description="Binding table auditing to kernel entities"
+      element={<ModelElement $refByName="//www.aelastics.org/ERMetamodel/Kernel" />}
+      issues={[
+        <ElementIssue $refByName="//www.aelastics.org/RelationSchemaDesign/TableAuditing" />,
+      ]}
+    />
+
+    <Binding
+      name="WeakAuditingBinding"
+      description="Binding table auditing to weak entities"
+      element={<ModelElement $refByName="//www.aelastics.org/ERMetamodel/Weak" />}
+      issues={[
+        <ElementIssue $refByName="//www.aelastics.org/RelationSchemaDesign/TableAuditing" />,
+      ]}
+    />
+
+    <Binding
+      name="SubtypeAuditingBinding"
+      description="Binding table auditing to subtype entities"
+      element={<ModelElement $refByName="//www.aelastics.org/ERMetamodel/Subtype" />}
+      issues={[
+        <ElementIssue $refByName="//www.aelastics.org/RelationSchemaDesign/TableAuditing" />,
+      ]}
+    />
+
+    <Binding
+      name="InheritanceBinding"
+      description="Binding the inheritance strategy to specialization hierarchies"
+      element={<ModelElement $refByName="//www.aelastics.org/ERMetamodel/Specialization" />}
+      issues={[
+        <ElementIssue $refByName="//www.aelastics.org/RelationSchemaDesign/InheritanceStrategy" />,
+      ]}
     />
   </BindingModel>
 )

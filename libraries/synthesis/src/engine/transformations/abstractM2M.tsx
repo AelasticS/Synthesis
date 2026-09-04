@@ -93,8 +93,11 @@ export class M2MContext<P = undefined> extends Context implements IM2MContext {
   // Fast O(1) lookup by source element
   public readonly sourceIndex: Map<IModelElement, TraceEntryRecord[]> = new Map()
 
-  // Fast O(1) lookup by JSX element — private, used only by resolveTargetForJSX()
-  private readonly jsxIndex: Map<ExprNode<IModelElement>, TraceEntryRecord> = new Map()
+  // Fast O(1) lookup by JSX element — private, used only by resolveTargetForJSX().
+  // One JSX node may belong to several entries (a rule's result embedded
+  // in an enclosing rule's result registers with both), and every one of
+  // them must receive the resolved target.
+  private readonly jsxIndex: Map<ExprNode<IModelElement>, TraceEntryRecord[]> = new Map()
 
   // Raw trace data collected during template(); converted to JSX lazily in createTraceModel()
   public readonly rawTraceEntries: RawTraceEntryData[] = []
@@ -141,14 +144,21 @@ export class M2MContext<P = undefined> extends Context implements IM2MContext {
 
     // jsxIndex — register each JSX element from the array
     for (const jsx of jsxElements) {
-      this.jsxIndex.set(jsx, entry)
+      const entries = this.jsxIndex.get(jsx)
+      if (entries) {
+        entries.push(entry)
+      } else {
+        this.jsxIndex.set(jsx, [entry])
+      }
     }
   }
 
   public resolveTargetForJSX(jsxElement: ExprNode<IModelElement>, modelElement: IModelElement): void {
-    const entry = this.jsxIndex.get(jsxElement)
-    if (entry) {
-      entry.targets.push(modelElement)
+    const entries = this.jsxIndex.get(jsxElement)
+    if (entries) {
+      for (const entry of entries) {
+        entry.targets.push(modelElement)
+      }
     }
   }
 

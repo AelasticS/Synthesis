@@ -62,6 +62,23 @@ overall version history.
   every suite smoke. The legacy `Column.isForeignKey`/`references`
   marks remain, now optional, until rel-to-sql-ddl adopts the rich
   content; `Domain` stays untouched pending discussion.
+- **eer-to-relational is the flagship transformation.** Reworked
+  against the rich relational metamodel with every template kind: pure
+  @SpecPoint dispatch over the entity kinds, seven configuration issues
+  (TableAuditing with the higher-order withAuditColumns applied inside
+  the audited option and on by default, JPA-style InheritanceStrategy
+  per hierarchy with JoinedTables/SingleTable/TablePerClass, an
+  index-per-foreign-key policy, collision-driven foreign key column
+  naming, plus the retained naming, primary key, and 1:N issues).
+  Authority over source elements is partitioned at the composition
+  site (subtypes belong to their hierarchy's rule; an abstract root
+  under TablePerClass gets no table), emission order is a topological
+  sort over table-producing units, and one foreignKeyTo plan drives
+  weak entities (composite keys down the chain), joined subtypes, and
+  relationship keys alike. The suite's verification runs the Library
+  sample under the default and a patched configuration and asserts
+  exact tables, keys, indexes, and trace resolutions.
+
 ### Changed
 
 - **metamodel-core reduced to the semantic core.** `ModelElement` now

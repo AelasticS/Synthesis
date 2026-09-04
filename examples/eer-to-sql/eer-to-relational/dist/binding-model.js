@@ -6,6 +6,8 @@
  * order) and into the decision model. The optional condition narrows an
  * element issue to the elements it really concerns; here,
  * OneToManyStrategy applies only to relationships that are 1:N.
+ * Binding matches by the concrete type name of a source element, so
+ * TableAuditing binds Kernel, Weak, and Subtype separately.
  */
 import { createExprNode } from "@aelastics/synthesis/jsx";
 import { BindingModel, Binding } from "@aelastics/synthesis/metamodels/binding";
@@ -17,5 +19,17 @@ export const ER_Bindings = (store) => (createExprNode(BindingModel, { name: "ER_
         ] }),
     createExprNode(Binding, { name: "OneToManyBinding", description: "Binding 1:N Relationship Strategy to EER Model", element: createExprNode(ModelElement, { "$refByName": "//www.aelastics.org/ERMetamodel/Relationship" }), issues: [
             createExprNode(ElementIssue, { "$refByName": "//www.aelastics.org/RelationSchemaDesign/OneToManyStrategy" }),
-        ], condition: 'return (e) => {\n                if (!e.roles || e.roles.length !== 2) return false;\n                const m1 = e.roles[0];\n                const m2 = e.roles[1];\n                return (m1.ub === "1" && m1.lb === "0" && m2.ub === "M") ||\n                       (m1.ub === "M" && m2.ub === "1" && m2.lb === "0");\n            }' })));
+        ], condition: 'return (e) => {\n                if (!e.roles || e.roles.length !== 2) return false;\n                const m1 = e.roles[0];\n                const m2 = e.roles[1];\n                return (m1.ub === "1" && m1.lb === "0" && m2.ub === "M") ||\n                       (m1.ub === "M" && m2.ub === "1" && m2.lb === "0");\n            }' }),
+    createExprNode(Binding, { name: "KernelAuditingBinding", description: "Binding table auditing to kernel entities", element: createExprNode(ModelElement, { "$refByName": "//www.aelastics.org/ERMetamodel/Kernel" }), issues: [
+            createExprNode(ElementIssue, { "$refByName": "//www.aelastics.org/RelationSchemaDesign/TableAuditing" }),
+        ] }),
+    createExprNode(Binding, { name: "WeakAuditingBinding", description: "Binding table auditing to weak entities", element: createExprNode(ModelElement, { "$refByName": "//www.aelastics.org/ERMetamodel/Weak" }), issues: [
+            createExprNode(ElementIssue, { "$refByName": "//www.aelastics.org/RelationSchemaDesign/TableAuditing" }),
+        ] }),
+    createExprNode(Binding, { name: "SubtypeAuditingBinding", description: "Binding table auditing to subtype entities", element: createExprNode(ModelElement, { "$refByName": "//www.aelastics.org/ERMetamodel/Subtype" }), issues: [
+            createExprNode(ElementIssue, { "$refByName": "//www.aelastics.org/RelationSchemaDesign/TableAuditing" }),
+        ] }),
+    createExprNode(Binding, { name: "InheritanceBinding", description: "Binding the inheritance strategy to specialization hierarchies", element: createExprNode(ModelElement, { "$refByName": "//www.aelastics.org/ERMetamodel/Specialization" }), issues: [
+            createExprNode(ElementIssue, { "$refByName": "//www.aelastics.org/RelationSchemaDesign/InheritanceStrategy" }),
+        ] })));
 //# sourceMappingURL=binding-model.js.map

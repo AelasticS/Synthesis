@@ -775,3 +775,20 @@ unique property names instead, and per-type property scopes are
 recorded as deferred work (they require restructuring every as-model
 to define types at top level and regenerating the CLI fixtures). Next:
 stage 5, the transformation rework.
+
+Stage 5 (eer-to-relational rework) COMPLETE 2026-09-04. Everything per
+the transformation section: partitioned template, Kahn-ordered units,
+entityToTable pure dispatch (Kernel, Weak), the tableColumns rule pair
+with the confirmed withAuditColumns verbatim (audit.tsx), the
+hierarchy point with all three strategies plus the strategyOf value
+point, plannedForeignKey/foreignKeyTo over key plans (composite down
+the weak chain), the index pass, seven issues with the recommended
+defaults (decisions 1, 2, 3, 6 applied as recommended; class renamed
+EerToRelational). Verification (scripts/verify.mjs, run by the package
+test after the smoke) asserts outputs and traces for the default and a
+patched configuration, including the abstract-root TablePerClass skip
+and the member/person_id strategy-routed graft. One engine defect
+found and fixed: the trace's jsxIndex credited only the last entry
+registered for a JSX node, so a rule result embedded in an enclosing
+rule's result lost its targets; the index now credits every registered
+entry. Next: stage 6, rel-to-sql-ddl adopting the rich content.
