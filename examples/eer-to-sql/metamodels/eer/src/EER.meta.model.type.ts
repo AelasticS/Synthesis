@@ -76,6 +76,10 @@ export const Entity = t.subtype(
   {
     attributes: t.arrayOf(Attribute),
     mappings: t.arrayOf(t.link(EERModel_TypeSchema, "Mapping")),
+    // A domain fact: an abstract entity has no direct instances (every
+    // one belongs to a subtype). The mapping consequences are fixed
+    // logic in the transformation, not a design option.
+    isAbstract: t.optional(t.boolean),
   },
   "Entity",
   EERModel_TypeSchema

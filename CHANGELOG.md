@@ -66,6 +66,22 @@ overall version history.
   matching keys on element identity (ids were store-generated and
   remain matched when present on older data).
 
+### Fixed
+
+- **eer-metamodel authoring repaired for the full concept set.**
+  `Specialization` connects as a top-level schema element (it
+  previously named a parent property no type declares) and `Subtype`
+  nests inside its `Specialization` via `subtypes` (maintaining the
+  `supertype` inverse) while remaining valid at top level. A rich
+  all-concepts sample (`eer-to-relational/sample/rich-library.tsx`)
+  now renders kernels, a specialization with subtypes, a weak entity
+  with its weak mapping, an aggregation with its mapping, and a
+  relationship with roles on every suite smoke, so no authoring path
+  can silently rot again. `Entity` additionally carries `isAbstract`
+  (an optional domain fact: an abstract entity has no direct
+  instances), in this metamodel only; the tutorial metamodels stay
+  deliberately simple.
+
 - **Repository consolidated around one Synthesis library.** The former
   packages `@synthesis/engine`, `@synthesis/jsx-runtime`,
   `@synthesis/metamodel-core`, `@synthesis/decision-framework`, and the

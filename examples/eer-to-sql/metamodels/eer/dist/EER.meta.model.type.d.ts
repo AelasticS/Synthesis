@@ -119,6 +119,7 @@ export declare const Entity: t.Subtype<{
         parentModel: t.OptionalType<t.LinkType>;
     }, t.ObjectType<import("@aelastics/types/lib/complex-types/ObjectType.js").InterfaceDecl, readonly string[]>>>;
     mappings: t.ArrayType<t.LinkType>;
+    isAbstract: t.OptionalType<t.BooleanType>;
 }, {
     conceptType: t.StringType;
 } & {
@@ -152,6 +153,7 @@ export declare const Kernel: t.Subtype<{}, {
         parentModel: t.OptionalType<t.LinkType>;
     }, t.ObjectType<import("@aelastics/types/lib/complex-types/ObjectType.js").InterfaceDecl, readonly string[]>>>;
     mappings: t.ArrayType<t.LinkType>;
+    isAbstract: t.OptionalType<t.BooleanType>;
 } & {
     conceptType: t.StringType;
 } & {
@@ -187,6 +189,7 @@ export declare const Weak: t.Subtype<{
         parentModel: t.OptionalType<t.LinkType>;
     }, t.ObjectType<import("@aelastics/types/lib/complex-types/ObjectType.js").InterfaceDecl, readonly string[]>>>;
     mappings: t.ArrayType<t.LinkType>;
+    isAbstract: t.OptionalType<t.BooleanType>;
 } & {
     conceptType: t.StringType;
 } & {
@@ -222,6 +225,7 @@ export declare const Aggregation: t.Subtype<{
         parentModel: t.OptionalType<t.LinkType>;
     }, t.ObjectType<import("@aelastics/types/lib/complex-types/ObjectType.js").InterfaceDecl, readonly string[]>>>;
     mappings: t.ArrayType<t.LinkType>;
+    isAbstract: t.OptionalType<t.BooleanType>;
 } & {
     conceptType: t.StringType;
 } & {
@@ -261,6 +265,7 @@ export declare const Subtype: t.Subtype<{
         parentModel: t.OptionalType<t.LinkType>;
     }, t.ObjectType<import("@aelastics/types/lib/complex-types/ObjectType.js").InterfaceDecl, readonly string[]>>>;
     mappings: t.ArrayType<t.LinkType>;
+    isAbstract: t.OptionalType<t.BooleanType>;
 } & {
     conceptType: t.StringType;
 } & {
@@ -295,6 +300,7 @@ export declare const Mapping: t.Subtype<{
             parentModel: t.OptionalType<t.LinkType>;
         }, t.ObjectType<import("@aelastics/types/lib/complex-types/ObjectType.js").InterfaceDecl, readonly string[]>>>;
         mappings: t.ArrayType<t.LinkType>;
+        isAbstract: t.OptionalType<t.BooleanType>;
     }, {
         conceptType: t.StringType;
     } & {
@@ -344,6 +350,7 @@ export declare const WeakMapping: t.Subtype<{
             parentModel: t.OptionalType<t.LinkType>;
         }, t.ObjectType<import("@aelastics/types/lib/complex-types/ObjectType.js").InterfaceDecl, readonly string[]>>>;
         mappings: t.ArrayType<t.LinkType>;
+        isAbstract: t.OptionalType<t.BooleanType>;
     } & {
         conceptType: t.StringType;
     } & {
@@ -380,6 +387,7 @@ export declare const WeakMapping: t.Subtype<{
             parentModel: t.OptionalType<t.LinkType>;
         }, t.ObjectType<import("@aelastics/types/lib/complex-types/ObjectType.js").InterfaceDecl, readonly string[]>>>;
         mappings: t.ArrayType<t.LinkType>;
+        isAbstract: t.OptionalType<t.BooleanType>;
     }, {
         conceptType: t.StringType;
     } & {
@@ -429,6 +437,7 @@ export declare const AggregationMapping: t.Subtype<{
             parentModel: t.OptionalType<t.LinkType>;
         }, t.ObjectType<import("@aelastics/types/lib/complex-types/ObjectType.js").InterfaceDecl, readonly string[]>>>;
         mappings: t.ArrayType<t.LinkType>;
+        isAbstract: t.OptionalType<t.BooleanType>;
     } & {
         conceptType: t.StringType;
     } & {
@@ -465,6 +474,7 @@ export declare const AggregationMapping: t.Subtype<{
             parentModel: t.OptionalType<t.LinkType>;
         }, t.ObjectType<import("@aelastics/types/lib/complex-types/ObjectType.js").InterfaceDecl, readonly string[]>>>;
         mappings: t.ArrayType<t.LinkType>;
+        isAbstract: t.OptionalType<t.BooleanType>;
     }, {
         conceptType: t.StringType;
     } & {
@@ -514,6 +524,7 @@ export declare const OrdinaryMapping: t.Subtype<{
             parentModel: t.OptionalType<t.LinkType>;
         }, t.ObjectType<import("@aelastics/types/lib/complex-types/ObjectType.js").InterfaceDecl, readonly string[]>>>;
         mappings: t.ArrayType<t.LinkType>;
+        isAbstract: t.OptionalType<t.BooleanType>;
     }, {
         conceptType: t.StringType;
     } & {
@@ -563,6 +574,7 @@ export declare const SpecializationMapping: t.Subtype<{
             parentModel: t.OptionalType<t.LinkType>;
         }, t.ObjectType<import("@aelastics/types/lib/complex-types/ObjectType.js").InterfaceDecl, readonly string[]>>>;
         mappings: t.ArrayType<t.LinkType>;
+        isAbstract: t.OptionalType<t.BooleanType>;
     }, {
         conceptType: t.StringType;
     } & {
@@ -613,6 +625,7 @@ export declare const Specialization: t.Subtype<{
                 parentModel: t.OptionalType<t.LinkType>;
             }, t.ObjectType<import("@aelastics/types/lib/complex-types/ObjectType.js").InterfaceDecl, readonly string[]>>>;
             mappings: t.ArrayType<t.LinkType>;
+            isAbstract: t.OptionalType<t.BooleanType>;
         }, {
             conceptType: t.StringType;
         } & {
@@ -665,6 +678,7 @@ export declare const Specialization: t.Subtype<{
             parentModel: t.OptionalType<t.LinkType>;
         }, t.ObjectType<import("@aelastics/types/lib/complex-types/ObjectType.js").InterfaceDecl, readonly string[]>>>;
         mappings: t.ArrayType<t.LinkType>;
+        isAbstract: t.OptionalType<t.BooleanType>;
     } & {
         conceptType: t.StringType;
     } & {
@@ -711,6 +725,7 @@ export declare const Relationship: t.Subtype<{
                 parentModel: t.OptionalType<t.LinkType>;
             }, t.ObjectType<import("@aelastics/types/lib/complex-types/ObjectType.js").InterfaceDecl, readonly string[]>>>;
             mappings: t.ArrayType<t.LinkType>;
+            isAbstract: t.OptionalType<t.BooleanType>;
         }, {
             conceptType: t.StringType;
         } & {

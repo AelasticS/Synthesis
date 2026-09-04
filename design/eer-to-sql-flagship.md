@@ -122,8 +122,8 @@ deterministically, never silently.
 The eer-metamodel already has everything the flagship needs: `Kernel`,
 `Weak` (with `WeakMapping`), `Subtype`/`Specialization` (with
 `SpecializationMapping`), `Relationship` with roles, `Aggregation`.
-Under open decision 8, `Entity` additionally gains `isAbstract`
-(optional boolean, a domain fact).
+Per decision 8 (resolved), `Entity` additionally carries `isAbstract`
+(optional boolean, a domain fact; flagship metamodel only).
 
 Only the Kernel/Attribute/Relationship authoring path is exercised by
 the current sample. The components file connects `Specialization` via a
@@ -626,10 +626,15 @@ Verified empirically before the approach is fixed, with fallbacks:
    or not (settle by stage 3), and the user's re-confirmation of the
    simplified `withAuditColumns` form (settle by stage 5; the confirmed
    qualified form remains authoritative until then).
-8. `isAbstract` on EER `Entity`. Recommendation: a metamodel fact with
-   fixed strategy logic (TablePerClass skips the abstract root's
-   table); a design option for abstract-root table generation stays
-   v2 material. Alternative: model it as a configuration issue.
+8. `isAbstract` on EER `Entity`. RESOLVED 2026-09-04: ADOPTED as a
+   metamodel fact with fixed strategy logic (TablePerClass skips the
+   abstract root's table), on the FLAGSHIP eer-metamodel only. The
+   user's accompanying directive, binding for the whole plan: the
+   tutorial metamodels (eer-tutorial, rel-tutorial) stay deliberately
+   simple and structurally UNCHANGED; the only tutorial updates allowed
+   are those the namespace feature enables (declaring the tutorial's
+   relational Table a namespace and adopting the more convenient
+   naming), handled in the documentation stage.
 
 Resolved during the discussion: bare-reference canonicalization
 semantics, full-path trace references, the classification mechanism,
@@ -677,10 +682,14 @@ pipefail):
    constraints via ALTER TABLE (order-independent by construction, no
    topological sort needed in m2t), CREATE INDEX, `IdentifierQuoting`
    retained, chain verification end to end, smoke.
-7. Documentation: package READMEs, suite and catalog rows, the
-   variability guide's "Execution Trace" section rewritten against
-   delivered behavior, docs build. Further guide or tutorial embedding
-   is a separate later discussion.
+7. Documentation and tutorial namespace adoption: package READMEs,
+   suite and catalog rows, the variability guide's "Execution Trace"
+   section rewritten against delivered behavior; the tutorial's
+   rel-tutorial `Table` declared a namespace, with the companion
+   transformations and tutorial pages adopting the more convenient
+   naming (tutorial metamodels stay structurally unchanged otherwise,
+   per decision 8's directive); docs build. Further guide embedding is
+   a separate later discussion.
 8. Merge `--no-ff`, full gate ladder repeated on merged main.
 
 Deferred work recorded here so no session resurrects it ad hoc: full
@@ -726,3 +735,16 @@ and the repo-wide ceremony sweep (content="" and MDA_level="M1" gone
 from samples, fixtures, transformations, and docs, including the two
 prose passages that taught them). Next: stage 3, the EER repair pass
 (decision 8 open: isAbstract).
+
+Stage 3 (EER repair pass) COMPLETE 2026-09-04, all gates green.
+Exactly two authoring paths were broken, both in the components:
+Specialization (undeclared parent property) and Subtype (no way to
+nest in its hierarchy); everything else, weak mappings and
+aggregations included, rendered once exercised, so no metamodel type
+changes were needed. The all-concepts sample
+eer-to-relational/sample/rich-library.tsx guards every authoring path
+on each suite smoke. Decision 8 resolved and applied: Entity carries
+isAbstract (flagship metamodel only, Person is abstract in the
+sample); the tutorial metamodels stay structurally unchanged, with
+the namespace naming upgrade assigned to stage 7. Next: stage 4, the
+rich relational metamodel with declareNamespace(Table).
