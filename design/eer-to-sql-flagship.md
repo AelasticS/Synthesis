@@ -614,12 +614,13 @@ Verified empirically before the approach is fixed, with fallbacks:
    v2 `Column.domain` indirection.
 6. Sample domain. Recommendation: extend the Library sample as
    sketched. Alternative: a fresh domain.
-7. Namespaces in the flagship. Recommendation: adopt (engine slices in
-   the hygiene/groundwork stages, `Table` declared a namespace,
-   `ShortNames` naming default, simplified `withAuditColumns` pending
-   re-confirmation); sub-decisions: declare `Entity` on the EER side
-   too or not. Alternative: defer namespaces to their own workstream
-   and ship the flagship flat with `TablePrefixed`.
+7. Namespaces in the flagship. RESOLVED 2026-09-04: ADOPTED per the
+   recommendation (engine slices in the hygiene/groundwork stages,
+   `Table` declared a namespace, `ShortNames` naming default). Still
+   pending inside this decision: declare `Entity` on the EER side too
+   or not (settle by stage 3), and the user's re-confirmation of the
+   simplified `withAuditColumns` form (settle by stage 5; the confirmed
+   qualified form remains authoritative until then).
 8. `isAbstract` on EER `Entity`. Recommendation: a metamodel fact with
    fixed strategy logic (TablePerClass skips the abstract root's
    table); a design option for abstract-root table generation stays
