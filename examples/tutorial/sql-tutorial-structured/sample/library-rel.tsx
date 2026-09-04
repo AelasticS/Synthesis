@@ -25,7 +25,7 @@ export const $synth = {
  * transformation gave them.
  */
 export default (store: ModelStore): ExprNode<rmT.IRelSchema> => (
-  <RelSchema name="Library_rel" content="" MDA_level="M1" store={store}>
+  <RelSchema name="Library_rel" store={store}>
     <Table name="Book">
       <Column name="bookId" type="INTEGER" isKey={true} isAutoincrement={true} isNullable={false} />
       <Column name="bookTitle" type="VARCHAR(255)" isKey={false} isAutoincrement={false} isNullable={true} />

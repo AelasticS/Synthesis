@@ -6,7 +6,7 @@ import {
   INamespace,
   Model,
   ModelElement,
-  Namespace,
+  isNamespaceType,
 } from "../../metamodel-core"
 import * as t from "@aelastics/types"
 import { ServerProxy } from "@aelastics/store"
@@ -83,7 +83,9 @@ export class ModelStore implements IStore {
       throw new Error(`newModel: Duplicate name "${fullQName}"`)
     const m = this.store.deepCreate<T>(type, data)
     if (ownerModel) ownerModel.elements.push(m)
-    if (namespace) namespace.elements.push(m)
+    if (namespace && Array.isArray((namespace as Partial<IModel>).elements)) {
+      (namespace as IModel).elements.push(m)
+    }
     // add to map of names
     this.mapOfNames.set(fullQName, m)
     return m
@@ -112,8 +114,8 @@ export class ModelStore implements IStore {
     ownerModel?: IModel,
     namespace?: INamespace,
   ): INamespace {
-    if (!type.isOfType(Namespace))
-      throw new Error(`newNamespace: type ${type.name} is not a namespace.`)
+    if (!isNamespaceType(type))
+      throw new Error(`newNamespace: type ${type.name} is not declared a namespace.`)
     const data = { ...initValue }
     this.normalizeName(data, type.name, namespace)
     const fullQName = this.getNameWithPath(data as INamespace)
@@ -123,7 +125,11 @@ export class ModelStore implements IStore {
 
     const n = this.store.deepCreate<INamespace>(type, data)
     if (ownerModel) ownerModel.elements.push(n)
-    if (namespace) namespace.elements.push(n)
+    // A namespace-classified concept keeps its own containment; the
+    // generic elements collection exists only on types that declare it.
+    if (namespace && Array.isArray((namespace as Partial<IModel>).elements)) {
+      (namespace as IModel).elements.push(n)
+    }
     // add to map of names
     this.mapOfNames.set(fullQName, n)
     return n
@@ -148,7 +154,11 @@ export class ModelStore implements IStore {
 
     const el = this.store.deepCreate<E>(type, data)
     model.elements!.push(el)
-    if (namespace != model) namespace.elements.push(el)
+    // The enclosing name scope may be a namespace-classified domain
+    // concept with its own containment and no generic elements array.
+    if (namespace != model && Array.isArray((namespace as Partial<IModel>).elements)) {
+      (namespace as IModel).elements.push(el)
+    }
     // add to map of names
     this.mapOfNames.set(fullQName, el)
     return el
@@ -173,9 +183,10 @@ export class ModelStore implements IStore {
       }
       // set normalized name
       el.name = newName
-      // set path to its namespace
-      el.path = namespace ? this.getNameWithPath(namespace) : ""
     }
+    // set path to its name scope (also for auto-generated names, so
+    // getNameWithPath never sees an undefined path)
+    el.path = namespace ? this.getNameWithPath(namespace) : ""
   }
 
   public render<P extends IModelElement>(element: ExprNode<P>): P {
@@ -188,7 +199,8 @@ export class ModelStore implements IStore {
   }
 
   public getNameWithPath(el: IModelElement): string {
-    return el.path || el.path != "" ? `${el.path}/${el.name}` : `//${el.name}`
+    const path = el.path ?? ""
+    return path === "" ? `//${el.name}` : `${path}/${el.name}`
   }
 
   public getTypeOf(e: IModelElement): t.AnyObjectType {
@@ -219,7 +231,7 @@ export class ModelStore implements IStore {
         const [pathType, segments] = doParseURL(path)
         const module = await import(path)
         const el: ExprNode<IModelElement> = module.default()
-        if (el.type.isOfType(Namespace)) return el.render(ctx)
+        if (isNamespaceType(el.type)) return el.render(ctx)
         throw new Error(
           `ImportNamespace: element ${el.type.name} is not a namespace or model`,
         )

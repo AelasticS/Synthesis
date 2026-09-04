@@ -62,7 +62,7 @@ describe("connection property candidates", () => {
   it("connects via the first candidate the parent's type declares", () => {
     const store = new ModelStore()
     const root = (
-      <RootC name="R" content="" store={store}>
+      <RootC name="R" store={store}>
         <ItemC name="a">
           <ItemC name="b" />
         </ItemC>
@@ -79,7 +79,7 @@ describe("connection property candidates", () => {
     const store = new ModelStore()
     expect(() =>
       (
-        <RootC name="R2" content="" store={store}>
+        <RootC name="R2" store={store}>
           <ItemC name="x" />
           <ItemC name="y" />
         </RootC>

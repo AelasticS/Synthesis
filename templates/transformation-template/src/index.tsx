@@ -29,7 +29,7 @@ export class MyTransformation extends abstractM2M<rmT.IRelSchema, rmT.IRelSchema
 
   template(s: rmT.IRelSchema): ExprNode<rmT.IRelSchema, rmT.IRelSchema> {
     return (
-      <RelSchema name={`${s.name}_out`} content="" MDA_level="M1" store={this.context.store}>
+      <RelSchema name={`${s.name}_out`} store={this.context.store}>
         {s.elements
           .filter((el) => this.context.store.isTypeOf(el, rmT.Table))
           .map((el) => this.copyTable(el as rmT.ITable))}

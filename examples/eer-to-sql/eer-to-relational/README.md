@@ -1,76 +1,95 @@
 # eer-to-relational
 
 The flagship configuration-based transformation: an EER schema becomes a
-relational schema, and the design questions that have no single right
-answer are left open as explicit decisions, closed per run by a
-configuration model. Three issues are on offer:
+rich relational schema (real foreign keys, composite capable, and
+indexes; a table is a name scope for its columns), and every design
+question without a single right answer is an explicit decision, closed
+per run by a configuration model. Seven issues are on offer:
 
-- OneToManyStrategy: implement a 1:N relationship as a foreign key or as
-  a join table (per relationship).
-- PrimaryKeyStrategy: auto increment or manual keys (per attribute).
-- NamingConvention: camelCase or snake_case identifiers (whole model).
+- TableAuditing (per entity, on by default): whether a table carries
+  `createdBy`/`createdAt` columns. The audited option applies the
+  higher-order `withAuditColumns` template ([src/audit.tsx](./src/audit.tsx)):
+  a columns step in, a columns step out, so further policies can stack.
+- InheritanceStrategy (per specialization hierarchy, JPA-style):
+  JoinedTables, SingleTable (discriminator plus grafted columns), or
+  TablePerClass (root columns copied; an abstract root gets no table).
+- OneToManyStrategy (per 1:N relationship): a foreign key on the many
+  side, or a join table.
+- IndexOnForeignKey (whole model): one index per foreign key, or none.
+- ForeignKeyColumnNaming (whole model): ShortNames keeps a referenced
+  column's meaningful name and prefixes only where the prefix is the
+  meaning; TablePrefixed prefixes on every hop.
+- PrimaryKeyStrategy (per attribute): auto increment or manual keys.
+- NamingConvention (whole model): camelCase or snake_case identifiers.
 
 ## The package anatomy
 
 - [src/transformation.tsx](./src/transformation.tsx): the transformation
-  class. Each open issue is a `@VarPoint` method; each admissible answer
-  is a `@VarOption` method. The engine dispatches to the option selected
-  by the run's configuration model.
+  class, every template kind in one place. `entityToTable` dispatches on
+  the entity's kind (`@SpecPoint`); subtypes belong exclusively to their
+  hierarchy's rule; emission order is a topological sort over the
+  table-producing units, so a weak chain's composite keys always find
+  their owners; one key-plan mechanism drives weak entities, joined
+  subtypes, and relationship keys.
+- [src/audit.tsx](./src/audit.tsx): the higher-order audit template in
+  its zero-argument form, pure target-domain.
 - [src/decision-model.tsx](./src/decision-model.tsx): the design space as
-  data (issues, options, defaults). `transformation show` reads it.
+  data (issues, options, defaults).
 - [src/binding-model.tsx](./src/binding-model.tsx): connects issues to
   the metamodel concepts they apply to, optionally narrowed by a
-  condition (here: only 1:N relationships raise OneToManyStrategy).
-- [src/er-metamodel.tsx](./src/er-metamodel.tsx): the EER metamodel as a
-  types-metamodel model, shipped as a manifest part so the binding model
-  can reference its concepts.
-- [synth.json](./synth.json): the manifest. The `parts` block lists the
-  three modules above with package-relative paths; they are rendered
-  into the store, in order, before every run.
-- [sample/library.tsx](./sample/library.tsx): a small EER schema (Book,
-  Author, a 1:N writtenBy relationship) to run the transformation on.
+  condition (only 1:N relationships raise OneToManyStrategy).
+- [synth.json](./synth.json): the manifest; its `parts` render the EER
+  metamodel-as-model, the decision model, and the binding model into the
+  store before every run.
+- [sample/library.tsx](./sample/library.tsx): the Library, covering the
+  whole design space: kernels, an abstract `Person` hierarchy, a weak
+  chain down to `Reservation` (composite keys), an M:N and a
+  strategy-routed 1:N relationship.
+- [sample/rich-library.tsx](./sample/rich-library.tsx): the authoring
+  pass over every EER concept, imported by the smoke on every run.
+- [scripts/verify.mjs](./scripts/verify.mjs): asserts exact tables,
+  keys, indexes, audit columns, and persisted trace resolutions for the
+  default and a patched configuration.
 
 ## Try it
 
 ```bash
-# Build the package (from the repository root: rush build -t eer-to-relational)
-npm run build
-
-# Set up a workspace and import the sample model
 synth init
 synth namespace mk demo
+synth transformation install .
 synth model import sample/library.tsx --as demo/library
 
-# Install; show reports the manifest facts, including variability: yes
-synth transformation install .
-synth transformation show eer-to-relational
-
-# Run with the declared defaults (JoinTable, UseAutoIncrement, SnakeCase)
-synth transformation run eer-to-relational --in demo/library --default-configs --out demo/library-rel
+# defaults: JoinedTables, JoinTable, auditing on, indexes on, snake_case
+synth transformation run eer-to-relational --in demo/library --default-configs \
+  --out demo/library-rel --trace demo/library-trace
 synth model show demo/library-rel
+synth model show demo/library-trace
 ```
 
-The default run produces snake_case tables `book` and `author` plus a
-join table `written_by` with two foreign key columns.
+The trace records, per executed rule, which option produced each table:
+`joinedSubtypeTable` entries carry the hierarchy's strategy, every
+`tableColumns` entry its auditing choice, the model its global naming.
 
 ## Choosing differently
 
-Generate an editable configuration, flip a decision, and run again:
-
 ```bash
 synth config init eer-to-relational --for demo/library --out demo/library-cfg
-# edit the configuration model: select ForeignKey for OneToManyStrategy
-synth transformation run eer-to-relational --in demo/library --config demo/library-cfg --out demo/library-rel-fk
+# edit: TablePerClass for the hierarchy, ForeignKey for borrows
+synth transformation run eer-to-relational --in demo/library --config demo/library-cfg --out demo/library-rel2
 ```
 
-With ForeignKey selected, the join table disappears; instead the `book`
-table (the N side) gains a `written_by_author_id_fk` column referencing
-`author`. Foreign key columns carry the relationship name because
-element names are unique across the whole model, not per table. Same
-source model, same transformation, different architecture: that is the
-variability mechanism in one picture.
+Under TablePerClass the abstract `person` table disappears and `member`
+carries the copied root columns; under ForeignKey the `borrows` join
+table is replaced by a key grafted into `book_copy`, aimed at wherever
+the hierarchy strategy put a member's rows. Same source, same
+transformation, different architecture.
 
-## What to look at next
+## The chain
 
-[rel-copy](../rel-copy/) shows the same package mechanics at minimal
-size, without variability.
+[rel-to-sql-ddl](../rel-to-sql-ddl/) consumes exactly what this
+transformation produces:
+
+```bash
+synth transformation run eer-to-relational rel-to-sql-ddl \
+  --in demo/library --default-configs --out-dir ./generated
+```

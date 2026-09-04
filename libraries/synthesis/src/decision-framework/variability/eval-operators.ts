@@ -26,7 +26,13 @@ const isElementDecision = (store: ContextStore, decision: unknown): boolean => {
 }
 
 const isElementScopedDecision = (decision: unknown, element: any): boolean => {
-  return (decision as any)?.element?.id === element?.id
+  const scoped = (decision as any)?.element
+  if (scoped === undefined || element === undefined) return false
+  // Object identity first (the decision's element links the very source
+  // element); the generated uuid `id` as the serialization-safe equality,
+  // counted only when both sides carry one.
+  return scoped === element
+    || (scoped?.id !== undefined && element?.id !== undefined && scoped.id === element.id)
 }
 
 const decisionChoices = (decision: unknown): any[] => {
@@ -112,8 +118,12 @@ export function Not(condition: EvalCondition): EvalCondition {
  * Or(Option("strategy1"), Option("strategy2"))
  */
 export function Option(optionName: string): EvalCondition {
-  return function (this: ConditionContext, configChoices: any[] = [], element?: any, currentContext?: any): boolean {
+  const condition = function (this: ConditionContext, configChoices: any[] = [], element?: any, currentContext?: any): boolean {
     const effectiveChoices = configChoices.length > 0 ? configChoices : resolveConfigChoices(this, element, currentContext)
     return effectiveChoices.some((choice: unknown) => hasOptionName(choice, optionName))
   }
+  // Carry the declared decision-model option name so resolutions are
+  // recorded in decision language, not method names.
+  ;(condition as EvalCondition & { optionName?: string }).optionName = optionName
+  return condition
 }

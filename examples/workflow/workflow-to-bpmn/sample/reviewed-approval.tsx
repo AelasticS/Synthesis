@@ -15,7 +15,7 @@ export const $synth = {
 } as const
 
 export default (store: ModelStore): ExprNode<wm.IProcess> => (
-  <Process name="ReviewedApproval" MDA_level="M1" store={store}>
+  <Process name="ReviewedApproval" store={store}>
     <Sequence name="main">
       <SubProcess name="WriteDocument">
         <Task name="Draft" />

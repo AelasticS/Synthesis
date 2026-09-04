@@ -11,22 +11,15 @@ import { VarPoint, VarOption, Option, Default, DecisionAwareM2M } from "@aelasti
 import * as cm from "@aelastics/synthesis/metamodels/configuration/model"
 
 /**
- * Model-to-text transformation that turns a relational schema into a
- * single-document M2T model containing SQL DDL (CREATE TABLE statements).
+ * Model-to-text transformation that turns a rich relational schema into
+ * SQL DDL: CREATE TABLE statements with composite-aware PRIMARY KEY
+ * clauses, named foreign key constraints as ALTER TABLE statements in a
+ * separate section (foreign keys can be circular, so no creation order
+ * can satisfy them inline), and CREATE INDEX statements.
  *
- * In Synthesis, text generation is a transformation like any other: the
- * target is the engine's text-document metamodel (M2T, Doc, Sec, P), and
- * the CLI's generate step serializes the documents to files.
- *
- * The relational schema's columns are already named according to the
- * naming convention chosen upstream (snake_case vs camelCase), so this
- * template emits identifiers verbatim. Empty tables (no columns) are
- * skipped.
- *
- * The transformation is decision-aware: the IdentifierQuoting issue of
- * its decision model (decision-model.tsx) selects how table and column
- * identifiers are emitted: verbatim (Unquoted, the default) or wrapped
- * in double quotes (DoubleQuoted).
+ * The schema's identifiers are already named per the naming convention
+ * chosen upstream; this template emits them verbatim, subject to the
+ * IdentifierQuoting issue (verbatim or double-quoted).
  */
 @M2M()
 export class Rel2DdlTransformation extends DecisionAwareM2M<
@@ -40,6 +33,7 @@ export class Rel2DdlTransformation extends DecisionAwareM2M<
   }
 
   template(s: rmT.IRelSchema) {
+    const tables = (s.elements ?? []).filter((el) => this.context.store.isTypeOf(el, rmT.Table)) as rmT.ITable[]
     return (
       <M2T name={`${s.name}_ddl`}>
         <Doc name={`${s.name}.sql`}>
@@ -48,10 +42,12 @@ export class Rel2DdlTransformation extends DecisionAwareM2M<
             <P>{" "}</P>
           </Sec>
           <Sec name="tables"></Sec>
+          <Sec name="constraints"></Sec>
+          <Sec name="indexes"></Sec>
         </Doc>
-        {s.elements
-          .filter((el) => this.context.store.isTypeOf(el, rmT.Table))
-          .map((tab) => this.tableToCreate(tab as rmT.ITable))}
+        {tables.map((tab) => this.tableToCreate(tab))}
+        {tables.flatMap((tab) => ((tab.foreignKeys ?? []) as rmT.IForeignKey[]).map((fk) => this.foreignKeyToAlter(fk)))}
+        {tables.flatMap((tab) => ((tab.indexes ?? []) as rmT.IIndex[]).map((ix) => this.indexToCreate(ix)))}
       </M2T>
     )
   }
@@ -59,12 +55,20 @@ export class Rel2DdlTransformation extends DecisionAwareM2M<
   @E2E()
   tableToCreate(tab: rmT.ITable): ExprNode<m2tmm.ISection> {
     const cols = (tab.columns || []) as rmT.IColumn[]
+    if (cols.length === 0) {
+      throw new Error(`Table '${tab.name}' has no columns; nothing to create.`)
+    }
+    const keyCols = cols.filter((c) => c.isKey)
+    const lines: string[] = cols.map((c) => `  ${this.columnLine(c)}`)
+    if (keyCols.length > 0) {
+      lines.push(`  PRIMARY KEY (${keyCols.map((c) => this.quoteIdentifier(c.name)).join(", ")})`)
+    }
     return (
       <Sec name={`table_${tab.name}`}>
         <SecParent $refByName="tables"></SecParent>
         <P>{`CREATE TABLE ${this.quoteIdentifier(tab.name)} (`}</P>
-        {cols.map((c, i) => (
-          <P>{`  ${this.columnLine(c)}${i < cols.length - 1 ? "," : ""}`}</P>
+        {lines.map((line, i) => (
+          <P>{`${line}${i < lines.length - 1 ? "," : ""}`}</P>
         ))}
         <P>{`);`}</P>
         <P>{" "}</P>
@@ -72,11 +76,54 @@ export class Rel2DdlTransformation extends DecisionAwareM2M<
     )
   }
 
+  @E2E()
+  foreignKeyToAlter(fk: rmT.IForeignKey): ExprNode<m2tmm.ISection> {
+    const owner = fk.ownerTable as rmT.ITable | undefined
+    const referenced = fk.referencedTable as rmT.ITable | undefined
+    const pairs = (fk.fkColumns ?? []) as rmT.IForeignKeyColumn[]
+    if (!owner || !referenced || pairs.length === 0) {
+      throw new Error(`Foreign key '${fk.name}' is incomplete: it needs an owner, a referenced table, and column pairs.`)
+    }
+    const fkCols = pairs.map((p) => {
+      const col = p.fkColumn as rmT.IColumn | undefined
+      if (!col) throw new Error(`Foreign key '${fk.name}' has a pair without its fk column.`)
+      return this.quoteIdentifier(col.name)
+    })
+    const refCols = pairs.map((p) => {
+      const col = p.refColumn as rmT.IColumn | undefined
+      if (!col) throw new Error(`Foreign key '${fk.name}' has a pair without its referenced column.`)
+      return this.quoteIdentifier(col.name)
+    })
+    return (
+      <Sec name={`constraint_${owner.name}_${fk.name}`}>
+        <SecParent $refByName="constraints"></SecParent>
+        <P>{`ALTER TABLE ${this.quoteIdentifier(owner.name)} ADD CONSTRAINT ${this.quoteIdentifier(fk.name)}`}</P>
+        <P>{`  FOREIGN KEY (${fkCols.join(", ")}) REFERENCES ${this.quoteIdentifier(referenced.name)} (${refCols.join(", ")});`}</P>
+        <P>{" "}</P>
+      </Sec>
+    )
+  }
+
+  @E2E()
+  indexToCreate(ix: rmT.IIndex): ExprNode<m2tmm.ISection> {
+    const owner = ix.ownerTable as rmT.ITable | undefined
+    const cols = (ix.columns ?? []) as rmT.IColumn[]
+    if (!owner || cols.length === 0) {
+      throw new Error(`Index '${ix.name}' is incomplete: it needs an owner table and at least one column.`)
+    }
+    const unique = ix.isUnique ? "UNIQUE " : ""
+    return (
+      <Sec name={`index_${owner.name}_${ix.name}`}>
+        <SecParent $refByName="indexes"></SecParent>
+        <P>{`CREATE ${unique}INDEX ${this.quoteIdentifier(ix.name)} ON ${this.quoteIdentifier(owner.name)} (${cols.map((c) => this.quoteIdentifier(c.name)).join(", ")});`}</P>
+        <P>{" "}</P>
+      </Sec>
+    )
+  }
+
   private columnLine(c: rmT.IColumn): string {
     const parts: string[] = [this.quoteIdentifier(c.name), c.type]
-    if (c.isKey) parts.push("PRIMARY KEY")
     if (c.isAutoincrement) parts.push("AUTOINCREMENT")
-    if (c.isForeignKey && c.references) parts.push(`REFERENCES ${this.quoteIdentifier(c.references)}`)
     if (c.isNullable === false && !c.isKey) parts.push("NOT NULL")
     return parts.join(" ")
   }

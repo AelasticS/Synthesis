@@ -37,8 +37,6 @@ export const DecisionModel = t.subtype(
   Decision_TypeSchema,
 );
 
-(DecisionModel as any).objectClassification = "Model"
-
 export const SimpleOption = t.subtype(
   ModelElement,
   {

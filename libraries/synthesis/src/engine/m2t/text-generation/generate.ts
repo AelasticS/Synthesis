@@ -110,7 +110,7 @@ const generateDirectory = async (
   try {
     if (ctx.realMode) await createDir(currPath);
     const res: ItemResult = {
-      itemID: dir.id,
+      itemID: `${dir.path}/${dir.name}`,
       itemPath: currRelPath,
       itemType: "Dir",
       outcome: success("successfully created"),
@@ -119,7 +119,7 @@ const generateDirectory = async (
     ctx.result.noSuccesses++;
   } catch (e) {
     const res: ItemResult = {
-      itemID: dir.id,
+      itemID: `${dir.path}/${dir.name}`,
       itemPath: currRelPath,
       itemType: "Dir",
       outcome: failure(e as Error),
@@ -157,7 +157,7 @@ const generateDocument = async (
     if (ctx.realMode) await createFile(currPath, text);
 
     const res: ItemResult = {
-      itemID: doc.id,
+      itemID: `${doc.path}/${doc.name}`,
       itemPath: currRelPath,
       itemType: "Doc",
       outcome: success(text),
@@ -166,7 +166,7 @@ const generateDocument = async (
     ctx.result.noSuccesses++;
   } catch (e) {
     const res: ItemResult = {
-      itemID: doc.id,
+      itemID: `${doc.path}/${doc.name}`,
       itemPath: currRelPath,
       itemType: "Doc",
       outcome: failure(e as Error),

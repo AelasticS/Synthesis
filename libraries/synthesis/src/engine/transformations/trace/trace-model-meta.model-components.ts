@@ -11,6 +11,13 @@ export const TraceEntry: Template<tm.ITraceEntry> = (props) => {
   return new ExprNode(tm.TraceEntry, props, "traceEntries")
 }
 
+// A target reference inside an entry. The explicit tag name makes the
+// serialized form read as what it is (the type would serialize it as a
+// misleading "TraceEntry" tag otherwise).
 export const TargetElement: Template<tm.ITraceEntry> = (props) => {
-  return new ExprNode(tm.TraceEntry, props, "targets")
+  return new ExprNode(tm.TraceEntry, props, "targets", "TargetElement")
+}
+
+export const ReadRecord: Template<tm.IReadRecord> = (props) => {
+  return new ExprNode(tm.ReadRecord, props, "reads")
 }

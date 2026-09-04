@@ -125,7 +125,7 @@ offering a choice that could not be honoured.
 `~/.synth/models/demo/library-rel.tsx`, below its `$synth` header:
 
 ```tsx
-<RelSchema store={store} name="Library_rel" content="" MDA_level="M1">
+<RelSchema store={store} name="Library_rel">
   <Table name="Book">
     <Column name="bookId" type="INTEGER" isKey={true} isAutoincrement={true} isNullable={false} />
     <Column name="bookTitle" type="VARCHAR(255)" isKey={false} isAutoincrement={false} isNullable={true} />

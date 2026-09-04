@@ -23,7 +23,7 @@ export class EER2RelBasicTransformation extends abstractM2M<em.IEERSchema, rmT.I
 
   template(s: em.IEERSchema): ExprNode<em.IEERSchema, rmT.IRelSchema> {
     return (
-      <RelSchema name={`${s.name}_rel`} content="" MDA_level="M1" store={this.context.store}>
+      <RelSchema name={`${s.name}_rel`} store={this.context.store}>
         {s.elements
           .filter((el) => this.context.store.isTypeOf(el, em.Entity))
           .map((el) => this.entityToTable(el as em.IEntity))}

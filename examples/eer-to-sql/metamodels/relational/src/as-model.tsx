@@ -14,10 +14,11 @@ import * as t from "@aelastics/synthesis/metamodels/types/model"
 import { TypeBoolean, TypeString } from "@aelastics/synthesis/metamodels/types/predefined-types"
 
 /**
- * Minimal relational metamodel model, mirroring er-metamodel.tsx of the
- * eer-to-relational example. Its role here is to stand for the source
- * metamodel of the Rel to DDL transformation so the DDL binding model
- * has a real sourceModel to reference, the same way ER_Bindings
+ * The relational metamodel as a model, mirroring the rich content of
+ * model.ts: tables with columns, foreign keys (composite capable via
+ * ForeignKeyColumn pairs), and indexes. Its role is to stand for the
+ * source metamodel of the Rel to DDL transformation so the DDL binding
+ * model has a real sourceModel to reference, the same way ER_Bindings
  * references ERMetamodel.
  */
 export const RELModel = (store: ModelStore): ExprNode<t.ITypeModel> => (
@@ -32,11 +33,48 @@ export const RELModel = (store: ModelStore): ExprNode<t.ITypeModel> => (
       <Property name="isKey">
         <PropertyDomain $refByName="boolean" />
       </Property>
+      <Property name="isNullable">
+        <PropertyDomain $refByName="boolean" />
+      </Property>
+      <Property name="isAutoincrement">
+        <PropertyDomain $refByName="boolean" />
+      </Property>
+    </TypeObject>
+
+    <TypeObject name="ForeignKeyColumn">
+      <Property name="fkColumn" domain={<TypeObject $refByName="Column" />} />
+      <Property name="refColumn" domain={<TypeObject $refByName="Column" />} />
+    </TypeObject>
+
+    <TypeObject name="ForeignKey">
+      <Property name="fkPairs"
+                domain={<TypeArray name="ArrayOfForeignKeyColumns" elementType={<TypeObject $refByName="ForeignKeyColumn" />} />}
+      />
+      <Property name="fkIsUnique">
+        <PropertyDomain $refByName="boolean" />
+      </Property>
+      {/* referencedTable omitted: Table is defined below and this
+          simplified mirror keeps definition order acyclic */}
+    </TypeObject>
+
+    <TypeObject name="Index">
+      <Property name="indexColumns"
+                domain={<TypeArray name="ArrayOfIndexColumns" elementType={<TypeObject $refByName="Column" />} />}
+      />
+      <Property name="indexIsUnique">
+        <PropertyDomain $refByName="boolean" />
+      </Property>
     </TypeObject>
 
     <TypeObject name="Table">
-      <Property name="columns"
+      <Property name="tableColumns"
                 domain={<TypeArray name="ArrayOfColumns" elementType={<TypeObject $refByName="Column" />} />}
+      />
+      <Property name="foreignKeys"
+                domain={<TypeArray name="ArrayOfForeignKeys" elementType={<TypeObject $refByName="ForeignKey" />} />}
+      />
+      <Property name="indexes"
+                domain={<TypeArray name="ArrayOfIndexes" elementType={<TypeObject $refByName="Index" />} />}
       />
     </TypeObject>
 

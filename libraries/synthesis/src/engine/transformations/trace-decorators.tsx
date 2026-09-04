@@ -71,18 +71,21 @@ export const E2E = function() {
         const traceableElements = jsxElements.filter(el => !(el instanceof ResolveElement))
         if (traceableElements.length === 0) return result
 
-        // Consume ALL point resolutions (clears leaks from internally nested calls).
-        // Returns only the resolution belonging to our registered point decorator.
+        // Consume the point resolutions left on the context by directly
+        // wrapped point decorators. Resolution FACTS (which option answered
+        // which issue) are recorded independently by the points themselves;
+        // here the resolution only names the executed option method, which
+        // becomes the entry's rule name: the trace records the outcome, not
+        // how dispatch selected it.
         const resolution = pointReg
           ? consumePointResolutions(this.context, pointReg)
           : undefined
+        const executedRule =
+          resolution && typeof resolution.optionName === "string"
+            ? resolution.optionName
+            : propertyKey
 
-        if (pointReg && resolution !== undefined) {
-          // Delegate to the point decorator's own makeTrace implementation
-          pointReg.makeTrace(this.context, sourceModelElement, traceableElements, propertyKey, resolution)
-        } else {
-          this.context.makeTrace(sourceModelElement, traceableElements, propertyKey, "RegularRule")
-        }
+        this.context.makeTrace(sourceModelElement, traceableElements, executedRule)
 
         return result
       }

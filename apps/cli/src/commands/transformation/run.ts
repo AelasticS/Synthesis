@@ -67,6 +67,10 @@ With one transformation: an m2m result is written back into the workspace as a m
         'Persist the generated default configuration as a workspace model at this ref (single step with --default-configs only).',
       exclusive: ['config']
     }),
+    trace: Flags.string({
+      description:
+        "Persist the run's trace model as a workspace model at this ref (single step only). The trace records, per executed rule, the source element, the produced targets, and every resolved configuration option; when the run used generated defaults, the effective configuration is persisted next to it at '<ref>-config'."
+    }),
     'save-as': Flags.string({
       description:
         "After a successful run, save the steps as a pipeline at pipelines/<name>.json; run it with 'pipeline run <name> --in <ref>'."
@@ -159,6 +163,7 @@ With one transformation: an m2m result is written back into the workspace as a m
         outDir: flags['out-dir'],
         config: flags.config,
         saveConfig: flags['save-config'],
+        trace: flags.trace,
         defaultConfigs: flags['default-configs'],
         keepIntermediates: flags['keep-intermediates'],
         overwrite: flags.overwrite,

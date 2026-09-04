@@ -22,7 +22,7 @@ export class WorkflowToBpmnTransformation extends abstractM2M<wm.IProcess, bm.IP
   template(p: wm.IProcess): ExprNode<wm.IProcess, bm.IProcess> {
     const root = this.rootOf(p)
     return (
-      <Process name={`${p.name}_bpmn`} content="" MDA_level="M1" store={this.context.store}>
+      <Process name={`${p.name}_bpmn`} store={this.context.store}>
         <StartEvent name="start" />
         {this.activityToGraph(root)}
         <EndEvent name="end" />

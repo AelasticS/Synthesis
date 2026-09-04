@@ -24,7 +24,6 @@ export class Context {
 
     // TODO : add initial nameaspace using store!
     const topNamespace: INamespace = {
-      id: "1",
       name: TOP_NAME_DOMAIN,
       label: TOP_NAME_DOMAIN,
       elements: [],

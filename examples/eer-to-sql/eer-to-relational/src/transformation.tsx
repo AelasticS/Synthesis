@@ -1,37 +1,52 @@
 /** @jsx createExprNode */
 
 /**
- * Configuration-based EER to relational transformation, the flagship Synthesis
- * example. Three design issues are left open by the transformation and
- * closed per run by a configuration model: how 1:N relationships are
- * implemented (foreign key or join table), how primary keys are generated
- * (auto increment or manual), and how identifiers are named (camelCase or
- * snake_case). Each issue appears here as a @VarPoint method whose
- * @VarOption implementations correspond to options declared in the
- * decision model (see decision-model.tsx).
+ * The flagship configuration-based EER to relational transformation.
+ * Seven design issues are left open and closed per run by a
+ * configuration model (see decision-model.tsx); the target is the rich
+ * relational metamodel (real foreign keys, composite capable, and
+ * indexes; Table is a name scope). Every template kind appears: plain
+ * @E2E rules, @SpecPoint specialization over the entity kinds,
+ * @VarPoint configuration dispatch, and the higher-order
+ * withAuditColumns template (audit.tsx) selected by the TableAuditing
+ * issue.
+ *
+ * Authority over source elements is partitioned at the composition
+ * site: the entities pass takes kernels and weak entities (hierarchy
+ * roots included), every Subtype belongs exclusively to its
+ * hierarchy's rule, relationships and indexes run last. Emission order
+ * is a topological sort over the table-producing units (a weak entity
+ * depends on its owner, a hierarchy on its root), so references always
+ * find their targets; a cycle is a clear error.
  */
 import { createExprNode } from "@aelastics/synthesis/jsx"
-import { VarPoint, VarOption, Default, Option, DecisionAwareM2M } from "@aelastics/synthesis/variability"
-import {
-  IEntity,
-  IEERSchema,
-  IAttribute,
-  IRelationship,
-  IOrdinaryMapping,
-  Relationship,
-  Entity,
-  IDomain,
-} from "eer-metamodel/model"
-import * as rmT from "relational-metamodel/model"
 import { ExprNode } from "@aelastics/synthesis/jsx"
-import { E2E, M2M } from "@aelastics/synthesis/m2m"
+import { VarPoint, VarOption, Default, Option, DecisionAwareM2M } from "@aelastics/synthesis/variability"
+import { E2E, M2M, SpecPoint, SpecOption } from "@aelastics/synthesis/m2m"
 import { ModelStore } from "@aelastics/synthesis/store"
 import * as cm from "@aelastics/synthesis/metamodels/configuration/model"
-import { RelSchema, Table, Column } from "relational-metamodel"
+import * as em from "eer-metamodel/model"
+import * as rmT from "relational-metamodel/model"
+import { RelSchema, Table, Column, ForeignKey, ForeignKeyColumn, Index } from "relational-metamodel"
+import { withAuditColumns } from "./audit.js"
+
+/** A key column of a table, as planned for emission and referencing. */
+interface KeyColumnPlan {
+  name: string
+  type: string
+}
+
+/** A table-producing unit of the topological emission order. */
+interface Unit {
+  key: string
+  kind: "entity" | "hierarchy"
+  element: em.IEntity | em.ISpecialization
+  deps: string[]
+}
 
 @M2M()
-export class EER2RelDomainWithDecisionTransformation extends DecisionAwareM2M<
-  IEERSchema,
+export class EerToRelational extends DecisionAwareM2M<
+  em.IEERSchema,
   rmT.IRelSchema,
   {},
   cm.IConfigurationModel
@@ -40,110 +55,584 @@ export class EER2RelDomainWithDecisionTransformation extends DecisionAwareM2M<
     super(store, {}, configModel)
   }
 
-  template(s: IEERSchema) {
-    return (
-      <RelSchema name={`${s.name}_Relational_Schema_with_Decision_Model`} content="" MDA_level="M1" store={this.context.store}>
-        {s.elements
-          .filter((el) => this.context.store.isTypeOf(el, Entity))
-          .map((el) => this.Entity2Table(el as IEntity))}
+  // Foreign keys emitted so far, for the index pass.
+  private emittedFks: Array<{ table: string; fkName: string; cols: string[] }> = []
+  // Key column plans, memoized per entity (single source of truth for
+  // emission and referencing).
+  private keyPlans = new Map<em.IEntity, KeyColumnPlan[]>()
 
-        {s.elements
-          .filter((el) => this.context.store.isTypeOf(el, Relationship))
-          .map((r) => this.RelationshipMapping(r as IRelationship))}
+  template(s: em.IEERSchema) {
+    const store = this.context.store
+    const els = ((s.elements ?? []) as em.IERConcept[])
+
+    if (els.some((el) => store.isTypeOf(el, em.Aggregation))) {
+      throw new Error(
+        "eer-to-relational v1 does not map Aggregation (a stated limitation); remove the aggregation or wait for v2.",
+      )
+    }
+
+    const hierarchies = els.filter((el) => store.isTypeOf(el, em.Specialization)) as em.ISpecialization[]
+    const relationships = els.filter((el) => store.isTypeOf(el, em.Relationship)) as em.IRelationship[]
+    // The partition: every source element belongs to exactly one pass.
+    // Subtypes are claimed by their hierarchy; an abstract root whose
+    // hierarchy is TablePerClass gets no table of its own.
+    const entities = (els.filter(
+      (el) => store.isTypeOf(el, em.Entity) && !store.isTypeOf(el, em.Subtype),
+    ) as em.IEntity[]).filter((e) => !this.skipsOwnTable(e))
+
+    const units = this.sortUnits(entities, hierarchies)
+
+    return (
+      <RelSchema name={this.applyNaming(`${s.name}_rel`)} store={this.context.store}>
+        {units.map((u) =>
+          u.kind === "entity"
+            ? this.entityToTable(u.element as em.IEntity)
+            : this.hierarchyToTables(u.element as em.ISpecialization),
+        )}
+        {relationships.map((r) => this.relationshipToStructure(r))}
+        {this.indexesForForeignKeys()}
       </RelSchema>
     )
   }
 
+  // ── the entities pass ────────────────────────────────────────────────
+
   @E2E()
-  Entity2Table(e: IEntity): ExprNode<rmT.ITable> {
-    return <Table name={this.applyNaming(e.name)}>{e.attributes.map((a) => this.Attribute2Column(a))}</Table>
+  @SpecPoint()
+  entityToTable(e: em.IEntity): ExprNode<rmT.ITable> | undefined {
+    return undefined // pure dispatch: Kernel and Weak options below
+  }
+
+  @SpecOption("entityToTable", em.Kernel)
+  kernelToTable(e: em.IKernel): ExprNode<rmT.ITable> {
+    return <Table name={this.tableNameOf(e)}>{this.tableColumns(e)}</Table>
+  }
+
+  @SpecOption("entityToTable", em.Weak)
+  weakToTable(w: em.IWeak): ExprNode<rmT.ITable> {
+    const owner = this.ownerOf(w)
+    const table = this.tableNameOf(w)
+    const copies = this.keyColumnsPlan(w).slice(0, this.keyColumnsPlan(this.ownerOf(w)).length)
+    return (
+      <Table name={table}>
+        {copies.map((c) => (
+          <Column name={c.name} type={c.type} isKey={true} isNullable={false} isAutoincrement={false} />
+        ))}
+        {this.tableColumns(w)}
+        {this.foreignKeyTo(table, `fk_${table}_${this.tableFor(owner)}`, copies.map((c) => c.name), owner, false)}
+      </Table>
+    )
+  }
+
+  /**
+   * The audited or plain columns of an entity's table: a rule pair
+   * selected by the TableAuditing issue, the higher-order
+   * withAuditColumns applied inside the audited option (the confirmed
+   * zero-argument composition).
+   */
+  @E2E()
+  @VarPoint("TableAuditing")
+  tableColumns(e: em.IEntity): ExprNode<rmT.IColumn>[] {
+    throw new Error("Not implemented VarOptions for VarPoint TableAuditing")
+  }
+
+  @Default()
+  @VarOption("tableColumns", Option("AuditColumns"))
+  auditedColumns(e: em.IEntity): ExprNode<rmT.IColumn>[] {
+    const base = () => (e.attributes as em.IAttribute[]).map((a) => this.attributeToColumn(a))
+    return withAuditColumns(this.tableNameOf(e))(base)()
+  }
+
+  @VarOption("tableColumns", Option("NoAuditColumns"))
+  plainColumns(e: em.IEntity): ExprNode<rmT.IColumn>[] {
+    return (e.attributes as em.IAttribute[]).map((a) => this.attributeToColumn(a))
   }
 
   @E2E()
-  Attribute2Column(a: IAttribute): ExprNode<rmT.IColumn> {
-    return <Column name={this.applyNaming(a.name)} isKey={a.isKey} isAutoincrement={this.primaryKeyStrategy(a)} type={this.getColumnType(a.attrDomain)}></Column>
+  attributeToColumn(a: em.IAttribute): ExprNode<rmT.IColumn> {
+    const composite = this.keyAttrsOf(a.attrEntity as em.IEntity).length > 1
+    return (
+      <Column
+        name={this.applyNaming(a.name)}
+        type={this.getColumnType(a.attrDomain)}
+        isKey={a.isKey}
+        isNullable={!a.isKey}
+        isAutoincrement={a.isKey && !composite && this.primaryKeyStrategy(a) && this.getColumnType(a.attrDomain) === "INTEGER"}
+      />
+    )
   }
 
-  // @E2E is outermost: wraps the VarPoint dispatcher, so tracing happens after VarPoint selects
-  // and calls the matching VarOption method. @VarPoint must be inner (applied first) so it
-  // registers its options bucket in the registry before @VarOption decorators run on later methods.
+  // ── the hierarchies pass ─────────────────────────────────────────────
+
+  @E2E()
+  @VarPoint("InheritanceStrategy")
+  hierarchyToTables(spec: em.ISpecialization): ExprNode<rmT.ITable> | ExprNode<rmT.ITable>[] {
+    throw new Error("Not implemented VarOptions for VarPoint InheritanceStrategy")
+  }
+
+  @Default()
+  @VarOption("hierarchyToTables", Option("JoinedTables"))
+  joinedHierarchy(spec: em.ISpecialization): ExprNode<rmT.ITable>[] {
+    return (spec.subtypes as em.ISubtype[]).map((st) => this.joinedSubtypeTable(st))
+  }
+
+  @VarOption("hierarchyToTables", Option("SingleTable"))
+  singleTableHierarchy(spec: em.ISpecialization): ExprNode<rmT.ITable> {
+    const root = this.rootOf(spec)
+    const rootTable = this.tableNameOf(root)
+    return (
+      <Table $refByName={rootTable}>
+        <Column name={`${rootTable}_type`} type="VARCHAR(255)" isKey={false} isNullable={false} isAutoincrement={false} />
+        {(spec.subtypes as em.ISubtype[]).flatMap((st) =>
+          (st.attributes as em.IAttribute[]).map((a) => this.attributeToColumn(a)),
+        )}
+      </Table>
+    )
+  }
+
+  @VarOption("hierarchyToTables", Option("TablePerClass"))
+  tablePerClassHierarchy(spec: em.ISpecialization): ExprNode<rmT.ITable>[] {
+    return (spec.subtypes as em.ISubtype[]).map((st) => this.tablePerClassSubtypeTable(st))
+  }
+
+  @E2E()
+  joinedSubtypeTable(st: em.ISubtype): ExprNode<rmT.ITable> {
+    const root = this.rootOf(st.supertype as em.ISpecialization)
+    const table = this.tableNameOf(st)
+    const copies = this.keyColumnsPlan(st)
+    return (
+      <Table name={table}>
+        {copies.map((c) => (
+          <Column name={c.name} type={c.type} isKey={true} isNullable={false} isAutoincrement={false} />
+        ))}
+        {this.tableColumns(st)}
+        {this.foreignKeyTo(table, `fk_${table}_${this.tableFor(root)}`, copies.map((c) => c.name), root, true)}
+      </Table>
+    )
+  }
+
+  @E2E()
+  tablePerClassSubtypeTable(st: em.ISubtype): ExprNode<rmT.ITable> {
+    const root = this.rootOf(st.supertype as em.ISpecialization)
+    const table = this.tableNameOf(st)
+    return (
+      <Table name={table}>
+        {(root.attributes as em.IAttribute[]).map((a) => this.copiedColumn(a))}
+        {this.tableColumns(st)}
+      </Table>
+    )
+  }
+
+  /** A copy of a root attribute's column in a TablePerClass subtype
+   * table: a new element with the same name (the table scope keeps it
+   * unambiguous) and no autoincrement. */
+  @E2E()
+  copiedColumn(a: em.IAttribute): ExprNode<rmT.IColumn> {
+    return (
+      <Column
+        name={this.applyNaming(a.name)}
+        type={this.getColumnType(a.attrDomain)}
+        isKey={a.isKey}
+        isNullable={!a.isKey}
+        isAutoincrement={false}
+      />
+    )
+  }
+
+  // A second point on the same issue, answering with the strategy VALUE
+  // for the places that must know where an entity's rows live (tableFor,
+  // key plans) without building anything.
+  @VarPoint("InheritanceStrategy")
+  strategyOf(spec: em.ISpecialization): "joined" | "single" | "tpc" {
+    throw new Error("Not implemented VarOptions for VarPoint InheritanceStrategy")
+  }
+
+  @Default()
+  @VarOption("strategyOf", Option("JoinedTables"))
+  strategyJoined(spec: em.ISpecialization): "joined" { return "joined" }
+
+  @VarOption("strategyOf", Option("SingleTable"))
+  strategySingle(spec: em.ISpecialization): "single" { return "single" }
+
+  @VarOption("strategyOf", Option("TablePerClass"))
+  strategyTpc(spec: em.ISpecialization): "tpc" { return "tpc" }
+
+  // ── the relationships pass ───────────────────────────────────────────
+
+  /** Plain dispatcher: the shape of the relationship decides the rule;
+   * only the genuinely open 1:N case is a configuration issue. */
+  relationshipToStructure(r: em.IRelationship): ExprNode<any> {
+    const roles = r.roles as em.IOrdinaryMapping[]
+    if (roles.length !== 2) {
+      throw new Error(`eer-to-relational v1 maps binary relationships only; '${r.name}' has ${roles.length} roles.`)
+    }
+    const [a, b] = roles
+    const oneToN = (a.ub === "1" && b.ub === "M") || (a.ub === "M" && b.ub === "1")
+    if (oneToN) return this.relationshipMapping(r)
+    if (a.ub === "1" && b.ub === "1") return this.oneToOneForeignKey(r)
+    return this.manyToManyJoinTable(r)
+  }
+
   @E2E()
   @VarPoint("OneToManyStrategy")
-  RelationshipMapping(rel: IRelationship): ExprNode<rmT.IColumn> | ExprNode<rmT.ITable> {
-    throw new Error("Not implemented VarOptions for VarPoint RelationshipMapping")
+  relationshipMapping(rel: em.IRelationship): ExprNode<rmT.ITable> {
+    throw new Error("Not implemented VarOptions for VarPoint OneToManyStrategy")
   }
 
-  // Element names are unique across the whole model, not per table, so
-  // foreign key columns are qualified with the relationship name. Without
-  // that, two relationships referencing the same entity would produce the
-  // same column name and the render would fail on a duplicate.
+  @VarOption("relationshipMapping", Option("ForeignKey"))
+  relationshipAsForeignKey(rel: em.IRelationship): ExprNode<rmT.ITable> {
+    const roles = rel.roles as em.IOrdinaryMapping[]
+    const oneSide = roles.find((m) => m.ub === "1")!
+    const manySide = roles.find((m) => m.ub !== "1")!
+    const table = this.tableFor(manySide.domain as em.IEntity)
+    const nullable = oneSide.lb === "0"
+    const { cols, pairs } = this.plannedForeignKey(table, rel.name, oneSide.domain as em.IEntity, nullable)
+    return (
+      <Table $refByName={table}>
+        {cols}
+        {pairs}
+      </Table>
+    )
+  }
+
   @Default()
-  @VarOption("RelationshipMapping", Option("ForeignKey"))
-  relationshipAsForeignKey(rel: IRelationship): ExprNode<rmT.IColumn> {
-    const fkSide = this.getFKSide(rel)
-    const pkSide = this.getPKSide(rel)
+  @VarOption("relationshipMapping", Option("JoinTable"))
+  relationshipAsJoinTable(rel: em.IRelationship): ExprNode<rmT.ITable> {
+    return this.buildJoinTable(rel)
+  }
 
+  @E2E()
+  manyToManyJoinTable(rel: em.IRelationship): ExprNode<rmT.ITable> {
+    return this.buildJoinTable(rel)
+  }
+
+  @E2E()
+  oneToOneForeignKey(rel: em.IRelationship): ExprNode<rmT.ITable> {
+    const roles = rel.roles as em.IOrdinaryMapping[]
+    // the optional side carries the (unique) foreign key
+    const holder = roles.find((m) => m.lb === "0") ?? roles[0]
+    const other = roles.find((m) => m !== holder)!
+    const table = this.tableFor(holder.domain as em.IEntity)
+    const { cols, pairs } = this.plannedForeignKey(table, rel.name, other.domain as em.IEntity, holder.lb === "0", true)
     return (
-      <Table $refByName={this.applyNaming(pkSide.domain.name)}>
-        <Column
-          name={this.applyNaming(rel.name + "_" + fkSide.domain.name + "Id_FK")}
-          type={this.keyColumnType(fkSide.domain)}
-          isForeignKey={true}
-          isKey={false}
-          references={this.applyNaming(fkSide.domain.name)}
-          isNullable={fkSide.lb === "0"}
-        />
+      <Table $refByName={table}>
+        {cols}
+        {pairs}
       </Table>
     )
   }
 
-  @VarOption("RelationshipMapping", Option("JoinTable"))
-  relationshipAsJoinTable(rel: IRelationship): ExprNode<rmT.ITable> {
-    const role1 = rel.roles[0]
-    const role2 = rel.roles[1]
-
+  private buildJoinTable(rel: em.IRelationship): ExprNode<rmT.ITable> {
+    const table = this.applyNaming(rel.name)
+    const roles = rel.roles as em.IOrdinaryMapping[]
+    const parts = roles.map((role) =>
+      this.plannedForeignKey(table, `${rel.name}_${role.name}`, role.domain as em.IEntity, false),
+    )
     return (
-      <Table name={this.applyNaming(rel.name)}>
-        <Column
-          name={this.applyNaming(rel.name + "_" + role1.domain.name + "Id_FK")}
-          type={this.keyColumnType(role1.domain)}
-          isForeignKey={true}
-          references={this.applyNaming(role1.domain.name)}
-          isNullable={role1.lb !== "1" && role1.ub !== "1"}
-          isKey={role1.ub === "1"}
-        />
-        <Column
-          name={this.applyNaming(rel.name + "_" + role2.domain.name + "Id_FK")}
-          type={this.keyColumnType(role2.domain)}
-          isForeignKey={true}
-          references={this.applyNaming(role2.domain.name)}
-          isNullable={role2.lb !== "1"}
-          isKey={role2.ub === "1"}
-        />
+      <Table name={table}>
+        {parts.flatMap((p) => p.cols)}
+        {parts.flatMap((p) => p.pairs)}
       </Table>
     )
   }
 
-  // ######### START PrimaryKeyStrategy variations #############
+  // ── the index pass ───────────────────────────────────────────────────
+
+  @VarPoint("IndexOnForeignKey")
+  indexesForForeignKeys(): ExprNode<rmT.ITable>[] {
+    throw new Error("Not implemented VarOptions for VarPoint IndexOnForeignKey")
+  }
+
+  @Default()
+  @VarOption("indexesForForeignKeys", Option("IndexAllForeignKeys"))
+  indexAllForeignKeys(): ExprNode<rmT.ITable>[] {
+    return this.emittedFks.map(({ table, fkName, cols }) => (
+      <Table $refByName={table}>
+        <Index name={`ix_${fkName}`} isUnique={false}>
+          {cols.map((c) => (
+            <Column $refByName={c} />
+          ))}
+        </Index>
+      </Table>
+    ))
+  }
+
+  @VarOption("indexesForForeignKeys", Option("NoForeignKeyIndexes"))
+  noForeignKeyIndexes(): ExprNode<rmT.ITable>[] {
+    return []
+  }
+
+  // ── foreign key machinery ────────────────────────────────────────────
+
+  /**
+   * Plan and emit one foreign key held by `table` toward `refEntity`'s
+   * table: the qualified fk columns (types mirroring the referenced key
+   * plan) and the ForeignKey element whose ForeignKeyColumn pairs name
+   * the fk column (resolved in the holding table's scope) and the
+   * referenced column (as <refTable>/<column>).
+   */
+  private plannedForeignKey(
+    table: string,
+    qualifier: string,
+    refEntity: em.IEntity,
+    nullable: boolean,
+    unique: boolean = false,
+  ): { cols: ExprNode<rmT.IColumn>[]; pairs: ExprNode<rmT.IForeignKey>[]; fkName: string } {
+    const refTable = this.tableFor(refEntity)
+    const refPlan = this.keyColumnsPlan(refEntity)
+    const taken = new Set<string>()
+    const fkCols = refPlan.map((c) => ({
+      name: this.uniqueName(this.fkColumnName(refTable, c.name), taken),
+      type: c.type,
+      ref: c.name,
+    }))
+    const fkName = this.applyNaming(`fk_${table}_${qualifier}`)
+    const cols = fkCols.map((c) => (
+      <Column name={c.name} type={c.type} isKey={false} isNullable={nullable} isAutoincrement={false} />
+    ))
+    const pairs = [this.foreignKeyElement(fkName, refTable, fkCols, unique)]
+    this.emittedFks.push({ table, fkName, cols: fkCols.map((c) => c.name) })
+    return { cols, pairs, fkName }
+  }
+
+  /** The ForeignKey element for already-planned fk columns. */
+  private foreignKeyElement(
+    fkName: string,
+    refTable: string,
+    fkCols: Array<{ name: string; ref: string }>,
+    unique: boolean,
+  ): ExprNode<rmT.IForeignKey> {
+    return (
+      <ForeignKey name={fkName} isUnique={unique} referencedTable={<Table $refByName={refTable} />}>
+        {fkCols.map((c, i) => (
+          <ForeignKeyColumn name={`${fkName}_p${i + 1}`}>
+            <Column $refByName={c.name} />
+            <Column $refByName={`${refTable}/${c.ref}`} />
+          </ForeignKeyColumn>
+        ))}
+      </ForeignKey>
+    )
+  }
+
+  /** The weak entity's and joined subtype's inline foreign key over the
+   * copied key columns (already present in the table). */
+  private foreignKeyTo(
+    table: string,
+    fkName: string,
+    colNames: string[],
+    refEntity: em.IEntity,
+    _joined: boolean,
+  ): ExprNode<rmT.IForeignKey> {
+    const refTable = this.tableFor(refEntity)
+    const refPlan = this.keyColumnsPlan(refEntity)
+    const named = this.applyNaming(fkName)
+    this.emittedFks.push({ table, fkName: named, cols: colNames })
+    return this.foreignKeyElement(
+      named,
+      refTable,
+      colNames.map((n, i) => ({ name: n, ref: refPlan[i].name })),
+      false,
+    )
+  }
+
+  /**
+   * The name of a foreign key or copied key column, per the
+   * ForeignKeyColumnNaming issue. ShortNames keeps a name that already
+   * carries meaning (it contains an underscore from a prior hop) and
+   * prefixes the referenced table's name otherwise; TablePrefixed
+   * prefixes on every hop. Collisions get numbered suffixes via
+   * uniqueName.
+   */
+  @VarPoint("ForeignKeyColumnNaming")
+  fkColumnName(refTable: string, colName: string): string {
+    throw new Error("Not implemented VarOptions for VarPoint ForeignKeyColumnNaming")
+  }
+
+  @Default()
+  @VarOption("fkColumnName", Option("ShortNames"))
+  shortFkColumnName(refTable: string, colName: string): string {
+    return colName.includes("_") ? colName : `${refTable}_${colName}`
+  }
+
+  @VarOption("fkColumnName", Option("TablePrefixed"))
+  prefixedFkColumnName(refTable: string, colName: string): string {
+    return `${refTable}_${colName}`
+  }
+
+  private uniqueName(base: string, taken: Set<string>): string {
+    let name = base
+    let n = 1
+    while (taken.has(name)) {
+      n += 1
+      name = `${base}_${n}`
+    }
+    taken.add(name)
+    return name
+  }
+
+  // ── key plans and table resolution ───────────────────────────────────
+
+  /** Where an entity's rows live: its own table for kernels and weak
+   * entities; for a subtype, whatever its hierarchy's strategy says. */
+  private tableFor(e: em.IEntity): string {
+    const store = this.context.store
+    if (store.isTypeOf(e, em.Subtype)) {
+      const spec = (e as em.ISubtype).supertype as em.ISpecialization
+      if (this.strategyOf(spec) === "single") {
+        return this.tableFor(this.rootOf(spec))
+      }
+    }
+    return this.tableNameOf(e)
+  }
+
+  /** The key columns of the table holding this entity's rows: names as
+   * emitted, types mirrored. One source of truth for emission and
+   * referencing. */
+  private keyColumnsPlan(e: em.IEntity): KeyColumnPlan[] {
+    const cached = this.keyPlans.get(e)
+    if (cached) return cached
+    const store = this.context.store
+    let plan: KeyColumnPlan[]
+    if (store.isTypeOf(e, em.Weak)) {
+      const owner = this.ownerOf(e as em.IWeak)
+      const ownerPlan = this.keyColumnsPlan(owner)
+      const ownerTable = this.tableFor(owner)
+      const taken = new Set<string>((e.attributes as em.IAttribute[]).map((a) => this.applyNaming(a.name)))
+      plan = [
+        ...ownerPlan.map((c) => ({ name: this.uniqueName(this.fkColumnName(ownerTable, c.name), taken), type: c.type })),
+        ...this.keyAttrsOf(e).map((a) => ({ name: this.applyNaming(a.name), type: this.getColumnType(a.attrDomain) })),
+      ]
+    } else if (store.isTypeOf(e, em.Subtype)) {
+      const spec = (e as em.ISubtype).supertype as em.ISpecialization
+      const root = this.rootOf(spec)
+      const rootPlan = this.keyColumnsPlan(root)
+      const strategy = this.strategyOf(spec)
+      if (strategy === "single") {
+        plan = rootPlan
+      } else if (strategy === "tpc") {
+        plan = rootPlan.map((c) => ({ ...c }))
+      } else {
+        const rootTable = this.tableFor(root)
+        const taken = new Set<string>((e.attributes as em.IAttribute[]).map((a) => this.applyNaming(a.name)))
+        plan = rootPlan.map((c) => ({ name: this.uniqueName(this.fkColumnName(rootTable, c.name), taken), type: c.type }))
+      }
+    } else {
+      plan = this.keyAttrsOf(e).map((a) => ({ name: this.applyNaming(a.name), type: this.getColumnType(a.attrDomain) }))
+    }
+    this.keyPlans.set(e, plan)
+    return plan
+  }
+
+  private keyAttrsOf(e: em.IEntity): em.IAttribute[] {
+    return ((e.attributes ?? []) as em.IAttribute[]).filter((a) => a.isKey)
+  }
+
+  private ownerOf(w: em.IWeak): em.IEntity {
+    const wm = w.weakMap as em.IWeakMapping | undefined
+    if (!wm || !wm.domain) {
+      throw new Error(`Weak entity '${w.name}' has no weak mapping naming its owner.`)
+    }
+    return wm.domain as em.IEntity
+  }
+
+  private rootOf(spec: em.ISpecialization): em.IEntity {
+    const mapping = spec.mapping as em.ISpecializationMapping | undefined
+    const root = mapping?.domain as em.IEntity | undefined
+    if (!root) {
+      throw new Error(`Specialization '${spec.name}' has no mapping naming its root entity.`)
+    }
+    if (this.context.store.isTypeOf(root, em.Subtype)) {
+      throw new Error(
+        `eer-to-relational v1 maps one-level hierarchies only; '${spec.name}' is rooted in subtype '${root.name}'.`,
+      )
+    }
+    return root
+  }
+
+  /** The hierarchy an entity is the root of, if any. */
+  private hierarchyOfRoot(e: em.IEntity): em.ISpecialization | undefined {
+    const store = this.context.store
+    const sm = ((e.mappings ?? []) as em.IMapping[]).find((m) => store.isTypeOf(m, em.SpecializationMapping))
+    return (sm as em.ISpecializationMapping | undefined)?.specialization as em.ISpecialization | undefined
+  }
+
+  /** An abstract root under TablePerClass gets no table of its own. */
+  private skipsOwnTable(e: em.IEntity): boolean {
+    if (!e.isAbstract) return false
+    const spec = this.hierarchyOfRoot(e)
+    return spec !== undefined && this.strategyOf(spec) === "tpc"
+  }
+
+  private tableNameOf(e: em.IEntity): string {
+    return this.applyNaming(e.name)
+  }
+
+  // ── topological emission order ───────────────────────────────────────
+
+  /** Kahn's sort over the table-producing units: a weak entity depends
+   * on the unit holding its owner's table, a hierarchy on its root's
+   * unit. Ties keep source order; a cycle is a clear error. */
+  private sortUnits(entities: em.IEntity[], hierarchies: em.ISpecialization[]): Unit[] {
+    const store = this.context.store
+    const units: Unit[] = []
+    const byKey = new Map<string, Unit>()
+    const unitKeyOfEntity = (e: em.IEntity): string => {
+      if (store.isTypeOf(e, em.Subtype)) {
+        return `h:${((e as em.ISubtype).supertype as em.ISpecialization).name}`
+      }
+      return `e:${e.name}`
+    }
+    for (const e of entities) {
+      const u: Unit = { key: `e:${e.name}`, kind: "entity", element: e, deps: [] }
+      if (store.isTypeOf(e, em.Weak)) {
+        u.deps.push(unitKeyOfEntity(this.ownerOf(e as em.IWeak)))
+      }
+      units.push(u)
+      byKey.set(u.key, u)
+    }
+    for (const h of hierarchies) {
+      const root = this.rootOf(h)
+      const u: Unit = { key: `h:${h.name}`, kind: "hierarchy", element: h, deps: [`e:${root.name}`] }
+      units.push(u)
+      byKey.set(u.key, u)
+    }
+    const externalDeps = (u: Unit) => u.deps.filter((d) => byKey.has(d))
+    const emitted: Unit[] = []
+    const done = new Set<string>()
+    let remaining = units.slice()
+    while (remaining.length > 0) {
+      const ready = remaining.filter((u) => externalDeps(u).every((d) => done.has(d)))
+      if (ready.length === 0) {
+        throw new Error(
+          `Cyclic ownership among: ${remaining.map((u) => u.key).join(", ")}; a weak entity chain must be acyclic.`,
+        )
+      }
+      for (const u of ready) {
+        emitted.push(u)
+        done.add(u.key)
+      }
+      remaining = remaining.filter((u) => !done.has(u.key))
+    }
+    return emitted
+  }
+
+  // ── retained fixed logic and naming ──────────────────────────────────
 
   @VarPoint("PrimaryKeyStrategy")
-  primaryKeyStrategy(a: IAttribute): boolean {
+  primaryKeyStrategy(a: em.IAttribute): boolean {
     throw new Error("Not implemented VarOptions for VarPoint PrimaryKeyStrategy")
   }
 
+  @Default()
   @VarOption("primaryKeyStrategy", Option("UseAutoIncrement"))
-  useAutoIncrement(a: IAttribute): boolean {
+  useAutoIncrement(a: em.IAttribute): boolean {
     return a.isKey ? true : false
   }
 
   @VarOption("primaryKeyStrategy", Option("UseManualIncrement"))
-  useManualIncrement(a: IAttribute): boolean {
+  useManualIncrement(a: em.IAttribute): boolean {
     return false
   }
-
-  // ######### END PrimaryKeyStrategy variations #############
-
-  // ######### START NamingConvention variations #############
 
   @VarPoint("NamingConvention")
   applyNaming(name: string): string {
@@ -155,6 +644,7 @@ export class EER2RelDomainWithDecisionTransformation extends DecisionAwareM2M<
     return name.replace(/_/g, "")
   }
 
+  @Default()
   @VarOption("applyNaming", Option("SnakeCase"))
   applySnakeCaseNaming(name: string): string {
     return name
@@ -163,28 +653,8 @@ export class EER2RelDomainWithDecisionTransformation extends DecisionAwareM2M<
       .toLowerCase()
   }
 
-  // ######### END NamingConvention variations #############
-
-  private getFKSide(rel: IRelationship): IOrdinaryMapping {
-    // The side with upper bound 1 carries the foreign key
-    return rel.roles.find((m) => m.ub === "1") || rel.roles[0]
-  }
-
-  private getPKSide(rel: IRelationship): IOrdinaryMapping {
-    // The side with upper bound N receives the foreign key column
-    return rel.roles.find((m) => m.ub !== "1") || rel.roles[1]
-  }
-
-  private keyColumnType(entity: IEntity): string {
-    // A foreign key column has the type of the referenced entity's key attribute
-    const key = entity.attributes.find((a) => a.isKey)
-    return key ? this.getColumnType(key.attrDomain) : "VARCHAR(255)"
-  }
-
-  private getColumnType(domain: IDomain): string {
-    // Map EER domain types to relational column types
+  private getColumnType(domain: em.IDomain): string {
     const domainName = domain.name.toLowerCase()
-
     switch (domainName) {
       case "string":
         return "VARCHAR(255)"

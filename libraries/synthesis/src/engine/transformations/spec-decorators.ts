@@ -147,10 +147,6 @@ registerPointDecorator({
   sentinel: __isSpecPoint,
   getResolution: (ctx: { lastSpecResolution: any; }) => ctx.lastSpecResolution,
   clearResolution: (ctx: { lastSpecResolution: undefined; }) => { ctx.lastSpecResolution = undefined },
-  makeTrace: (ctx, source, elements, ruleName, resolution) => {
-    ctx.makeTrace(source, elements, ruleName, "SpecializationPoint",
-      undefined, undefined, resolution.optionName, resolution.sourceTypeName)
-  },
 })
 
 

@@ -10,7 +10,113 @@ overall version history.
 
 ## [Unreleased]
 
+### Added
+
+- **The trace model records outcomes, and the CLI can persist it.** A
+  transformation's trace now has one entry per executed rule (named for
+  its rule and source element, the rule field carrying the executed
+  concrete method), and every resolved configuration option is recorded,
+  always: a choice consulted inside another rule is attached to the
+  entry of the element it was decided for, a global choice is recorded
+  once on the trace model, and each resolution carries decision-model
+  issue and option names, a reference to the explicit Choice or a
+  `byDefault` marker. The previous `VariabilityPointTraceEntry` /
+  `SpecializationPointTraceEntry` entry kinds and the `ruleType` field
+  are retired; trace references are full element paths. For future
+  incremental transformation (design/synchronizing-transformations/),
+  entries reserve a `reads` containment and an optional `parentRule`
+  link, and the trace model gains transformation and source version
+  slots. `transformation run --trace <ref>` persists the trace as a
+  workspace model (single step, m2m and m2t); when the run used
+  generated defaults, the effective configuration is persisted next to
+  it at `<ref>-config` so the trace's configuration reference resolves.
+  The trace file is written directly rather than through the
+  self-contained import gate: it is a provenance report whose
+  references resolve against the models of its run, named in its
+  header's `references` map. The engine no longer dumps trace and
+  target JSX through `console.log`; hosts read `context.traceJsx` and
+  `context.output.jsx`.
+- **Hierarchical name scopes by classification.** A metamodel concept
+  declared with `declareNamespace(Type)` (exported from
+  `@aelastics/synthesis/metamodel`, one line next to the type
+  definition) scopes its contained elements' names: equal names coexist
+  in different scopes (`//model/A/id` and `//model/B/id`), element
+  paths nest, and a bare `$refByName` canonicalizes against the current
+  scope and probes the enclosing scopes outward to the model, innermost
+  match winning. Existing flat metamodels are untouched: nothing is
+  scoped until a metamodel opts in. The `Namespace` TYPE is removed
+  (namespace-ness is a cross-cutting classification single inheritance
+  could not express; `Model` now declares it via the same call, and
+  `INamespace` remains as a deprecated type alias).
+
+- **relational-metamodel carries the rich content.** `Table` now
+  contains real `ForeignKey` elements (composite capable: one
+  `ForeignKeyColumn` pair per participating column) and `Index`
+  elements, with `ownerTable` inverses throughout. `Table` is declared
+  a namespace, so column names are per-table (`book/id` and `copy/no`
+  coexist; a foreign key names a sibling table's column as
+  `copy/book_id` and outward probing resolves it). One `Column` tag
+  serves every context via ordered connection candidates (`columns`,
+  then `fkColumn`/`refColumn`, then an index's column list). The
+  authoring sample `rel-to-sql-ddl/sample/rich-db.tsx` guards it all on
+  every suite smoke. The legacy `Column.isForeignKey`/`references`
+  marks remain, now optional, until rel-to-sql-ddl adopts the rich
+  content; `Domain` stays untouched pending discussion.
+- **eer-to-relational is the flagship transformation.** Reworked
+  against the rich relational metamodel with every template kind: pure
+  @SpecPoint dispatch over the entity kinds, seven configuration issues
+  (TableAuditing with the higher-order withAuditColumns applied inside
+  the audited option and on by default, JPA-style InheritanceStrategy
+  per hierarchy with JoinedTables/SingleTable/TablePerClass, an
+  index-per-foreign-key policy, collision-driven foreign key column
+  naming, plus the retained naming, primary key, and 1:N issues).
+  Authority over source elements is partitioned at the composition
+  site (subtypes belong to their hierarchy's rule; an abstract root
+  under TablePerClass gets no table), emission order is a topological
+  sort over table-producing units, and one foreignKeyTo plan drives
+  weak entities (composite keys down the chain), joined subtypes, and
+  relationship keys alike. The suite's verification runs the Library
+  sample under the default and a patched configuration and asserts
+  exact tables, keys, indexes, and trace resolutions.
+
+- **rel-to-sql-ddl generates DDL from the rich content.** CREATE TABLE
+  statements carry composite-aware PRIMARY KEY clauses; foreign keys
+  become named ALTER TABLE ADD CONSTRAINT statements in a separate
+  section (foreign keys can be circular, so no creation order can
+  satisfy them inline); indexes become CREATE INDEX statements. An
+  incomplete foreign key or index is a clear error. The legacy flat
+  `Column.isForeignKey`/`references` marks are now fully removed from
+  the relational metamodel. The suite's chain verification runs EER to
+  relational to DDL end to end and asserts the composite constraint
+  down the weak chain. Pair references skip an occupied slot instead
+  of reconnecting it (the flow-endpoint idiom), so the first Column
+  reference in a pair fills fkColumn and the second refColumn.
+
+- **Docs follow the delivered behavior.** The variability guide's
+  Execution Trace section describes the outcome trace and
+  `transformation run --trace`; the building-models guide documents
+  name scopes (`declareNamespace`, nested paths, outward-probing
+  references); the tutorial's unique-names lesson presents name scopes
+  as a metamodel choice (the tutorial's simplified metamodel keeps the
+  flat rule); the eer-to-sql READMEs and catalog rows describe the
+  flagship design space.
+
 ### Changed
+
+- **metamodel-core reduced to the semantic core.** `ModelElement` now
+  carries exactly `name`, `label`, `description`, `path`, and
+  `parentModel`; `Model` adds `elements`. Dropped as dead weight, with
+  artifact-level concerns belonging to the envelope (the `$synth`
+  header and manifest) instead of element types: the repository fields
+  (`ownerRepository`, `ownerPackage`, `category`,
+  `objectClassification`, `id`), `content`, `MDA_level` (superseded by
+  the conformsTo relationship at the artifact level), the `namespace`
+  link, and `diagrams` with the diagram types (a diagram references
+  model elements from outside; the element graph does not contain
+  diagrams). Samples, fixtures, and docs no longer pass the
+  `content=""` and `MDA_level="M1"` ceremony. Per-element decision
+  matching keys on element identity (ids were store-generated and
+  remain matched when present on older data).
 
 - **Repository consolidated around one Synthesis library.** The former
   packages `@synthesis/engine`, `@synthesis/jsx-runtime`,
@@ -45,6 +151,22 @@ overall version history.
   is removed. A package that still carries a `synth` block fails
   manifest loading with a migration hint pointing at `synth.json`.
   Decision recorded in `design/engine-follow-ups.md`.
+
+### Fixed
+
+- **eer-metamodel authoring repaired for the full concept set.**
+  `Specialization` connects as a top-level schema element (it
+  previously named a parent property no type declares) and `Subtype`
+  nests inside its `Specialization` via `subtypes` (maintaining the
+  `supertype` inverse) while remaining valid at top level. A rich
+  all-concepts sample (`eer-to-relational/sample/rich-library.tsx`)
+  now renders kernels, a specialization with subtypes, a weak entity
+  with its weak mapping, an aggregation with its mapping, and a
+  relationship with roles on every suite smoke, so no authoring path
+  can silently rot again. `Entity` additionally carries `isAbstract`
+  (an optional domain fact: an abstract entity has no direct
+  instances), in this metamodel only; the tutorial metamodels stay
+  deliberately simple.
 - **Documentation site reorganized around two audience tracks.** The six
   parallel sections are replaced by a **User Guide** for CLI consumers
   (installation → quick start → concepts → tutorial → guides → command

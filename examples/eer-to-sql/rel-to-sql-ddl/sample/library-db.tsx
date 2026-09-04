@@ -3,38 +3,37 @@
 import { createExprNode } from '@aelastics/synthesis/jsx'
 import type { ExprNode } from '@aelastics/synthesis/jsx'
 import type { ModelStore } from '@aelastics/synthesis/store'
-import { RelSchema, Table, Column } from 'relational-metamodel'
-import type * as rmT from 'relational-metamodel/model'
+import { RelSchema, Table, Column, ForeignKey, ForeignKeyColumn, Index } from 'relational-metamodel'
+import type * as t from 'relational-metamodel/model'
 
 export const $synth = {
   kind: 'model',
   metamodel: 'relational-metamodel',
   author: 'Sinisa Neskovic',
   version: '0.1.0',
-  description: 'Sample relational schema: import it to try the rel-to-sql-ddl example'
+  description: 'Sample relational schema with a real foreign key and an index: import it to try the rel-to-sql-ddl example'
 } as const
 
-export default (store: ModelStore): ExprNode<rmT.IRelSchema> => (
-  <RelSchema name="LibraryDb" content="" MDA_level="M1" store={store}>
-    {/* Element names are unique across the whole model in the store's
-        naming scheme, so columns carry table-qualified names, the same
-        convention that the eer-to-relational naming decisions generate. */}
-    <Table name="book">
-      <Column name="book_id" type="INTEGER" isKey={true} isForeignKey={false} isNullable={false} isAutoincrement={true} />
-      <Column name="book_title" type="VARCHAR(255)" isKey={false} isForeignKey={false} isNullable={false} isAutoincrement={false} />
-      <Column
-        name="book_author_id"
-        type="INTEGER"
-        isKey={false}
-        isForeignKey={true}
-        isNullable={false}
-        isAutoincrement={false}
-        references="author"
-      />
-    </Table>
+export default (store: ModelStore): ExprNode<t.IRelSchema> => (
+  <RelSchema name="LibraryDb" store={store}>
     <Table name="author">
-      <Column name="author_id" type="INTEGER" isKey={true} isForeignKey={false} isNullable={false} isAutoincrement={true} />
-      <Column name="author_name" type="VARCHAR(255)" isKey={false} isForeignKey={false} isNullable={false} isAutoincrement={false} />
+      <Column name="id" type="INTEGER" isKey={true} isNullable={false} isAutoincrement={true} />
+      <Column name="name" type="VARCHAR(255)" isKey={false} isNullable={false} isAutoincrement={false} />
+    </Table>
+    <Table name="book">
+      <Column name="id" type="INTEGER" isKey={true} isNullable={false} isAutoincrement={true} />
+      <Column name="title" type="VARCHAR(255)" isKey={false} isNullable={false} isAutoincrement={false} />
+      <Column name="author_id" type="INTEGER" isKey={false} isNullable={true} isAutoincrement={false} />
+      <ForeignKey name="fk_book_author" isUnique={false}
+        referencedTable={<Table $refByName="author" />}>
+        <ForeignKeyColumn name="fk_book_author_p1">
+          <Column $refByName="author_id" />
+          <Column $refByName="author/id" />
+        </ForeignKeyColumn>
+      </ForeignKey>
+      <Index name="ix_fk_book_author" isUnique={false}>
+        <Column $refByName="author_id" />
+      </Index>
     </Table>
   </RelSchema>
 )
