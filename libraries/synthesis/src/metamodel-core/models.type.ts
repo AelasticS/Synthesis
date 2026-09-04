@@ -1,42 +1,44 @@
 /*
  * Copyright (c) AelasticS 2019.
  *
+ * The semantic core: what is INSIDE a model. Everything about a model
+ * as an ARTIFACT (conformance, version, ownership, storage,
+ * relationships between models) lives in the envelope around the
+ * serialized model (the $synth header and manifest today, a model
+ * repository row tomorrow), never here.
  */
 
 import * as t from "@aelastics/types";
-import { Diagram } from "./diagram.type";
-import { RepositoryObject } from "./repository.type";
+import { NameType, DescriptionType } from "./basic.type";
+import { declareNamespace } from "./namespace";
 
 export const ModelSchema = t.schema("RepModelSchema");
 
-//TODO: change id type
-
-
-export const ModelElement = t.subtype(RepositoryObject,{
-    // name must be RegExp("^[a-zA-Z0-9_.-]+$")
+export const ModelElement = t.entity({
+    // name must be RegExp("^[a-zA-Z0-9_.-]+$"); normalized at creation
+    // (whitespace stripped), unique per name scope
+    name: NameType,
+    // label preserves the pre-normalization name for display ("Approve 1"
+    // when name became "Approve1"); backfilled from name by the store
+    label: t.optional(t.string),
+    description: t.optional(DescriptionType),
+    // the full path of the enclosing name scope, set by the store
     path: t.optional(t.string),
-    // label is logically same as name, but can it be consisting of several words (and shown in multiple lines)
-    // label is shown and entered in UI; name is computed from label by removing all extra spaces and newlines
-    label: t.string,
-    content: t.string.derive('max_65535').maxLength(65535),
-    parentModel: t.optional(t.link(ModelSchema, 'Model')), // to be defined as Ref
-    namespace: t.optional(t.link(ModelSchema, 'Namespace')) // to be defined as Ref
-},  "ModelElement", ModelSchema);
+    parentModel: t.optional(t.link(ModelSchema, 'Model')),
+}, ['name'] as const, "ModelElement", ModelSchema);
 
-export const Namespace = t.subtype(ModelElement, {
-    elements: t.arrayOf(ModelElement)
-}, "Namespace", ModelSchema);
-
-
-// TODO: add "status" property: Draft, Valid, Approved, Published, Archieved
-export const Model = t.subtype(Namespace, {
-    MDA_level: t.optional(t.string.derive().oneOf(['M0', 'M1', 'M2', 'M3'])),
-    diagrams: t.arrayOf(Diagram),
+export const Model = t.subtype(ModelElement, {
+    elements: t.arrayOf(ModelElement),
 }, "Model", ModelSchema);
 
-// TODO: make parentModel and namespace to be reference type
 t.inverseProps(ModelElement, 'parentModel', Model, 'elements')
 
+// A model scopes the names of its elements; further concepts opt in
+// with their own declareNamespace call in their metamodel module.
+declareNamespace(Model)
+
 export type IModelElement = t.TypeOf<typeof ModelElement>
-export type INamespace = t.TypeOf<typeof Namespace>
 export type IModel = t.TypeOf<typeof Model>
+/** @deprecated Namespace is a classification, not a type: declare
+ * concepts with declareNamespace and test with isNamespaceType. */
+export type INamespace = IModelElement

@@ -15,7 +15,7 @@ export const $synth = {
 } as const
 
 export default (store: ModelStore): ExprNode<bm.IProcess> => (
-  <Process name="Approval" content="" MDA_level="M1" store={store}>
+  <Process name="Approval" store={store}>
     <StartEvent name="start" />
     <Task name="Write" />
     <Gateway name="split" kind="parallel" />

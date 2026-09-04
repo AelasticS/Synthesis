@@ -317,7 +317,7 @@ export const $synth = {
 } as const
 
 export default (store) => (
-<RelSchema store={store} name="Library_rel" content="" MDA_level="M1">
+<RelSchema store={store} name="Library_rel">
   <Table name="Book">
     <Column name="bookId" type="INTEGER" isKey={true} isAutoincrement={true} isNullable={false} />
     <Column name="bookTitle" type="VARCHAR(255)" isKey={false} isAutoincrement={false} isNullable={true} />

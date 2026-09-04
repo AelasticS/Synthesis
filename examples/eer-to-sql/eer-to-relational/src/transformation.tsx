@@ -42,7 +42,7 @@ export class EER2RelDomainWithDecisionTransformation extends DecisionAwareM2M<
 
   template(s: IEERSchema) {
     return (
-      <RelSchema name={`${s.name}_Relational_Schema_with_Decision_Model`} content="" MDA_level="M1" store={this.context.store}>
+      <RelSchema name={`${s.name}_Relational_Schema_with_Decision_Model`} store={this.context.store}>
         {s.elements
           .filter((el) => this.context.store.isTypeOf(el, Entity))
           .map((el) => this.Entity2Table(el as IEntity))}

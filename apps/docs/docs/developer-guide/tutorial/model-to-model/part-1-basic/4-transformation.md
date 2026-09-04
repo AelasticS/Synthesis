@@ -55,7 +55,7 @@ places: to pass to the output root, and to test source element types.
 ```tsx
   template(s: em.IEERSchema): ExprNode<em.IEERSchema, rmT.IRelSchema> {
     return (
-      <RelSchema name={`${s.name}_rel`} content="" MDA_level="M1" store={this.context.store}>
+      <RelSchema name={`${s.name}_rel`} store={this.context.store}>
         {s.elements
           .filter((el) => this.context.store.isTypeOf(el, em.Entity))
           .map((el) => this.entityToTable(el as em.IEntity))}
@@ -76,9 +76,8 @@ braces with ordinary TypeScript.
 Read the body as three decisions.
 
 **The output root.** `<RelSchema>` is the target model's root, so it
-receives the store from the context and the `MDA_level`. Its name is
-derived from the source model's name, so `Library` becomes
-`Library_rel`.
+receives the store from the context. Its name is derived from the
+source model's name, so `Library` becomes `Library_rel`.
 
 **Selecting source elements by type.**
 `this.context.store.isTypeOf(el, em.Entity)` asks the store whether an

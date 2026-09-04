@@ -15,7 +15,7 @@ export const $synth = {
 } as const
 
 export default (store: ModelStore): ExprNode<t.IEERSchema> => (
-  <EERSchema name="Library" MDA_level="M1" store={store}>
+  <EERSchema name="Library" store={store}>
     <Entity name="Book">
       <Attribute name="bookId" isKey={true}>
         <Domain name="number" />

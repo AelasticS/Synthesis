@@ -185,22 +185,32 @@ export class ExprNode<P extends WithRefProps<g.IModelElement>, R = P> {
         urlSegments.shift();
       }
       let ctxArrayIndex = ctxArray.length - 1;
-      let urlSegmentIndex = 0;
 
-      while (ctxArrayIndex >= 0 && urlSegmentIndex <= urlSegments.length - 1) {
-        // move up namespace if path segment is '..'
-        if (urlSegments[urlSegmentIndex] != "..") {
-          // construct absolute path and return
-          const fname = ctx.store.getNameWithPath(ctxArray[ctxArrayIndex]);
-          return `${fname}/${urlSegments.join("/")}`;
-        }
-        // continue iteration
+      // explicit '..' segments move the starting scope up
+      while (ctxArrayIndex >= 0 && urlSegments.length > 0 && urlSegments[0] === "..") {
         urlSegments.shift();
         ctxArrayIndex--;
-        // urlSegmentIndex++;
+      }
+      if (ctxArrayIndex < 0 || urlSegments.length === 0) {
+        return ""; // empty url
       }
 
-      return ""; // empty url
+      // A reference is internally always a full path: canonicalize the
+      // relative name against the current scope, then probe the
+      // enclosing scopes outward. The innermost scope containing the
+      // name wins (lexical shadowing); each probe is one direct lookup
+      // in the store's path-keyed name map. When no scope has the name,
+      // return the innermost candidate so the caller's error names the
+      // path that was tried first.
+      const tail = urlSegments.join("/");
+      const innermost = `${ctx.store.getNameWithPath(ctxArray[ctxArrayIndex])}/${tail}`;
+      for (let i = ctxArrayIndex; i >= 0; i--) {
+        const candidate = `${ctx.store.getNameWithPath(ctxArray[i])}/${tail}`;
+        if (ctx.store.getByName(candidate) !== undefined) {
+          return candidate;
+        }
+      }
+      return innermost;
     } catch (e) {
       return ""; // empty url
     }
@@ -231,7 +241,7 @@ export class ExprNode<P extends WithRefProps<g.IModelElement>, R = P> {
       return sub;
     }
 
-    if (forImport && this.props.id) {
+    if (forImport && (this.props as { id?: unknown }).id) {
       // TODO: handle import of the element
     }
     // handle normal element
@@ -288,7 +298,8 @@ export class ExprNode<P extends WithRefProps<g.IModelElement>, R = P> {
           model,
           namespace
         );
-      else if (this.type.isOfType(g.Namespace))
+      else if (g.isNamespaceType(this.type) && (!model || !namespace))
+        // a namespace-classified element outside any model (top level)
         el = store.newNamespace(
           this.type,
           // renderedProps as unknown as g.INamespace,
@@ -336,12 +347,14 @@ export class ExprNode<P extends WithRefProps<g.IModelElement>, R = P> {
       ctx.pushStore((<any>this.props).store);
     }
     const parent = this.create(ctx, isImport);
-    // if (parent.type.isOfType(g.Namespace)) { // push model to context
-    //   ctx.pushModel(<g.INamespace>parent.instance)
-    // }
+    let pushedNamespace = false;
     if (parent.type.isOfType(g.Model)) {
-      // push model to context
+      // push model to context (a model is a name scope too)
       ctx.pushModel(<g.IModel>parent.instance);
+    } else if (g.isNamespaceType(parent.type)) {
+      // a namespace-classified concept scopes its children's names
+      ctx.pushNamespace(parent.instance as g.INamespace);
+      pushedNamespace = true;
     }
     let objType = parent.type as t.ObjectType<any, any>;
     let mapPropTypes = objType.allProperties;
@@ -382,6 +395,8 @@ export class ExprNode<P extends WithRefProps<g.IModelElement>, R = P> {
     if (parent.type.isOfType(g.Model)) {
       // return old model
       ctx.popModel();
+    } else if (pushedNamespace) {
+      ctx.popNamespace();
     }
     if ("store" in this.props) {
       ctx.popStore();
@@ -493,7 +508,7 @@ export class ExprNode<P extends WithRefProps<g.IModelElement>, R = P> {
             // missing propName on a Namespace parent when the child is a ModelElement
             // (already pushed into parent.elements by store.newModelElement).
             const opted = childElement.connectionInfo.allowedAsTopLevelElement === true;
-            const parentIsNamespace = parent.type.isOfType(g.Namespace);
+            const parentIsNamespace = g.isNamespaceType(parent.type);
             const childIsModelElement = childElement.type.isOfType(g.ModelElement);
             if (!(opted && parentIsNamespace && childIsModelElement)) {
               throw new Error(

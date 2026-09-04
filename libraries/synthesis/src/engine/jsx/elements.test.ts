@@ -6,7 +6,7 @@ describe("should correctly find fully qualified name of model elements from refe
   const store = new ModelStore();
   const ctx = new Context();
 
-  let ns1 = store.newNamespace(g.Namespace, { name: "www.aelastics.com" });
+  let ns1 = { name: "www.aelastics.com", path: "" } as unknown as g.INamespace;
   ctx.namespaceStack.push(ns1);
 
   it("should correctly find fully qualified name from absolute path with protocol", () => {

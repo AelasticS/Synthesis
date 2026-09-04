@@ -15,7 +15,7 @@ export const $synth = {
 } as const
 
 export default (store: ModelStore): ExprNode<rmT.IRelSchema> => (
-  <RelSchema name="LibraryDb" content="" MDA_level="M1" store={store}>
+  <RelSchema name="LibraryDb" store={store}>
     {/* Element names are unique across the whole model in the store's
         naming scheme, so columns carry table-qualified names, the same
         convention that the eer-to-relational naming decisions generate. */}

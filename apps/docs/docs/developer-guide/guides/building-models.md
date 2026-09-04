@@ -29,7 +29,7 @@ import * as e from './EER.jsx-comps'
 const store = new ModelStore()
 
 const eerModel = (
-  <e.EERSchema name="Persons" MDA_level="M1" store={store}>
+  <e.EERSchema name="Persons" store={store}>
     <e.Kernel name="Person">
       <e.Attribute name="PersonName" isKey={false}>
         <e.Domain name="string" />

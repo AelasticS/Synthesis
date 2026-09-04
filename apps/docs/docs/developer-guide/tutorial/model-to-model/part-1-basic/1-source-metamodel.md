@@ -272,7 +272,7 @@ Two smaller points in the same listing:
   `CpxTemplate` rather than `Template`, and its props include an
   optional `store`. The root of a model expression is where the
   `ModelStore` enters, which is why the sample model on page 3 writes
-  `<EERSchema name="Library" MDA_level="M1" store={store}>` and nothing
+  `<EERSchema name="Library" store={store}>` and nothing
   below it mentions the store again. `WithRefProps` is what allows any
   tag to be written in reference form (`$refByName`) instead of
   definition form; page 3 uses that.

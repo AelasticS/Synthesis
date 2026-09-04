@@ -18,7 +18,7 @@ export class WorkflowToBpmnTransformation extends abstractM2M {
     }
     template(p) {
         const root = this.rootOf(p);
-        return (createExprNode(Process, { name: `${p.name}_bpmn`, content: "", MDA_level: "M1", store: this.context.store },
+        return (createExprNode(Process, { name: `${p.name}_bpmn`, store: this.context.store },
             createExprNode(StartEvent, { name: "start" }),
             this.activityToGraph(root),
             createExprNode(EndEvent, { name: "end" }),

@@ -30,7 +30,7 @@ let EER2RelConfigurableTransformation = class EER2RelConfigurableTransformation 
         super(store, {}, configModel);
     }
     template(s) {
-        return (createExprNode(RelSchema, { name: `${s.name}_rel`, content: "", MDA_level: "M1", store: this.context.store },
+        return (createExprNode(RelSchema, { name: `${s.name}_rel`, store: this.context.store },
             s.elements
                 .filter((el) => this.context.store.isTypeOf(el, em.Entity))
                 .map((el) => this.entityToTable(el)),

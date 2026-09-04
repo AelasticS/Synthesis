@@ -25,7 +25,7 @@ let EER2RelDomainWithDecisionTransformation = class EER2RelDomainWithDecisionTra
         super(store, {}, configModel);
     }
     template(s) {
-        return (createExprNode(RelSchema, { name: `${s.name}_Relational_Schema_with_Decision_Model`, content: "", MDA_level: "M1", store: this.context.store },
+        return (createExprNode(RelSchema, { name: `${s.name}_Relational_Schema_with_Decision_Model`, store: this.context.store },
             s.elements
                 .filter((el) => this.context.store.isTypeOf(el, Entity))
                 .map((el) => this.Entity2Table(el)),

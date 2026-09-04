@@ -711,3 +711,18 @@ and the trace file is written directly rather than through the
 self-contained import gate, carrying its run's models in the header
 references map. Next: stage 2, metamodel-core hygiene with the
 namespace activation (decision 7 adopted).
+
+Stage 2 (metamodel-core hygiene and namespace activation) COMPLETE
+2026-09-04, all gates green: rush build, library 84 tests (plus the six
+namespace-scope tests), CLI 441 and 86 smoke, all eleven example and
+template smokes, docs build. Delivered: the five-property semantic core
+(ModelElement re-based, RepositoryObject and diagram types deleted, the
+Namespace TYPE removed with INamespace kept as a deprecated alias),
+declareNamespace/isNamespaceType classification with Model declared in
+core, the renderer push/pop activation, outward-probing reference
+canonicalization (innermost wins), the store corner fixes
+(auto-generated names get paths; getNameWithPath never sees undefined),
+and the repo-wide ceremony sweep (content="" and MDA_level="M1" gone
+from samples, fixtures, transformations, and docs, including the two
+prose passages that taught them). Next: stage 3, the EER repair pass
+(decision 8 open: isAbstract).

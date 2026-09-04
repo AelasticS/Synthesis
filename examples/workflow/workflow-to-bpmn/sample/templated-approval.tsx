@@ -54,7 +54,7 @@ const Approval = (WriteStep: Template<wm.IActivity>) =>
 const ReviewedApproval = Approval(ReviewedWrite)
 
 export default (store: ModelStore): ExprNode<wm.IProcess> => (
-  <Process name="TemplatedApproval" MDA_level="M1" store={store}>
+  <Process name="TemplatedApproval" store={store}>
     <ReviewedApproval doc="Contract" approvers={2} />
   </Process>
 )

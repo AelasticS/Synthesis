@@ -36,8 +36,35 @@ overall version history.
   header's `references` map. The engine no longer dumps trace and
   target JSX through `console.log`; hosts read `context.traceJsx` and
   `context.output.jsx`.
+- **Hierarchical name scopes by classification.** A metamodel concept
+  declared with `declareNamespace(Type)` (exported from
+  `@aelastics/synthesis/metamodel`, one line next to the type
+  definition) scopes its contained elements' names: equal names coexist
+  in different scopes (`//model/A/id` and `//model/B/id`), element
+  paths nest, and a bare `$refByName` canonicalizes against the current
+  scope and probes the enclosing scopes outward to the model, innermost
+  match winning. Existing flat metamodels are untouched: nothing is
+  scoped until a metamodel opts in. The `Namespace` TYPE is removed
+  (namespace-ness is a cross-cutting classification single inheritance
+  could not express; `Model` now declares it via the same call, and
+  `INamespace` remains as a deprecated type alias).
 
 ### Changed
+
+- **metamodel-core reduced to the semantic core.** `ModelElement` now
+  carries exactly `name`, `label`, `description`, `path`, and
+  `parentModel`; `Model` adds `elements`. Dropped as dead weight, with
+  artifact-level concerns belonging to the envelope (the `$synth`
+  header and manifest) instead of element types: the repository fields
+  (`ownerRepository`, `ownerPackage`, `category`,
+  `objectClassification`, `id`), `content`, `MDA_level` (superseded by
+  the conformsTo relationship at the artifact level), the `namespace`
+  link, and `diagrams` with the diagram types (a diagram references
+  model elements from outside; the element graph does not contain
+  diagrams). Samples, fixtures, and docs no longer pass the
+  `content=""` and `MDA_level="M1"` ceremony. Per-element decision
+  matching keys on element identity (ids were store-generated and
+  remain matched when present on older data).
 
 - **Repository consolidated around one Synthesis library.** The former
   packages `@synthesis/engine`, `@synthesis/jsx-runtime`,

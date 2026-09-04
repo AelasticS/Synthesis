@@ -15,7 +15,7 @@ export const $synth = {
 } as const
 
 export default (store: ModelStore): ExprNode<rmT.IRelSchema> => (
-  <RelSchema name="Tables" content="" MDA_level="M1" store={store}>
+  <RelSchema name="Tables" store={store}>
     <Table name="Author">
       <Column name="authorId" type="INTEGER" isKey={true} isAutoincrement={true} isNullable={false} />
       <Column name="authorName" type="VARCHAR(255)" isKey={false} isAutoincrement={false} isNullable={true} />

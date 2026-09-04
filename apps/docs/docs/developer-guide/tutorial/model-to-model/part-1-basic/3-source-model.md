@@ -39,7 +39,7 @@ export const $synth = {
 } as const
 
 export default (store: ModelStore): ExprNode<em.IEERSchema> => (
-  <EERSchema name="Library" MDA_level="M1" store={store}>
+  <EERSchema name="Library" store={store}>
     <Entity name="Book">
       <Attribute name="bookId" isKey={true}>
         <Domain name="number" />
@@ -103,10 +103,6 @@ adds provenance to it, as page 5 shows.
 returning the JSX expression. The store is threaded in by the caller
 (the CLI, or your own code) and handed to the root tag as
 `store={store}`. Nothing below the root mentions the store again.
-
-**`MDA_level="M1"`.** Model-driven architecture levels: M1 is the model
-level, where instances of a metamodel live. The metamodel itself would
-be M2. It is a property of the root element and you set it once.
 
 ### Definition form and reference form
 
