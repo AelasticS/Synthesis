@@ -198,7 +198,7 @@ Relationship2ForeignKey(rel: et.IRelationship): ExprNode<rt.IForeignKey> {
     <r.ForeignKey name={rel.name}>
       <Resolve input={rel.sourceEntity} ruleName="Entity2Table">
         {(targetTable: rt.ITable) => (
-          <r.Column name={`${targetTable.name}_FK`} isForeignKey={true} />
+          <r.Column name={`${targetTable.name}_FK`} />
         )}
       </Resolve>
     </r.ForeignKey>

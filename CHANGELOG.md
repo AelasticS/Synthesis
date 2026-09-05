@@ -113,6 +113,19 @@ overall version history.
 
 ### Changed
 
+- **Guides catch up with name scopes and connection candidates.** The
+  metamodel guide gains a Name scopes section and its relational
+  example drops the retired `isForeignKey` mark (and a broken
+  `inverseProps` line) for the derived-references shape with
+  `declareNamespace(Table)`; the components guide documents ordered
+  connection candidates (`defaultConnectionInfo([...])`,
+  first-available semantics, `isReconnectAllowed` and the pair idiom)
+  and scope-aware `$refByName` resolution; the concepts page and three
+  model-to-text tutorial passages scope their flat-naming claims to
+  the metamodels at hand; CONTRIBUTING's release ladder lists the real
+  per-package commands (there is no repository-wide `rush test`), and
+  the example catalogs credit the gate ladder rather than a CI job.
+
 - **metamodel-core reduced to the semantic core.** `ModelElement` now
   carries exactly `name`, `label`, `description`, `path`, and
   `parentModel`; `Model` adds `elements`. Dropped as dead weight, with

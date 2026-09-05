@@ -10,8 +10,8 @@ transformation author would publish: its own `package.json`, a
 `synth.json` manifest, TypeScript sources built with plain `tsc`, a
 sample input model, and a README that walks through what it
 demonstrates and how to run it. Every example is smoke tested through
-the real CLI in CI, so the catalog stays executable truth rather than
-prose.
+the real CLI by the repository's gate ladder before each merge, so the
+catalog stays executable truth rather than prose.
 
 Packages are grouped by suite, because that is where metamodels are
 shared: every suite owns its metamodels in a `metamodels/` folder, and

@@ -210,8 +210,8 @@ them to `ddl/` under the output directory. A directory holds documents
 and other directories, so only the documents move inside it.
 
 **Two documents cannot share a name.** Documents are model elements,
-and element names are unique across a whole model rather than per
-container. Give both documents the same name and the run fails while
+and in the text metamodel, which declares no name scopes, element
+names are unique across a whole model rather than per container. Give both documents the same name and the run fails while
 the model is still being built, before any file is written:
 
 ```text

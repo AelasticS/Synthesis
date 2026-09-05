@@ -112,6 +112,51 @@ When the parent's type schema has the declared propName (nested case), the runti
 
 Without the opt-in, a missing propName on the parent throws (see below).
 
+### One tag, several parents: ordered candidates
+
+`propName` also accepts an ordered list of candidates, built with
+`defaultConnectionInfo`, which fills in the default flags around it:
+
+```typescript
+import { defaultConnectionInfo, ExprNode, Template } from '@aelastics/synthesis/jsx'
+
+// A Domain is either model-level vocabulary (a direct child of the
+// schema connects into `elements`) or an attribute's type (a child of
+// an Attribute connects into `attrDomain`).
+export const Domain: Template<e.IDomain> = (props) => {
+  return new ExprNode(e.Domain, props, defaultConnectionInfo(["attrDomain", "elements"]))
+}
+```
+
+Candidates are tried in order, and the first *available* property wins:
+
+- A candidate the parent's type does not declare is skipped.
+- An array property is always available; the child is pushed into it.
+- A single-valued property that is still empty is available; the child
+  is assigned to it.
+- A single-valued property that is already filled is **reconnected**
+  (the connection is replaced) by default. Set
+  `isReconnectAllowed: false` on the connection info to make an
+  occupied slot skip to the next candidate instead.
+
+The last rule is what makes paired references work. The full
+relational metamodel of the eer-to-sql example defines one `Column`
+tag serving three contexts, and its foreign-key column pairs depend on
+the occupied slot being skipped rather than replaced:
+
+```typescript
+// One Column tag for a Table's columns, a ForeignKeyColumn pair, and
+// an Index's column list. With isReconnectAllowed false, the first
+// Column reference under a pair fills fkColumn and the second fills
+// refColumn instead of reconnecting the first.
+export const Column: Template<r.IColumn> = (props) => {
+  return new ExprNode(r.Column, props, {
+    ...defaultConnectionInfo(["columns", "fkColumn", "refColumn"]),
+    isReconnectAllowed: false,
+  })
+}
+```
+
 ### The connection info determines the model graph
 
 The relationship between your metamodel, your components, and the resulting model graph is direct:
@@ -151,6 +196,14 @@ For example, suppose multiple attributes share the same domain. The domain is cr
 The first `<Domain name="string" />` creates a new domain element in the store. The second `<Domain $refByName="string" />` does not create anything. It resolves the existing "string" domain by name and connects it to the "LastName" attribute's `attrDomain` property. The result is a graph: two attributes pointing to the same domain.
 
 This is how `$refByName` turns a hierarchical JSX expression into a general graph-structured model. Any component defined with `Template` automatically supports `$refByName` in addition to its regular props. When `$refByName` is set, it must be the only prop on that element.
+
+Resolution is scope-aware. In a metamodel that declares no name
+scopes, a bare name matches against the model's single flat pool,
+which is the behavior shown above. Once the metamodel declares scopes
+(see [Name scopes](./building-models.md#name-scopes)), a bare name
+resolves against the nearest enclosing scope first and is probed
+outward to the model, and a path such as `Author/id` reaches into a
+sibling scope, which no bare name can.
 
 ## Component Types
 

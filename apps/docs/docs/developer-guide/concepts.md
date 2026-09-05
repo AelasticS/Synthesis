@@ -77,9 +77,14 @@ while a reference connects an element to something created elsewhere:
 Here no new `Domain` is created; the existing element named `string` is
 looked up and connected. A reference must resolve to an element that
 exists when it is evaluated; an unresolvable name is a construction
-error, not a silent null. See
+error, not a silent null. When the metamodel declares name scopes,
+resolution is scope-aware: a bare name is probed from the nearest
+enclosing scope outward, and a path such as `Author/id` reaches into a
+sibling scope. See
 [References](./guides/building-models.md#references) for the three
-reference forms.
+reference forms and
+[Name scopes](./guides/building-models.md#name-scopes) for scoped
+resolution.
 
 The fourth operator is where the host language comes in. Anything
 TypeScript can compute can appear inside `{ … }`, as long as it produces

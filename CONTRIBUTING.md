@@ -197,16 +197,24 @@ manually (`workflow_dispatch`) or by pushing a tag of the form `cli-vX.Y.Z`.
 
 Maintainer workflow:
 
-1. **Run the tests and the smoke suite.** Both must be green before
-   anything is tagged: the full test suite, and the CLI's executable
-   end-to-end smoke scenarios (`rushx smoke` runs the composed user
-   journey of workspace, import gate, execution, configurations,
-   chaining, pipelines, and completion through the real binary in an
-   isolated HOME):
+1. **Run the tests and the smoke suite.** All must be green before
+   anything is tagged: the library and CLI test suites, the CLI's
+   executable end-to-end smoke scenarios (`rushx smoke` runs the
+   composed user journey of workspace, import gate, execution,
+   configurations, chaining, pipelines, and completion through the
+   real binary in an isolated HOME), every example package's smoke
+   (each `test` script runs the shared harness through the real CLI),
+   and the docs build. There is no repository-wide test command; the
+   ladder is per package:
    ```bash
    rush build
-   rush test
-   cd apps/cli && rushx smoke
+   (cd libraries/synthesis && rushx test)
+   (cd apps/cli && rushx test && rushx smoke)
+   # every example and template package with a test script:
+   # examples/eer-to-sql/*, examples/tutorial/eer-* and sql-*,
+   # examples/workflow/*, templates/transformation-template
+   (cd examples/tutorial/eer-tutorial-basic && npm test)   # ...and so on
+   (cd apps/docs && rushx build)
    ```
 2. **Bump the version** in `apps/cli/package.json` (semantic versioning).
 3. **Update `CHANGELOG.md`** at the repo root with the new version's

@@ -300,8 +300,9 @@ from the model's namespace and the containment chain:
 
 The binding model above references the decision model by the first of
 those, and page 3's configuration model references an issue and an
-option by two more. Names are unique across a whole model, and a path is
-how one model points into another.
+option by two more. Names are unique across a whole model here,
+because neither metamodel declares name scopes, and a path is how one
+model points into another.
 
 ## Further reading
 
