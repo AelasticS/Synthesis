@@ -184,6 +184,7 @@ same way, with the entity name.
 
 ## What to look at next
 
-Part 4's companion, `eer-tutorial-higher-order`, generates rules instead
-of selecting between them: the template itself becomes the thing that
-varies.
+[eer-tutorial-name-scopes](../eer-tutorial-name-scopes/), the Part 4
+companion, changes the naming world instead of the rules: `Entity` and
+`Table` become name scopes, names turn natural (`id`, `authorId`), and
+cross-table references become paths such as `Author/id`.

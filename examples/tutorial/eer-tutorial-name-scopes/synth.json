@@ -1,0 +1,12 @@
+{
+  "kind": "m2m",
+  "entry": "./dist/transformation.js",
+  "exportName": "EER2RelNameScopesTransformation",
+  "source": {
+    "metamodel": "eer-tutorial-metamodel/name-scopes"
+  },
+  "target": {
+    "metamodel": "rel-tutorial-metamodel/name-scopes",
+    "components": "rel-tutorial-metamodel/name-scopes"
+  }
+}

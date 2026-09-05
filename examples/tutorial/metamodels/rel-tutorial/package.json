@@ -25,12 +25,22 @@
     "./as-model": {
       "types": "./dist/as-model.d.ts",
       "default": "./dist/as-model.js"
+    },
+    "./name-scopes": {
+      "types": "./dist/name-scopes/index.d.ts",
+      "default": "./dist/name-scopes/index.js"
+    },
+    "./name-scopes/model": {
+      "types": "./dist/name-scopes/REL-name-scopes.meta.model.type.d.ts",
+      "default": "./dist/name-scopes/REL-name-scopes.meta.model.type.js"
     }
   },
   "typesVersions": {
     "*": {
       "model": ["dist/REL-tutorial.meta.model.type.d.ts"],
-      "as-model": ["dist/as-model.d.ts"]
+      "as-model": ["dist/as-model.d.ts"],
+      "name-scopes": ["dist/name-scopes/index.d.ts"],
+      "name-scopes/model": ["dist/name-scopes/REL-name-scopes.meta.model.type.d.ts"]
     }
   },
   "dependencies": {

@@ -12,13 +12,17 @@ The tutorial is built around a single observation. The mapping rules
 you would write by hand are almost entirely mechanical, except for a
 handful of places where the source model does not determine the answer.
 Whether a 1:N relationship becomes a foreign key or a join table is a
-design decision, not a deduction. Everything the four parts add is
-machinery for handling exactly those places well.
+design decision, not a deduction. Everything Parts 2 and 3 add is
+machinery for handling exactly those places well, and the closing part
+turns to a different kind of quality: the names the generated schema
+carries.
 
 ## The four parts
 
-Each part starts from the transformation the previous part finished
-with and changes one thing about how its rules are organized.
+Each part changes one thing about a transformation you already know.
+Parts 2 and 3 each start from the previous part's rules and reorganize
+them; Part 4 returns to Part 1's code and changes its naming world
+instead.
 
 ### Part 1: Basic
 
@@ -71,6 +75,25 @@ relational architectures.
 
 Answer key: `examples/tutorial/eer-tutorial-configuration-based`.
 
+### Part 4: Name scopes
+
+**Available now.**
+[Finish here](./part-4-name-scopes/index.md).
+
+The closing part changes no rules at all. Parts 1 to 3 lived under the
+flat naming rule, element names unique across the whole model, which
+is why the sample carried qualified names like `bookId` and the
+generated foreign keys were called `AuthorId_FK`. Part 4 declares
+`Entity` and `Table` name scopes on dedicated stages of the two
+metamodels, and reworks Part 1's transformation onto them: every table
+now has its own `id`, foreign key columns take natural names like
+`authorId`, and references between tables become paths like
+`Author/id`. The diff against Part 1 is deliberately tiny, because
+scopes are a property of the metamodel, not of the rules.
+
+Answer key: `examples/tutorial/eer-tutorial-name-scopes`, which uses
+the `name-scopes` stages of both tutorial metamodels.
+
 ## At a glance
 
 | Part | What decides the mapping | Mechanism |
@@ -78,6 +101,7 @@ Answer key: `examples/tutorial/eer-tutorial-configuration-based`.
 | 1: Basic | A hand written conditional in the rule | Plain TypeScript |
 | 2: Advanced | The runtime type of the source element | `@SpecPoint` and `@SpecOption` |
 | 3: Configuration-based | A configuration chosen for the run | Decision model, binding model, `@VarPoint` and `@VarOption` |
+| 4: Name scopes | Nothing new; the naming world changes | `declareNamespace` and path references |
 
 ## What happens after your transformation runs
 

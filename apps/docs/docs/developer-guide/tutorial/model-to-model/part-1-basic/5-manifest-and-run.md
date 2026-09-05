@@ -462,6 +462,6 @@ Everything else in Synthesis is built on this loop. What Part 1 leaves
 open is the `if` statement in `relationshipToStructure`, the single
 place where the transformation made a design decision and hid it. Part
 2 opens it up, starting with the variants the source model already
-determines, and Part 3 takes on the ones it does not. The
-[tutorial overview](../index.md) describes what each remaining part
-adds and tracks when they become available.
+determines, and Part 3 takes on the ones it does not. Part 4 then
+leaves the rules alone and makes the names natural. The
+[tutorial overview](../index.md) describes what each part adds.

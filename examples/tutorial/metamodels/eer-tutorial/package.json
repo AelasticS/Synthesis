@@ -32,6 +32,14 @@
     "./advanced/as-model": {
       "types": "./dist/advanced/as-model.d.ts",
       "default": "./dist/advanced/as-model.js"
+    },
+    "./name-scopes": {
+      "types": "./dist/name-scopes/index.d.ts",
+      "default": "./dist/name-scopes/index.js"
+    },
+    "./name-scopes/model": {
+      "types": "./dist/name-scopes/EER-name-scopes.meta.model.type.d.ts",
+      "default": "./dist/name-scopes/EER-name-scopes.meta.model.type.js"
     }
   },
   "typesVersions": {
@@ -40,7 +48,9 @@
       "basic/model": ["dist/basic/EER-basic.meta.model.type.d.ts"],
       "advanced": ["dist/advanced/index.d.ts"],
       "advanced/model": ["dist/advanced/EER-advanced.meta.model.type.d.ts"],
-      "advanced/as-model": ["dist/advanced/as-model.d.ts"]
+      "advanced/as-model": ["dist/advanced/as-model.d.ts"],
+      "name-scopes": ["dist/name-scopes/index.d.ts"],
+      "name-scopes/model": ["dist/name-scopes/EER-name-scopes.meta.model.type.d.ts"]
     }
   },
   "dependencies": {

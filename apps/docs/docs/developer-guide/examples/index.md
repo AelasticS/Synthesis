@@ -23,11 +23,12 @@ the metamodel-as-model factory that manifests reference in `parts`.
 ## The tutorial suite
 
 Each part of both tutorials has its own complete package under
-`examples/tutorial/`, which is the finished state of that part. All six
-companions pivot on `rel-tutorial-metamodel`: the model-to-model parts
-target it, and the model-to-text parts read from it. The suite's
+`examples/tutorial/`, which is the finished state of that part. All
+seven companions pivot on `rel-tutorial-metamodel`: the model-to-model
+parts target it, and the model-to-text parts read from it. The suite's
 `metamodels/` folder holds `eer-tutorial-metamodel` (the teaching EER
-stages, `basic` and `advanced`) and `rel-tutorial-metamodel`.
+stages, `basic`, `advanced`, and `name-scopes`) and
+`rel-tutorial-metamodel` (the flat base plus a `name-scopes` stage).
 
 From the [model-to-model tutorial](../tutorial/model-to-model/index.md):
 
@@ -36,6 +37,7 @@ From the [model-to-model tutorial](../tutorial/model-to-model/index.md):
 | `examples/tutorial/eer-tutorial-basic` | m2m | Part 1: a simple EER to relational transformation with fixed logic. |
 | `examples/tutorial/eer-tutorial-advanced` | m2m | Part 2: the entity rule specialized per entity subtype with `@SpecPoint` and `@SpecOption`. |
 | `examples/tutorial/eer-tutorial-configuration-based` | m2m | Part 3: the relationship mapping decided by a configuration model. |
+| `examples/tutorial/eer-tutorial-name-scopes` | m2m | Part 4: Part 1's transformation on name-scoped metamodel stages, with natural names and path references. |
 
 From the [model-to-text tutorial](../tutorial/model-to-text/index.md):
 
@@ -55,8 +57,8 @@ metamodel) and `relational-metamodel` (the full relational one).
 
 | Example | Kind | What it shows |
 | --- | --- | --- |
-| `examples/eer-to-sql/eer-to-relational` | m2m | A configuration-based transformation over the full EER metamodel: decision model, binding model, manifest `parts`, and configurations. |
-| `examples/eer-to-sql/rel-to-sql-ddl` | m2t | Text generation: a relational schema becomes a SQL DDL file, with one global issue (identifier quoting). |
+| `examples/eer-to-sql/eer-to-relational` | m2m | The flagship: every template kind, seven design issues (per-table auditing via a higher-order template, JPA-style inheritance strategies, foreign key indexing and naming), a rich relational target with composite foreign keys, verified outputs and traces. |
+| `examples/eer-to-sql/rel-to-sql-ddl` | m2t | DDL from the rich content: composite PRIMARY KEY clauses, named ALTER TABLE constraints, CREATE INDEX, and identifier quoting as a configuration issue. |
 
 ## Running an example
 

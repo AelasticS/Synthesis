@@ -308,5 +308,4 @@ model and the same transformation can produce different relational
 architectures. The M:N branch stays fixed logic, because a join table
 there is structurally forced rather than chosen.
 
-The [tutorial overview](../index.md) tracks what each remaining part
-adds and when it becomes available.
+The [tutorial overview](../index.md) describes what each part adds.

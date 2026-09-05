@@ -160,6 +160,9 @@ declares `Table` one, so each table names its own columns); this
 tutorial's simplified metamodel keeps the flat rule, which is why the
 transformation on page 4 builds foreign key names like `AuthorId_FK`
 rather than a bare `id_fk`.
+[Part 4](../part-4-name-scopes/index.md) lifts exactly this
+restriction, on dedicated name-scopes stages of both tutorial
+metamodels, once the mechanics of this part are familiar.
 
 ## Creating a workspace
 
