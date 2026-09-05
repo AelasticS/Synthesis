@@ -22,8 +22,8 @@ its examples depend on them like any other dependency.
 examples/
   tutorial/            the tutorial suite
     metamodels/
-      eer-tutorial/    package eer-tutorial-metamodel: the teaching EER stages (basic, advanced)
-      rel-tutorial/    package rel-tutorial-metamodel: the simple relational model, the tutorial's pivot
+      eer-tutorial/    package eer-tutorial-metamodel: the teaching EER stages (basic, advanced, name-scopes)
+      rel-tutorial/    package rel-tutorial-metamodel: the simple relational model, the tutorial's pivot (flat base plus a name-scopes stage)
     eer-tutorial-*     model-to-model tutorial companions
     sql-tutorial-*     model-to-text tutorial companions
   eer-to-sql/          the full-example suite, a chain pair
@@ -49,7 +49,7 @@ Every part of the tutorials has its own complete, independent package.
 Each one is the finished state of that part, so it doubles as the answer
 key while you follow along. The model-to-text tutorial picks up where
 the model-to-model one leaves off: its sample model is what
-eer-tutorial-basic generates, and all six companions pivot on
+eer-tutorial-basic generates, and all seven companions pivot on
 rel-tutorial-metamodel.
 
 | Example | Kind | Shows |
@@ -57,6 +57,7 @@ rel-tutorial-metamodel.
 | [eer-tutorial-basic](./tutorial/eer-tutorial-basic/) | m2m | Part 1: simple EER to relational with fixed logic |
 | [eer-tutorial-advanced](./tutorial/eer-tutorial-advanced/) | m2m | Part 2: entity rule specialization with `@SpecPoint` and `@SpecOption` |
 | [eer-tutorial-configuration-based](./tutorial/eer-tutorial-configuration-based/) | m2m | Part 3: relationship mapping decided by a configuration model |
+| [eer-tutorial-name-scopes](./tutorial/eer-tutorial-name-scopes/) | m2m | Part 4: Part 1 on name-scoped metamodel stages, natural names and path references |
 | [sql-tutorial-basic](./tutorial/sql-tutorial-basic/) | m2t | Text Part 1: relational schema to one SQL DDL file |
 | [sql-tutorial-structured](./tutorial/sql-tutorial-structured/) | m2t | Text Part 2: named sections and one file per document |
 | [sql-tutorial-configuration-based](./tutorial/sql-tutorial-configuration-based/) | m2t | Text Part 3: output layout and identifier quoting decided by a configuration model |

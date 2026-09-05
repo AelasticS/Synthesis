@@ -12,6 +12,16 @@ overall version history.
 
 ### Added
 
+- **Tutorial Part 4: Name scopes.** The model-to-model tutorial gains a
+  closing part that keeps Part 1's rules and changes the naming world:
+  both tutorial metamodel packages gain an additional `name-scopes`
+  stage (the known stage plus one `declareNamespace` line, `Entity` on
+  the EER side, `Table` on the relational side), and the new companion
+  package `eer-tutorial-name-scopes` reworks Part 1 onto them with
+  natural names (`id`, `title`), referenced-entity foreign key names
+  (`authorId`), and path references (`Author/id`). Parts 1 to 3, the
+  model-to-text tutorial, and the flat metamodel stages are untouched.
+
 - **The trace model records outcomes, and the CLI can persist it.** A
   transformation's trace now has one entry per executed rule (named for
   its rule and source element, the rule field carrying the executed

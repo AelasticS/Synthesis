@@ -377,6 +377,10 @@
       "projectFolder": "examples/tutorial/eer-tutorial-configuration-based"
     },
     {
+      "packageName": "eer-tutorial-name-scopes",
+      "projectFolder": "examples/tutorial/eer-tutorial-name-scopes"
+    },
+    {
       "packageName": "sql-tutorial-basic",
       "projectFolder": "examples/tutorial/sql-tutorial-basic"
     },

@@ -532,5 +532,4 @@ an EER model and then generating DDL from it are two commands, each with
 its own configuration. The
 [pipelines guide](../../../../user-guide/guides/pipelines.md) covers
 packaging that chain as one artifact. The
-[tutorial overview](../index.md) tracks what each remaining part adds
-and when it becomes available.
+[tutorial overview](../index.md) describes what each part adds.

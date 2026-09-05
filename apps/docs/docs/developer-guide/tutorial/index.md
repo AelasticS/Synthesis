@@ -18,10 +18,12 @@ source model and produce a target model in another metamodel. The
 running case is the classic one: an Extended Entity-Relationship schema
 becomes a relational schema. The tutorial has four parts. It starts
 with a transformation whose logic is fixed and readable in one sitting,
-then reworks that same logic three times, each time replacing hand
-written branching with a Synthesis mechanism: typed rule
-specialization, configuration-based rules, and higher-order templates.
-Parts 1 to 3 are available now; Part 4 is in preparation.
+then reworks that same logic twice, each time replacing hand written
+branching with a Synthesis mechanism: typed rule specialization, then
+configuration-based rules. The closing part changes the naming world
+instead of the rules: name scopes let models carry natural names like
+`id` with path references between scopes. All four parts are available
+now.
 
 **[Model-to-text transformations](./model-to-text/index.md)** read a
 model and produce files: SQL DDL, documentation, source code, diagram

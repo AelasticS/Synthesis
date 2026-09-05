@@ -403,10 +403,12 @@ source metamodel to achieve it, which was the trap page 2 of Part 2
 warned about: a `ForeignKeyRelationship` subtype would have made a
 target-side design choice a permanent property of the source language.
 
-What remains open is a different kind of question. Both options here
-are rules somebody wrote by hand, and adding a third means writing a
-third. Part 4 takes up templates that take templates as parameters, so
-that families of structurally different targets come from one
-definition rather than from one method each. The
-[tutorial overview](../index.md) tracks what each remaining part adds
-and when it becomes available.
+What remains after the rules are settled is the quality of what they
+emit. Every name this part generated still carries the flat naming
+rule's scars: qualified attribute names, `AuthorId_FK`.
+[Part 4](../part-4-name-scopes/index.md) closes the tutorial by
+declaring name scopes on dedicated metamodel stages, so the same rules
+produce the natural names a database designer would have written by
+hand. Templates that take templates as parameters, the next step in
+rule reuse, are the [Templates guide's](../../../guides/templates.md)
+story, and the flagship example applies them in earnest.
