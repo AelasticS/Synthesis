@@ -26,7 +26,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          # rush.json requires Node >= 22 (nodeSupportedVersionRange)
+          node-version: '22'
 
       - name: Install Rush
         run: node common/scripts/install-run-rush.js install
