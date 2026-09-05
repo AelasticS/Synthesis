@@ -869,3 +869,23 @@ structurally unchanged; the scoped stages are additional standalone
 stage modules per the tutorial's existing stage pattern. The work
 proceeds on its own gated branch (feat/tutorial-name-scopes) in the
 worktree Synthesis-wt-tutorial, full ladder before merge, no push.
+
+Part 4 DELIVERED and MERGED to main 6126e65 the same day (--no-ff,
+branch commit f2c9ecf), full ladder green on merged main: rush build
+by the "Operations succeeded" criterion, library 84 tests, CLI 441
+tests and 86 smoke checks, twelve example and template smokes (the
+new eer-tutorial-name-scopes among them, both suite verifications
+passing), docs build. The example smoke count is twelve from here on.
+Delivered: name-scopes stages in both tutorial metamodel packages
+(declareNamespace on Entity and Table; the scoped EER stage's Domain
+component connects through ordered candidates so vocabulary can be
+declared at model level), the companion with natural names,
+referenced-entity foreign key names, and path references, the
+four-page docs part, and a truthfulness sweep that rewrote the stale
+part 4 pointers left from the deleted higher-order plan (tutorial
+index, part 2 and part 3 closings, the part 3 companion README).
+Verified beyond the smoke: the serializer emits scoped path
+references and the generated model round-trips through model import.
+Not pushed. The worktree Synthesis-wt-tutorial and the branch
+feat/tutorial-name-scopes await removal after the user's review,
+alongside the flagship pair.
