@@ -10,6 +10,8 @@ overall version history.
 
 ## [Unreleased]
 
+## [cli-v0.2.0] - 2026-09-05
+
 ### Added
 
 - **Tutorial Part 4: Name scopes.** The model-to-model tutorial gains a
@@ -486,5 +488,6 @@ overall version history.
   regenerates the manifest, so the git-committed copies were never the
   consumed artifacts, only noise in diffs.
 
-[Unreleased]: https://github.com/AelasticS/Synthesis/compare/cli-v0.1.0..HEAD
+[Unreleased]: https://github.com/AelasticS/Synthesis/compare/cli-v0.2.0..HEAD
+[cli-v0.2.0]: https://github.com/AelasticS/Synthesis/compare/cli-v0.1.0..cli-v0.2.0
 [cli-v0.1.0]: https://github.com/AelasticS/Synthesis/compare/8b82ae4..cli-v0.1.0
