@@ -618,8 +618,21 @@ Verified empirically before the approach is fixed, with fallbacks:
    instruction ("wait with domain dropping, we need to discuss"):
    stage 4 keeps the existing Domain concept untouched (present,
    unwired) and the transformation continues not to emit it, so the
-   discussion can still go either way. Recommendation stands: drop it;
-   alternative: keep or wire the v2 `Column.domain` indirection.
+   discussion can still go either way. RESOLVED 2026-09-05 after the
+   industry discussion: the direction is WIRE, the execution DEFERRED
+   to a dedicated domain workstream (see deferred work). The flagship
+   eventually supports full semantic domains: user-defined EER domains
+   expressing constraints and defaults, mapped to correct relational
+   domains by a once-defined data-driven mapping (a correspondence
+   model, installable on the platform per ADR-015), the relational
+   Domain wired through an optional `Column.domain` link with
+   `Column.type` kept as the resolved string, and the DDL generator
+   gaining a `DomainHandling` issue (EmitDomains for dialects with
+   CREATE DOMAIN: PostgreSQL, Firebird, Oracle 23ai; InlineTypes for
+   the rest). Until that workstream, Domain stays present and unwired
+   as the seam. The tutorial metamodels never get domains (user
+   2026-09-05: the tutorial stays simple on both sides, plain foreign
+   keys, no domains).
 6. Sample domain. Recommendation: extend the Library sample as
    sketched. Alternative: a fresh domain.
 7. Namespaces in the flagship. RESOLVED 2026-09-04: ADOPTED per the
@@ -703,7 +716,11 @@ restructured to top-level definitions and CLI fixtures regenerated);
 the execution-seam extraction
 (library host API; the CLI becomes one host, the platform backend the
 second), which is the named successor of publishing prep; namespace
-representation in metamodel-as-model; `withHistoryColumns`.
+representation in metamodel-as-model; `withHistoryColumns`; full
+semantic domain support per decision 5's resolution 2026-09-05
+(user-defined EER domains with constraints and defaults, the
+once-defined data-driven domain mapping, the wired relational Domain,
+the DDL `DomainHandling` issue).
 
 Conventions binding for all stages: no em dashes in user-facing text;
 "configuration-based", never "decision-based"; JSX notation is the
@@ -825,3 +842,30 @@ references links as author/authorId, or (b) the full natural-naming
 rewrite of companions and listings. Recorded as an open item for the
 user's return. CHANGELOG carries the stage entries. Next: stage 8,
 merge.
+
+Stage 8 (merge) COMPLETE 2026-09-04: merged to main 538a34a with
+--no-ff, the full gate ladder repeated green on merged main (rush
+build, library 84 tests, CLI 441 tests and 86 smoke checks, the
+eleven example and template smokes with both suite verifications,
+docs build). Not pushed. The worktree Synthesis-wt-flagship and the
+branch feat/eer-to-sql-flagship await removal after the user's
+review.
+
+Post-merge resolutions 2026-09-05, from the user discussion. Decision
+5 is resolved as deferred with a confirmed direction (see the decision
+list). The tutorial namespace adoption question is resolved as an
+ADDITIVE shape that supersedes both rewrite offers: parts 1 to 3 of
+the model-to-model tutorial, the whole model-to-text tutorial, and
+every existing fixture stay on the flat rule untouched; a new closing
+topic "Name scopes" joins the model-to-model tutorial as part 4,
+backed by the companion package eer-tutorial-name-scopes, which
+evolves the part 1 companion onto scoped stages of both tutorial
+metamodels (declareNamespace on the EER stage's Entity and the
+relational stage's Table, natural names, path references such as
+Author/id), runs and compares against part 1's output, and closes by
+handing the reader to the flagship, where specialization,
+configurations, and scopes compose. The tutorial metamodels stay
+structurally unchanged; the scoped stages are additional standalone
+stage modules per the tutorial's existing stage pattern. The work
+proceeds on its own gated branch (feat/tutorial-name-scopes) in the
+worktree Synthesis-wt-tutorial, full ladder before merge, no push.
