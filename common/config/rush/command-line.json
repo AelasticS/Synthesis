@@ -11,6 +11,20 @@
    * "rush my-global-command --help".
    */
   "commands": [
+    /**
+     * Override of the built-in "build" command: a build whose operations
+     * all succeed is a success even when some wrote warnings to stderr
+     * (the oclif tool's update notice, TypeDoc's version notice). The
+     * warnings still appear in the log; only the exit code changes.
+     */
+    {
+      "commandKind": "bulk",
+      "name": "build",
+      "summary": "Build all projects that haven't been built, or have changed since they were last built.",
+      "enableParallelism": true,
+      "incremental": true,
+      "allowWarningsInSuccessfulBuild": true
+    }
     // {
     //   /**
     //    * (Required) Determines the type of custom command.

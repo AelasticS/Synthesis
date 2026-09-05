@@ -26,6 +26,10 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    env:
+      # Silence the oclif tool's self-update notice; it lands on stderr,
+      # which Rush would otherwise report as a build warning.
+      OCLIF_SKIP_NEW_VERSION_CHECK: "1"
     steps:
       - name: Resolve tag
         id: tag
