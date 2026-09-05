@@ -61,7 +61,7 @@ Protected branches (`main` and `develop`) require a Pull Request with at least o
 
 ### Prerequisites
 
-- Node.js >= 18
+- Node.js >= 22 (rush.json `nodeSupportedVersionRange` is authoritative)
 - pnpm 10.30.3 (managed by Rush automatically)
 - Git
 - A code editor (VS Code recommended)
