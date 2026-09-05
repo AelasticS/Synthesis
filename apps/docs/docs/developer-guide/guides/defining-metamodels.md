@@ -108,6 +108,40 @@ t.inverseProps(Attribute, 'attrEntity', Entity, 'attributes')
 
 When an Attribute is added to an Entity's `attributes` array, the Attribute's `attrEntity` property is set automatically, and vice versa.
 
+## Name scopes
+
+Element names are unique per name scope, and by default the model is
+the only scope: two elements in one model cannot share a name, wherever
+they sit. A metamodel may relax this by declaring further concepts as
+scopes, with one line next to the type definition:
+
+```typescript
+import { Model, ModelElement, declareNamespace } from '@aelastics/synthesis/metamodel'
+
+export const Table = t.subtype(RelConcept, {
+  columns: t.arrayOf(Column),
+}, "Table", RelModel_TypeSchema)
+
+// A table scopes its columns' names: every table can have its own `id`.
+declareNamespace(Table)
+```
+
+`declareNamespace` is a classification, not a supertype: it works on a
+concept wherever it sits in the subtype hierarchy, so a type keeps its
+natural parent and still scopes names.
+
+The declaration changes two things. Elements contained in a scope get
+nested paths (`//db/book/id` and `//db/copy/id` coexist), and reference
+resolution becomes scope-aware: a bare `$refByName` resolves against
+the nearest enclosing scope first, probing outward to the model, while
+a path such as `book/id` reaches into a sibling scope. Metamodels that
+declare no scopes keep the flat one-name-per-model rule unchanged.
+
+The [building-models guide](./building-models.md#name-scopes) describes
+resolution in detail, and
+[Part 4 of the model-to-model tutorial](../tutorial/model-to-model/part-4-name-scopes/index.md)
+shows what the declaration changes across a whole transformation.
+
 ## Extracting TypeScript Interfaces
 
 Use `t.TypeOf<>` to extract a TypeScript interface from any type definition. This gives you compile-time type checking when working with model instances.
@@ -166,14 +200,20 @@ export type IDomain    = t.TypeOf<typeof Domain>
 
 ```typescript
 import * as t from '@aelastics/types'
-import { Model, ModelElement } from '@aelastics/synthesis/metamodel'
+import { Model, ModelElement, declareNamespace } from '@aelastics/synthesis/metamodel'
 
 export const RelModel_TypeSchema = t.schema("RelModelSchema")
 
 export const RelConcept = t.subtype(ModelElement, {}, "RelConcept", RelModel_TypeSchema)
 
 export const Column = t.subtype(RelConcept, {
-  isForeignKey: t.boolean,
+  type: t.string,
+  isKey: t.boolean,
+  // A column is a foreign key exactly when it references another
+  // column: the fact is derived from the model, never stored beside
+  // it where the two could disagree.
+  references: t.optional(t.link(RelModel_TypeSchema, "Column")),
+  ownerTable: t.optional(t.link(RelModel_TypeSchema, "Table")),
 }, "Column", RelModel_TypeSchema)
 
 export const Table = t.subtype(RelConcept, {
@@ -182,11 +222,14 @@ export const Table = t.subtype(RelConcept, {
 
 export const RelSchema = t.subtype(Model, {}, "RelSchema", RelModel_TypeSchema)
 
-t.inverseProps(Column, 'columnTable', Table, 'columns')
+t.inverseProps(Table, 'columns', Column, 'ownerTable')
+
+// A table scopes its columns' names.
+declareNamespace(Table)
 
 export type IRelSchema = t.TypeOf<typeof RelSchema>
 export type ITable     = t.TypeOf<typeof Table>
 export type IColumn    = t.TypeOf<typeof Column>
 ```
 
-These two metamodels are the source and target of the EER-to-Relational transformation covered in [Writing Transformations](./writing-transformations.md).
+These two metamodels are the source and target of the EER-to-Relational transformation covered in [Writing Transformations](./writing-transformations.md). The repository ships both shapes executable: the tutorial's rel-tutorial metamodel is this relational shape (a flat base stage and a name-scopes stage), and the eer-to-sql suite's full relational metamodel goes further, with first-class composite foreign keys and indexes.

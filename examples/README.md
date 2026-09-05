@@ -6,8 +6,9 @@ exactly like a package a transformation author would publish: its own
 plain `tsc`, and a README explaining what it demonstrates and how to run
 it with the `synth` CLI.
 
-The examples are Rush projects (CI builds them against the workspace),
-but they deliberately carry no monorepo tooling beyond that: no heft,
+The examples are Rush projects (built against the workspace by the
+repository gate), but they deliberately carry no monorepo tooling
+beyond that: no heft,
 no rigs. Any example directory can be read, copied, or extracted as a
 standalone starting point, together with the metamodel packages it
 depends on.
@@ -105,5 +106,6 @@ suite is self-contained, so new domains can be added at any time.
   isolated workspace, imports the sample models (after the install, so
   the metamodel packages resolve through the installed transformation),
   and executes one run (with default configurations when the package is
-  configuration-based). CI runs this for every example on every pull
-  request, so the catalog stays executable truth rather than prose.
+  configuration-based). The repository's gate ladder runs every
+  example's smoke before each merge, so the catalog stays executable
+  truth rather than prose.

@@ -126,9 +126,10 @@ of its mechanism.
 `M2T_Model` extends `Model` and every concept here extends
 `ModelElement`, so documents, sections, and paragraphs are model
 elements with names, subject to the same rules as any other. In
-particular, element names are unique across a whole model rather than
-per container. That fact has a consequence you will meet in Part 2,
-when there are two documents.
+particular, the text metamodel declares no name scopes, so element
+names are unique across a whole model rather than per container. That
+fact has a consequence you will meet in Part 2, when there are two
+documents.
 
 ## The tag functions
 
