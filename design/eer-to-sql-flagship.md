@@ -889,3 +889,23 @@ references and the generated model round-trips through model import.
 Not pushed. The worktree Synthesis-wt-tutorial and the branch
 feat/tutorial-name-scopes await removal after the user's review,
 alongside the flagship pair.
+
+Docs follow-up pass 2026-09-05, user-approved scope, MERGED to main
+5ba4f44 (--no-ff, branch docs/scopes-and-candidates, commit 9a29a04),
+full ladder green on merged main. Delivered: the defining-metamodels
+guide gains a Name scopes section and a repaired relational example
+(the retired isForeignKey mark and an inverseProps line referencing an
+undeclared property replaced by the derived-references shape with
+declareNamespace(Table)); the jsx-components guide documents ordered
+connection candidates (defaultConnectionInfo with candidate lists,
+first-available semantics: absent candidates skipped, occupied single
+slots reconnected by default, isReconnectAllowed false making them
+skip, the pair idiom) and scope-aware $refByName resolution; the
+concepts page and three model-to-text tutorial passages scope their
+flat-naming claims to the metamodels at hand; the writing-
+transformations Resolve sketch drops isForeignKey; CONTRIBUTING's
+release ladder now lists the real per-package commands, since no
+repository-wide rush test exists; the example catalogs credit the gate
+ladder instead of a CI job that does not exist (no examples workflow
+is committed; adding one is a candidate follow-up). The branch
+docs/scopes-and-candidates also awaits removal after review.
