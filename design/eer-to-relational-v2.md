@@ -537,9 +537,19 @@ other v1 deferrals stand.
 
 ## Status
 
+V2 COMPLETE 2026-09-06. All six stages delivered on
+feat/eer-to-relational-v2, each on a full green ladder: stages 1 and
+2 (the metamodels, reshaped through four user review rounds: full
+cardinality names, arity doctrine, typed validators, the schema-level
+identification-dependency acyclicity, the isNamespace marker, the
+EER-convention file names, PrimaryKey with isKey deleted outright,
+membership constraints), the constraint validation point (decision
+13), stage 3 (the full-semantics transformation), stage 4 (dialects
+as configurations with extension-authored presets), and stage 5 (the
+canonical mapping-rules page). Merged to main with --no-ff and the
+ladder repeated there; not pushed.
+
 Drafted 2026-09-06 from the user discussions of 2026-09-05/06.
-Awaiting the user's approval and the open-decision answers; no
-building before that.
 
 Decisions round 2026-09-06, same day: the user resolved 1 (the
 connect/disconnect semantics, correcting the draft's delete/update
