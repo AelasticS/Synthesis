@@ -64,8 +64,6 @@ try {
     out.includes('onDelete="Cascade" onUpdate="Cascade"'))
   expect('connect rules are carried for the trigger layer',
     out.includes('onConnect="Cascade"'))
-  expect('a multivalued attribute gets its own table with set semantics',
-    out.includes('<Table name="author_phones"') && out.includes('<PrimaryKey name="pk_author_phones"'))
   expect('a composite attribute flattens to prefixed columns',
     out.includes('name="address_street"') && out.includes('name="address_city"'))
   expect('a user-defined domain is emitted and linked',
@@ -78,7 +76,7 @@ try {
 
   const tr = read('demo/tr')
   expect('trace names executed rules', tr.includes('rule="kernelToTable"') && tr.includes('rule="joinedSubtypeTable"')
-    && tr.includes('rule="aggregationToTable"') && tr.includes('rule="multivaluedAttributeTable"'))
+    && tr.includes('rule="aggregationToTable"'))
   expect('trace records the audit default on the tableColumns entries',
     tr.includes('issue="TableAuditing" option="AuditColumns" byDefault={true}'))
   expect('trace records the hierarchy strategy on the hierarchy entry',

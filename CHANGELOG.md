@@ -20,8 +20,7 @@ overall version history.
   Aggregation; connect/disconnect integrity rules translated into
   referential actions and trigger stubs; user-defined domains
   (baseType, check, default) emitted and column-linked; attribute
-  cardinality driving nullability and multivalued tables; composite
-  attributes flattened; a first-class ordered PrimaryKey element
+  optionality driving nullability; composite attributes flattened; a first-class ordered PrimaryKey element
   replacing the isKey mark; the SingleTable discriminator named
   `type`; entity name scopes with naturally named samples; and the
   simplified withAuditColumns form (plain createdBy/createdAt).

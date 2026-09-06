@@ -34,7 +34,7 @@ export default (store: ModelStore): ExprNode<t.IEERSchema> => (
       <Attribute name="id" isKey={true}>
         <Domain $refByName="number" />
       </Attribute>
-      <Attribute name="title" isKey={false} lowerBound="0">
+      <Attribute name="title" isKey={false} isOptional={true}>
         <Domain $refByName="string" />
       </Attribute>
     </Entity>
@@ -45,12 +45,8 @@ export default (store: ModelStore): ExprNode<t.IEERSchema> => (
       <Attribute name="name" isKey={false}>
         <Domain $refByName="string" />
       </Attribute>
-      {/* multivalued: its own table in the mapping */}
-      <Attribute name="phones" isKey={false} lowerBound="0" upperBound="M">
-        <Domain $refByName="string" />
-      </Attribute>
       {/* composite, one level: flattened to address_street, address_city */}
-      <Attribute name="address" isKey={false} lowerBound="0">
+      <Attribute name="address" isKey={false} isOptional={true}>
         <Attribute name="street" isKey={false}>
           <Domain $refByName="string" />
         </Attribute>
@@ -65,7 +61,7 @@ export default (store: ModelStore): ExprNode<t.IEERSchema> => (
       <Attribute name="id" isKey={true}>
         <Domain $refByName="number" />
       </Attribute>
-      <Attribute name="name" isKey={false} lowerBound="0">
+      <Attribute name="name" isKey={false} isOptional={true}>
         <Domain $refByName="string" />
       </Attribute>
     </Entity>
@@ -74,7 +70,7 @@ export default (store: ModelStore): ExprNode<t.IEERSchema> => (
         domain={<Entity $refByName="Person" />}
         lowerBound="0" upperBound="1" cnMapp="R" dcnMapp="R" />
       <Subtype name="Member" cnSupertype="R" dcnSupertype="R" cnSubtype="R" dcnSubtype="R">
-        <Attribute name="since" isKey={false} lowerBound="0">
+        <Attribute name="since" isKey={false} isOptional={true}>
           <Domain $refByName="string" />
         </Attribute>
       </Subtype>
@@ -101,7 +97,7 @@ export default (store: ModelStore): ExprNode<t.IEERSchema> => (
       <Attribute name="no" isKey={true}>
         <Domain $refByName="number" />
       </Attribute>
-      <Attribute name="date" isKey={false} lowerBound="0">
+      <Attribute name="date" isKey={false} isOptional={true}>
         <Domain $refByName="string" />
       </Attribute>
     </Weak>
@@ -131,7 +127,7 @@ export default (store: ModelStore): ExprNode<t.IEERSchema> => (
         (the key rule); the member is an ordinary foreign key. Deleting
         the copy cascades the loan (dcn = C on the copy side). */}
     <Aggregation name="Loan">
-      <Attribute name="date" isKey={false} lowerBound="0">
+      <Attribute name="date" isKey={false} isOptional={true}>
         <Domain $refByName="string" />
       </Attribute>
       <AggregationMapping name="ofCopy"

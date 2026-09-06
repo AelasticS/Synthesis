@@ -15,10 +15,6 @@ export declare class EerToRelational extends DecisionAwareM2M<em.IEERSchema, rmT
      * carried over. Primitive domains stay what they always were: names
      * the mapping resolves inline. */
     domainToDomain(d: em.IDomain): ExprNode<rmT.IDomain>;
-    /** A multivalued attribute (upper bound M) becomes its own table:
-     * the owner's key copied, one value column, both forming the primary
-     * key (set semantics), and a foreign key back to the owner. */
-    multivaluedAttributeTable(e: em.IEntity, a: em.IAttribute): ExprNode<rmT.ITable>;
     entityToTable(e: em.IEntity): ExprNode<rmT.ITable> | undefined;
     kernelToTable(e: em.IKernel): ExprNode<rmT.ITable>;
     /**
@@ -46,8 +42,7 @@ export declare class EerToRelational extends DecisionAwareM2M<em.IEERSchema, rmT
     tableColumns(e: em.IEntity): ExprNode<rmT.IColumn>[];
     auditedColumns(e: em.IEntity): ExprNode<rmT.IColumn>[];
     plainColumns(e: em.IEntity): ExprNode<rmT.IColumn>[];
-    /** One attribute's columns in the entity's own table: a multivalued
-     * attribute contributes none (its table is separate), a composite
+    /** One attribute's columns in the entity's own table: a composite
      * parent contributes one column per leaf (attribute_component), a
      * leaf contributes its column. */
     private attributeColumns;

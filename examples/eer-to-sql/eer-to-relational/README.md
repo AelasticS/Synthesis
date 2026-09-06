@@ -2,8 +2,8 @@
 
 The flagship configuration-based transformation: a full-semantics EER
 schema (aggregations with the cardinality key rule, weak chains,
-JPA-style hierarchies, user-defined domains with checks, multivalued
-and composite attributes, connect/disconnect integrity rules) becomes
+JPA-style hierarchies, user-defined domains with checks,
+composite attributes, connect/disconnect integrity rules) becomes
 a rich relational schema (first-class primary and foreign keys,
 composite capable, referential actions, wired domains, indexes; a
 table is a name scope for its columns). Every design question without

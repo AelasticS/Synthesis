@@ -96,8 +96,7 @@ export declare const Attribute: t.Subtype<{
     attrEntity: t.OptionalType<t.LinkType>;
     isKey: t.BooleanType;
     defaultValue: t.OptionalType<t.StringType>;
-    lowerBound: t.OptionalType<t.StringType>;
-    upperBound: t.OptionalType<t.StringType>;
+    isOptional: t.OptionalType<t.BooleanType>;
     components: t.ArrayType<t.LinkType>;
 }, {
     conceptType: t.StringType;
@@ -126,8 +125,7 @@ export declare const Entity: t.Subtype<{
         attrEntity: t.OptionalType<t.LinkType>;
         isKey: t.BooleanType;
         defaultValue: t.OptionalType<t.StringType>;
-        lowerBound: t.OptionalType<t.StringType>;
-        upperBound: t.OptionalType<t.StringType>;
+        isOptional: t.OptionalType<t.BooleanType>;
         components: t.ArrayType<t.LinkType>;
     }, {
         conceptType: t.StringType;
@@ -167,8 +165,7 @@ export declare const Kernel: t.Subtype<{}, {
         attrEntity: t.OptionalType<t.LinkType>;
         isKey: t.BooleanType;
         defaultValue: t.OptionalType<t.StringType>;
-        lowerBound: t.OptionalType<t.StringType>;
-        upperBound: t.OptionalType<t.StringType>;
+        isOptional: t.OptionalType<t.BooleanType>;
         components: t.ArrayType<t.LinkType>;
     }, {
         conceptType: t.StringType;
@@ -210,8 +207,7 @@ export declare const Weak: t.Subtype<{
         attrEntity: t.OptionalType<t.LinkType>;
         isKey: t.BooleanType;
         defaultValue: t.OptionalType<t.StringType>;
-        lowerBound: t.OptionalType<t.StringType>;
-        upperBound: t.OptionalType<t.StringType>;
+        isOptional: t.OptionalType<t.BooleanType>;
         components: t.ArrayType<t.LinkType>;
     }, {
         conceptType: t.StringType;
@@ -253,8 +249,7 @@ export declare const Aggregation: t.Subtype<{
         attrEntity: t.OptionalType<t.LinkType>;
         isKey: t.BooleanType;
         defaultValue: t.OptionalType<t.StringType>;
-        lowerBound: t.OptionalType<t.StringType>;
-        upperBound: t.OptionalType<t.StringType>;
+        isOptional: t.OptionalType<t.BooleanType>;
         components: t.ArrayType<t.LinkType>;
     }, {
         conceptType: t.StringType;
@@ -300,8 +295,7 @@ export declare const Subtype: t.Subtype<{
         attrEntity: t.OptionalType<t.LinkType>;
         isKey: t.BooleanType;
         defaultValue: t.OptionalType<t.StringType>;
-        lowerBound: t.OptionalType<t.StringType>;
-        upperBound: t.OptionalType<t.StringType>;
+        isOptional: t.OptionalType<t.BooleanType>;
         components: t.ArrayType<t.LinkType>;
     }, {
         conceptType: t.StringType;
@@ -342,8 +336,7 @@ export declare const Mapping: t.Subtype<{
             attrEntity: t.OptionalType<t.LinkType>;
             isKey: t.BooleanType;
             defaultValue: t.OptionalType<t.StringType>;
-            lowerBound: t.OptionalType<t.StringType>;
-            upperBound: t.OptionalType<t.StringType>;
+            isOptional: t.OptionalType<t.BooleanType>;
             components: t.ArrayType<t.LinkType>;
         }, {
             conceptType: t.StringType;
@@ -399,8 +392,7 @@ export declare const WeakMapping: t.Subtype<{
             attrEntity: t.OptionalType<t.LinkType>;
             isKey: t.BooleanType;
             defaultValue: t.OptionalType<t.StringType>;
-            lowerBound: t.OptionalType<t.StringType>;
-            upperBound: t.OptionalType<t.StringType>;
+            isOptional: t.OptionalType<t.BooleanType>;
             components: t.ArrayType<t.LinkType>;
         }, {
             conceptType: t.StringType;
@@ -443,8 +435,7 @@ export declare const WeakMapping: t.Subtype<{
             attrEntity: t.OptionalType<t.LinkType>;
             isKey: t.BooleanType;
             defaultValue: t.OptionalType<t.StringType>;
-            lowerBound: t.OptionalType<t.StringType>;
-            upperBound: t.OptionalType<t.StringType>;
+            isOptional: t.OptionalType<t.BooleanType>;
             components: t.ArrayType<t.LinkType>;
         }, {
             conceptType: t.StringType;
@@ -500,8 +491,7 @@ export declare const AggregationMapping: t.Subtype<{
             attrEntity: t.OptionalType<t.LinkType>;
             isKey: t.BooleanType;
             defaultValue: t.OptionalType<t.StringType>;
-            lowerBound: t.OptionalType<t.StringType>;
-            upperBound: t.OptionalType<t.StringType>;
+            isOptional: t.OptionalType<t.BooleanType>;
             components: t.ArrayType<t.LinkType>;
         }, {
             conceptType: t.StringType;
@@ -544,8 +534,7 @@ export declare const AggregationMapping: t.Subtype<{
             attrEntity: t.OptionalType<t.LinkType>;
             isKey: t.BooleanType;
             defaultValue: t.OptionalType<t.StringType>;
-            lowerBound: t.OptionalType<t.StringType>;
-            upperBound: t.OptionalType<t.StringType>;
+            isOptional: t.OptionalType<t.BooleanType>;
             components: t.ArrayType<t.LinkType>;
         }, {
             conceptType: t.StringType;
@@ -601,8 +590,7 @@ export declare const OrdinaryMapping: t.Subtype<{
             attrEntity: t.OptionalType<t.LinkType>;
             isKey: t.BooleanType;
             defaultValue: t.OptionalType<t.StringType>;
-            lowerBound: t.OptionalType<t.StringType>;
-            upperBound: t.OptionalType<t.StringType>;
+            isOptional: t.OptionalType<t.BooleanType>;
             components: t.ArrayType<t.LinkType>;
         }, {
             conceptType: t.StringType;
@@ -658,8 +646,7 @@ export declare const SpecializationMapping: t.Subtype<{
             attrEntity: t.OptionalType<t.LinkType>;
             isKey: t.BooleanType;
             defaultValue: t.OptionalType<t.StringType>;
-            lowerBound: t.OptionalType<t.StringType>;
-            upperBound: t.OptionalType<t.StringType>;
+            isOptional: t.OptionalType<t.BooleanType>;
             components: t.ArrayType<t.LinkType>;
         }, {
             conceptType: t.StringType;
@@ -716,8 +703,7 @@ export declare const Specialization: t.Subtype<{
                 attrEntity: t.OptionalType<t.LinkType>;
                 isKey: t.BooleanType;
                 defaultValue: t.OptionalType<t.StringType>;
-                lowerBound: t.OptionalType<t.StringType>;
-                upperBound: t.OptionalType<t.StringType>;
+                isOptional: t.OptionalType<t.BooleanType>;
                 components: t.ArrayType<t.LinkType>;
             }, {
                 conceptType: t.StringType;
@@ -776,8 +762,7 @@ export declare const Specialization: t.Subtype<{
             attrEntity: t.OptionalType<t.LinkType>;
             isKey: t.BooleanType;
             defaultValue: t.OptionalType<t.StringType>;
-            lowerBound: t.OptionalType<t.StringType>;
-            upperBound: t.OptionalType<t.StringType>;
+            isOptional: t.OptionalType<t.BooleanType>;
             components: t.ArrayType<t.LinkType>;
         }, {
             conceptType: t.StringType;
@@ -830,8 +815,7 @@ export declare const Relationship: t.Subtype<{
                 attrEntity: t.OptionalType<t.LinkType>;
                 isKey: t.BooleanType;
                 defaultValue: t.OptionalType<t.StringType>;
-                lowerBound: t.OptionalType<t.StringType>;
-                upperBound: t.OptionalType<t.StringType>;
+                isOptional: t.OptionalType<t.BooleanType>;
                 components: t.ArrayType<t.LinkType>;
             }, {
                 conceptType: t.StringType;

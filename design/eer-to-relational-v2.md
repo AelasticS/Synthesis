@@ -518,6 +518,18 @@ variability guide gained the presets pattern (extension by
 composition, source-agnostic configurations); CHANGELOG carries the
 three v2 entries.
 
+## Correction round (2026-09-06, user review of the emissions)
+
+Decision 2 is corrected: attributes carry a plain `isOptional`
+boolean (nullable column when true), not a cardinality pair. The
+multivalued form was removed without trace from the metamodel, the
+transformation, the samples, the verification, and the documentation:
+a repeating group is a weak entity, and the removed rule's emission
+was bit-for-bit what weakToTable already produces, so the language
+already owned the concept. Per the user's standing directive,
+documentation describes what exists and never explains removed or
+absent concepts.
+
 ## Deferred, out of v2
 
 withHistoryColumns; constraint representation in the

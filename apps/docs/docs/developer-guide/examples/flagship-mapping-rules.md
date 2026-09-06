@@ -80,16 +80,12 @@ an aggregation.
 
 ## Attributes
 
-Cardinality is one modeling fact with two consequences: a lower bound
-of `0` makes the column nullable (the default `(1,1)` is NOT NULL),
-and an upper bound of `M` makes the attribute **multivalued**: it
-leaves the entity's table entirely and becomes its own table (owner
-key copies plus one value column, all of them the primary key, with a
-cascading foreign key back to the owner). A **composite** attribute
-(one level of components) flattens into prefixed columns:
-`address_street`, `address_city`. Autoincrement applies only to
-single-column INTEGER keys, judged by the table's key plan, never to
-parts of composite keys.
+An optional attribute (`isOptional`) maps to a nullable column; the
+default is mandatory, NOT NULL. A **composite** attribute (one level
+of components) flattens into prefixed columns: `address_street`,
+`address_city`. Autoincrement applies only to single-column INTEGER
+keys, judged by the table's key plan, never to parts of composite
+keys.
 
 ## Domains
 

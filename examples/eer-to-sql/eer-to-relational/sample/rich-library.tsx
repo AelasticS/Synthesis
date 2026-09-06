@@ -4,8 +4,8 @@
  * The EER authoring pass: a sample exercising every concept of the
  * eer-metamodel once (kernels, a specialization with subtypes, a weak
  * entity with its weak mapping, an aggregation with its mapping, a
- * relationship with roles, a user-defined domain, a multivalued and a
- * composite attribute). The suite smoke imports every sample, so a
+ * relationship with roles, a user-defined domain, a composite
+ * attribute). The suite smoke imports every sample, so a
  * broken authoring path fails the gate. Fix the metamodel or the
  * components, never this file's shape.
  */
@@ -43,12 +43,8 @@ export default (store: ModelStore): ExprNode<t.IEERSchema> => (
       <Attribute name="name" isKey={false}>
         <Domain $refByName="string" />
       </Attribute>
-      {/* multivalued: any number of phone numbers per person */}
-      <Attribute name="phones" isKey={false} lowerBound="0" upperBound="M">
-        <Domain $refByName="string" />
-      </Attribute>
       {/* composite, one level: an address of street and city */}
-      <Attribute name="address" isKey={false}>
+      <Attribute name="address" isKey={false} isOptional={true}>
         <Attribute name="street" isKey={false}>
           <Domain $refByName="string" />
         </Attribute>
@@ -61,7 +57,7 @@ export default (store: ModelStore): ExprNode<t.IEERSchema> => (
       <Attribute name="id" isKey={true}>
         <Domain $refByName="number" />
       </Attribute>
-      <Attribute name="price" isKey={false} lowerBound="0">
+      <Attribute name="price" isKey={false} isOptional={true}>
         <Domain $refByName="Money" />
       </Attribute>
     </Entity>

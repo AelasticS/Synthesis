@@ -67,14 +67,11 @@ export const EERModel = (store: ModelStore): ExprNode<t.ITypeModel> => (
       <Property name="defaultValue"
                 domain={<TypeOptional name="OptionalString" optionalType={<TypeString $refByName="string" />} />}
       />
-      {/* attrLowerBound/attrUpperBound: property-definition names are
-          unique per model until per-type property scopes land (the
-          code property names are lowerBound/upperBound) */}
-      <Property name="attrLowerBound"
-                domain={<TypeOptional name="OptionalAttrLb" optionalType={<TypeString $refByName="string" />} />}
-      />
-      <Property name="attrUpperBound"
-                domain={<TypeOptional name="OptionalAttrUb" optionalType={<TypeString $refByName="string" />} />}
+      {/* attrIsOptional: property-definition names are unique per model
+          until per-type property scopes land (the code property name
+          is isOptional) */}
+      <Property name="attrIsOptional"
+                domain={<TypeOptional name="OptionalAttrIsOptional" optionalType={<TypeBoolean $refByName="boolean" />} />}
       />
       <Property name="components"
                 domain={<TypeArray name="ArrayOfComponents" elementType={<TypeObject $refByName="Attribute" />} />}

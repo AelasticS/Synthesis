@@ -2,11 +2,11 @@
  * Copyright (c) AelasticS 2020.
  *
  * The full EER metamodel of the eer-to-sql suite (v2): entities scope
- * their attributes' names, attributes carry cardinality (nullability
- * and multivalued in one fact) and may be composite one level deep,
- * and domains are user-definable (base type, check, default) on top of
- * the primitive names. Relationships are strictly binary by doctrine:
- * relating more than two entities is modeled as an Aggregation.
+ * their attributes' names, attributes carry optionality and may be
+ * composite one level deep, and domains are user-definable (base
+ * type, check, default) on top of the primitive names. Relationships
+ * are strictly binary by doctrine: relating more than two entities is
+ * modeled as an Aggregation.
  */
 
 import * as t from "@aelastics/types";
@@ -94,11 +94,9 @@ export const Attribute = t.subtype(
     attrEntity: t.optional(t.link(EERModel_TypeSchema, "Entity")),
     isKey: t.boolean,
     defaultValue: t.optional(t.string),
-    // Attribute cardinality, (1,1) when absent: lowerBound "0" makes
-    // the attribute nullable, upperBound "M" makes it multivalued (an
-    // own table in the relational mapping).
-    lowerBound: t.optional(t.string.derive().oneOf(["0", "1"])),
-    upperBound: t.optional(t.string.derive().oneOf(["1", "M"])),
+    // An optional attribute maps to a nullable column; absent means
+    // mandatory.
+    isOptional: t.optional(t.boolean),
     // One level of composition: the parts of a composite attribute.
     components: t.arrayOf(t.link(EERModel_TypeSchema, "Attribute")),
   },
