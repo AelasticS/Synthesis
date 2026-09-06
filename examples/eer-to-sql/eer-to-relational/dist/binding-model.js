@@ -19,7 +19,7 @@ export const ER_Bindings = (store) => (createExprNode(BindingModel, { name: "ER_
         ] }),
     createExprNode(Binding, { name: "OneToManyBinding", description: "Binding 1:N Relationship Strategy to EER Model", element: createExprNode(ModelElement, { "$refByName": "//www.aelastics.org/ERMetamodel/Relationship" }), issues: [
             createExprNode(ElementIssue, { "$refByName": "//www.aelastics.org/RelationSchemaDesign/OneToManyStrategy" }),
-        ], condition: 'return (e) => {\n                if (!e.roles || e.roles.length !== 2) return false;\n                const m1 = e.roles[0];\n                const m2 = e.roles[1];\n                return (m1.ub === "1" && m1.lb === "0" && m2.ub === "M") ||\n                       (m1.ub === "M" && m2.ub === "1" && m2.lb === "0");\n            }' }),
+        ], condition: 'return (e) => {\n                if (!e.roles || e.roles.length !== 2) return false;\n                const m1 = e.roles[0];\n                const m2 = e.roles[1];\n                return (m1.upperBound === "1" && m1.lowerBound === "0" && m2.upperBound === "M") ||\n                       (m1.upperBound === "M" && m2.upperBound === "1" && m2.lowerBound === "0");\n            }' }),
     createExprNode(Binding, { name: "KernelAuditingBinding", description: "Binding table auditing to kernel entities", element: createExprNode(ModelElement, { "$refByName": "//www.aelastics.org/ERMetamodel/Kernel" }), issues: [
             createExprNode(ElementIssue, { "$refByName": "//www.aelastics.org/RelationSchemaDesign/TableAuditing" }),
         ] }),

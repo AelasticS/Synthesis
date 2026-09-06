@@ -96,8 +96,8 @@ export declare const Attribute: t.Subtype<{
     attrEntity: t.OptionalType<t.LinkType>;
     isKey: t.BooleanType;
     defaultValue: t.OptionalType<t.StringType>;
-    lb: t.OptionalType<t.StringType>;
-    ub: t.OptionalType<t.StringType>;
+    lowerBound: t.OptionalType<t.StringType>;
+    upperBound: t.OptionalType<t.StringType>;
     components: t.ArrayType<t.LinkType>;
 }, {
     conceptType: t.StringType;
@@ -126,8 +126,8 @@ export declare const Entity: t.Subtype<{
         attrEntity: t.OptionalType<t.LinkType>;
         isKey: t.BooleanType;
         defaultValue: t.OptionalType<t.StringType>;
-        lb: t.OptionalType<t.StringType>;
-        ub: t.OptionalType<t.StringType>;
+        lowerBound: t.OptionalType<t.StringType>;
+        upperBound: t.OptionalType<t.StringType>;
         components: t.ArrayType<t.LinkType>;
     }, {
         conceptType: t.StringType;
@@ -167,8 +167,8 @@ export declare const Kernel: t.Subtype<{}, {
         attrEntity: t.OptionalType<t.LinkType>;
         isKey: t.BooleanType;
         defaultValue: t.OptionalType<t.StringType>;
-        lb: t.OptionalType<t.StringType>;
-        ub: t.OptionalType<t.StringType>;
+        lowerBound: t.OptionalType<t.StringType>;
+        upperBound: t.OptionalType<t.StringType>;
         components: t.ArrayType<t.LinkType>;
     }, {
         conceptType: t.StringType;
@@ -210,8 +210,8 @@ export declare const Weak: t.Subtype<{
         attrEntity: t.OptionalType<t.LinkType>;
         isKey: t.BooleanType;
         defaultValue: t.OptionalType<t.StringType>;
-        lb: t.OptionalType<t.StringType>;
-        ub: t.OptionalType<t.StringType>;
+        lowerBound: t.OptionalType<t.StringType>;
+        upperBound: t.OptionalType<t.StringType>;
         components: t.ArrayType<t.LinkType>;
     }, {
         conceptType: t.StringType;
@@ -253,8 +253,8 @@ export declare const Aggregation: t.Subtype<{
         attrEntity: t.OptionalType<t.LinkType>;
         isKey: t.BooleanType;
         defaultValue: t.OptionalType<t.StringType>;
-        lb: t.OptionalType<t.StringType>;
-        ub: t.OptionalType<t.StringType>;
+        lowerBound: t.OptionalType<t.StringType>;
+        upperBound: t.OptionalType<t.StringType>;
         components: t.ArrayType<t.LinkType>;
     }, {
         conceptType: t.StringType;
@@ -300,8 +300,8 @@ export declare const Subtype: t.Subtype<{
         attrEntity: t.OptionalType<t.LinkType>;
         isKey: t.BooleanType;
         defaultValue: t.OptionalType<t.StringType>;
-        lb: t.OptionalType<t.StringType>;
-        ub: t.OptionalType<t.StringType>;
+        lowerBound: t.OptionalType<t.StringType>;
+        upperBound: t.OptionalType<t.StringType>;
         components: t.ArrayType<t.LinkType>;
     }, {
         conceptType: t.StringType;
@@ -342,8 +342,8 @@ export declare const Mapping: t.Subtype<{
             attrEntity: t.OptionalType<t.LinkType>;
             isKey: t.BooleanType;
             defaultValue: t.OptionalType<t.StringType>;
-            lb: t.OptionalType<t.StringType>;
-            ub: t.OptionalType<t.StringType>;
+            lowerBound: t.OptionalType<t.StringType>;
+            upperBound: t.OptionalType<t.StringType>;
             components: t.ArrayType<t.LinkType>;
         }, {
             conceptType: t.StringType;
@@ -365,8 +365,8 @@ export declare const Mapping: t.Subtype<{
         path: t.OptionalType<t.StringType>;
         parentModel: t.OptionalType<t.LinkType>;
     }, t.ObjectType<import("@aelastics/types/lib/complex-types/ObjectType.js").InterfaceDecl, readonly string[]>>;
-    lb: t.StringType;
-    ub: t.StringType;
+    lowerBound: t.StringType;
+    upperBound: t.StringType;
     cnMapp: t.StringType;
     dcnMapp: t.StringType;
 }, {
@@ -399,8 +399,8 @@ export declare const WeakMapping: t.Subtype<{
             attrEntity: t.OptionalType<t.LinkType>;
             isKey: t.BooleanType;
             defaultValue: t.OptionalType<t.StringType>;
-            lb: t.OptionalType<t.StringType>;
-            ub: t.OptionalType<t.StringType>;
+            lowerBound: t.OptionalType<t.StringType>;
+            upperBound: t.OptionalType<t.StringType>;
             components: t.ArrayType<t.LinkType>;
         }, {
             conceptType: t.StringType;
@@ -443,8 +443,8 @@ export declare const WeakMapping: t.Subtype<{
             attrEntity: t.OptionalType<t.LinkType>;
             isKey: t.BooleanType;
             defaultValue: t.OptionalType<t.StringType>;
-            lb: t.OptionalType<t.StringType>;
-            ub: t.OptionalType<t.StringType>;
+            lowerBound: t.OptionalType<t.StringType>;
+            upperBound: t.OptionalType<t.StringType>;
             components: t.ArrayType<t.LinkType>;
         }, {
             conceptType: t.StringType;
@@ -466,8 +466,8 @@ export declare const WeakMapping: t.Subtype<{
         path: t.OptionalType<t.StringType>;
         parentModel: t.OptionalType<t.LinkType>;
     }, t.ObjectType<import("@aelastics/types/lib/complex-types/ObjectType.js").InterfaceDecl, readonly string[]>>;
-    lb: t.StringType;
-    ub: t.StringType;
+    lowerBound: t.StringType;
+    upperBound: t.StringType;
     cnMapp: t.StringType;
     dcnMapp: t.StringType;
 } & {
@@ -500,8 +500,8 @@ export declare const AggregationMapping: t.Subtype<{
             attrEntity: t.OptionalType<t.LinkType>;
             isKey: t.BooleanType;
             defaultValue: t.OptionalType<t.StringType>;
-            lb: t.OptionalType<t.StringType>;
-            ub: t.OptionalType<t.StringType>;
+            lowerBound: t.OptionalType<t.StringType>;
+            upperBound: t.OptionalType<t.StringType>;
             components: t.ArrayType<t.LinkType>;
         }, {
             conceptType: t.StringType;
@@ -544,8 +544,8 @@ export declare const AggregationMapping: t.Subtype<{
             attrEntity: t.OptionalType<t.LinkType>;
             isKey: t.BooleanType;
             defaultValue: t.OptionalType<t.StringType>;
-            lb: t.OptionalType<t.StringType>;
-            ub: t.OptionalType<t.StringType>;
+            lowerBound: t.OptionalType<t.StringType>;
+            upperBound: t.OptionalType<t.StringType>;
             components: t.ArrayType<t.LinkType>;
         }, {
             conceptType: t.StringType;
@@ -567,8 +567,8 @@ export declare const AggregationMapping: t.Subtype<{
         path: t.OptionalType<t.StringType>;
         parentModel: t.OptionalType<t.LinkType>;
     }, t.ObjectType<import("@aelastics/types/lib/complex-types/ObjectType.js").InterfaceDecl, readonly string[]>>;
-    lb: t.StringType;
-    ub: t.StringType;
+    lowerBound: t.StringType;
+    upperBound: t.StringType;
     cnMapp: t.StringType;
     dcnMapp: t.StringType;
 } & {
@@ -601,8 +601,8 @@ export declare const OrdinaryMapping: t.Subtype<{
             attrEntity: t.OptionalType<t.LinkType>;
             isKey: t.BooleanType;
             defaultValue: t.OptionalType<t.StringType>;
-            lb: t.OptionalType<t.StringType>;
-            ub: t.OptionalType<t.StringType>;
+            lowerBound: t.OptionalType<t.StringType>;
+            upperBound: t.OptionalType<t.StringType>;
             components: t.ArrayType<t.LinkType>;
         }, {
             conceptType: t.StringType;
@@ -624,8 +624,8 @@ export declare const OrdinaryMapping: t.Subtype<{
         path: t.OptionalType<t.StringType>;
         parentModel: t.OptionalType<t.LinkType>;
     }, t.ObjectType<import("@aelastics/types/lib/complex-types/ObjectType.js").InterfaceDecl, readonly string[]>>;
-    lb: t.StringType;
-    ub: t.StringType;
+    lowerBound: t.StringType;
+    upperBound: t.StringType;
     cnMapp: t.StringType;
     dcnMapp: t.StringType;
 } & {
@@ -658,8 +658,8 @@ export declare const SpecializationMapping: t.Subtype<{
             attrEntity: t.OptionalType<t.LinkType>;
             isKey: t.BooleanType;
             defaultValue: t.OptionalType<t.StringType>;
-            lb: t.OptionalType<t.StringType>;
-            ub: t.OptionalType<t.StringType>;
+            lowerBound: t.OptionalType<t.StringType>;
+            upperBound: t.OptionalType<t.StringType>;
             components: t.ArrayType<t.LinkType>;
         }, {
             conceptType: t.StringType;
@@ -681,8 +681,8 @@ export declare const SpecializationMapping: t.Subtype<{
         path: t.OptionalType<t.StringType>;
         parentModel: t.OptionalType<t.LinkType>;
     }, t.ObjectType<import("@aelastics/types/lib/complex-types/ObjectType.js").InterfaceDecl, readonly string[]>>;
-    lb: t.StringType;
-    ub: t.StringType;
+    lowerBound: t.StringType;
+    upperBound: t.StringType;
     cnMapp: t.StringType;
     dcnMapp: t.StringType;
 } & {
@@ -716,8 +716,8 @@ export declare const Specialization: t.Subtype<{
                 attrEntity: t.OptionalType<t.LinkType>;
                 isKey: t.BooleanType;
                 defaultValue: t.OptionalType<t.StringType>;
-                lb: t.OptionalType<t.StringType>;
-                ub: t.OptionalType<t.StringType>;
+                lowerBound: t.OptionalType<t.StringType>;
+                upperBound: t.OptionalType<t.StringType>;
                 components: t.ArrayType<t.LinkType>;
             }, {
                 conceptType: t.StringType;
@@ -739,8 +739,8 @@ export declare const Specialization: t.Subtype<{
             path: t.OptionalType<t.StringType>;
             parentModel: t.OptionalType<t.LinkType>;
         }, t.ObjectType<import("@aelastics/types/lib/complex-types/ObjectType.js").InterfaceDecl, readonly string[]>>;
-        lb: t.StringType;
-        ub: t.StringType;
+        lowerBound: t.StringType;
+        upperBound: t.StringType;
         cnMapp: t.StringType;
         dcnMapp: t.StringType;
     } & {
@@ -776,8 +776,8 @@ export declare const Specialization: t.Subtype<{
             attrEntity: t.OptionalType<t.LinkType>;
             isKey: t.BooleanType;
             defaultValue: t.OptionalType<t.StringType>;
-            lb: t.OptionalType<t.StringType>;
-            ub: t.OptionalType<t.StringType>;
+            lowerBound: t.OptionalType<t.StringType>;
+            upperBound: t.OptionalType<t.StringType>;
             components: t.ArrayType<t.LinkType>;
         }, {
             conceptType: t.StringType;
@@ -830,8 +830,8 @@ export declare const Relationship: t.Subtype<{
                 attrEntity: t.OptionalType<t.LinkType>;
                 isKey: t.BooleanType;
                 defaultValue: t.OptionalType<t.StringType>;
-                lb: t.OptionalType<t.StringType>;
-                ub: t.OptionalType<t.StringType>;
+                lowerBound: t.OptionalType<t.StringType>;
+                upperBound: t.OptionalType<t.StringType>;
                 components: t.ArrayType<t.LinkType>;
             }, {
                 conceptType: t.StringType;
@@ -853,8 +853,8 @@ export declare const Relationship: t.Subtype<{
             path: t.OptionalType<t.StringType>;
             parentModel: t.OptionalType<t.LinkType>;
         }, t.ObjectType<import("@aelastics/types/lib/complex-types/ObjectType.js").InterfaceDecl, readonly string[]>>;
-        lb: t.StringType;
-        ub: t.StringType;
+        lowerBound: t.StringType;
+        upperBound: t.StringType;
         cnMapp: t.StringType;
         dcnMapp: t.StringType;
     } & {

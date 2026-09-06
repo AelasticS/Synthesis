@@ -44,7 +44,7 @@ export default (store: ModelStore): ExprNode<t.IEERSchema> => (
         <Domain $refByName="string" />
       </Attribute>
       {/* multivalued: any number of phone numbers per person */}
-      <Attribute name="phones" isKey={false} lb="0" ub="M">
+      <Attribute name="phones" isKey={false} lowerBound="0" upperBound="M">
         <Domain $refByName="string" />
       </Attribute>
       {/* composite, one level: an address of street and city */}
@@ -61,8 +61,13 @@ export default (store: ModelStore): ExprNode<t.IEERSchema> => (
       <Attribute name="id" isKey={true}>
         <Domain $refByName="number" />
       </Attribute>
-      <Attribute name="price" isKey={false} lb="0">
+      <Attribute name="price" isKey={false} lowerBound="0">
         <Domain $refByName="Money" />
+      </Attribute>
+    </Entity>
+    <Entity name="Publisher">
+      <Attribute name="id" isKey={true}>
+        <Domain $refByName="number" />
       </Attribute>
     </Entity>
 
@@ -70,7 +75,7 @@ export default (store: ModelStore): ExprNode<t.IEERSchema> => (
     <Specialization name="personRoles">
       <SpecializationMapping name="personRolesMapping"
         domain={<Entity $refByName="Person" />}
-        lb="0" ub="1" cnMapp="R" dcnMapp="R" />
+        lowerBound="0" upperBound="1" cnMapp="R" dcnMapp="R" />
       <Subtype name="Member" cnSupertype="R" dcnSupertype="R" cnSubtype="R" dcnSubtype="R">
         <Attribute name="since" isKey={false}>
           <Domain $refByName="string" />
@@ -92,25 +97,29 @@ export default (store: ModelStore): ExprNode<t.IEERSchema> => (
     <WeakMapping name="copyOf"
       domain={<Entity $refByName="Book" />}
       codomain={<Weak $refByName="BookCopy" />}
-      lb="1" ub="1" cnMapp="R" dcnMapp="R"
+      lowerBound="1" upperBound="1" cnMapp="R" dcnMapp="R"
       cnWeakOwner="R" dcnWeakOwner="R" />
 
-    {/* aggregation with its mapping */}
+    {/* aggregation: at least two participants, by the arity rule */}
     <Aggregation name="BookSeries">
       <Attribute name="title" isKey={false}>
         <Domain $refByName="string" />
       </Attribute>
       <AggregationMapping name="seriesOf"
         domain={<Entity $refByName="Book" />}
-        lb="0" ub="M" cnMapp="R" dcnMapp="R"
+        lowerBound="0" upperBound="M" cnMapp="R" dcnMapp="R"
+        cnAggrOwner="R" dcnAggrOwner="R" />
+      <AggregationMapping name="seriesBy"
+        domain={<Entity $refByName="Publisher" />}
+        lowerBound="0" upperBound="M" cnMapp="R" dcnMapp="R"
         cnAggrOwner="R" dcnAggrOwner="R" />
     </Aggregation>
 
     {/* relationship with two roles */}
     <Relationship name="borrows">
-      <Role name="borrower" lb="0" ub="1" cnMapp="R" dcnMapp="R"
+      <Role name="borrower" lowerBound="0" upperBound="1" cnMapp="R" dcnMapp="R"
         domain={<Entity $refByName="Person" />} />
-      <Role name="borrowed" lb="0" ub="M" cnMapp="R" dcnMapp="R"
+      <Role name="borrowed" lowerBound="0" upperBound="M" cnMapp="R" dcnMapp="R"
         domain={<Entity $refByName="Book" />} />
     </Relationship>
   </EERSchema>

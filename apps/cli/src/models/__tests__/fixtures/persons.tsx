@@ -37,8 +37,8 @@ export default (store: ModelStore): ExprNode<t.IEERSchema> => (
       </Attribute>
     </Entity>
     <Relationship name="worksIn">
-      <Role name="WorksIn" lb="0" ub="1" domain={<Entity $refByName="Organization"></Entity>} />
-      <Role name="Employs" lb="0" ub="M" domain={<Entity $refByName="Person"></Entity>} />
+      <Role name="WorksIn" lowerBound="0" upperBound="1" domain={<Entity $refByName="Organization"></Entity>} />
+      <Role name="Employs" lowerBound="0" upperBound="M" domain={<Entity $refByName="Person"></Entity>} />
     </Relationship>
   </EERSchema>
 )

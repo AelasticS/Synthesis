@@ -48,8 +48,8 @@ export const ER_Bindings = (store: ModelStore): ExprNode<t.IBindingModel> => (
                 if (!e.roles || e.roles.length !== 2) return false;
                 const m1 = e.roles[0];
                 const m2 = e.roles[1];
-                return (m1.ub === "1" && m1.lb === "0" && m2.ub === "M") ||
-                       (m1.ub === "M" && m2.ub === "1" && m2.lb === "0");
+                return (m1.upperBound === "1" && m1.lowerBound === "0" && m2.upperBound === "M") ||
+                       (m1.upperBound === "M" && m2.upperBound === "1" && m2.lowerBound === "0");
             }'
     />
 

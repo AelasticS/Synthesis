@@ -153,10 +153,10 @@ let EerToRelational = class EerToRelational extends DecisionAwareM2M {
             throw new Error(`eer-to-relational v1 maps binary relationships only; '${r.name}' has ${roles.length} roles.`);
         }
         const [a, b] = roles;
-        const oneToN = (a.ub === "1" && b.ub === "M") || (a.ub === "M" && b.ub === "1");
+        const oneToN = (a.upperBound === "1" && b.upperBound === "M") || (a.upperBound === "M" && b.upperBound === "1");
         if (oneToN)
             return this.relationshipMapping(r);
-        if (a.ub === "1" && b.ub === "1")
+        if (a.upperBound === "1" && b.upperBound === "1")
             return this.oneToOneForeignKey(r);
         return this.manyToManyJoinTable(r);
     }
@@ -165,10 +165,10 @@ let EerToRelational = class EerToRelational extends DecisionAwareM2M {
     }
     relationshipAsForeignKey(rel) {
         const roles = rel.roles;
-        const oneSide = roles.find((m) => m.ub === "1");
-        const manySide = roles.find((m) => m.ub !== "1");
+        const oneSide = roles.find((m) => m.upperBound === "1");
+        const manySide = roles.find((m) => m.upperBound !== "1");
         const table = this.tableFor(manySide.domain);
-        const nullable = oneSide.lb === "0";
+        const nullable = oneSide.lowerBound === "0";
         const { cols, pairs } = this.plannedForeignKey(table, rel.name, oneSide.domain, nullable);
         return (createExprNode(Table, { "$refByName": table },
             cols,
@@ -183,10 +183,10 @@ let EerToRelational = class EerToRelational extends DecisionAwareM2M {
     oneToOneForeignKey(rel) {
         const roles = rel.roles;
         // the optional side carries the (unique) foreign key
-        const holder = roles.find((m) => m.lb === "0") ?? roles[0];
+        const holder = roles.find((m) => m.lowerBound === "0") ?? roles[0];
         const other = roles.find((m) => m !== holder);
         const table = this.tableFor(holder.domain);
-        const { cols, pairs } = this.plannedForeignKey(table, rel.name, other.domain, holder.lb === "0", true);
+        const { cols, pairs } = this.plannedForeignKey(table, rel.name, other.domain, holder.lowerBound === "0", true);
         return (createExprNode(Table, { "$refByName": table },
             cols,
             pairs));

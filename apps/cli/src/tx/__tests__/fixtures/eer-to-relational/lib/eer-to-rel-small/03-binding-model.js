@@ -9,5 +9,5 @@ const ER_Bindings = (store) => ((0, jsx_1.createExprNode)(binding_1.BindingModel
         ] }),
     (0, jsx_1.createExprNode)(binding_1.Binding, { name: "OneToManyBinding", description: "Binding 1:N Relationship Strategy to EER Model", element: (0, jsx_1.createExprNode)(jsx_2.Element, { "$refByName": "//www.aelastics.org/ERMetamodel/Relationship" }), issues: [
             (0, jsx_1.createExprNode)(decision_1.ElementIssue, { "$refByName": "//www.aelastics.org/RelationSchemaDesign/OneToManyStrategy" }),
-        ], condition: 'return (e) => {\n                if (!e.roles || e.roles.length !== 2) return false;\n                const m1 = e.roles[0];\n                const m2 = e.roles[1];\n                return (m1.ub === "1" && m1.lb === "0" && m2.ub === "M") ||\n                       (m1.ub === "M" && m2.ub === "1" && m2.lb === "0");\n            }' })));
+        ], condition: 'return (e) => {\n                if (!e.roles || e.roles.length !== 2) return false;\n                const m1 = e.roles[0];\n                const m2 = e.roles[1];\n                return (m1.upperBound === "1" && m1.lowerBound === "0" && m2.upperBound === "M") ||\n                       (m1.upperBound === "M" && m2.upperBound === "1" && m2.lowerBound === "0");\n            }' })));
 export { ER_Bindings };

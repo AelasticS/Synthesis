@@ -268,9 +268,9 @@ export class EerToRelational extends DecisionAwareM2M<
       throw new Error(`eer-to-relational v1 maps binary relationships only; '${r.name}' has ${roles.length} roles.`)
     }
     const [a, b] = roles
-    const oneToN = (a.ub === "1" && b.ub === "M") || (a.ub === "M" && b.ub === "1")
+    const oneToN = (a.upperBound === "1" && b.upperBound === "M") || (a.upperBound === "M" && b.upperBound === "1")
     if (oneToN) return this.relationshipMapping(r)
-    if (a.ub === "1" && b.ub === "1") return this.oneToOneForeignKey(r)
+    if (a.upperBound === "1" && b.upperBound === "1") return this.oneToOneForeignKey(r)
     return this.manyToManyJoinTable(r)
   }
 
@@ -283,10 +283,10 @@ export class EerToRelational extends DecisionAwareM2M<
   @VarOption("relationshipMapping", Option("ForeignKey"))
   relationshipAsForeignKey(rel: em.IRelationship): ExprNode<rmT.ITable> {
     const roles = rel.roles as em.IOrdinaryMapping[]
-    const oneSide = roles.find((m) => m.ub === "1")!
-    const manySide = roles.find((m) => m.ub !== "1")!
+    const oneSide = roles.find((m) => m.upperBound === "1")!
+    const manySide = roles.find((m) => m.upperBound !== "1")!
     const table = this.tableFor(manySide.domain as em.IEntity)
-    const nullable = oneSide.lb === "0"
+    const nullable = oneSide.lowerBound === "0"
     const { cols, pairs } = this.plannedForeignKey(table, rel.name, oneSide.domain as em.IEntity, nullable)
     return (
       <Table $refByName={table}>
@@ -311,10 +311,10 @@ export class EerToRelational extends DecisionAwareM2M<
   oneToOneForeignKey(rel: em.IRelationship): ExprNode<rmT.ITable> {
     const roles = rel.roles as em.IOrdinaryMapping[]
     // the optional side carries the (unique) foreign key
-    const holder = roles.find((m) => m.lb === "0") ?? roles[0]
+    const holder = roles.find((m) => m.lowerBound === "0") ?? roles[0]
     const other = roles.find((m) => m !== holder)!
     const table = this.tableFor(holder.domain as em.IEntity)
-    const { cols, pairs } = this.plannedForeignKey(table, rel.name, other.domain as em.IEntity, holder.lb === "0", true)
+    const { cols, pairs } = this.plannedForeignKey(table, rel.name, other.domain as em.IEntity, holder.lowerBound === "0", true)
     return (
       <Table $refByName={table}>
         {cols}

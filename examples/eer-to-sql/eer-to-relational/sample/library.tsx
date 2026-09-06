@@ -57,7 +57,7 @@ export default (store: ModelStore): ExprNode<t.IEERSchema> => (
     <Specialization name="personRoles">
       <SpecializationMapping name="personRolesMapping"
         domain={<Entity $refByName="Person" />}
-        lb="0" ub="1" cnMapp="R" dcnMapp="R" />
+        lowerBound="0" upperBound="1" cnMapp="R" dcnMapp="R" />
       <Subtype name="Member" cnSupertype="R" dcnSupertype="R" cnSubtype="R" dcnSubtype="R">
         <Attribute name="since" isKey={false}>
           <Domain $refByName="string" />
@@ -80,7 +80,7 @@ export default (store: ModelStore): ExprNode<t.IEERSchema> => (
     <WeakMapping name="copyOf"
       domain={<Entity $refByName="Book" />}
       codomain={<Weak $refByName="BookCopy" />}
-      lb="1" ub="1" cnMapp="R" dcnMapp="R"
+      lowerBound="1" upperBound="1" cnMapp="R" dcnMapp="R"
       cnWeakOwner="R" dcnWeakOwner="R" />
     <Weak name="Reservation">
       <Attribute name="no" isKey={true}>
@@ -93,21 +93,21 @@ export default (store: ModelStore): ExprNode<t.IEERSchema> => (
     <WeakMapping name="reservedAs"
       domain={<Weak $refByName="BookCopy" />}
       codomain={<Weak $refByName="Reservation" />}
-      lb="1" ub="1" cnMapp="R" dcnMapp="R"
+      lowerBound="1" upperBound="1" cnMapp="R" dcnMapp="R"
       cnWeakOwner="R" dcnWeakOwner="R" />
 
     {/* M:N: a book has many authors, an author writes many books. */}
     <Relationship name="writtenBy">
-      <Role name="Wrote" lb="0" ub="M" domain={<Entity $refByName="Author" />} />
-      <Role name="OfBook" lb="0" ub="M" domain={<Entity $refByName="Book" />} />
+      <Role name="Wrote" lowerBound="0" upperBound="M" domain={<Entity $refByName="Author" />} />
+      <Role name="OfBook" lowerBound="0" upperBound="M" domain={<Entity $refByName="Book" />} />
     </Relationship>
 
     {/* 1:N, the OneToManyStrategy playground: a member borrows many
         copies; its source is a subtype and its target is weak, so the
         ForeignKey option produces a strategy-routed composite key. */}
     <Relationship name="borrows">
-      <Role name="borrower" lb="0" ub="1" domain={<Subtype $refByName="Member" />} />
-      <Role name="borrowed" lb="0" ub="M" domain={<Weak $refByName="BookCopy" />} />
+      <Role name="borrower" lowerBound="0" upperBound="1" domain={<Subtype $refByName="Member" />} />
+      <Role name="borrowed" lowerBound="0" upperBound="M" domain={<Weak $refByName="BookCopy" />} />
     </Relationship>
   </EERSchema>
 )

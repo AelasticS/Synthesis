@@ -64,11 +64,11 @@ export const Attribute = t.subtype(ERConcept, {
     attrEntity: t.optional(t.link(EERModel_TypeSchema, "Entity")),
     isKey: t.boolean,
     defaultValue: t.optional(t.string),
-    // Attribute cardinality, (1,1) when absent: lb "0" makes the
-    // attribute nullable, ub "M" makes it multivalued (an own table
-    // in the relational mapping).
-    lb: t.optional(t.string.derive().oneOf(["0", "1"])),
-    ub: t.optional(t.string.derive().oneOf(["1", "M"])),
+    // Attribute cardinality, (1,1) when absent: lowerBound "0" makes
+    // the attribute nullable, upperBound "M" makes it multivalued (an
+    // own table in the relational mapping).
+    lowerBound: t.optional(t.string.derive().oneOf(["0", "1"])),
+    upperBound: t.optional(t.string.derive().oneOf(["1", "M"])),
     // One level of composition: the parts of a composite attribute.
     components: t.arrayOf(t.link(EERModel_TypeSchema, "Attribute")),
 }, "Attribute", EERModel_TypeSchema);
@@ -86,9 +86,21 @@ t.inverseProps(Attribute, "attrEntity", Entity, "attributes");
 declareNamespace(Entity);
 export const Kernel = t.subtype(Entity, {}, "Kernel", EERModel_TypeSchema);
 export const Weak = t.subtype(Entity, {
+    // Semantically exactly one weak mapping names the owner; the
+    // OPTIONAL is a creation-order accommodation, not semantics: the
+    // link is filled only when the WeakMapping element is authored,
+    // later in the model, and the store auto-initializes mandatory
+    // properties at creation (verified: a mandatory link here breaks
+    // rendering). Subtype.supertype can stay mandatory because
+    // nesting inside the Specialization fills it at creation time.
+    // The transformation enforces the semantic rule (ownerOf).
     weakMap: t.optional(t.link(EERModel_TypeSchema, "WeakMapping")),
 }, "Weak", EERModel_TypeSchema);
 export const Aggregation = t.subtype(Entity, {
+    // At least two participants: relating two or more entities is
+    // what an aggregation is for (relationships stay binary). The
+    // arity is enforced by the transformation and validation, not
+    // expressible on the array type.
     agrMapp: t.arrayOf(t.link(EERModel_TypeSchema, "AggregationMapping")),
 }, "Aggregation", EERModel_TypeSchema);
 export const Subtype = t.subtype(Entity, {
@@ -100,8 +112,8 @@ export const Subtype = t.subtype(Entity, {
 }, "Subtype", EERModel_TypeSchema);
 export const Mapping = t.subtype(ERConcept, {
     domain: Entity,
-    lb: t.string.derive().oneOf(["0", "1", "M", "m", "*"]), // .defaultValue("0"),
-    ub: t.string.derive().oneOf(["1", "M", "m", "*"]), // .defaultValue("M"),
+    lowerBound: t.string.derive().oneOf(["0", "1", "M", "m", "*"]), // .defaultValue("0"),
+    upperBound: t.string.derive().oneOf(["1", "M", "m", "*"]), // .defaultValue("M"),
     cnMapp: IntegrityRule,
     dcnMapp: IntegrityRule,
 }, "Mapping", EERModel_TypeSchema);
@@ -126,6 +138,9 @@ export const Specialization = t.subtype(ERConcept, {
     subtypes: t.arrayOf(Subtype),
 }, "Specialization", EERModel_TypeSchema);
 export const Relationship = t.subtype(ERConcept, {
+    // Exactly two roles, by doctrine: relationships are binary, and
+    // relating more entities is modeled as an Aggregation. The arity
+    // is enforced by the transformation and validation.
     roles: t.arrayOf(OrdinaryMapping),
 }, "Relationship", EERModel_TypeSchema);
 t.inverseProps(Relationship, "roles", OrdinaryMapping, "relationship");
