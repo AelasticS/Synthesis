@@ -91,12 +91,43 @@ t.inverseProps(Table, "primaryKey", PrimaryKey, "ownerTable")
 t.inverseProps(Table, "foreignKeys", ForeignKey, "ownerTable")
 t.inverseProps(Table, "indexes", Index, "ownerTable")
 
-// A declared constraint, run at the validation point: a primary key
-// names at least one column.
+// ── declared constraints, run at the validation point ───────────────
+// A primary key names at least one column.
 PrimaryKey.addValidator({
   predicate: (v: IPrimaryKey) => (v.columns?.length ?? 0) >= 1,
   message: (_v: IPrimaryKey, label?: string) =>
     `${label ?? "PrimaryKey"}: a primary key lists at least one column`,
+});
+
+// Membership: a key or index may only name columns of the table it
+// belongs to, and a foreign key's referenced columns must be columns
+// of the referenced table.
+const inTable = (table: ITable | undefined, col: IColumn | undefined): boolean =>
+  table !== undefined && col !== undefined && ((table.columns ?? []) as IColumn[]).includes(col);
+
+PrimaryKey.addValidator({
+  predicate: (v: IPrimaryKey) =>
+    ((v.columns ?? []) as IColumn[]).every((c) => inTable(v.ownerTable as ITable | undefined, c)),
+  message: (_v: IPrimaryKey, label?: string) =>
+    `${label ?? "PrimaryKey"}: every primary key column must be a column of the owning table`,
+});
+
+ForeignKey.addValidator({
+  predicate: (v: IForeignKey) =>
+    ((v.fkColumns ?? []) as IForeignKeyColumn[]).every(
+      (p) =>
+        inTable(v.ownerTable as ITable | undefined, p.fkColumn as IColumn | undefined) &&
+        inTable(v.referencedTable as ITable | undefined, p.refColumn as IColumn | undefined),
+    ),
+  message: (_v: IForeignKey, label?: string) =>
+    `${label ?? "ForeignKey"}: every foreign key column must belong to the owning table and every referenced column to the referenced table`,
+});
+
+Index.addValidator({
+  predicate: (v: IIndex) =>
+    ((v.columns ?? []) as IColumn[]).every((c) => inTable(v.ownerTable as ITable | undefined, c)),
+  message: (_v: IIndex, label?: string) =>
+    `${label ?? "Index"}: every index column must be a column of the owning table`,
 });
 
 // A table scopes its columns', keys', and indexes' names.

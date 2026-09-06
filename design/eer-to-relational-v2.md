@@ -559,7 +559,14 @@ transformation emits a PrimaryKey element per table over its key plan
 shape until stage 3 decides otherwise), the DDL generator reads the
 element (clause text unchanged, order now explicit from the element),
 the audit template and all samples shed the mark, and the suite
-verification asserts the element and the mark's absence.
+verification asserts the element and the mark's absence. On the
+user's next request the relational metamodel gained MEMBERSHIP
+constraints: a primary key and an index may only name columns of
+their owning table, and a foreign key's own columns must belong to
+the owning table while its referenced columns belong to the
+referenced table; the DDL suite verification validates library-db
+positively and rejects a cross-table primary key and foreign key
+through the real CLI.
 
 Review round four delivered the metamodel-as-model namespace marker:
 the types meta-metamodel's Object concept carries an optional

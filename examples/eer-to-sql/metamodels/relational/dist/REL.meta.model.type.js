@@ -76,11 +76,28 @@ t.inverseProps(Table, "columns", Column, "ownerTable");
 t.inverseProps(Table, "primaryKey", PrimaryKey, "ownerTable");
 t.inverseProps(Table, "foreignKeys", ForeignKey, "ownerTable");
 t.inverseProps(Table, "indexes", Index, "ownerTable");
-// A declared constraint, run at the validation point: a primary key
-// names at least one column.
+// ── declared constraints, run at the validation point ───────────────
+// A primary key names at least one column.
 PrimaryKey.addValidator({
     predicate: (v) => (v.columns?.length ?? 0) >= 1,
     message: (_v, label) => `${label ?? "PrimaryKey"}: a primary key lists at least one column`,
+});
+// Membership: a key or index may only name columns of the table it
+// belongs to, and a foreign key's referenced columns must be columns
+// of the referenced table.
+const inTable = (table, col) => table !== undefined && col !== undefined && (table.columns ?? []).includes(col);
+PrimaryKey.addValidator({
+    predicate: (v) => (v.columns ?? []).every((c) => inTable(v.ownerTable, c)),
+    message: (_v, label) => `${label ?? "PrimaryKey"}: every primary key column must be a column of the owning table`,
+});
+ForeignKey.addValidator({
+    predicate: (v) => (v.fkColumns ?? []).every((p) => inTable(v.ownerTable, p.fkColumn) &&
+        inTable(v.referencedTable, p.refColumn)),
+    message: (_v, label) => `${label ?? "ForeignKey"}: every foreign key column must belong to the owning table and every referenced column to the referenced table`,
+});
+Index.addValidator({
+    predicate: (v) => (v.columns ?? []).every((c) => inTable(v.ownerTable, c)),
+    message: (_v, label) => `${label ?? "Index"}: every index column must be a column of the owning table`,
 });
 // A table scopes its columns', keys', and indexes' names.
 declareNamespace(Table);
