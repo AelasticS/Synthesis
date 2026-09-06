@@ -7,9 +7,22 @@
   "license": "Apache-2.0",
   "type": "module",
   "main": "dist/transformation.js",
+  "exports": {
+    ".": "./dist/transformation.js",
+    "./presets": {
+      "types": "./dist/presets.d.ts",
+      "default": "./dist/presets.js"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "presets": ["dist/presets.d.ts"]
+    }
+  },
   "files": [
     "dist",
-    "synth.json"
+    "synth.json",
+    "presets"
   ],
   "scripts": {
     "build": "tsc",

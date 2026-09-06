@@ -1,13 +1,15 @@
 // JSX template components for the full relational metamodel of the
 // eer-to-sql example suite. The data-type schemas live in model.ts.
-import * as r from "./model.js";
+import * as r from "./REL.meta.model.type.js";
 import { defaultConnectionInfo, ExprNode, } from "@aelastics/synthesis/jsx";
 export const RelSchema = (props) => {
     return new ExprNode(r.RelSchema, props, undefined);
 };
-// Kept as-is while decision 5 (Domain) is under discussion; unwired.
+// A Domain is declared once at model level (a direct child of the
+// schema connects into `elements`) or referenced from a column's
+// `domain` prop; ordered candidates pick the context.
 export const Domain = (props) => {
-    return new ExprNode(r.Domain, props, "domain");
+    return new ExprNode(r.Domain, props, defaultConnectionInfo(["domain", "elements"]));
 };
 // One Column tag for every context, connected via ordered candidates
 // with first-available semantics: a contained column in a Table; the
@@ -34,4 +36,7 @@ export const ForeignKeyColumn = (props) => {
 export const Index = (props) => {
     return new ExprNode(r.Index, props, "indexes");
 };
-//# sourceMappingURL=components.js.map
+export const PrimaryKey = (props) => {
+    return new ExprNode(r.PrimaryKey, props, "primaryKey");
+};
+//# sourceMappingURL=REL-components.js.map

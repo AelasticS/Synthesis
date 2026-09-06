@@ -12,6 +12,7 @@ import { normalizeRef, refToModelPath } from '../../support/refs.js'
 import { EXIT_CODES } from '../../support/exit-codes.js'
 import { EngineOutputBuffer } from '../../tx/engine-output.js'
 import { GateRenderError, renderForGate, TxResolveError } from '../../tx/load.js'
+import { checkModelConstraints, type TypeProvider } from '@aelastics/synthesis/metamodel'
 
 export default class ModelValidate extends BaseCommand {
   static override description = `Check the model against its metamodel.
@@ -66,8 +67,9 @@ Configuration models reference their transformation's decision/binding models; p
     // installed transformation's parts (and the header's reference closure)
     // render first, providing the context configuration models need.
     const buffer = new EngineOutputBuffer(!flags.verbose)
+    let rendered: Awaited<ReturnType<typeof renderForGate>> | undefined
     try {
-      await buffer.run(() => renderForGate(this.workspaceConfig, modelPath, flags.tx, modelsDir))
+      rendered = await buffer.run(() => renderForGate(this.workspaceConfig, modelPath, flags.tx, modelsDir))
     } catch (err) {
       buffer.flushToStderr()
       if (err instanceof TxResolveError) {
@@ -84,6 +86,26 @@ Configuration models reference their transformation's decision/binding models; p
     }
     this.log('[ok] file transpiles and imports')
     this.log(flags.tx === undefined ? '[ok] default export renders' : `[ok] default export renders (with '${flags.tx}' context)`)
+
+    // The declared-constraints traversal: run the metamodel's
+    // addValidator predicates over the finished model. Rendering never
+    // runs them (a model is legitimately incomplete mid-construction);
+    // this is the validation point that does.
+    if (rendered !== undefined) {
+      const violations = checkModelConstraints(
+        rendered.store as unknown as TypeProvider,
+        rendered.root as { name?: unknown; elements?: unknown[] }
+      )
+      if (violations.length > 0) {
+        for (const v of violations) {
+          this.log(`[fail] ${v.type} '${v.element}': ${v.message}`)
+        }
+        this.error(`${violations.length} declared constraint violation(s)`, {
+          exit: EXIT_CODES.VALIDATION_FAILURE
+        })
+      }
+      this.log('[ok] declared constraints hold')
+    }
 
     const { header, error } = parseSynthHeader(text)
     if (header === null) {

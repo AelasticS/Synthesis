@@ -204,6 +204,43 @@ merging at load), which per ADR-015 belongs to the envelope and the
 platform's model repository, alongside general model overlays. Out
 of scope here; noted for the platform-alignment workstream.
 
+## Declared constraints and the validation point
+
+Added to scope 2026-09-06 (decision 13, from the user's metamodel
+review). The EER metamodel declares its semantic rules on the types
+with addValidator: weak-mapping presence, aggregation arity (at least
+two participants), binary relationships (the message teaches the
+doctrine: relate more entities with an Aggregation), and ONE
+schema-level identification-dependency acyclicity rule on EERSchema,
+walking the combined graph of weak ownership, aggregation
+participation, and subtyping with a colored DFS, once per validation,
+its message naming the elements on the cycles. Both refinements are
+the user's review catches: kind-local walkers miss mixed cycles (a
+weak entity owned by an aggregation it participates in is the
+canonical case) and subtyping belongs in the same graph (round two);
+a whole-graph rule belongs on the schema, run once, and the walker is
+typed with the metamodel's own interfaces rather than unknown (round
+three). The suite verification rejects all five doctrine violations
+through the real CLI: a weak chain cycle, the mixed weak-aggregation
+cycle, a subtype cycle, a one-participant aggregation, a one-role
+relationship.
+Validators run only in a validation traversal, never during authoring
+or rendering, because a model under construction is legitimately
+incomplete; the creation-order rule follows: a backlink on a child
+(Subtype.supertype) may be mandatory, a slot filled by a later
+element (Weak.weakMap) stays type-level optional with the
+completeness rule declared as a constraint.
+
+The traversal is a library helper (metamodel-core
+checkModelConstraints: every element checked against its concrete
+type's validators via checkValidators, shallow, no deep structural
+recursion) and the CLI's `model validate` runs it after the gate
+render, reporting each violation with the rule's own message; the
+import gate is intentionally unchanged (gate-time enforcement is a
+recorded follow-up option). Documented in the defining-metamodels
+guide (Constraints section) and the managing-models user guide; the
+tutorial stays untouched per the standing simplicity directive.
+
 ## Full semantic domains (the v1 decision 5 workstream, executed)
 
 EER side: `Domain` grows from an empty named concept to a user-defined
@@ -369,6 +406,10 @@ ERConcept stays untouched (used by authoring components).
     RESOLVED 2026-09-06: in, as proposed; the oracle preset emits
     index-organized tables for the same logical option. Alongside,
     the user grew decision 9 to three presets built by extension.
+13. Declared constraints and the validation point (new, from the
+    user's metamodel review). RESOLVED 2026-09-06: in scope as the
+    section above describes; import-gate enforcement stays a
+    follow-up.
 
 ## Execution order and gates
 
@@ -400,10 +441,92 @@ plus smoke, all example and template smokes, docs build), merge
    CHANGELOG.
 6. Merge --no-ff, full ladder repeated on merged main.
 
+## Stage 3 delivery notes (2026-09-06)
+
+Delivered per the sections above: aggregationToTable as a third
+@SpecOption on the entity dispatch with the KEY rule (keyed-by-copy
+Loan verified; the composite variant shares the plan machinery, its
+foreign keys carved from plan slices), Kahn edges from aggregations to
+their participants, the integrity translation (the governing pair is
+the one guarding the referenced end: WeakMapping's Owner pair, the
+Subtype's supertype pair, the referenced role's Mapp pair, the
+AggregationMapping's AggrOwner pair; dcn to onDelete and onUpdate, cn
+to onConnect, Restrict omitted as the SQL default), cardinality-driven
+nullability, composite flattening (attribute_component), multivalued
+tables with set-semantics keys and cascading owner foreign keys, the
+domain rule (one primitive mapping, user-defined domains emitted and
+column-linked), the discriminator renamed to the scoped `type`, and
+the doctrine error message naming Aggregation. Inspection-driven
+fixes beyond the plan: autoincrement now judges compositeness by the
+TABLE key plan, not the entity's own attributes (a weak entity's
+single key attribute was wrongly autoincremented); the aggregation
+and join-table foreign keys drop their doubled qualifiers
+(fk_loan_by_member, fk_written_by_wrote). Scope notes: multivalued
+tables are emitted for the entities pass's owners (subtype-owned
+multivalued attributes are a stage 5 documentation caveat, none exist
+in samples); the surplus-unique aggregation path is exercised by
+authoring, not by a transformed sample; SpecializationMapping's own
+Mapp pair and the Subtype's cnSubtype/dcnSubtype have no declarative
+foreign-key form and are documented as unmapped on the mapping-rules
+page.
+
+## Stage 4 delivery notes (2026-09-06)
+
+Delivered per the dialect and physical sections: the DDL generator
+grew three global issues (ReferentialActions with NativeDdl default
+and TriggerEmulation; DomainHandling with InlineTypes default and
+EmitDomains; SqlDialect with StandardSql, PostgreSql, Oracle) and the
+per-table Clustering ElementIssue bound to Table. Native emission
+appends ON DELETE and ON UPDATE clauses; connect rules always become
+BEFORE INSERT OR UPDATE trigger stubs in a separate
+<schema>-triggers.sql document, and under TriggerEmulation the
+disconnect rules join them as AFTER DELETE OR UPDATE stubs. Inline
+domain handling renders DEFAULT and CHECK on the column with VALUE
+replaced by the column identifier; EmitDomains renders CREATE DOMAIN
+statements and types columns by domain name. Clustering under
+PostgreSql emits one-time CLUSTER statements naming the PrimaryKey;
+under Oracle the CREATE TABLE gains ORGANIZATION INDEX: one logical
+choice, two dialect-true emissions, both exercised by the
+verification alongside both preset runs and the default chain.
+
+The three presets live in presets/ as configuration models AUTHORED
+BY EXTENSION: the choice vocabulary and the standard-sql choice set
+are compiled package exports (rel-to-sql-ddl/presets), and postgres
+and oracle are the standard set spread with dialect overrides, the
+level-one extension mechanism demonstrated as required. Two facts
+this surfaced, both recorded as architecture: a workspace model is
+re-transpiled from its WORKSPACE COPY at run time, so models must be
+self-contained (bare package imports only; a relative fragment import
+works at import time and dies at run time, which is why the preset
+vocabulary is a package export); and `transformation run --config`
+now accepts SOURCE-AGNOSTIC configurations, configs whose header
+declares no source reference (the preset form), while a declared
+mismatching source still fails. The chain finder in the verification
+learned to skip the triggers document.
+
+## Stage 5 delivery notes (2026-09-06)
+
+The canonical mapping-rules page landed in the developer guide's
+Examples section ("The flagship: EER to relational mapping rules"):
+every rule family with its rationale, the aggregation key rule, the
+integrity pair table (including the two unmapped pairs), the
+dialect-as-configuration story with the extension-authored presets,
+the physical clustering divergence, the validation story, and the
+twelve-issue design-space table. Both suite READMEs stay concise and
+point at the page; the catalogs' flagship rows updated; the
+variability guide gained the presets pattern (extension by
+composition, source-agnostic configurations); CHANGELOG carries the
+three v2 entries.
+
 ## Deferred, out of v2
 
-withHistoryColumns; exhaustive dialect coverage (each future dialect
-is a configuration model); configuration layering at run time
+withHistoryColumns; constraint representation in the
+metamodel-as-model (a Constraint concept in the types meta-metamodel;
+belongs with the platform's metamodel-as-data contract);
+Union-of-Literals value restrictions in the as-models (expressible
+today, flat-name-pool caution); exhaustive dialect coverage (each
+future dialect is a configuration model); configuration layering at
+run time
 (--config stacking with per-issue precedence, level two of the
 extension section); model extension as an envelope relationship
 (level three, platform alignment, ADR-015); the domain mapping as an
@@ -414,9 +537,19 @@ other v1 deferrals stand.
 
 ## Status
 
+V2 COMPLETE 2026-09-06. All six stages delivered on
+feat/eer-to-relational-v2, each on a full green ladder: stages 1 and
+2 (the metamodels, reshaped through four user review rounds: full
+cardinality names, arity doctrine, typed validators, the schema-level
+identification-dependency acyclicity, the isNamespace marker, the
+EER-convention file names, PrimaryKey with isKey deleted outright,
+membership constraints), the constraint validation point (decision
+13), stage 3 (the full-semantics transformation), stage 4 (dialects
+as configurations with extension-authored presets), and stage 5 (the
+canonical mapping-rules page). Merged to main with --no-ff and the
+ladder repeated there; not pushed.
+
 Drafted 2026-09-06 from the user discussions of 2026-09-05/06.
-Awaiting the user's approval and the open-decision answers; no
-building before that.
 
 Decisions round 2026-09-06, same day: the user resolved 1 (the
 connect/disconnect semantics, correcting the draft's delete/update
@@ -440,3 +573,91 @@ oracle) BUILT BY EXTENSION, which added the extension section and
 two new deferred items (configuration layering; model extension in
 the platform envelope). The record is decision-complete; awaiting
 the user's word to open the worktree and start stage 1.
+
+Stage 1 (EER metamodel v2) COMPLETE 2026-09-06, commit a9a70f4, full
+ladder green on the branch: the scoped attribute-rich metamodel
+(Entity a namespace, attribute lb/ub cardinality, one-level
+components, user-definable Domain with baseType/check/defaultValue,
+IntegrityRule renamed with the deprecated alias, dead code removed),
+Attribute and Domain components on ordered candidates, samples
+renamed to natural names with model-level domain vocabulary,
+rich-library extended (Money domain, multivalued phones, composite
+address), the audit template switched to the confirmed simplified
+form (folded into this stage: it shares its verify expectations with
+the renames), both suite verifications updated. Deviations, both
+recorded here: the Loan aggregation joins library.tsx in stage 3
+(that sample is transformed on every smoke and the aggregation rule
+does not exist yet), and the draft's claim that SingleTable emits no
+discriminator was wrong, v1 already emits `<root>_type`, so stage 3
+merely renames it to the scoped `type` per decision 8. One engine fix
+surfaced by scoped sources: the default-configuration generator named
+element choices by bare element name and collided on the three `id`
+attributes; it now derives scope-qualified names from element paths
+(an element's `path` is its container's path, so the element name is
+appended; flat models keep their old names; one CLI fixture model and
+one test marker updated).
+
+Stage 2 (relational metamodel v2) COMPLETE 2026-09-06, commit
+481ddef, full ladder green: the ReferentialAction vocabulary,
+ForeignKey onDelete/onUpdate, Domain wired (check added, optional
+Column.domain link, Column.type kept as the resolved string), the
+as-model mirror extended under its flat property-name-pool convention
+(domainType, domainCheck, domainDefault, columnDomain, fkOnDelete,
+fkOnUpdate), and rich-db exercising a checked money domain, a
+domain-linked column, and actions on the composite foreign key.
+PAUSED at the user's request for the metamodel review before stage 3
+begins.
+
+Review round one, 2026-09-06, folded in (commits f813839, e012885 and
+the constraint slice): full cardinality names lowerBound/upperBound
+across the metamodel, samples, transformation, binding condition, and
+CLI fixtures; the at-least-two aggregation arity with the BookSeries
+sample gaining Publisher; the binary doctrine commented on
+Relationship; weakMap kept optional with the verified creation-order
+reason documented (a mandatory link breaks rendering; backlinks
+filled at child creation may be mandatory). Decision 13 delivered:
+doctrine constraints plus acyclicity walkers declared on the EER
+types, the checkModelConstraints helper (library test), `model
+validate` running the traversal (CLI tests; suite verification
+asserts the positive run and three negative rejections through the
+real CLI), docs in defining-metamodels and managing-models. The
+relational metamodel still awaits the user's review comments.
+
+Relational review round, 2026-09-06: the package files renamed to the
+EER package's convention (REL.meta.model.type.ts, REL-components.ts;
+the public specifiers relational-metamodel and /model are unchanged,
+only the exports map moved), and PrimaryKey introduced as a
+first-class named constraint: an ordered column list with the
+Table.primaryKey single containment and ownerTable inverse, an
+at-least-one-column declared constraint, the as-model mirror
+(PrimaryKey, tablePrimaryKey), and rich-db demonstrating a single and
+a composite key. What it buys: named PK constraints in DDL (symmetric
+with the ALTER TABLE foreign keys), explicit column ORDER for
+composite keys (previously implicit in emission order), the
+attachment point decision 12's Clustering emission needs (CLUSTER
+USING and ORGANIZATION INDEX address the key by name), and the
+derived-fact principle applied to key-ness immediately: on the user's
+correction ("there is no legacy code here", the v1 analogy was false
+because no shipped rework depended on the mark), Column.isKey was
+DELETED in the same round rather than kept as a transition mark, and
+the PrimaryKey adoption was pulled forward from stages 3 and 4: the
+transformation emits a PrimaryKey element per table over its key plan
+(kernel, weak, joined, table-per-class; join tables keep v1's no-key
+shape until stage 3 decides otherwise), the DDL generator reads the
+element (clause text unchanged, order now explicit from the element),
+the audit template and all samples shed the mark, and the suite
+verification asserts the element and the mark's absence. On the
+user's next request the relational metamodel gained MEMBERSHIP
+constraints: a primary key and an index may only name columns of
+their owning table, and a foreign key's own columns must belong to
+the owning table while its referenced columns belong to the
+referenced table; the DDL suite verification validates library-db
+positively and rejects a cross-table primary key and foreign key
+through the real CLI.
+
+Review round four delivered the metamodel-as-model namespace marker:
+the types meta-metamodel's Object concept carries an optional
+isNamespace boolean, and both suite as-models declare it truthfully
+(Entity and Table); constraint representation and Union-of-Literals
+value restrictions are recorded as named follow-ups in the deferred
+list.

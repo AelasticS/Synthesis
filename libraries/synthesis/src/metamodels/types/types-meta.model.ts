@@ -46,6 +46,13 @@ export const Object = t.subtype(
   Type,
   {
     properties: t.arrayOf(Property),
+    // The namespace classification as data: true when instances of the
+    // described concept scope their contained elements' names (the
+    // code-level twin is declareNamespace on the concept's type). The
+    // renderer reads the code marker; this slot keeps the
+    // metamodel-as-model truthful and gives the platform the fact in
+    // data form.
+    isNamespace: t.optional(t.boolean),
   },
   "Object",
   TypesMM_TypeSchema,

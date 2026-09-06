@@ -3,7 +3,7 @@
 import { createExprNode } from '@aelastics/synthesis/jsx'
 import type { ExprNode } from '@aelastics/synthesis/jsx'
 import type { ModelStore } from '@aelastics/synthesis/store'
-import { RelSchema, Table, Column, ForeignKey, ForeignKeyColumn, Index } from 'relational-metamodel'
+import { RelSchema, Table, Column, ForeignKey, ForeignKeyColumn, Index, PrimaryKey } from 'relational-metamodel'
 import type * as t from 'relational-metamodel/model'
 
 export const $synth = {
@@ -17,13 +17,19 @@ export const $synth = {
 export default (store: ModelStore): ExprNode<t.IRelSchema> => (
   <RelSchema name="LibraryDb" store={store}>
     <Table name="author">
-      <Column name="id" type="INTEGER" isKey={true} isNullable={false} isAutoincrement={true} />
-      <Column name="name" type="VARCHAR(255)" isKey={false} isNullable={false} isAutoincrement={false} />
+      <Column name="id" type="INTEGER" isNullable={false} isAutoincrement={true} />
+      <Column name="name" type="VARCHAR(255)" isNullable={false} isAutoincrement={false} />
+      <PrimaryKey name="pk_author">
+        <Column $refByName="id" />
+      </PrimaryKey>
     </Table>
     <Table name="book">
-      <Column name="id" type="INTEGER" isKey={true} isNullable={false} isAutoincrement={true} />
-      <Column name="title" type="VARCHAR(255)" isKey={false} isNullable={false} isAutoincrement={false} />
-      <Column name="author_id" type="INTEGER" isKey={false} isNullable={true} isAutoincrement={false} />
+      <Column name="id" type="INTEGER" isNullable={false} isAutoincrement={true} />
+      <Column name="title" type="VARCHAR(255)" isNullable={false} isAutoincrement={false} />
+      <Column name="author_id" type="INTEGER" isNullable={true} isAutoincrement={false} />
+      <PrimaryKey name="pk_book">
+        <Column $refByName="id" />
+      </PrimaryKey>
       <ForeignKey name="fk_book_author" isUnique={false}
         referencedTable={<Table $refByName="author" />}>
         <ForeignKeyColumn name="fk_book_author_p1">

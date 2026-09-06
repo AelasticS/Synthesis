@@ -278,6 +278,31 @@ class EER2RelWithConfig
 }
 ```
 
+## Presets: configurations authored by extension
+
+A recurring configuration deserves a name and a file. The flagship's
+DDL generator ships dialect PRESETS: configuration models closing all
+its emission issues at once, so choosing a dialect means passing one
+`--config`. Two techniques make presets practical:
+
+- **Extension by composition.** A configuration model is a JSX
+  program, so reuse is ordinary import and spread: the choice
+  vocabulary and the base choice set live as compiled package exports
+  (`rel-to-sql-ddl/presets`), and each dialect preset spreads the
+  standard set and overrides only what the dialect changes. The diff
+  is the dialect's definition. (Workspace models must be
+  self-contained at run time, so the shared vocabulary is a package
+  export, never a relative import.)
+- **Source-agnostic configurations.** A preset closes global issues
+  and declares no source-model reference in its header;
+  `transformation run --config` accepts such a configuration for any
+  input. A configuration that DOES declare a source still fails on a
+  mismatch, exactly as before.
+
+See `examples/eer-to-sql/rel-to-sql-ddl/presets/` for the three
+shipped presets and the docs page "The flagship: EER to relational
+mapping rules" for the design space they close.
+
 ## Guarantees
 
 The framework provides several guarantees for well-formed transformations with design decisions.

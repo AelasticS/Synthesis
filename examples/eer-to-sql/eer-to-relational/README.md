@@ -1,10 +1,17 @@
 # eer-to-relational
 
-The flagship configuration-based transformation: an EER schema becomes a
-rich relational schema (real foreign keys, composite capable, and
-indexes; a table is a name scope for its columns), and every design
-question without a single right answer is an explicit decision, closed
-per run by a configuration model. Seven issues are on offer:
+The flagship configuration-based transformation: a full-semantics EER
+schema (aggregations with the cardinality key rule, weak chains,
+JPA-style hierarchies, user-defined domains with checks, multivalued
+and composite attributes, connect/disconnect integrity rules) becomes
+a rich relational schema (first-class primary and foreign keys,
+composite capable, referential actions, wired domains, indexes; a
+table is a name scope for its columns). Every design question without
+a single right answer is an explicit decision closed per run by a
+configuration model. The mapping rules are explained canonically in
+the docs page "The flagship: EER to relational mapping rules"
+(developer guide, Examples section); this README stays with what the
+package is and how to run it. Seven issues are on offer:
 
 - TableAuditing (per entity, on by default): whether a table carries
   `createdBy`/`createdAt` columns. The audited option applies the

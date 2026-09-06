@@ -15,8 +15,10 @@ export declare const RelSchema: t.Subtype<{}, {
     path: t.OptionalType<t.StringType>;
     parentModel: t.OptionalType<t.LinkType>;
 }, t.ObjectType<import("@aelastics/types/lib/complex-types/ObjectType.js").InterfaceDecl, readonly string[]>>;
+export declare const ReferentialAction: t.StringType;
 export declare const Domain: t.Subtype<{
     type: t.StringType;
+    check: t.OptionalType<t.StringType>;
     defaultValue: t.OptionalType<t.StringType>;
 }, {
     name: t.StringType;
@@ -27,9 +29,9 @@ export declare const Domain: t.Subtype<{
 }, t.ObjectType<import("@aelastics/types/lib/complex-types/ObjectType.js").InterfaceDecl, readonly ["name"]>>;
 export declare const Column: t.Subtype<{
     type: t.StringType;
-    isKey: t.BooleanType;
     isNullable: t.BooleanType;
     isAutoincrement: t.BooleanType;
+    domain: t.OptionalType<t.LinkType>;
     ownerTable: t.OptionalType<t.LinkType>;
 }, {
     name: t.StringType;
@@ -60,6 +62,9 @@ export declare const ForeignKey: t.Subtype<{
         parentModel: t.OptionalType<t.LinkType>;
     }, t.ObjectType<import("@aelastics/types/lib/complex-types/ObjectType.js").InterfaceDecl, readonly ["name"]>>>;
     isUnique: t.BooleanType;
+    onConnect: t.OptionalType<t.StringType>;
+    onDelete: t.OptionalType<t.StringType>;
+    onUpdate: t.OptionalType<t.StringType>;
     referencedTable: t.OptionalType<t.LinkType>;
     ownerTable: t.OptionalType<t.LinkType>;
 }, {
@@ -80,12 +85,32 @@ export declare const Index: t.Subtype<{
     path: t.OptionalType<t.StringType>;
     parentModel: t.OptionalType<t.LinkType>;
 }, t.ObjectType<import("@aelastics/types/lib/complex-types/ObjectType.js").InterfaceDecl, readonly ["name"]>>;
+export declare const PrimaryKey: t.Subtype<{
+    columns: t.ArrayType<t.LinkType>;
+    ownerTable: t.OptionalType<t.LinkType>;
+}, {
+    name: t.StringType;
+    label: t.OptionalType<t.StringType>;
+    description: t.OptionalType<t.StringType>;
+    path: t.OptionalType<t.StringType>;
+    parentModel: t.OptionalType<t.LinkType>;
+}, t.ObjectType<import("@aelastics/types/lib/complex-types/ObjectType.js").InterfaceDecl, readonly ["name"]>>;
 export declare const Table: t.Subtype<{
     columns: t.ArrayType<t.Subtype<{
         type: t.StringType;
-        isKey: t.BooleanType;
         isNullable: t.BooleanType;
         isAutoincrement: t.BooleanType;
+        domain: t.OptionalType<t.LinkType>;
+        ownerTable: t.OptionalType<t.LinkType>;
+    }, {
+        name: t.StringType;
+        label: t.OptionalType<t.StringType>;
+        description: t.OptionalType<t.StringType>;
+        path: t.OptionalType<t.StringType>;
+        parentModel: t.OptionalType<t.LinkType>;
+    }, t.ObjectType<import("@aelastics/types/lib/complex-types/ObjectType.js").InterfaceDecl, readonly ["name"]>>>;
+    primaryKey: t.OptionalType<t.Subtype<{
+        columns: t.ArrayType<t.LinkType>;
         ownerTable: t.OptionalType<t.LinkType>;
     }, {
         name: t.StringType;
@@ -106,6 +131,9 @@ export declare const Table: t.Subtype<{
             parentModel: t.OptionalType<t.LinkType>;
         }, t.ObjectType<import("@aelastics/types/lib/complex-types/ObjectType.js").InterfaceDecl, readonly ["name"]>>>;
         isUnique: t.BooleanType;
+        onConnect: t.OptionalType<t.StringType>;
+        onDelete: t.OptionalType<t.StringType>;
+        onUpdate: t.OptionalType<t.StringType>;
         referencedTable: t.OptionalType<t.LinkType>;
         ownerTable: t.OptionalType<t.LinkType>;
     }, {
@@ -140,3 +168,4 @@ export type IColumn = t.TypeOf<typeof Column>;
 export type IForeignKey = t.TypeOf<typeof ForeignKey>;
 export type IForeignKeyColumn = t.TypeOf<typeof ForeignKeyColumn>;
 export type IIndex = t.TypeOf<typeof Index>;
+export type IPrimaryKey = t.TypeOf<typeof PrimaryKey>;

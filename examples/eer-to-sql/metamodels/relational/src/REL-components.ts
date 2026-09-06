@@ -1,6 +1,6 @@
 // JSX template components for the full relational metamodel of the
 // eer-to-sql example suite. The data-type schemas live in model.ts.
-import * as r from "./model.js"
+import * as r from "./REL.meta.model.type.js"
 import {
   CpxTemplate,
   defaultConnectionInfo,
@@ -16,9 +16,11 @@ export const RelSchema: CpxTemplate<IModelProps, r.IRelSchema> = (props) => {
   return new ExprNode(r.RelSchema, props, undefined)
 }
 
-// Kept as-is while decision 5 (Domain) is under discussion; unwired.
+// A Domain is declared once at model level (a direct child of the
+// schema connects into `elements`) or referenced from a column's
+// `domain` prop; ordered candidates pick the context.
 export const Domain: Template<r.IDomain> = (props) => {
-  return new ExprNode(r.Domain, props, "domain")
+  return new ExprNode(r.Domain, props, defaultConnectionInfo(["domain", "elements"]))
 }
 
 // One Column tag for every context, connected via ordered candidates
@@ -49,4 +51,8 @@ export const ForeignKeyColumn: Template<r.IForeignKeyColumn> = (props) => {
 
 export const Index: Template<r.IIndex> = (props) => {
   return new ExprNode(r.Index, props, "indexes")
+}
+
+export const PrimaryKey: Template<r.IPrimaryKey> = (props) => {
+  return new ExprNode(r.PrimaryKey, props, "primaryKey")
 }

@@ -26,13 +26,23 @@ export const RELModel = (store: ModelStore): ExprNode<t.ITypeModel> => (
     <TypeString name="string"></TypeString>
     <TypeBoolean name="boolean"></TypeBoolean>
 
+    <TypeObject name="Domain">
+      <Property name="domainType">
+        <PropertyDomain $refByName="string" />
+      </Property>
+      <Property name="domainCheck">
+        <PropertyDomain $refByName="string" />
+      </Property>
+      <Property name="domainDefault">
+        <PropertyDomain $refByName="string" />
+      </Property>
+    </TypeObject>
+
     <TypeObject name="Column">
       <Property name="type">
         <PropertyDomain $refByName="string" />
       </Property>
-      <Property name="isKey">
-        <PropertyDomain $refByName="boolean" />
-      </Property>
+      <Property name="columnDomain" domain={<TypeObject $refByName="Domain" />} />
       <Property name="isNullable">
         <PropertyDomain $refByName="boolean" />
       </Property>
@@ -53,6 +63,15 @@ export const RELModel = (store: ModelStore): ExprNode<t.ITypeModel> => (
       <Property name="fkIsUnique">
         <PropertyDomain $refByName="boolean" />
       </Property>
+      <Property name="fkOnConnect">
+        <PropertyDomain $refByName="string" />
+      </Property>
+      <Property name="fkOnDelete">
+        <PropertyDomain $refByName="string" />
+      </Property>
+      <Property name="fkOnUpdate">
+        <PropertyDomain $refByName="string" />
+      </Property>
       {/* referencedTable omitted: Table is defined below and this
           simplified mirror keeps definition order acyclic */}
     </TypeObject>
@@ -66,7 +85,14 @@ export const RELModel = (store: ModelStore): ExprNode<t.ITypeModel> => (
       </Property>
     </TypeObject>
 
-    <TypeObject name="Table">
+    <TypeObject name="PrimaryKey">
+      <Property name="pkColumns"
+                domain={<TypeArray name="ArrayOfPrimaryKeyColumns" elementType={<TypeObject $refByName="Column" />} />}
+      />
+    </TypeObject>
+
+    <TypeObject name="Table" isNamespace={true}>
+      <Property name="tablePrimaryKey" domain={<TypeObject $refByName="PrimaryKey" />} />
       <Property name="tableColumns"
                 domain={<TypeArray name="ArrayOfColumns" elementType={<TypeObject $refByName="Column" />} />}
       />

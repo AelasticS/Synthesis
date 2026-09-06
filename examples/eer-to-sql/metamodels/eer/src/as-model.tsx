@@ -48,7 +48,18 @@ export const EERModel = (store: ModelStore): ExprNode<t.ITypeModel> => (
 
     <TypeSubtype name="Attribute" superType={<TypeObject $refByName="ERConcept" />}>
       <Property name="attrDomain"
-                domain={<TypeSubtype name="Domain" superType={<TypeObject $refByName="ERConcept" />} />}
+                domain={
+                  <TypeSubtype name="Domain" superType={<TypeObject $refByName="ERConcept" />}>
+                    <Property name="baseType"
+                              domain={<TypeOptional name="OptionalBaseType" optionalType={<TypeString $refByName="string" />} />} />
+                    <Property name="check"
+                              domain={<TypeOptional name="OptionalCheck" optionalType={<TypeString $refByName="string" />} />} />
+                    {/* named domainDefault: property-definition names are
+                        unique per model until per-type property scopes land */}
+                    <Property name="domainDefault"
+                              domain={<TypeOptional name="OptionalDomainDefault" optionalType={<TypeString $refByName="string" />} />} />
+                  </TypeSubtype>
+                }
       />
       <Property name="isKey">
         <PropertyDomain $refByName="boolean" />
@@ -56,9 +67,21 @@ export const EERModel = (store: ModelStore): ExprNode<t.ITypeModel> => (
       <Property name="defaultValue"
                 domain={<TypeOptional name="OptionalString" optionalType={<TypeString $refByName="string" />} />}
       />
+      {/* attrLowerBound/attrUpperBound: property-definition names are
+          unique per model until per-type property scopes land (the
+          code property names are lowerBound/upperBound) */}
+      <Property name="attrLowerBound"
+                domain={<TypeOptional name="OptionalAttrLb" optionalType={<TypeString $refByName="string" />} />}
+      />
+      <Property name="attrUpperBound"
+                domain={<TypeOptional name="OptionalAttrUb" optionalType={<TypeString $refByName="string" />} />}
+      />
+      <Property name="components"
+                domain={<TypeArray name="ArrayOfComponents" elementType={<TypeObject $refByName="Attribute" />} />}
+      />
       <Property name="attrEntity"
                 domain={
-                  <TypeSubtype name="Entity" superType={<TypeObject $refByName="ERConcept" />}>
+                  <TypeSubtype name="Entity" superType={<TypeObject $refByName="ERConcept" />} isNamespace={true}>
                     <Property name="attributes"
                               domain={<TypeArray name="ArrayOfAttributes"
                                                  elementType={<TypeObject $refByName="Attribute" />} />}

@@ -10,6 +10,42 @@ overall version history.
 
 ## [Unreleased]
 
+### Added
+
+- **The flagship maps full EER semantics (v2).** Aggregations with the
+  cardinality key rule (an at-most-once participant's copied key IS
+  the primary key, surplus candidates become UNIQUE foreign keys, no
+  such participant means the composite of all participants' keys);
+  relationships strictly binary by doctrine, with the error naming
+  Aggregation; connect/disconnect integrity rules translated into
+  referential actions and trigger stubs; user-defined domains
+  (baseType, check, default) emitted and column-linked; attribute
+  cardinality driving nullability and multivalued tables; composite
+  attributes flattened; a first-class ordered PrimaryKey element
+  replacing the isKey mark; the SingleTable discriminator named
+  `type`; entity name scopes with naturally named samples; and the
+  simplified withAuditColumns form (plain createdBy/createdAt).
+
+- **Dialects are configurations: the DDL design space grew.**
+  ReferentialActions (NativeDdl or TriggerEmulation), DomainHandling
+  (InlineTypes or EmitDomains), SqlDialect (StandardSql, PostgreSql,
+  Oracle), and the per-table Clustering issue (one-time CLUSTER under
+  PostgreSql, ORGANIZATION INDEX under Oracle) join IdentifierQuoting.
+  Three dialect presets ship as configuration models authored by
+  extension over the compiled `rel-to-sql-ddl/presets` vocabulary, and
+  `transformation run --config` accepts source-agnostic configurations
+  (no declared source reference), the preset form.
+
+- **Declared constraints with a validation point.** Metamodels declare
+  semantic rules on their types with addValidator (arity, presence,
+  membership of key/index/foreign-key columns in their tables, and a
+  schema-level acyclicity of the combined identification-dependency
+  graph); `synth model validate` runs the traversal after the gate
+  render and reports each violation; `model import` is unchanged. The
+  types meta-metamodel records namespace classifications as data
+  (`isNamespace`), and the metamodel guide documents constraints and
+  their placement rule.
+
 ## [cli-v0.2.0] - 2026-09-05
 
 ### Added

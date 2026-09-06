@@ -2,11 +2,23 @@
 
 Model-to-text over the rich relational metamodel: a relational schema
 becomes SQL DDL. CREATE TABLE statements carry composite-aware
-`PRIMARY KEY` clauses; every foreign key becomes a named
-`ALTER TABLE ... ADD CONSTRAINT` in its own section, because foreign
-keys can be circular and no creation order satisfies them inline;
-indexes become `CREATE INDEX` statements. One configuration issue is on
-offer: IdentifierQuoting (verbatim or double-quoted identifiers).
+`PRIMARY KEY` clauses read from the PrimaryKey element in its order;
+every foreign key becomes a named `ALTER TABLE ... ADD CONSTRAINT`
+with its `ON DELETE`/`ON UPDATE` actions, in its own section, because
+foreign keys can be circular and no creation order satisfies them
+inline; indexes become `CREATE INDEX` statements; connect rules (and,
+under trigger emulation, disconnect rules) become trigger stubs in a
+separate `-triggers.sql` document. Five issues are on offer:
+IdentifierQuoting, ReferentialActions (NativeDdl or TriggerEmulation),
+DomainHandling (InlineTypes or EmitDomains), SqlDialect (StandardSql,
+PostgreSql, Oracle), and the per-table Clustering. A dialect is a
+configuration, not code: the presets under [presets/](./presets/) are
+authored by extension over the compiled `rel-to-sql-ddl/presets`
+vocabulary (postgres and oracle spread the standard-sql choice set and
+override only what the dialect changes), and they are source-agnostic:
+`--config demo/cfg-postgres` fits any input schema. The mapping rules
+are explained canonically in the docs page "The flagship: EER to
+relational mapping rules".
 
 ## The package anatomy
 
@@ -21,10 +33,17 @@ offer: IdentifierQuoting (verbatim or double-quoted identifiers).
   rich relational metamodel (short per-table names, a composite foreign
   key whose references cross table scopes, an index), imported by the
   smoke on every run.
+- [presets/](./presets/): the three dialect presets
+  (standard-sql, postgres, oracle), configuration models authored by
+  extension; import one with
+  `synth model import presets/postgres.tsx --as demo/cfg-pg --tx rel-to-sql-ddl`.
 - [scripts/verify.mjs](./scripts/verify.mjs): the suite's end-to-end
   proof: eer-to-relational then rel-to-sql-ddl on the Library sample,
   asserting the composite constraint down the weak chain, the joined
-  subtype constraint, indexes, and audit columns in the generated SQL.
+  subtype constraint, indexes, audit columns, native referential
+  actions, inline and emitted domains, the trigger documents, both
+  preset runs, both clustering emissions, and the relational
+  membership constraints through `model validate`.
 
 ## Try it
 

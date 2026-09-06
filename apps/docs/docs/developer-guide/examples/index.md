@@ -57,8 +57,8 @@ metamodel) and `relational-metamodel` (the full relational one).
 
 | Example | Kind | What it shows |
 | --- | --- | --- |
-| `examples/eer-to-sql/eer-to-relational` | m2m | The flagship: every template kind, seven design issues (per-table auditing via a higher-order template, JPA-style inheritance strategies, foreign key indexing and naming), a rich relational target with composite foreign keys, verified outputs and traces. |
-| `examples/eer-to-sql/rel-to-sql-ddl` | m2t | DDL from the rich content: composite PRIMARY KEY clauses, named ALTER TABLE constraints, CREATE INDEX, and identifier quoting as a configuration issue. |
+| `examples/eer-to-sql/eer-to-relational` | m2m | The flagship: full EER semantics (aggregations with the cardinality key rule, integrity rules, user-defined domains, multivalued and composite attributes), every template kind, seven design issues, verified outputs and traces. See [the mapping rules](./flagship-mapping-rules.md). |
+| `examples/eer-to-sql/rel-to-sql-ddl` | m2t | DDL from the rich content: named keys and constraints with referential actions, domains, trigger stubs, physical clustering, and dialects as extension-authored preset configurations. |
 
 ## Running an example
 

@@ -56,14 +56,14 @@ let EER2RelDomainWithDecisionTransformation = class EER2RelDomainWithDecisionTra
         const fkSide = this.getFKSide(rel);
         const pkSide = this.getPKSide(rel);
         return ((0, jsx_1.createExprNode)(components_legacy_1.Table, { "$refByName": this.applyNaming(pkSide.domain.name) },
-            (0, jsx_1.createExprNode)(components_legacy_1.Column, { name: this.applyNaming(fkSide.domain.name + "Id_FK"), type: this.getColumnType(fkSide.domain), isForeignKey: true, isKey: false, references: this.applyNaming(fkSide.domain.name), isNullable: fkSide.lb === "0" })));
+            (0, jsx_1.createExprNode)(components_legacy_1.Column, { name: this.applyNaming(fkSide.domain.name + "Id_FK"), type: this.getColumnType(fkSide.domain), isForeignKey: true, isKey: false, references: this.applyNaming(fkSide.domain.name), isNullable: fkSide.lowerBound === "0" })));
     }
     relationshipAsJoinTable(rel) {
         const role1 = rel.roles[0];
         const role2 = rel.roles[1];
         return ((0, jsx_1.createExprNode)(components_legacy_1.Table, { name: this.applyNaming(rel.name) },
-            (0, jsx_1.createExprNode)(components_legacy_1.Column, { name: this.applyNaming(role1.domain.name + "Id_FK"), type: this.getColumnType(role1), isForeignKey: true, references: this.applyNaming(role1.domain.name), isNullable: role1.lb !== "1" && role1.ub !== "1", isKey: role1.ub === "1" }),
-            (0, jsx_1.createExprNode)(components_legacy_1.Column, { name: this.applyNaming(role2.domain.name + "Id_FK"), type: this.getColumnType(role2), isForeignKey: true, references: this.applyNaming(role2.domain.name), isNullable: role2.lb !== "1", isKey: role2.ub === "1" })));
+            (0, jsx_1.createExprNode)(components_legacy_1.Column, { name: this.applyNaming(role1.domain.name + "Id_FK"), type: this.getColumnType(role1), isForeignKey: true, references: this.applyNaming(role1.domain.name), isNullable: role1.lowerBound !== "1" && role1.upperBound !== "1", isKey: role1.upperBound === "1" }),
+            (0, jsx_1.createExprNode)(components_legacy_1.Column, { name: this.applyNaming(role2.domain.name + "Id_FK"), type: this.getColumnType(role2), isForeignKey: true, references: this.applyNaming(role2.domain.name), isNullable: role2.lowerBound !== "1", isKey: role2.upperBound === "1" })));
     }
     // ######### START PrimaryKeyStrategy variations #############
     primaryKeyStrategy(a) {
@@ -92,11 +92,11 @@ let EER2RelDomainWithDecisionTransformation = class EER2RelDomainWithDecisionTra
     // ######### END NamingConvention variations #############
     getFKSide(rel) {
         // Return the side with upperBound = 1 (many-to-one side becomes FK side)
-        return rel.roles.find((m) => m.ub === "1") || rel.roles[0];
+        return rel.roles.find((m) => m.upperBound === "1") || rel.roles[0];
     }
     getPKSide(rel) {
         // Return the side with upperBound = N (one-to-many side becomes PK side)
-        return rel.roles.find((m) => m.ub !== "1") || rel.roles[1];
+        return rel.roles.find((m) => m.upperBound !== "1") || rel.roles[1];
     }
     getColumnType(domain) {
         // Map EER domain types to relational column types
