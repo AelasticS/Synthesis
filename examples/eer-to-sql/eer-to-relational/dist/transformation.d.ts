@@ -82,10 +82,29 @@ export declare class EerToRelational extends DecisionAwareM2M<em.IEERSchema, rmT
     attributeToColumn(a: em.IAttribute): ExprNode<rmT.IColumn>;
     hierarchyToTables(spec: em.ISpecialization): ExprNode<rmT.ITable> | ExprNode<rmT.ITable>[];
     joinedHierarchy(spec: em.ISpecialization): ExprNode<rmT.ITable>[];
+    /**
+     * The single-table emission follows the specialization's own
+     * bounds. Disjoint (upperBound 1) gets the `type` discriminator,
+     * NOT NULL exactly when the specialization is total (lowerBound 1);
+     * overlapping gets NO discriminator, membership being carried by
+     * the subtype columns themselves. Those grafted columns are always
+     * nullable: rows of other subtypes (and, under a partial
+     * specialization, of no subtype) have no value for them.
+     */
     singleTableHierarchy(spec: em.ISpecialization): ExprNode<rmT.ITable> | ExprNode<rmT.ITable>[];
+    /** One subtype attribute's columns in the shared single table: a
+     * composite parent contributes one nullable column per leaf. */
+    private singleTableColumns;
+    /** A subtype attribute's column in the shared single table: like
+     * attributeToColumn, but always nullable and never autoincrement. */
+    singleTableColumn(a: em.IAttribute): ExprNode<rmT.IColumn>;
     tablePerClassHierarchy(spec: em.ISpecialization): ExprNode<rmT.ITable>[];
     joinedSubtypeTable(st: em.ISubtype): ExprNode<rmT.ITable>;
     tablePerClassSubtypeTable(st: em.ISubtype): ExprNode<rmT.ITable>;
+    /** The copies of one root attribute in a TablePerClass subtype
+     * table: a composite parent contributes one copy per leaf
+     * (attribute_component), a leaf its plain copy. */
+    private copiedColumns;
     /** A copy of a root attribute's column in a TablePerClass subtype
      * table: a new element with the same name (the table scope keeps it
      * unambiguous) and no autoincrement. */
@@ -158,9 +177,13 @@ export declare class EerToRelational extends DecisionAwareM2M<em.IEERSchema, rmT
     private keyAttrsOf;
     private ownerOf;
     private rootOf;
-    /** The hierarchy an entity is the root of, if any. */
-    private hierarchyOfRoot;
-    /** An abstract root under TablePerClass gets no table of its own. */
+    /** The hierarchies an entity is the root of: a specialization is a
+     * mapping, so it sits in the entity's mappings. Several are several
+     * independent categories of subtyping. */
+    private hierarchiesOfRoot;
+    /** An abstract root gets no table of its own exactly when every
+     * hierarchy it roots is TablePerClass (any other strategy needs the
+     * root's table). */
     private skipsOwnTable;
     private tableNameOf;
     /** Kahn's sort over the table-producing units: a weak entity depends

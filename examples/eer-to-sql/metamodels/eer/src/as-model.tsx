@@ -141,20 +141,7 @@ export const EERModel = (store: ModelStore): ExprNode<t.ITypeModel> => (
     <TypeSubtype name="Subtype" superType={<TypeSubtype $refByName="Entity" />}>
       <Property name="supertype"
                 domain={
-                  <TypeSubtype name="Specialization" superType={<TypeObject $refByName="ERConcept" />}>
-                    <Property name="mapping"
-                              domain={<TypeOptional name="OptionalSpecializationMapping"
-                                                    optionalType={
-                                                      <TypeSubtype name="SpecializationMapping"
-                                                                   superType={<TypeObject $refByName="Mapping" />}>
-                                                        <Property name="specialization"
-                                                                  domain={<TypeOptional name="OptionalSpecialization"
-                                                                                        optionalType={<TypeSubtype
-                                                                                          $refByName="Specialization" />} />}
-                                                        />
-                                                      </TypeSubtype>
-                                                    } />}
-                    />
+                  <TypeSubtype name="Specialization" superType={<TypeObject $refByName="Mapping" />}>
                     <Property name="subtypes"
                               domain={<TypeArray name="ArrayOfSubtypes"
                                                  elementType={<TypeSubtype $refByName="Subtype" />} />}
@@ -219,13 +206,6 @@ export const EERModel = (store: ModelStore): ExprNode<t.ITypeModel> => (
       firstProperty="supertype"
       secondType={<TypeSubtype $refByName="Specialization" />}
       secondProperty="subtypes"
-    />
-
-    <InverseProperty
-      firstType={<TypeSubtype $refByName="Specialization" />}
-      firstProperty="mapping"
-      secondType={<TypeSubtype $refByName="SpecializationMapping" />}
-      secondProperty="specialization"
     />
 
   </TypeModel>

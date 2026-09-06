@@ -396,19 +396,65 @@ export class EerToRelational extends DecisionAwareM2M<
     return (spec.subtypes as em.ISubtype[]).map((st) => this.joinedSubtypeTable(st))
   }
 
+  /**
+   * The single-table emission follows the specialization's own
+   * bounds. Disjoint (upperBound 1) gets the `type` discriminator,
+   * NOT NULL exactly when the specialization is total (lowerBound 1);
+   * overlapping gets NO discriminator, membership being carried by
+   * the subtype columns themselves. Those grafted columns are always
+   * nullable: rows of other subtypes (and, under a partial
+   * specialization, of no subtype) have no value for them.
+   */
   @VarOption("hierarchyToTables", Option("SingleTable"))
   singleTableHierarchy(spec: em.ISpecialization): ExprNode<rmT.ITable> | ExprNode<rmT.ITable>[] {
     const root = this.rootOf(spec)
     const rootTable = this.tableNameOf(root)
+    const disjoint = spec.upperBound === "1"
     const graft = (
       <Table $refByName={rootTable}>
-        <Column name="type" type="VARCHAR(255)" isNullable={false} isAutoincrement={false} />
+        {disjoint
+          ? [<Column name="type" type="VARCHAR(255)" isNullable={spec.lowerBound === "0"} isAutoincrement={false} />]
+          : []}
         {(spec.subtypes as em.ISubtype[]).flatMap((st) =>
-          (st.attributes as em.IAttribute[]).map((a) => this.attributeToColumn(a)),
+          (st.attributes as em.IAttribute[]).flatMap((a) => this.singleTableColumns(a)),
         )}
       </Table>
     )
     return this.mirrorGraftIntoHistory(root, graft)
+  }
+
+  /** One subtype attribute's columns in the shared single table: a
+   * composite parent contributes one nullable column per leaf. */
+  private singleTableColumns(a: em.IAttribute): ExprNode<rmT.IColumn>[] {
+    const components = ((a.components ?? []) as em.IAttribute[])
+    if (components.length > 0) {
+      return components.map((leaf) => (
+        <Column
+          name={this.applyNaming(`${a.name}_${leaf.name}`)}
+          type={this.getColumnType(this.domainOf(leaf))}
+          isNullable={true}
+          isAutoincrement={false}
+        />
+      ))
+    }
+    return [this.singleTableColumn(a)]
+  }
+
+  /** A subtype attribute's column in the shared single table: like
+   * attributeToColumn, but always nullable and never autoincrement. */
+  @E2E()
+  singleTableColumn(a: em.IAttribute): ExprNode<rmT.IColumn> {
+    const dom = this.domainOf(a)
+    const userDefined = dom.baseType !== undefined && dom.baseType !== null
+    return (
+      <Column
+        name={this.applyNaming(a.name)}
+        type={this.getColumnType(dom)}
+        isNullable={true}
+        isAutoincrement={false}
+        {...(userDefined ? { domain: <RelDomain $refByName={this.applyNaming(String(dom.name))} /> } : {})}
+      />
+    )
   }
 
   @VarOption("hierarchyToTables", Option("TablePerClass"))
@@ -439,11 +485,30 @@ export class EerToRelational extends DecisionAwareM2M<
     const table = this.tableNameOf(st)
     return (
       <Table name={table}>
-        {(root.attributes as em.IAttribute[]).map((a) => this.copiedColumn(a))}
+        {(root.attributes as em.IAttribute[]).flatMap((a) => this.copiedColumns(a))}
         {this.tableColumns(st)}
         {this.primaryKeyFor(st)}
       </Table>
     )
+  }
+
+  /** The copies of one root attribute in a TablePerClass subtype
+   * table: a composite parent contributes one copy per leaf
+   * (attribute_component), a leaf its plain copy. */
+  private copiedColumns(a: em.IAttribute): ExprNode<rmT.IColumn>[] {
+    const components = ((a.components ?? []) as em.IAttribute[])
+    if (components.length > 0) {
+      const parentOptional = a.isOptional === true
+      return components.map((leaf) => (
+        <Column
+          name={this.applyNaming(`${a.name}_${leaf.name}`)}
+          type={this.getColumnType(this.domainOf(leaf))}
+          isNullable={parentOptional || leaf.isOptional === true}
+          isAutoincrement={false}
+        />
+      ))
+    }
+    return [this.copiedColumn(a)]
   }
 
   /** A copy of a root attribute's column in a TablePerClass subtype
@@ -828,10 +893,9 @@ export class EerToRelational extends DecisionAwareM2M<
   }
 
   private rootOf(spec: em.ISpecialization): em.IEntity {
-    const mapping = spec.mapping as em.ISpecializationMapping | undefined
-    const root = mapping?.domain as em.IEntity | undefined
+    const root = spec.domain as em.IEntity | undefined
     if (!root) {
-      throw new Error(`Specialization '${spec.name}' has no mapping naming its root entity.`)
+      throw new Error(`Specialization '${spec.name}' has no root entity; nest it inside the entity it specializes.`)
     }
     if (this.context.store.isTypeOf(root, em.Subtype)) {
       throw new Error(
@@ -841,18 +905,22 @@ export class EerToRelational extends DecisionAwareM2M<
     return root
   }
 
-  /** The hierarchy an entity is the root of, if any. */
-  private hierarchyOfRoot(e: em.IEntity): em.ISpecialization | undefined {
+  /** The hierarchies an entity is the root of: a specialization is a
+   * mapping, so it sits in the entity's mappings. Several are several
+   * independent categories of subtyping. */
+  private hierarchiesOfRoot(e: em.IEntity): em.ISpecialization[] {
     const store = this.context.store
-    const sm = ((e.mappings ?? []) as em.IMapping[]).find((m) => store.isTypeOf(m, em.SpecializationMapping))
-    return (sm as em.ISpecializationMapping | undefined)?.specialization as em.ISpecialization | undefined
+    return ((e.mappings ?? []) as em.IMapping[]).filter((m) =>
+      store.isTypeOf(m, em.Specialization)) as em.ISpecialization[]
   }
 
-  /** An abstract root under TablePerClass gets no table of its own. */
+  /** An abstract root gets no table of its own exactly when every
+   * hierarchy it roots is TablePerClass (any other strategy needs the
+   * root's table). */
   private skipsOwnTable(e: em.IEntity): boolean {
     if (!e.isAbstract) return false
-    const spec = this.hierarchyOfRoot(e)
-    return spec !== undefined && this.strategyOf(spec) === "tpc"
+    const specs = this.hierarchiesOfRoot(e)
+    return specs.length > 0 && specs.every((spec) => this.strategyOf(spec) === "tpc")
   }
 
   private tableNameOf(e: em.IEntity): string {

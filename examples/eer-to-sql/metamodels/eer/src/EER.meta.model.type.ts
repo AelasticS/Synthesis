@@ -44,7 +44,6 @@ export const ERConcept = t.subtype(
         "WeakMapping",
         "AggregationMapping",
         "OrdinaryMapping",
-        "SpecializationMapping",
         "Relationship",
       ]),
   },
@@ -159,7 +158,11 @@ export const Aggregation = t.subtype(
 export const Subtype = t.subtype(
   Entity,
   {
-    supertype: t.link(EERModel_TypeSchema, "Specialization"),
+    // Semantically exactly one specialization; type-level optional
+    // because the canonical form is a top-level Subtype whose
+    // supertype is a reference prop (the declared constraint below
+    // enforces presence at the validation point).
+    supertype: t.optional(t.link(EERModel_TypeSchema, "Specialization")),
     cnSupertype: IntegrityRule,
     dcnSupertype: IntegrityRule,
     cnSubtype: IntegrityRule,
@@ -213,19 +216,17 @@ export const OrdinaryMapping = t.subtype(
   EERModel_TypeSchema
 );
 
-export const SpecializationMapping = t.subtype(
+// A specialization IS a mapping: from the root entity's instance set
+// into the union of its subtypes' sets. The inherited facts carry the
+// two classical constraints as cardinalities: lowerBound 0/1 is
+// partial/total (completeness), upperBound 1/M is disjoint/overlapping
+// (an instance may belong to several subtypes at once). It nests
+// inside its root entity, connecting into `mappings`, whose inverse
+// fills `domain` at creation; several specializations inside one
+// entity are several independent categories of subtyping.
+export const Specialization = t.subtype(
   Mapping,
   {
-    specialization: t.optional(t.link(EERModel_TypeSchema, "Specialization")),
-  },
-  "SpecializationMapping",
-  EERModel_TypeSchema
-);
-
-export const Specialization = t.subtype(
-  ERConcept,
-  {
-    mapping: t.optional(SpecializationMapping),
     subtypes: t.arrayOf(Subtype),
   },
   "Specialization",
@@ -255,12 +256,6 @@ t.inverseProps(Entity, "mappings", Mapping, "domain");
 t.inverseProps(Weak, "weakMap", WeakMapping, "codomain");
 t.inverseProps(Aggregation, "agrMapp", AggregationMapping, "codomain");
 t.inverseProps(Subtype, "supertype", Specialization, "subtypes");
-t.inverseProps(
-  Specialization,
-  "mapping",
-  SpecializationMapping,
-  "specialization"
-);
 
 // ── semantic completeness constraints ────────────────────────────────
 // Declared on the types, run only in a validation traversal: while a
@@ -281,6 +276,27 @@ Relationship.addValidator({
   predicate: (v: IRelationship) => (v.roles?.length ?? 0) === 2,
   message: (_v: IRelationship, label?: string) =>
     `${label ?? "Relationship"}: a relationship is binary (exactly two roles); relate more entities with an Aggregation`,
+});
+Subtype.addValidator({
+  predicate: (v: ISubtype) => v.supertype !== undefined && v.supertype !== null,
+  message: (_v: ISubtype, label?: string) =>
+    `${label ?? "Subtype"}: a subtype belongs to exactly one specialization`,
+});
+Specialization.addValidator({
+  predicate: (v: ISpecialization) => (v.subtypes?.length ?? 0) >= 1,
+  message: (_v: ISpecialization, label?: string) =>
+    `${label ?? "Specialization"}: a specialization groups at least one subtype`,
+});
+Specialization.addValidator({
+  predicate: (v: ISpecialization) => v.domain !== undefined && v.domain !== null,
+  message: (_v: ISpecialization, label?: string) =>
+    `${label ?? "Specialization"}: a specialization nests inside the entity it specializes`,
+});
+Attribute.addValidator({
+  predicate: (v: IAttribute) =>
+    (v.components?.length ?? 0) > 0 || (v.attrDomain !== undefined && v.attrDomain !== null),
+  message: (_v: IAttribute, label?: string) =>
+    `${label ?? "Attribute"}: a leaf attribute takes its type from a domain; a composite attribute has components instead`,
 });
 
 // One identification-dependency graph spans the kinds: a weak entity
@@ -305,7 +321,7 @@ const identityDependencies = (el: IEntity): IEntity[] => {
     if (participant !== undefined) deps.push(participant);
   }
   const spec = e.supertype as ISpecialization | undefined;
-  const root = (spec?.mapping as ISpecializationMapping | undefined)?.domain as IEntity | undefined;
+  const root = spec?.domain as IEntity | undefined;
   if (root !== undefined) deps.push(root);
   return deps;
 };
@@ -354,7 +370,6 @@ export type IMapping = t.TypeOf<typeof Mapping>;
 export type IWeakMapping = t.TypeOf<typeof WeakMapping>;
 export type IAggregationMapping = t.TypeOf<typeof AggregationMapping>;
 export type IOrdinaryMapping = t.TypeOf<typeof OrdinaryMapping>;
-export type ISpecializationMapping = t.TypeOf<typeof SpecializationMapping>;
 export type IRelationship = t.TypeOf<typeof Relationship>;
 
 export const getCodomain = (mapping: IOrdinaryMapping): IEntity => {

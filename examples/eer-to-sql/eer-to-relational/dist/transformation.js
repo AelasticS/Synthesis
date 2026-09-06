@@ -256,13 +256,41 @@ let EerToRelational = class EerToRelational extends DecisionAwareM2M {
     joinedHierarchy(spec) {
         return spec.subtypes.map((st) => this.joinedSubtypeTable(st));
     }
+    /**
+     * The single-table emission follows the specialization's own
+     * bounds. Disjoint (upperBound 1) gets the `type` discriminator,
+     * NOT NULL exactly when the specialization is total (lowerBound 1);
+     * overlapping gets NO discriminator, membership being carried by
+     * the subtype columns themselves. Those grafted columns are always
+     * nullable: rows of other subtypes (and, under a partial
+     * specialization, of no subtype) have no value for them.
+     */
     singleTableHierarchy(spec) {
         const root = this.rootOf(spec);
         const rootTable = this.tableNameOf(root);
+        const disjoint = spec.upperBound === "1";
         const graft = (createExprNode(Table, { "$refByName": rootTable },
-            createExprNode(Column, { name: "type", type: "VARCHAR(255)", isNullable: false, isAutoincrement: false }),
-            spec.subtypes.flatMap((st) => st.attributes.map((a) => this.attributeToColumn(a)))));
+            disjoint
+                ? [createExprNode(Column, { name: "type", type: "VARCHAR(255)", isNullable: spec.lowerBound === "0", isAutoincrement: false })]
+                : [],
+            spec.subtypes.flatMap((st) => st.attributes.flatMap((a) => this.singleTableColumns(a)))));
         return this.mirrorGraftIntoHistory(root, graft);
+    }
+    /** One subtype attribute's columns in the shared single table: a
+     * composite parent contributes one nullable column per leaf. */
+    singleTableColumns(a) {
+        const components = (a.components ?? []);
+        if (components.length > 0) {
+            return components.map((leaf) => (createExprNode(Column, { name: this.applyNaming(`${a.name}_${leaf.name}`), type: this.getColumnType(this.domainOf(leaf)), isNullable: true, isAutoincrement: false })));
+        }
+        return [this.singleTableColumn(a)];
+    }
+    /** A subtype attribute's column in the shared single table: like
+     * attributeToColumn, but always nullable and never autoincrement. */
+    singleTableColumn(a) {
+        const dom = this.domainOf(a);
+        const userDefined = dom.baseType !== undefined && dom.baseType !== null;
+        return (createExprNode(Column, { name: this.applyNaming(a.name), type: this.getColumnType(dom), isNullable: true, isAutoincrement: false, ...(userDefined ? { domain: createExprNode(RelDomain, { "$refByName": this.applyNaming(String(dom.name)) }) } : {}) }));
     }
     tablePerClassHierarchy(spec) {
         return spec.subtypes.map((st) => this.tablePerClassSubtypeTable(st));
@@ -281,9 +309,20 @@ let EerToRelational = class EerToRelational extends DecisionAwareM2M {
         const root = this.rootOf(st.supertype);
         const table = this.tableNameOf(st);
         return (createExprNode(Table, { name: table },
-            root.attributes.map((a) => this.copiedColumn(a)),
+            root.attributes.flatMap((a) => this.copiedColumns(a)),
             this.tableColumns(st),
             this.primaryKeyFor(st)));
+    }
+    /** The copies of one root attribute in a TablePerClass subtype
+     * table: a composite parent contributes one copy per leaf
+     * (attribute_component), a leaf its plain copy. */
+    copiedColumns(a) {
+        const components = (a.components ?? []);
+        if (components.length > 0) {
+            const parentOptional = a.isOptional === true;
+            return components.map((leaf) => (createExprNode(Column, { name: this.applyNaming(`${a.name}_${leaf.name}`), type: this.getColumnType(this.domainOf(leaf)), isNullable: parentOptional || leaf.isOptional === true, isAutoincrement: false })));
+        }
+        return [this.copiedColumn(a)];
     }
     /** A copy of a root attribute's column in a TablePerClass subtype
      * table: a new element with the same name (the table scope keeps it
@@ -552,28 +591,30 @@ let EerToRelational = class EerToRelational extends DecisionAwareM2M {
         return wm.domain;
     }
     rootOf(spec) {
-        const mapping = spec.mapping;
-        const root = mapping?.domain;
+        const root = spec.domain;
         if (!root) {
-            throw new Error(`Specialization '${spec.name}' has no mapping naming its root entity.`);
+            throw new Error(`Specialization '${spec.name}' has no root entity; nest it inside the entity it specializes.`);
         }
         if (this.context.store.isTypeOf(root, em.Subtype)) {
             throw new Error(`eer-to-relational v1 maps one-level hierarchies only; '${spec.name}' is rooted in subtype '${root.name}'.`);
         }
         return root;
     }
-    /** The hierarchy an entity is the root of, if any. */
-    hierarchyOfRoot(e) {
+    /** The hierarchies an entity is the root of: a specialization is a
+     * mapping, so it sits in the entity's mappings. Several are several
+     * independent categories of subtyping. */
+    hierarchiesOfRoot(e) {
         const store = this.context.store;
-        const sm = (e.mappings ?? []).find((m) => store.isTypeOf(m, em.SpecializationMapping));
-        return sm?.specialization;
+        return (e.mappings ?? []).filter((m) => store.isTypeOf(m, em.Specialization));
     }
-    /** An abstract root under TablePerClass gets no table of its own. */
+    /** An abstract root gets no table of its own exactly when every
+     * hierarchy it roots is TablePerClass (any other strategy needs the
+     * root's table). */
     skipsOwnTable(e) {
         if (!e.isAbstract)
             return false;
-        const spec = this.hierarchyOfRoot(e);
-        return spec !== undefined && this.strategyOf(spec) === "tpc";
+        const specs = this.hierarchiesOfRoot(e);
+        return specs.length > 0 && specs.every((spec) => this.strategyOf(spec) === "tpc");
     }
     tableNameOf(e) {
         return this.applyNaming(e.name);
@@ -756,6 +797,9 @@ __decorate([
 __decorate([
     VarOption("hierarchyToTables", Option("SingleTable"))
 ], EerToRelational.prototype, "singleTableHierarchy", null);
+__decorate([
+    E2E()
+], EerToRelational.prototype, "singleTableColumn", null);
 __decorate([
     VarOption("hierarchyToTables", Option("TablePerClass"))
 ], EerToRelational.prototype, "tablePerClassHierarchy", null);
