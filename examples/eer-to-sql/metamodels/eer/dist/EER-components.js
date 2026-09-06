@@ -39,21 +39,31 @@ export const Relationship = (props) => {
 export const OrdinaryMapping = (props) => {
     return new ExprNode(e.OrdinaryMapping, props, "roles");
 };
+// Nested in its weak entity (via weakMap; the inverse fills the
+// codomain): the identification dependency is authored where it
+// semantically lives.
 export const WeakMapping = (props) => {
-    return new ExprNode(e.WeakMapping, props, undefined);
+    return new ExprNode(e.WeakMapping, props, "weakMap");
 };
-// Nested in its Specialization (via subtypes, which also maintains the
-// supertype inverse) or authored at top level with an explicit link.
+// A first-class entity, authored at top level like any other; its
+// membership is the supertype reference
+// (supertype={<Specialization $refByName="Person/personRoles" />},
+// scope-qualified because entities are name scopes). The "subtypes"
+// connection also admits a membership graft, a Subtype reference
+// child of a re-opened Specialization.
 export const Subtype = (props) => {
     return new ExprNode(e.Subtype, props, allowedAsTopLevelElement("subtypes"));
 };
-// A specialization is a top-level element of the schema; its parts
-// (mapping, subtypes) nest inside it.
+// A specialization IS a mapping and nests inside its root entity,
+// connecting into `mappings`; the inverse fills its domain (the root)
+// at creation. Several specializations inside one entity are several
+// independent categories of subtyping.
+// allowedAsTopLevelElement keeps the re-opening idiom working
+// (<Specialization $refByName="SubA/S1"> with membership children);
+// a NEW specialization authored at top level renders but fails the
+// declared root-presence constraint.
 export const Specialization = (props) => {
-    return new ExprNode(e.Specialization, props, undefined);
-};
-export const SpecializationMapping = (props) => {
-    return new ExprNode(e.SpecializationMapping, props, "mapping");
+    return new ExprNode(e.Specialization, props, allowedAsTopLevelElement("mappings"));
 };
 export const Aggregation = (props) => {
     return new ExprNode(e.Aggregation, props, undefined);

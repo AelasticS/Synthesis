@@ -171,18 +171,41 @@ try {
   expect('trace records the defaulted discriminator for book_copy',
     tr2.includes('issue="HistoryDiscriminator" option="ValidFromTimestamp" byDefault={true}'))
 
+  // ── run 3: SingleTable, the bounds-aware discriminator ────────────
+  cli(['config', 'init', 'eer-to-relational', '--for', 'demo/library', '--out', 'demo/cfg3'])
+  const cfg3Path = modelPath('demo/cfg3')
+  writeFileSync(cfg3Path, readFileSync(cfg3Path, 'utf-8').replaceAll('JoinedTables', 'SingleTable'))
+  cli(['transformation', 'run', 'eer-to-relational', '--in', 'demo/library',
+    '--config', 'demo/cfg3', '--out', 'demo/out3'])
+  const out3 = read('demo/out3')
+  const graftOf = (table) => {
+    const match = out3.match(new RegExp(`<Table \\$refByName="${table}">[\\s\\S]*?</Table>`))
+    return match ? match[0] : ''
+  }
+  expect('a partial disjoint hierarchy gets a NULLABLE discriminator',
+    /<Column name="type" type="VARCHAR\(255\)" isNullable={true}/.test(graftOf('person')))
+  expect('an overlapping hierarchy gets NO discriminator',
+    !graftOf('author').includes('name="type"')
+    && graftOf('author').includes('<Column name="expertise"'))
+  expect('subtype columns in a single table are always nullable',
+    graftOf('person').includes('<Column name="salary" type="INTEGER" isNullable={true}')
+    && graftOf('author').includes('<Column name="section" type="VARCHAR(255)" isNullable={true}'))
+
   // ── declared constraints: the validation point ────────────────────
   const validateOut = cli(['model', 'validate', 'demo/library'])
   expect('model validate runs the declared constraints', validateOut.includes('[ok] declared constraints hold'))
 
-  // a model that renders fine but violates the doctrine five ways: a
+  // a model that renders fine but violates the doctrine eight ways: a
   // weak-ownership cycle, a MIXED cycle (a weak owned by an aggregation
   // it participates in), a subtype cycle, a one-participant
-  // aggregation, and a one-role relationship
+  // aggregation, a one-role relationship, an orphan subtype, an empty
+  // specialization, and a leaf attribute without a domain. The cycles
+  // use the re-opening idiom, since the nested canonical forms cannot
+  // express a forward reference.
   const badPath = join(home, 'invalid.tsx')
   writeFileSync(badPath, `/** @jsx createExprNode */
 import { createExprNode } from '@aelastics/synthesis/jsx'
-import { EERSchema, Entity, Weak, Attribute, Domain, Relationship, Role, WeakMapping, Aggregation, AggregationMapping, Specialization, SpecializationMapping, Subtype } from 'eer-metamodel'
+import { EERSchema, Entity, Weak, Attribute, Domain, Relationship, Role, WeakMapping, Aggregation, AggregationMapping, Specialization, Subtype } from 'eer-metamodel'
 
 export const $synth = { kind: 'model', metamodel: 'eer-metamodel', author: 'verify', version: '0.1.0', description: 'constraint violations on purpose' }
 
@@ -197,9 +220,11 @@ export default (store) => (
     </Weak>
     <Weak name="WB">
       <Attribute name="no" isKey={true}><Domain $refByName="number" /></Attribute>
+      <WeakMapping name="m2" domain={<Weak $refByName="WA" />} lowerBound="1" upperBound="1" cnMapp="R" dcnMapp="R" cnWeakOwner="R" dcnWeakOwner="R" />
     </Weak>
-    <WeakMapping name="m1" domain={<Weak $refByName="WB" />} codomain={<Weak $refByName="WA" />} lowerBound="1" upperBound="1" cnMapp="R" dcnMapp="R" cnWeakOwner="R" dcnWeakOwner="R" />
-    <WeakMapping name="m2" domain={<Weak $refByName="WA" />} codomain={<Weak $refByName="WB" />} lowerBound="1" upperBound="1" cnMapp="R" dcnMapp="R" cnWeakOwner="R" dcnWeakOwner="R" />
+    <Weak $refByName="WA">
+      <WeakMapping name="m1" domain={<Weak $refByName="WB" />} lowerBound="1" upperBound="1" cnMapp="R" dcnMapp="R" cnWeakOwner="R" dcnWeakOwner="R" />
+    </Weak>
     <Weak name="W2">
       <Attribute name="no" isKey={true}><Domain $refByName="number" /></Attribute>
     </Weak>
@@ -207,16 +232,17 @@ export default (store) => (
       <AggregationMapping name="g2k" domain={<Entity $refByName="K" />} lowerBound="0" upperBound="M" cnMapp="R" dcnMapp="R" cnAggrOwner="R" dcnAggrOwner="R" />
       <AggregationMapping name="g2w" domain={<Weak $refByName="W2" />} lowerBound="0" upperBound="M" cnMapp="R" dcnMapp="R" cnAggrOwner="R" dcnAggrOwner="R" />
     </Aggregation>
-    <WeakMapping name="m3" domain={<Aggregation $refByName="G2" />} codomain={<Weak $refByName="W2" />} lowerBound="1" upperBound="1" cnMapp="R" dcnMapp="R" cnWeakOwner="R" dcnWeakOwner="R" />
-    <Specialization name="S1">
-      <Subtype name="SubB" cnSupertype="R" dcnSupertype="R" cnSubtype="R" dcnSubtype="R" />
-    </Specialization>
-    <Specialization name="S2">
-      <SpecializationMapping name="s2m" domain={<Subtype $refByName="SubB" />} lowerBound="0" upperBound="1" cnMapp="R" dcnMapp="R" />
-      <Subtype name="SubA" cnSupertype="R" dcnSupertype="R" cnSubtype="R" dcnSubtype="R" />
-    </Specialization>
-    <Specialization $refByName="S1">
-      <SpecializationMapping name="s1m" domain={<Subtype $refByName="SubA" />} lowerBound="0" upperBound="1" cnMapp="R" dcnMapp="R" />
+    <Weak $refByName="W2">
+      <WeakMapping name="m3" domain={<Aggregation $refByName="G2" />} lowerBound="1" upperBound="1" cnMapp="R" dcnMapp="R" cnWeakOwner="R" dcnWeakOwner="R" />
+    </Weak>
+    <Subtype name="SubA" cnSupertype="R" dcnSupertype="R" cnSubtype="R" dcnSubtype="R">
+      <Specialization name="S1" lowerBound="0" upperBound="1" cnMapp="R" dcnMapp="R" />
+    </Subtype>
+    <Subtype name="SubB" supertype={<Specialization $refByName="SubA/S1" />} cnSupertype="R" dcnSupertype="R" cnSubtype="R" dcnSubtype="R">
+      <Specialization name="S2" lowerBound="0" upperBound="1" cnMapp="R" dcnMapp="R" />
+    </Subtype>
+    <Specialization $refByName="SubB/S2">
+      <Subtype $refByName="SubA" />
     </Specialization>
     <Aggregation name="Solo">
       <AggregationMapping name="only" domain={<Entity $refByName="K" />} lowerBound="0" upperBound="M" cnMapp="R" dcnMapp="R" cnAggrOwner="R" dcnAggrOwner="R" />
@@ -224,6 +250,11 @@ export default (store) => (
     <Relationship name="half">
       <Role name="one" lowerBound="0" upperBound="M" domain={<Entity $refByName="K" />} />
     </Relationship>
+    <Subtype name="Orphan" cnSupertype="R" dcnSupertype="R" cnSubtype="R" dcnSubtype="R" />
+    <Entity name="K2">
+      <Specialization name="Empty" lowerBound="0" upperBound="1" cnMapp="R" dcnMapp="R" />
+      <Attribute name="x" isKey={false} />
+    </Entity>
   </EERSchema>
 )
 `)
@@ -246,6 +277,12 @@ export default (store) => (
     constraintFailure.includes('SubA') && constraintFailure.includes('SubB'))
   expect('the aggregation arity is enforced', constraintFailure.includes('at least two participants'))
   expect('the binary-relationship doctrine is enforced', constraintFailure.includes('binary'))
+  expect('an orphan subtype is rejected',
+    constraintFailure.includes('Orphan') && constraintFailure.includes('exactly one specialization'))
+  expect('an empty specialization is rejected',
+    constraintFailure.includes('Empty') && constraintFailure.includes('at least one subtype'))
+  expect('a leaf attribute without a domain is rejected',
+    constraintFailure.includes('leaf attribute takes its type from a domain'))
 
   if (failures > 0) {
     console.error(`eer-to-relational verify: ${failures} assertion(s) failed`)

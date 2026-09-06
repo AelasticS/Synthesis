@@ -14,7 +14,6 @@ export declare const OrdinaryMapping: Template<e.IOrdinaryMapping>;
 export declare const WeakMapping: Template<e.IWeakMapping>;
 export declare const Subtype: Template<e.ISubtype>;
 export declare const Specialization: Template<e.ISpecialization>;
-export declare const SpecializationMapping: Template<e.ISpecializationMapping>;
 export declare const Aggregation: Template<e.IAggregation>;
 export declare const AggregationMapping: Template<e.IAggregationMapping>;
 export declare const Role: Template<e.IOrdinaryMapping>;

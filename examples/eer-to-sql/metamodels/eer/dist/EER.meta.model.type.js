@@ -38,7 +38,6 @@ export const ERConcept = t.subtype(ModelElement, {
         "WeakMapping",
         "AggregationMapping",
         "OrdinaryMapping",
-        "SpecializationMapping",
         "Relationship",
     ]),
 }, "ERConcept", EERModel_TypeSchema);
@@ -102,7 +101,11 @@ export const Aggregation = t.subtype(Entity, {
     agrMapp: t.arrayOf(t.link(EERModel_TypeSchema, "AggregationMapping")),
 }, "Aggregation", EERModel_TypeSchema);
 export const Subtype = t.subtype(Entity, {
-    supertype: t.link(EERModel_TypeSchema, "Specialization"),
+    // Semantically exactly one specialization; type-level optional
+    // because the canonical form is a top-level Subtype whose
+    // supertype is a reference prop (the declared constraint below
+    // enforces presence at the validation point).
+    supertype: t.optional(t.link(EERModel_TypeSchema, "Specialization")),
     cnSupertype: IntegrityRule,
     dcnSupertype: IntegrityRule,
     cnSubtype: IntegrityRule,
@@ -128,11 +131,15 @@ export const AggregationMapping = t.subtype(Mapping, {
 export const OrdinaryMapping = t.subtype(Mapping, {
     relationship: t.link(EERModel_TypeSchema, "Relationship", "relationship"),
 }, "OrdinaryMapping", EERModel_TypeSchema);
-export const SpecializationMapping = t.subtype(Mapping, {
-    specialization: t.optional(t.link(EERModel_TypeSchema, "Specialization")),
-}, "SpecializationMapping", EERModel_TypeSchema);
-export const Specialization = t.subtype(ERConcept, {
-    mapping: t.optional(SpecializationMapping),
+// A specialization IS a mapping: from the root entity's instance set
+// into the union of its subtypes' sets. The inherited facts carry the
+// two classical constraints as cardinalities: lowerBound 0/1 is
+// partial/total (completeness), upperBound 1/M is disjoint/overlapping
+// (an instance may belong to several subtypes at once). It nests
+// inside its root entity, connecting into `mappings`, whose inverse
+// fills `domain` at creation; several specializations inside one
+// entity are several independent categories of subtyping.
+export const Specialization = t.subtype(Mapping, {
     subtypes: t.arrayOf(Subtype),
 }, "Specialization", EERModel_TypeSchema);
 export const Relationship = t.subtype(ERConcept, {
@@ -147,7 +154,6 @@ t.inverseProps(Entity, "mappings", Mapping, "domain");
 t.inverseProps(Weak, "weakMap", WeakMapping, "codomain");
 t.inverseProps(Aggregation, "agrMapp", AggregationMapping, "codomain");
 t.inverseProps(Subtype, "supertype", Specialization, "subtypes");
-t.inverseProps(Specialization, "mapping", SpecializationMapping, "specialization");
 // ── semantic completeness constraints ────────────────────────────────
 // Declared on the types, run only in a validation traversal: while a
 // model renders it is legitimately incomplete (a Weak exists before
@@ -165,6 +171,22 @@ Relationship.addValidator({
     predicate: (v) => (v.roles?.length ?? 0) === 2,
     message: (_v, label) => `${label ?? "Relationship"}: a relationship is binary (exactly two roles); relate more entities with an Aggregation`,
 });
+Subtype.addValidator({
+    predicate: (v) => v.supertype !== undefined && v.supertype !== null,
+    message: (_v, label) => `${label ?? "Subtype"}: a subtype belongs to exactly one specialization`,
+});
+Specialization.addValidator({
+    predicate: (v) => (v.subtypes?.length ?? 0) >= 1,
+    message: (_v, label) => `${label ?? "Specialization"}: a specialization groups at least one subtype`,
+});
+Specialization.addValidator({
+    predicate: (v) => v.domain !== undefined && v.domain !== null,
+    message: (_v, label) => `${label ?? "Specialization"}: a specialization nests inside the entity it specializes`,
+});
+Attribute.addValidator({
+    predicate: (v) => (v.components?.length ?? 0) > 0 || (v.attrDomain !== undefined && v.attrDomain !== null),
+    message: (_v, label) => `${label ?? "Attribute"}: a leaf attribute takes its type from a domain; a composite attribute has components instead`,
+});
 const identityDependencies = (el) => {
     const e = el;
     const deps = [];
@@ -177,7 +199,7 @@ const identityDependencies = (el) => {
             deps.push(participant);
     }
     const spec = e.supertype;
-    const root = spec?.mapping?.domain;
+    const root = spec?.domain;
     if (root !== undefined)
         deps.push(root);
     return deps;

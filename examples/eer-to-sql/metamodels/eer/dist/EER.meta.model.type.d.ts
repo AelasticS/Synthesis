@@ -272,7 +272,7 @@ export declare const Aggregation: t.Subtype<{
     parentModel: t.OptionalType<t.LinkType>;
 }, t.ObjectType<import("@aelastics/types/lib/complex-types/ObjectType.js").InterfaceDecl, readonly string[]>>;
 export declare const Subtype: t.Subtype<{
-    supertype: t.LinkType;
+    supertype: t.OptionalType<t.LinkType>;
     cnSupertype: t.StringType;
     dcnSupertype: t.StringType;
     cnSubtype: t.StringType;
@@ -625,8 +625,53 @@ export declare const OrdinaryMapping: t.Subtype<{
     path: t.OptionalType<t.StringType>;
     parentModel: t.OptionalType<t.LinkType>;
 }, t.ObjectType<import("@aelastics/types/lib/complex-types/ObjectType.js").InterfaceDecl, readonly string[]>>;
-export declare const SpecializationMapping: t.Subtype<{
-    specialization: t.OptionalType<t.LinkType>;
+export declare const Specialization: t.Subtype<{
+    subtypes: t.ArrayType<t.Subtype<{
+        supertype: t.OptionalType<t.LinkType>;
+        cnSupertype: t.StringType;
+        dcnSupertype: t.StringType;
+        cnSubtype: t.StringType;
+        dcnSubtype: t.StringType;
+    }, {
+        attributes: t.ArrayType<t.Subtype<{
+            attrDomain: t.OptionalType<t.Subtype<{
+                baseType: t.OptionalType<t.StringType>;
+                check: t.OptionalType<t.StringType>;
+                defaultValue: t.OptionalType<t.StringType>;
+            }, {
+                conceptType: t.StringType;
+            } & {
+                name: t.StringType;
+                label: t.OptionalType<t.StringType>;
+                description: t.OptionalType<t.StringType>;
+                path: t.OptionalType<t.StringType>;
+                parentModel: t.OptionalType<t.LinkType>;
+            }, t.ObjectType<import("@aelastics/types/lib/complex-types/ObjectType.js").InterfaceDecl, readonly string[]>>>;
+            attrEntity: t.OptionalType<t.LinkType>;
+            isKey: t.BooleanType;
+            defaultValue: t.OptionalType<t.StringType>;
+            isOptional: t.OptionalType<t.BooleanType>;
+            components: t.ArrayType<t.LinkType>;
+        }, {
+            conceptType: t.StringType;
+        } & {
+            name: t.StringType;
+            label: t.OptionalType<t.StringType>;
+            description: t.OptionalType<t.StringType>;
+            path: t.OptionalType<t.StringType>;
+            parentModel: t.OptionalType<t.LinkType>;
+        }, t.ObjectType<import("@aelastics/types/lib/complex-types/ObjectType.js").InterfaceDecl, readonly string[]>>>;
+        mappings: t.ArrayType<t.LinkType>;
+        isAbstract: t.OptionalType<t.BooleanType>;
+    } & {
+        conceptType: t.StringType;
+    } & {
+        name: t.StringType;
+        label: t.OptionalType<t.StringType>;
+        description: t.OptionalType<t.StringType>;
+        path: t.OptionalType<t.StringType>;
+        parentModel: t.OptionalType<t.LinkType>;
+    }, t.ObjectType<import("@aelastics/types/lib/complex-types/ObjectType.js").InterfaceDecl, readonly string[]>>>;
 }, {
     domain: t.Subtype<{
         attributes: t.ArrayType<t.Subtype<{
@@ -673,118 +718,6 @@ export declare const SpecializationMapping: t.Subtype<{
     cnMapp: t.StringType;
     dcnMapp: t.StringType;
 } & {
-    conceptType: t.StringType;
-} & {
-    name: t.StringType;
-    label: t.OptionalType<t.StringType>;
-    description: t.OptionalType<t.StringType>;
-    path: t.OptionalType<t.StringType>;
-    parentModel: t.OptionalType<t.LinkType>;
-}, t.ObjectType<import("@aelastics/types/lib/complex-types/ObjectType.js").InterfaceDecl, readonly string[]>>;
-export declare const Specialization: t.Subtype<{
-    mapping: t.OptionalType<t.Subtype<{
-        specialization: t.OptionalType<t.LinkType>;
-    }, {
-        domain: t.Subtype<{
-            attributes: t.ArrayType<t.Subtype<{
-                attrDomain: t.OptionalType<t.Subtype<{
-                    baseType: t.OptionalType<t.StringType>;
-                    check: t.OptionalType<t.StringType>;
-                    defaultValue: t.OptionalType<t.StringType>;
-                }, {
-                    conceptType: t.StringType;
-                } & {
-                    name: t.StringType;
-                    label: t.OptionalType<t.StringType>;
-                    description: t.OptionalType<t.StringType>;
-                    path: t.OptionalType<t.StringType>;
-                    parentModel: t.OptionalType<t.LinkType>;
-                }, t.ObjectType<import("@aelastics/types/lib/complex-types/ObjectType.js").InterfaceDecl, readonly string[]>>>;
-                attrEntity: t.OptionalType<t.LinkType>;
-                isKey: t.BooleanType;
-                defaultValue: t.OptionalType<t.StringType>;
-                isOptional: t.OptionalType<t.BooleanType>;
-                components: t.ArrayType<t.LinkType>;
-            }, {
-                conceptType: t.StringType;
-            } & {
-                name: t.StringType;
-                label: t.OptionalType<t.StringType>;
-                description: t.OptionalType<t.StringType>;
-                path: t.OptionalType<t.StringType>;
-                parentModel: t.OptionalType<t.LinkType>;
-            }, t.ObjectType<import("@aelastics/types/lib/complex-types/ObjectType.js").InterfaceDecl, readonly string[]>>>;
-            mappings: t.ArrayType<t.LinkType>;
-            isAbstract: t.OptionalType<t.BooleanType>;
-        }, {
-            conceptType: t.StringType;
-        } & {
-            name: t.StringType;
-            label: t.OptionalType<t.StringType>;
-            description: t.OptionalType<t.StringType>;
-            path: t.OptionalType<t.StringType>;
-            parentModel: t.OptionalType<t.LinkType>;
-        }, t.ObjectType<import("@aelastics/types/lib/complex-types/ObjectType.js").InterfaceDecl, readonly string[]>>;
-        lowerBound: t.StringType;
-        upperBound: t.StringType;
-        cnMapp: t.StringType;
-        dcnMapp: t.StringType;
-    } & {
-        conceptType: t.StringType;
-    } & {
-        name: t.StringType;
-        label: t.OptionalType<t.StringType>;
-        description: t.OptionalType<t.StringType>;
-        path: t.OptionalType<t.StringType>;
-        parentModel: t.OptionalType<t.LinkType>;
-    }, t.ObjectType<import("@aelastics/types/lib/complex-types/ObjectType.js").InterfaceDecl, readonly string[]>>>;
-    subtypes: t.ArrayType<t.Subtype<{
-        supertype: t.LinkType;
-        cnSupertype: t.StringType;
-        dcnSupertype: t.StringType;
-        cnSubtype: t.StringType;
-        dcnSubtype: t.StringType;
-    }, {
-        attributes: t.ArrayType<t.Subtype<{
-            attrDomain: t.OptionalType<t.Subtype<{
-                baseType: t.OptionalType<t.StringType>;
-                check: t.OptionalType<t.StringType>;
-                defaultValue: t.OptionalType<t.StringType>;
-            }, {
-                conceptType: t.StringType;
-            } & {
-                name: t.StringType;
-                label: t.OptionalType<t.StringType>;
-                description: t.OptionalType<t.StringType>;
-                path: t.OptionalType<t.StringType>;
-                parentModel: t.OptionalType<t.LinkType>;
-            }, t.ObjectType<import("@aelastics/types/lib/complex-types/ObjectType.js").InterfaceDecl, readonly string[]>>>;
-            attrEntity: t.OptionalType<t.LinkType>;
-            isKey: t.BooleanType;
-            defaultValue: t.OptionalType<t.StringType>;
-            isOptional: t.OptionalType<t.BooleanType>;
-            components: t.ArrayType<t.LinkType>;
-        }, {
-            conceptType: t.StringType;
-        } & {
-            name: t.StringType;
-            label: t.OptionalType<t.StringType>;
-            description: t.OptionalType<t.StringType>;
-            path: t.OptionalType<t.StringType>;
-            parentModel: t.OptionalType<t.LinkType>;
-        }, t.ObjectType<import("@aelastics/types/lib/complex-types/ObjectType.js").InterfaceDecl, readonly string[]>>>;
-        mappings: t.ArrayType<t.LinkType>;
-        isAbstract: t.OptionalType<t.BooleanType>;
-    } & {
-        conceptType: t.StringType;
-    } & {
-        name: t.StringType;
-        label: t.OptionalType<t.StringType>;
-        description: t.OptionalType<t.StringType>;
-        path: t.OptionalType<t.StringType>;
-        parentModel: t.OptionalType<t.LinkType>;
-    }, t.ObjectType<import("@aelastics/types/lib/complex-types/ObjectType.js").InterfaceDecl, readonly string[]>>>;
-}, {
     conceptType: t.StringType;
 } & {
     name: t.StringType;
@@ -874,7 +807,6 @@ export type IMapping = t.TypeOf<typeof Mapping>;
 export type IWeakMapping = t.TypeOf<typeof WeakMapping>;
 export type IAggregationMapping = t.TypeOf<typeof AggregationMapping>;
 export type IOrdinaryMapping = t.TypeOf<typeof OrdinaryMapping>;
-export type ISpecializationMapping = t.TypeOf<typeof SpecializationMapping>;
 export type IRelationship = t.TypeOf<typeof Relationship>;
 export declare const getCodomain: (mapping: IOrdinaryMapping) => IEntity;
 export declare const getInverse: (mapping: IOrdinaryMapping) => IOrdinaryMapping;

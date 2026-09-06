@@ -61,9 +61,10 @@ package is and how to run it. Nine issues are on offer:
   metamodel-as-model, the decision model, and the binding model into the
   store before every run.
 - [sample/library.tsx](./sample/library.tsx): the Library, covering the
-  whole design space: kernels, an abstract `Person` hierarchy, a weak
-  chain down to `Reservation` (composite keys), an M:N and a
-  strategy-routed 1:N relationship.
+  whole design space: kernels, an abstract `Person` hierarchy (partial,
+  disjoint), an overlapping `Author` hierarchy, a weak chain down to
+  `Reservation` (composite keys), an M:N and a strategy-routed 1:N
+  relationship.
 - [sample/rich-library.tsx](./sample/rich-library.tsx): the authoring
   pass over every EER concept, imported by the smoke on every run.
 - [scripts/verify.mjs](./scripts/verify.mjs): asserts exact tables,

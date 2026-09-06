@@ -12,6 +12,23 @@ overall version history.
 
 ### Added
 
+- **The EER metamodel says what the language means.** A weak mapping
+  nests inside its weak entity. A Specialization IS a mapping (a
+  Mapping subtype), nested inside its root entity, its inherited
+  cardinalities carrying the two classical subtyping constraints:
+  lowerBound is completeness (partial/total), upperBound is
+  disjointness (disjoint/overlapping); several specializations inside
+  one entity are independent categories of subtyping, and
+  SpecializationMapping is gone. Subtypes are first-class top-level
+  entities declaring membership with a scope-qualified supertype
+  reference. The constraint audit adds declared rules for every
+  semantically mandatory link JSX cannot force (subtype membership,
+  specialization root and arity, leaf-attribute domains). The
+  SingleTable strategy honors the bounds: disjoint hierarchies get
+  the `type` discriminator (NOT NULL exactly when total), overlapping
+  ones get none, and grafted subtype columns are always nullable;
+  TablePerClass root copies handle composite attributes.
+
 - **Row history as a composite design option.** The eer-to-sql suite gains the
   per-entity RowHistory issue: the HistoryTable option wraps the
   entity's table step with the higher-order `withHistoryTable`

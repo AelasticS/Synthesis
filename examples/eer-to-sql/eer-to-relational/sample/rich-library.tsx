@@ -14,7 +14,7 @@ import type { ExprNode } from '@aelastics/synthesis/jsx'
 import type { ModelStore } from '@aelastics/synthesis/store'
 import {
   EERSchema, Entity, Weak, Attribute, Domain, Relationship, Role,
-  Specialization, SpecializationMapping, Subtype, WeakMapping,
+  Specialization, Subtype, WeakMapping,
   Aggregation, AggregationMapping,
 } from 'eer-metamodel'
 import type * as t from 'eer-metamodel/model'
@@ -52,6 +52,9 @@ export default (store: ModelStore): ExprNode<t.IEERSchema> => (
           <Domain $refByName="string" />
         </Attribute>
       </Attribute>
+      {/* the specialization is a mapping and nests in its root; its
+          bounds say: partial (0) and disjoint (1) */}
+      <Specialization name="personRoles" lowerBound="0" upperBound="1" cnMapp="R" dcnMapp="R" />
     </Entity>
     <Entity name="Book">
       <Attribute name="id" isKey={true}>
@@ -67,34 +70,32 @@ export default (store: ModelStore): ExprNode<t.IEERSchema> => (
       </Attribute>
     </Entity>
 
-    {/* specialization: Person into Member and Staff */}
-    <Specialization name="personRoles">
-      <SpecializationMapping name="personRolesMapping"
-        domain={<Entity $refByName="Person" />}
-        lowerBound="0" upperBound="1" cnMapp="R" dcnMapp="R" />
-      <Subtype name="Member" cnSupertype="R" dcnSupertype="R" cnSubtype="R" dcnSubtype="R">
-        <Attribute name="since" isKey={false}>
-          <Domain $refByName="string" />
-        </Attribute>
-      </Subtype>
-      <Subtype name="Staff" cnSupertype="R" dcnSupertype="R" cnSubtype="R" dcnSubtype="R">
-        <Attribute name="salary" isKey={false}>
-          <Domain $refByName="Money" />
-        </Attribute>
-      </Subtype>
-    </Specialization>
+    {/* subtypes are first-class top-level entities declaring their
+        membership with a supertype reference */}
+    <Subtype name="Member" supertype={<Specialization $refByName="Person/personRoles" />}
+      cnSupertype="R" dcnSupertype="R" cnSubtype="R" dcnSubtype="R">
+      <Attribute name="since" isKey={false}>
+        <Domain $refByName="string" />
+      </Attribute>
+    </Subtype>
+    <Subtype name="Staff" supertype={<Specialization $refByName="Person/personRoles" />}
+      cnSupertype="R" dcnSupertype="R" cnSubtype="R" dcnSubtype="R">
+      <Attribute name="salary" isKey={false}>
+        <Domain $refByName="Money" />
+      </Attribute>
+    </Subtype>
 
-    {/* weak entity: BookCopy identified through Book */}
+    {/* weak entity: BookCopy identified through Book; the weak
+        mapping nests inside its weak entity */}
     <Weak name="BookCopy">
       <Attribute name="no" isKey={true}>
         <Domain $refByName="number" />
       </Attribute>
+      <WeakMapping name="copyOf"
+        domain={<Entity $refByName="Book" />}
+        lowerBound="1" upperBound="1" cnMapp="R" dcnMapp="R"
+        cnWeakOwner="R" dcnWeakOwner="R" />
     </Weak>
-    <WeakMapping name="copyOf"
-      domain={<Entity $refByName="Book" />}
-      codomain={<Weak $refByName="BookCopy" />}
-      lowerBound="1" upperBound="1" cnMapp="R" dcnMapp="R"
-      cnWeakOwner="R" dcnWeakOwner="R" />
 
     {/* aggregation: at least two participants, by the arity rule */}
     <Aggregation name="BookSeries">

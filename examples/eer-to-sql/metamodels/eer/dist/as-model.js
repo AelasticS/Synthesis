@@ -43,9 +43,7 @@ export const EERModel = (store) => (createExprNode(TypeModel, { name: "ERMetamod
                     createExprNode(Property, { name: "cnAggrOwner", domain: createExprNode(TypeString, { "$refByName": "string" }) }),
                     createExprNode(Property, { name: "dcnAggrOwner", domain: createExprNode(TypeString, { "$refByName": "string" }) })) }) })),
     createExprNode(TypeSubtype, { name: "Subtype", superType: createExprNode(TypeSubtype, { "$refByName": "Entity" }) },
-        createExprNode(Property, { name: "supertype", domain: createExprNode(TypeSubtype, { name: "Specialization", superType: createExprNode(TypeObject, { "$refByName": "ERConcept" }) },
-                createExprNode(Property, { name: "mapping", domain: createExprNode(TypeOptional, { name: "OptionalSpecializationMapping", optionalType: createExprNode(TypeSubtype, { name: "SpecializationMapping", superType: createExprNode(TypeObject, { "$refByName": "Mapping" }) },
-                            createExprNode(Property, { name: "specialization", domain: createExprNode(TypeOptional, { name: "OptionalSpecialization", optionalType: createExprNode(TypeSubtype, { "$refByName": "Specialization" }) }) })) }) }),
+        createExprNode(Property, { name: "supertype", domain: createExprNode(TypeSubtype, { name: "Specialization", superType: createExprNode(TypeObject, { "$refByName": "Mapping" }) },
                 createExprNode(Property, { name: "subtypes", domain: createExprNode(TypeArray, { name: "ArrayOfSubtypes", elementType: createExprNode(TypeSubtype, { "$refByName": "Subtype" }) }) })) }),
         createExprNode(Property, { name: "cnSupertype", domain: createExprNode(TypeString, { "$refByName": "string" }) }),
         createExprNode(Property, { name: "dcnSupertype", domain: createExprNode(TypeString, { "$refByName": "string" }) }),
@@ -59,6 +57,5 @@ export const EERModel = (store) => (createExprNode(TypeModel, { name: "ERMetamod
     createExprNode(InverseProperty, { firstType: createExprNode(TypeSubtype, { "$refByName": "Entity" }), firstProperty: "mappings", secondType: createExprNode(TypeSubtype, { "$refByName": "Mapping" }), secondProperty: "domain" }),
     createExprNode(InverseProperty, { firstType: createExprNode(TypeSubtype, { "$refByName": "Weak" }), firstProperty: "weakMap", secondType: createExprNode(TypeSubtype, { "$refByName": "WeakMapping" }), secondProperty: "weakCodomain" }),
     createExprNode(InverseProperty, { firstType: createExprNode(TypeSubtype, { "$refByName": "Aggregation" }), firstProperty: "agrMapp", secondType: createExprNode(TypeSubtype, { "$refByName": "AggregationMapping" }), secondProperty: "aggrCodomain" }),
-    createExprNode(InverseProperty, { firstType: createExprNode(TypeSubtype, { "$refByName": "Subtype" }), firstProperty: "supertype", secondType: createExprNode(TypeSubtype, { "$refByName": "Specialization" }), secondProperty: "subtypes" }),
-    createExprNode(InverseProperty, { firstType: createExprNode(TypeSubtype, { "$refByName": "Specialization" }), firstProperty: "mapping", secondType: createExprNode(TypeSubtype, { "$refByName": "SpecializationMapping" }), secondProperty: "specialization" })));
+    createExprNode(InverseProperty, { firstType: createExprNode(TypeSubtype, { "$refByName": "Subtype" }), firstProperty: "supertype", secondType: createExprNode(TypeSubtype, { "$refByName": "Specialization" }), secondProperty: "subtypes" })));
 //# sourceMappingURL=as-model.js.map
