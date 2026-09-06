@@ -440,3 +440,37 @@ oracle) BUILT BY EXTENSION, which added the extension section and
 two new deferred items (configuration layering; model extension in
 the platform envelope). The record is decision-complete; awaiting
 the user's word to open the worktree and start stage 1.
+
+Stage 1 (EER metamodel v2) COMPLETE 2026-09-06, commit a9a70f4, full
+ladder green on the branch: the scoped attribute-rich metamodel
+(Entity a namespace, attribute lb/ub cardinality, one-level
+components, user-definable Domain with baseType/check/defaultValue,
+IntegrityRule renamed with the deprecated alias, dead code removed),
+Attribute and Domain components on ordered candidates, samples
+renamed to natural names with model-level domain vocabulary,
+rich-library extended (Money domain, multivalued phones, composite
+address), the audit template switched to the confirmed simplified
+form (folded into this stage: it shares its verify expectations with
+the renames), both suite verifications updated. Deviations, both
+recorded here: the Loan aggregation joins library.tsx in stage 3
+(that sample is transformed on every smoke and the aggregation rule
+does not exist yet), and the draft's claim that SingleTable emits no
+discriminator was wrong, v1 already emits `<root>_type`, so stage 3
+merely renames it to the scoped `type` per decision 8. One engine fix
+surfaced by scoped sources: the default-configuration generator named
+element choices by bare element name and collided on the three `id`
+attributes; it now derives scope-qualified names from element paths
+(an element's `path` is its container's path, so the element name is
+appended; flat models keep their old names; one CLI fixture model and
+one test marker updated).
+
+Stage 2 (relational metamodel v2) COMPLETE 2026-09-06, commit
+481ddef, full ladder green: the ReferentialAction vocabulary,
+ForeignKey onDelete/onUpdate, Domain wired (check added, optional
+Column.domain link, Column.type kept as the resolved string), the
+as-model mirror extended under its flat property-name-pool convention
+(domainType, domainCheck, domainDefault, columnDomain, fkOnDelete,
+fkOnUpdate), and rich-db exercising a checked money domain, a
+domain-linked column, and actions on the composite foreign key.
+PAUSED at the user's request for the metamodel review before stage 3
+begins.
