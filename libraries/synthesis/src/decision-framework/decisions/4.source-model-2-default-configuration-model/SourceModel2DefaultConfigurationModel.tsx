@@ -33,6 +33,7 @@ export class SourceModelToDefaultConfigurationModel extends abstractM2M<IModel, 
         {this.extra?.bindingModel.decisionModel.issues.filter((issue: dmT.IIssue) => {
           return this.context.store.isTypeOf(issue, dmT.ModelIssue)
         })
+          .flatMap((issue) => this.issueWithChosenSubIssues(issue))
           .map((issue) => {
             return this.createGlobalChoice(issue)
           })}
@@ -50,9 +51,11 @@ export class SourceModelToDefaultConfigurationModel extends abstractM2M<IModel, 
     const decisionBindingElements = this.getBindingElementBySourceModelElement(sourceModelElement)
     // this shuld be one binding element for each source model element, but eventually it can be more than one, so we need to handle thats
     const choices = decisionBindingElements.flatMap((e) => {
-      return e.issues.map((issue) => {
-        return this.createChosenOptionForIssue(issue) as unknown as cmT.IChoice
-      })
+      return e.issues
+        .flatMap((issue) => this.issueWithChosenSubIssues(issue))
+        .map((issue) => {
+          return this.createChosenOptionForIssue(issue) as unknown as cmT.IChoice
+        })
     })
 
     if (choices.length === 0) {
@@ -93,15 +96,30 @@ export class SourceModelToDefaultConfigurationModel extends abstractM2M<IModel, 
     return [...segments.slice(idx + 1), name].join("_")
   }
 
+  /** The option a default configuration chooses for an issue: the one
+   * marked isDefault, or the first declared one. */
+  private chosenOptionOf(issue: dmT.IIssue): dmT.IOption | undefined {
+    return (
+      issue.possibleOptions.find((o: dmT.IOption) => o.isDefault === true)
+      ?? issue.possibleOptions[0]
+    )
+  }
+
+  /** The issue followed, transitively, by the sub-issues its chosen
+   * option opens: a CompositeOption's sub-issues are part of the path
+   * the defaults actually take, so the generated configuration answers
+   * them in the same decision context. Sub-issues behind unchosen
+   * options stay quiet; if a later edit takes that path, the run-time
+   * default fallback covers them. */
+  private issueWithChosenSubIssues(issue: dmT.IIssue): dmT.IIssue[] {
+    const chosen = this.chosenOptionOf(issue)
+    const subIssues = ((chosen?.optionType as dmT.ICompositeOption | undefined)?.subIssues ?? []) as dmT.IIssue[]
+    return [issue, ...subIssues.flatMap((sub) => this.issueWithChosenSubIssues(sub))]
+  }
+
   private createChosenOptionForIssue(issue: dmT.IIssue): ExprNode<cmT.IChoice> {
 
-    let defaultOption: dmT.IOption | undefined = issue.possibleOptions.find((o: dmT.IOption) => {
-      return o.isDefault === true
-    })
-
-    if (!defaultOption) {
-      defaultOption = issue.possibleOptions[0]
-    }
+    const defaultOption: dmT.IOption | undefined = this.chosenOptionOf(issue)
 
     // Ensure defaultOption is defined and of correct type
     if (!defaultOption) {

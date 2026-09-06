@@ -115,6 +115,39 @@ describe('indexDecisionModel', () => {
     // Document-order attribution: the first declaring issue owns the name
     expect(index.optionIssues.get('Shared')?.name).toBe('IssueA')
   })
+
+  it('uses the materialized containment when present and indexes composite sub-issues', () => {
+    // The rendered graph puts a composite option's subtree BEFORE the
+    // option itself (props render first), so document order would
+    // attribute HistoryTable to its own sub-issue; containment must win.
+    const rowHistory = el('ElementIssue', 'RowHistory')
+    const noHistory = el('Option', 'NoHistory', { isDefault: true })
+    const discriminator = el('ElementIssue', 'HistoryDiscriminator')
+    const validFrom = el('Option', 'ValidFromTimestamp', { isDefault: true })
+    const counter = el('Option', 'VersionCounter', { isDefault: false })
+    discriminator.possibleOptions = [validFrom, counter]
+    const historyTable = el('Option', 'HistoryTable', {
+      isDefault: false,
+      optionType: { subIssues: [discriminator] }
+    })
+    rowHistory.possibleOptions = [noHistory, historyTable]
+    const model = {
+      name: 'DM',
+      issues: [rowHistory],
+      elements: [rowHistory, noHistory, discriminator, validFrom, counter, historyTable]
+    }
+    const index = indexDecisionModel(fakeStore, model)
+    expect([...index.issues.keys()]).toEqual(['RowHistory', 'HistoryDiscriminator'])
+    expect(index.optionIssues.get('HistoryTable')?.name).toBe('RowHistory')
+    expect(index.optionIssues.get('NoHistory')?.name).toBe('RowHistory')
+    expect(index.optionIssues.get('ValidFromTimestamp')?.name).toBe('HistoryDiscriminator')
+    expect(index.issues.get('HistoryDiscriminator')?.typeName).toBe('ElementIssue')
+    expect(index.issues.get('HistoryDiscriminator')?.options.map((o) => o.name)).toEqual([
+      'ValidFromTimestamp',
+      'VersionCounter'
+    ])
+    expect(index.warnings).toEqual([])
+  })
 })
 
 describe('validateConfigStructure coverage', () => {

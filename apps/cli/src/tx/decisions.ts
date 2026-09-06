@@ -45,19 +45,73 @@ export interface DecisionModelIndex {
 
 /**
  * Index a rendered decision model: issues, their options, and defaults.
- * The rendered graph does not materialize the Option->Issue containment
- * (issue.options stays empty and option.ParentIssue is unset), but the
- * model's elements[] preserves document order: every Option follows the
- * Issue that declared it. Ownership is therefore keyed by (issue, option)
- * with document order as the attribution mechanism; an option name used
- * by two issues is ambiguous and reported as a warning. Interim until the
- * engine materializes the containment link; then this reconstruction (and
- * the ambiguity) disappears.
+ * The containment the rendered graph materializes (decisionModel.issues,
+ * issue.possibleOptions, and a CompositeOption's subIssues) is the
+ * attribution mechanism, and it is what makes composite options sound
+ * here: a composite option's whole subtree renders BEFORE the option
+ * itself (props render first), so document order would attribute the
+ * option to its own sub-issue. Sub-issues are indexed like top-level
+ * issues; an option name used by two issues is ambiguous and reported
+ * as a warning. For a model whose containment did not materialize, the
+ * old document-order walk over elements[] (every Option follows the
+ * Issue that declared it) remains as the fallback.
  */
 export function indexDecisionModel(store: ModelStore, decisionModel: unknown): DecisionModelIndex {
   const issues = new Map<string, IssueInfo>()
   const optionIssues = new Map<string, IssueInfo>()
   const warnings: string[] = []
+
+  const typeNameOf = (element: unknown): string => {
+    try {
+      return store.getTypeOf(element as StoreElement).name
+    } catch {
+      return ''
+    }
+  }
+
+  const claimOption = (issue: IssueInfo, name: string, element: unknown): void => {
+    issue.options.push({ name, element, isDefault: (element as { isDefault?: unknown }).isDefault === true })
+    const previousOwner = optionIssues.get(name)
+    if (previousOwner === undefined) {
+      optionIssues.set(name, issue)
+    } else if (previousOwner !== issue) {
+      warnings.push(
+        `decision model option name '${name}' is declared by both issue '${previousOwner.name}' and issue '${issue.name}'; choices selecting it are attributed to '${previousOwner.name}'`
+      )
+    }
+  }
+
+  const registerIssue = (element: unknown): void => {
+    const name = (element as { name?: unknown }).name
+    if (typeof name !== 'string' || name === '') {
+      return
+    }
+    const info: IssueInfo = { name, element, typeName: typeNameOf(element), options: [] }
+    issues.set(name, info)
+    const options = ((element as { possibleOptions?: unknown[] }).possibleOptions ?? [])
+    for (const option of options) {
+      const optionName = (option as { name?: unknown }).name
+      if (typeof optionName !== 'string' || optionName === '') {
+        continue
+      }
+      claimOption(info, optionName, option)
+      // A composite option opens sub-issues; index them like any issue.
+      const subIssues = ((option as { optionType?: { subIssues?: unknown[] } }).optionType?.subIssues ?? [])
+      for (const sub of subIssues) {
+        registerIssue(sub)
+      }
+    }
+  }
+
+  const topIssues = ((decisionModel as { issues?: unknown[] } | undefined)?.issues ?? [])
+  if (topIssues.length > 0) {
+    for (const issue of topIssues) {
+      registerIssue(issue)
+    }
+    return { issues, optionIssues, warnings }
+  }
+
+  // Fallback: document-order reconstruction over elements[].
   const elements = (decisionModel as { elements?: unknown[] } | undefined)?.elements ?? []
   let currentIssue: IssueInfo | undefined
   for (const element of elements) {
@@ -65,26 +119,15 @@ export function indexDecisionModel(store: ModelStore, decisionModel: unknown): D
     if (typeof name !== 'string' || name === '') {
       continue
     }
-    let typeName: string
-    try {
-      typeName = store.getTypeOf(element as StoreElement).name
-    } catch {
+    const typeName = typeNameOf(element)
+    if (typeName === '') {
       continue
     }
     if (typeName.endsWith('Issue')) {
       currentIssue = { name, element, typeName, options: [] }
       issues.set(name, currentIssue)
     } else if (typeName === 'Option' && currentIssue !== undefined) {
-      const isDefault = (element as { isDefault?: unknown }).isDefault === true
-      currentIssue.options.push({ name, element, isDefault })
-      const previousOwner = optionIssues.get(name)
-      if (previousOwner === undefined) {
-        optionIssues.set(name, currentIssue)
-      } else if (previousOwner !== currentIssue) {
-        warnings.push(
-          `decision model option name '${name}' is declared by both issue '${previousOwner.name}' and issue '${currentIssue.name}'; choices selecting it are attributed to '${previousOwner.name}' (document order)`
-        )
-      }
+      claimOption(currentIssue, name, element)
     }
   }
   return { issues, optionIssues, warnings }
