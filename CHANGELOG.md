@@ -12,6 +12,14 @@ overall version history.
 
 ### Added
 
+- **The workflow suite has its docs page.** "The workflow suite: block
+  structure to BPMN to diagrams" joins the developer guide's Examples
+  section, written to the suite-page standard: goals and result up
+  front, both metamodels described for a reader who does not know the
+  domain, the flattening rules (the fragment contract) and the Mermaid
+  rendering, and why this suite declares no design space. The examples
+  catalogs point at it.
+
 - **The EER metamodel says what the language means.** A weak mapping
   nests inside its weak entity. A Specialization IS a mapping (a
   Mapping subtype), nested inside its root entity, its inherited

@@ -131,6 +131,24 @@ limitation rather than an accident. Option 2 is the destination, and its
 prerequisite is a way to validate a configuration against a step rather
 than against a stored model.
 
+### Development (2026-09-06): source-agnostic configurations exist now
+
+The flagship's dialect-preset work weakened the constraint this whole
+section is built on. A configuration whose header declares NO source
+reference is now accepted by `transformation run --config` for any
+input (the preset form; a declared mismatching source still fails).
+That opens a middle course between options 1 and 2 for chains: a step
+produced mid-run cannot bind a source-specific configuration, but it
+CAN take a source-agnostic one. A first chain version could therefore
+allow, per step, either generated defaults or an explicit
+source-agnostic configuration, which covers exactly the curated
+"best practice" chains option 3 wanted, without freezing anything
+into the package and without touching the identity rule. Option 2
+remains the destination for per-step source-bound configurations;
+this raises the floor a first version stands on. Not yet discussed
+with the user as a decision; recorded so the next chains discussion
+starts from the current facts.
+
 ## Open questions
 
 - Do steps reference published packages, or names of already-installed
