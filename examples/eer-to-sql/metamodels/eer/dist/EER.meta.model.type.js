@@ -156,15 +156,15 @@ t.inverseProps(Specialization, "mapping", SpecializationMapping, "specialization
 // its mapping, arrays grow one element at a time), so these are
 // judgments about the finished model, never authoring-time checks.
 Weak.addValidator({
-    predicate: (v) => v?.weakMap !== undefined,
+    predicate: (v) => v.weakMap !== undefined,
     message: (_v, label) => `${label ?? "Weak"}: a weak entity needs exactly one weak mapping naming its owner`,
 });
 Aggregation.addValidator({
-    predicate: (v) => (v?.agrMapp?.length ?? 0) >= 2,
+    predicate: (v) => (v.agrMapp?.length ?? 0) >= 2,
     message: (_v, label) => `${label ?? "Aggregation"}: an aggregation relates at least two participants`,
 });
 Relationship.addValidator({
-    predicate: (v) => (v?.roles?.length ?? 0) === 2,
+    predicate: (v) => (v.roles?.length ?? 0) === 2,
     message: (_v, label) => `${label ?? "Relationship"}: a relationship is binary (exactly two roles); relate more entities with an Aggregation`,
 });
 const identityDependencies = (el) => {

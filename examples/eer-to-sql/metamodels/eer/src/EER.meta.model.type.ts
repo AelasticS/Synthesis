@@ -270,18 +270,18 @@ t.inverseProps(
 // its mapping, arrays grow one element at a time), so these are
 // judgments about the finished model, never authoring-time checks.
 Weak.addValidator({
-  predicate: (v: unknown) => (v as IWeak | undefined)?.weakMap !== undefined,
-  message: (_v: unknown, label?: string) =>
+  predicate: (v: IWeak) => v.weakMap !== undefined,
+  message: (_v: IWeak, label?: string) =>
     `${label ?? "Weak"}: a weak entity needs exactly one weak mapping naming its owner`,
 });
 Aggregation.addValidator({
-  predicate: (v: unknown) => ((v as IAggregation | undefined)?.agrMapp?.length ?? 0) >= 2,
-  message: (_v: unknown, label?: string) =>
+  predicate: (v: IAggregation) => (v.agrMapp?.length ?? 0) >= 2,
+  message: (_v: IAggregation, label?: string) =>
     `${label ?? "Aggregation"}: an aggregation relates at least two participants`,
 });
 Relationship.addValidator({
-  predicate: (v: unknown) => ((v as IRelationship | undefined)?.roles?.length ?? 0) === 2,
-  message: (_v: unknown, label?: string) =>
+  predicate: (v: IRelationship) => (v.roles?.length ?? 0) === 2,
+  message: (_v: IRelationship, label?: string) =>
     `${label ?? "Relationship"}: a relationship is binary (exactly two roles); relate more entities with an Aggregation`,
 });
 
