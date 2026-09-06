@@ -536,6 +536,22 @@ asserts the positive run and three negative rejections through the
 real CLI), docs in defining-metamodels and managing-models. The
 relational metamodel still awaits the user's review comments.
 
+Relational review round, 2026-09-06: the package files renamed to the
+EER package's convention (REL.meta.model.type.ts, REL-components.ts;
+the public specifiers relational-metamodel and /model are unchanged,
+only the exports map moved), and PrimaryKey introduced as a
+first-class named constraint: an ordered column list with the
+Table.primaryKey single containment and ownerTable inverse, an
+at-least-one-column declared constraint, the as-model mirror
+(PrimaryKey, tablePrimaryKey), and rich-db demonstrating a single and
+a composite key. What it buys: named PK constraints in DDL (symmetric
+with the ALTER TABLE foreign keys), explicit column ORDER for
+composite keys (previously implicit in emission order), the
+attachment point decision 12's Clustering emission needs (CLUSTER
+USING and ORGANIZATION INDEX address the key by name), and the
+derived-fact principle applied to key-ness: Column.isKey stays only
+until stage 3/4 emit and read PrimaryKey, then it is dropped.
+
 Review round four delivered the metamodel-as-model namespace marker:
 the types meta-metamodel's Object concept carries an optional
 isNamespace boolean, and both suite as-models declare it truthfully

@@ -85,6 +85,16 @@ export declare const Index: t.Subtype<{
     path: t.OptionalType<t.StringType>;
     parentModel: t.OptionalType<t.LinkType>;
 }, t.ObjectType<import("@aelastics/types/lib/complex-types/ObjectType.js").InterfaceDecl, readonly ["name"]>>;
+export declare const PrimaryKey: t.Subtype<{
+    columns: t.ArrayType<t.LinkType>;
+    ownerTable: t.OptionalType<t.LinkType>;
+}, {
+    name: t.StringType;
+    label: t.OptionalType<t.StringType>;
+    description: t.OptionalType<t.StringType>;
+    path: t.OptionalType<t.StringType>;
+    parentModel: t.OptionalType<t.LinkType>;
+}, t.ObjectType<import("@aelastics/types/lib/complex-types/ObjectType.js").InterfaceDecl, readonly ["name"]>>;
 export declare const Table: t.Subtype<{
     columns: t.ArrayType<t.Subtype<{
         type: t.StringType;
@@ -92,6 +102,16 @@ export declare const Table: t.Subtype<{
         isNullable: t.BooleanType;
         isAutoincrement: t.BooleanType;
         domain: t.OptionalType<t.LinkType>;
+        ownerTable: t.OptionalType<t.LinkType>;
+    }, {
+        name: t.StringType;
+        label: t.OptionalType<t.StringType>;
+        description: t.OptionalType<t.StringType>;
+        path: t.OptionalType<t.StringType>;
+        parentModel: t.OptionalType<t.LinkType>;
+    }, t.ObjectType<import("@aelastics/types/lib/complex-types/ObjectType.js").InterfaceDecl, readonly ["name"]>>>;
+    primaryKey: t.OptionalType<t.Subtype<{
+        columns: t.ArrayType<t.LinkType>;
         ownerTable: t.OptionalType<t.LinkType>;
     }, {
         name: t.StringType;
@@ -148,3 +168,4 @@ export type IColumn = t.TypeOf<typeof Column>;
 export type IForeignKey = t.TypeOf<typeof ForeignKey>;
 export type IForeignKeyColumn = t.TypeOf<typeof ForeignKeyColumn>;
 export type IIndex = t.TypeOf<typeof Index>;
+export type IPrimaryKey = t.TypeOf<typeof PrimaryKey>;

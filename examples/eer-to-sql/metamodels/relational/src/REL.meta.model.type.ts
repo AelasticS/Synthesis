@@ -68,15 +68,39 @@ export const Index = t.subtype(ModelElement, {
   ownerTable: t.optional(t.link(RelModel_TypeSchema, 'Table')),
 }, "Index", RelModel_TypeSchema);
 
+// The primary key as a first-class named constraint: an ORDERED list
+// of the owner table's columns, symmetric with ForeignKey. Key-ness
+// of a column is semantically membership in this list; the legacy
+// Column.isKey mark stays only until the transformation and the DDL
+// generator adopt PrimaryKey (v2 stage 3 and 4), then it is dropped,
+// per the derived-fact principle: a fact is not stored beside where
+// it could disagree.
+export const PrimaryKey = t.subtype(ModelElement, {
+  columns: t.arrayOf(t.link(RelModel_TypeSchema, "Column")),
+  ownerTable: t.optional(t.link(RelModel_TypeSchema, 'Table')),
+}, "PrimaryKey", RelModel_TypeSchema);
+
 export const Table = t.subtype(ModelElement, {
   columns: t.arrayOf(Column),
+  // Semantically every base table has one; type-level optional for the
+  // creation order (the key nests after its columns exist).
+  primaryKey: t.optional(PrimaryKey),
   foreignKeys: t.arrayOf(ForeignKey),
   indexes: t.arrayOf(Index),
 }, "Table", RelModel_TypeSchema);
 
 t.inverseProps(Table, "columns", Column, "ownerTable")
+t.inverseProps(Table, "primaryKey", PrimaryKey, "ownerTable")
 t.inverseProps(Table, "foreignKeys", ForeignKey, "ownerTable")
 t.inverseProps(Table, "indexes", Index, "ownerTable")
+
+// A declared constraint, run at the validation point: a primary key
+// names at least one column.
+PrimaryKey.addValidator({
+  predicate: (v: IPrimaryKey) => (v.columns?.length ?? 0) >= 1,
+  message: (_v: IPrimaryKey, label?: string) =>
+    `${label ?? "PrimaryKey"}: a primary key lists at least one column`,
+});
 
 // A table scopes its columns', keys', and indexes' names.
 declareNamespace(Table)
@@ -88,3 +112,4 @@ export type IColumn = t.TypeOf<typeof Column>
 export type IForeignKey = t.TypeOf<typeof ForeignKey>
 export type IForeignKeyColumn = t.TypeOf<typeof ForeignKeyColumn>
 export type IIndex = t.TypeOf<typeof Index>
+export type IPrimaryKey = t.TypeOf<typeof PrimaryKey>

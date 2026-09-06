@@ -1,6 +1,6 @@
 // JSX template components for the full relational metamodel of the
 // eer-to-sql example suite. The data-type schemas live in model.ts.
-import * as r from "./model.js"
+import * as r from "./REL.meta.model.type.js"
 import {
   CpxTemplate,
   defaultConnectionInfo,
@@ -51,4 +51,8 @@ export const ForeignKeyColumn: Template<r.IForeignKeyColumn> = (props) => {
 
 export const Index: Template<r.IIndex> = (props) => {
   return new ExprNode(r.Index, props, "indexes")
+}
+
+export const PrimaryKey: Template<r.IPrimaryKey> = (props) => {
+  return new ExprNode(r.PrimaryKey, props, "primaryKey")
 }

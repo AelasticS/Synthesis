@@ -19,8 +19,8 @@
       "default": "./dist/index.js"
     },
     "./model": {
-      "types": "./dist/model.d.ts",
-      "default": "./dist/model.js"
+      "types": "./dist/REL.meta.model.type.d.ts",
+      "default": "./dist/REL.meta.model.type.js"
     },
     "./as-model": {
       "types": "./dist/as-model.d.ts",
@@ -29,7 +29,7 @@
   },
   "typesVersions": {
     "*": {
-      "model": ["dist/model.d.ts"],
+      "model": ["dist/REL.meta.model.type.d.ts"],
       "as-model": ["dist/as-model.d.ts"]
     }
   },

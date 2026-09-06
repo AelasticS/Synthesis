@@ -4,5 +4,5 @@
 // "relational-metamodel/model" to avoid identifier clashes (e.g.
 // `RelSchema` is both an @aelastics/types Type and a JSX template), and
 // "relational-metamodel/as-model" exports the metamodel-as-model factory.
-export * from "./components.js";
+export * from "./REL-components.js";
 //# sourceMappingURL=index.js.map
