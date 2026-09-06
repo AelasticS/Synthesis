@@ -26,10 +26,23 @@ export const RELModel = (store: ModelStore): ExprNode<t.ITypeModel> => (
     <TypeString name="string"></TypeString>
     <TypeBoolean name="boolean"></TypeBoolean>
 
+    <TypeObject name="Domain">
+      <Property name="domainType">
+        <PropertyDomain $refByName="string" />
+      </Property>
+      <Property name="domainCheck">
+        <PropertyDomain $refByName="string" />
+      </Property>
+      <Property name="domainDefault">
+        <PropertyDomain $refByName="string" />
+      </Property>
+    </TypeObject>
+
     <TypeObject name="Column">
       <Property name="type">
         <PropertyDomain $refByName="string" />
       </Property>
+      <Property name="columnDomain" domain={<TypeObject $refByName="Domain" />} />
       <Property name="isKey">
         <PropertyDomain $refByName="boolean" />
       </Property>
@@ -52,6 +65,12 @@ export const RELModel = (store: ModelStore): ExprNode<t.ITypeModel> => (
       />
       <Property name="fkIsUnique">
         <PropertyDomain $refByName="boolean" />
+      </Property>
+      <Property name="fkOnDelete">
+        <PropertyDomain $refByName="string" />
+      </Property>
+      <Property name="fkOnUpdate">
+        <PropertyDomain $refByName="string" />
       </Property>
       {/* referencedTable omitted: Table is defined below and this
           simplified mirror keeps definition order acyclic */}

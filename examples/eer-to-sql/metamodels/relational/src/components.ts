@@ -16,9 +16,11 @@ export const RelSchema: CpxTemplate<IModelProps, r.IRelSchema> = (props) => {
   return new ExprNode(r.RelSchema, props, undefined)
 }
 
-// Kept as-is while decision 5 (Domain) is under discussion; unwired.
+// A Domain is declared once at model level (a direct child of the
+// schema connects into `elements`) or referenced from a column's
+// `domain` prop; ordered candidates pick the context.
 export const Domain: Template<r.IDomain> = (props) => {
-  return new ExprNode(r.Domain, props, "domain")
+  return new ExprNode(r.Domain, props, defaultConnectionInfo(["domain", "elements"]))
 }
 
 // One Column tag for every context, connected via ordered candidates

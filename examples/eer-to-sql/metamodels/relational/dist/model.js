@@ -3,20 +3,28 @@
  *
  * Data-type schemas of the full relational metamodel, owned by the
  * eer-to-sql example suite: tables with real foreign keys (composite
- * capable) and indexes. The JSX template components over these schemas
- * live in components.ts. Table is a namespace: column names are unique
- * per table, not per model.
+ * capable, carrying referential actions) and indexes, and wired
+ * domains (v2). The JSX template components over these schemas live in
+ * components.ts. Table is a namespace: column names are unique per
+ * table, not per model.
  */
 import * as t from "@aelastics/types";
 import { ModelElement, Model, declareNamespace } from "@aelastics/synthesis/metamodel";
 // tslint:disable-next-line:variable-name
 export const RelModel_TypeSchema = t.schema("RelModel_TypeSchema");
 export const RelSchema = t.subtype(Model, {}, "RelSchema", RelModel_TypeSchema);
-// Kept as-is while decision 5 of the flagship record (Domain in the
-// relational metamodel) is under discussion; currently unwired, Column
-// carries a plain SQL type string.
+// The referential actions of standard SQL, dialect-neutral: what
+// happens to the referencing rows when the referenced row is deleted
+// (onDelete) or its key modified (onUpdate).
+export const ReferentialAction = t.string.derive().oneOf(["Restrict", "Cascade", "SetNull", "SetDefault"]);
+// A wired domain (v2, decision 5 of design/eer-to-relational-v2.md): a
+// named type with an optional check (a boolean SQL expression over
+// VALUE) and default. Columns may reference one; Column.type always
+// keeps the resolved SQL type string, so a model without domains works
+// exactly as before.
 export const Domain = t.subtype(ModelElement, {
     type: t.string,
+    check: t.optional(t.string),
     defaultValue: t.optional(t.string)
 }, "Domain", RelModel_TypeSchema);
 export const Column = t.subtype(ModelElement, {
@@ -24,6 +32,7 @@ export const Column = t.subtype(ModelElement, {
     isKey: t.boolean,
     isNullable: t.boolean,
     isAutoincrement: t.boolean,
+    domain: t.optional(t.link(RelModel_TypeSchema, 'Domain')),
     ownerTable: t.optional(t.link(RelModel_TypeSchema, 'Table')),
 }, "Column", RelModel_TypeSchema);
 // One pair per participating column; several pairs on one ForeignKey
@@ -37,6 +46,8 @@ export const ForeignKeyColumn = t.subtype(ModelElement, {
 export const ForeignKey = t.subtype(ModelElement, {
     fkColumns: t.arrayOf(ForeignKeyColumn),
     isUnique: t.boolean,
+    onDelete: t.optional(ReferentialAction),
+    onUpdate: t.optional(ReferentialAction),
     referencedTable: t.optional(t.link(RelModel_TypeSchema, 'Table')),
     ownerTable: t.optional(t.link(RelModel_TypeSchema, 'Table')),
 }, "ForeignKey", RelModel_TypeSchema);

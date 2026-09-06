@@ -10,7 +10,7 @@
 import { createExprNode } from '@aelastics/synthesis/jsx'
 import type { ExprNode } from '@aelastics/synthesis/jsx'
 import type { ModelStore } from '@aelastics/synthesis/store'
-import { RelSchema, Table, Column, ForeignKey, ForeignKeyColumn, Index } from 'relational-metamodel'
+import { RelSchema, Table, Column, Domain, ForeignKey, ForeignKeyColumn, Index } from 'relational-metamodel'
 import type * as t from 'relational-metamodel/model'
 
 export const $synth = {
@@ -23,9 +23,15 @@ export const $synth = {
 
 export default (store: ModelStore): ExprNode<t.IRelSchema> => (
   <RelSchema name="RichDb" store={store}>
+    {/* a wired domain: named type with check and default; the column
+        referencing it keeps its resolved SQL type string */}
+    <Domain name="money" type="DECIMAL(10,2)" check="VALUE >= 0" defaultValue="0" />
+
     <Table name="book">
       <Column name="id" type="INTEGER" isKey={true} isNullable={false} isAutoincrement={true} />
       <Column name="title" type="VARCHAR(255)" isKey={false} isNullable={true} isAutoincrement={false} />
+      <Column name="price" type="DECIMAL(10,2)" isKey={false} isNullable={true} isAutoincrement={false}
+        domain={<Domain $refByName="money" />} />
     </Table>
 
     <Table name="copy">
@@ -48,6 +54,7 @@ export default (store: ModelStore): ExprNode<t.IRelSchema> => (
       <Column name="due" type="DATE" isKey={false} isNullable={true} isAutoincrement={false} />
       {/* composite foreign key to copy's two-column primary key */}
       <ForeignKey name="fk_loan_copy" isUnique={false}
+        onDelete="Cascade" onUpdate="Restrict"
         referencedTable={<Table $refByName="copy" />}>
         <ForeignKeyColumn name="p1">
           <Column $refByName="copy_book_id" />
