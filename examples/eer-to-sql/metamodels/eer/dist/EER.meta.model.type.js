@@ -99,8 +99,8 @@ export const Weak = t.subtype(Entity, {
 export const Aggregation = t.subtype(Entity, {
     // At least two participants: relating two or more entities is
     // what an aggregation is for (relationships stay binary). The
-    // arity is enforced by the transformation and validation, not
-    // expressible on the array type.
+    // arity is declared as a validator below and enforced by the
+    // transformation.
     agrMapp: t.arrayOf(t.link(EERModel_TypeSchema, "AggregationMapping")),
 }, "Aggregation", EERModel_TypeSchema);
 export const Subtype = t.subtype(Entity, {
@@ -140,7 +140,8 @@ export const Specialization = t.subtype(ERConcept, {
 export const Relationship = t.subtype(ERConcept, {
     // Exactly two roles, by doctrine: relationships are binary, and
     // relating more entities is modeled as an Aggregation. The arity
-    // is enforced by the transformation and validation.
+    // is declared as a validator below and enforced by the
+    // transformation.
     roles: t.arrayOf(OrdinaryMapping),
 }, "Relationship", EERModel_TypeSchema);
 t.inverseProps(Relationship, "roles", OrdinaryMapping, "relationship");
@@ -149,6 +150,23 @@ t.inverseProps(Weak, "weakMap", WeakMapping, "codomain");
 t.inverseProps(Aggregation, "agrMapp", AggregationMapping, "codomain");
 t.inverseProps(Subtype, "supertype", Specialization, "subtypes");
 t.inverseProps(Specialization, "mapping", SpecializationMapping, "specialization");
+// ── semantic completeness constraints ────────────────────────────────
+// Declared on the types, run only in a validation traversal: while a
+// model renders it is legitimately incomplete (a Weak exists before
+// its mapping, arrays grow one element at a time), so these are
+// judgments about the finished model, never authoring-time checks.
+Weak.addValidator({
+    predicate: (v) => v?.weakMap !== undefined,
+    message: (_v, label) => `${label ?? "Weak"}: a weak entity needs exactly one weak mapping naming its owner`,
+});
+Aggregation.addValidator({
+    predicate: (v) => (v?.agrMapp?.length ?? 0) >= 2,
+    message: (_v, label) => `${label ?? "Aggregation"}: an aggregation relates at least two participants`,
+});
+Relationship.addValidator({
+    predicate: (v) => (v?.roles?.length ?? 0) === 2,
+    message: (_v, label) => `${label ?? "Relationship"}: a relationship is binary (exactly two roles); relate more entities with an Aggregation`,
+});
 export const getCodomain = (mapping) => {
     return getInverse(mapping).domain;
 };

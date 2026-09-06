@@ -150,8 +150,8 @@ export const Aggregation = t.subtype(
   {
     // At least two participants: relating two or more entities is
     // what an aggregation is for (relationships stay binary). The
-    // arity is enforced by the transformation and validation, not
-    // expressible on the array type.
+    // arity is declared as a validator below and enforced by the
+    // transformation.
     agrMapp: t.arrayOf(t.link(EERModel_TypeSchema, "AggregationMapping")),
   },
   "Aggregation",
@@ -239,7 +239,8 @@ export const Relationship = t.subtype(
   {
     // Exactly two roles, by doctrine: relationships are binary, and
     // relating more entities is modeled as an Aggregation. The arity
-    // is enforced by the transformation and validation.
+    // is declared as a validator below and enforced by the
+    // transformation.
     roles: t.arrayOf(OrdinaryMapping),
   },
   "Relationship",
@@ -262,6 +263,27 @@ t.inverseProps(
   SpecializationMapping,
   "specialization"
 );
+
+// ── semantic completeness constraints ────────────────────────────────
+// Declared on the types, run only in a validation traversal: while a
+// model renders it is legitimately incomplete (a Weak exists before
+// its mapping, arrays grow one element at a time), so these are
+// judgments about the finished model, never authoring-time checks.
+Weak.addValidator({
+  predicate: (v: unknown) => (v as IWeak | undefined)?.weakMap !== undefined,
+  message: (_v: unknown, label?: string) =>
+    `${label ?? "Weak"}: a weak entity needs exactly one weak mapping naming its owner`,
+});
+Aggregation.addValidator({
+  predicate: (v: unknown) => ((v as IAggregation | undefined)?.agrMapp?.length ?? 0) >= 2,
+  message: (_v: unknown, label?: string) =>
+    `${label ?? "Aggregation"}: an aggregation relates at least two participants`,
+});
+Relationship.addValidator({
+  predicate: (v: unknown) => ((v as IRelationship | undefined)?.roles?.length ?? 0) === 2,
+  message: (_v: unknown, label?: string) =>
+    `${label ?? "Relationship"}: a relationship is binary (exactly two roles); relate more entities with an Aggregation`,
+});
 
 export type IERConcept = t.TypeOf<typeof ERConcept>;
 export type IDomain = t.TypeOf<typeof Domain>;
