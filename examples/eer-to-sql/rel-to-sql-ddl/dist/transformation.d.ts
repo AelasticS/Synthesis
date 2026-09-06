@@ -14,9 +14,10 @@ import * as cm from "@aelastics/synthesis/metamodels/configuration/model";
  * satisfy them inline), CREATE INDEX statements, domain rendering per
  * the DomainHandling issue, referential rules per ReferentialActions
  * (native clauses or trigger emulation; connect rules are always
- * triggers, no dialect has a declarative form), and physical
- * clustering per the per-table Clustering issue flavored by
- * SqlDialect. Identifiers are emitted per IdentifierQuoting.
+ * triggers, no dialect has a declarative form), row-history capture
+ * stubs for every table carrying historyOf (equally unconditional),
+ * and physical clustering per the per-table Clustering issue flavored
+ * by SqlDialect. Identifiers are emitted per IdentifierQuoting.
  */
 export declare class Rel2DdlTransformation extends DecisionAwareM2M<rmT.IRelSchema, m2tmm.M2T_Model, {}, cm.IConfigurationModel> {
     constructor(store: ModelStore, extra?: {}, configModel?: cm.IConfigurationModel);
@@ -26,9 +27,17 @@ export declare class Rel2DdlTransformation extends DecisionAwareM2M<rmT.IRelSche
     private postgresClusterSection;
     /** The triggers document: connect rules always land here (no dialect
      * expresses them declaratively); under TriggerEmulation the
-     * disconnect rules join them. The bodies are named stubs: the rule,
-     * its event, and its meaning are the generated contract. */
-    triggersDocument(s: rmT.IRelSchema, connectFks: rmT.IForeignKey[], emulatedFks: rmT.IForeignKey[]): ExprNode<m2tmm.IDocument>;
+     * disconnect rules join them, and history capture stubs land here
+     * unconditionally for every table carrying historyOf. The bodies are
+     * named stubs: the rule, its event, and its meaning are the
+     * generated contract. */
+    triggersDocument(s: rmT.IRelSchema, connectFks: rmT.IForeignKey[], emulatedFks: rmT.IForeignKey[], historyTables: rmT.ITable[]): ExprNode<m2tmm.IDocument>;
+    /** The row-history capture stub, unconditional like the connect
+     * rules: no dialect maintains a history table declaratively, so
+     * every update or delete on the base table writes the previous row
+     * state (with its discriminator value) through the named
+     * procedure. */
+    private captureTrigger;
     private connectTrigger;
     private disconnectTrigger;
     tableToCreate(tab: rmT.ITable): ExprNode<m2tmm.ISection>;
