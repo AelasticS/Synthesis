@@ -71,8 +71,8 @@ rel-to-sql-ddl consumes.
 
 | Example | Kind | Shows |
 | --- | --- | --- |
-| [eer-to-relational](./eer-to-sql/eer-to-relational/) | m2m | The flagship: every template kind, seven design issues (per-table auditing via a higher-order template, JPA-style inheritance strategies, foreign key indexing and naming), a rich relational target with composite foreign keys, verified outputs and traces |
-| [rel-to-sql-ddl](./eer-to-sql/rel-to-sql-ddl/) | m2t | DDL from the rich content: composite PRIMARY KEY clauses, named ALTER TABLE constraints, CREATE INDEX, identifier quoting as a configuration issue |
+| [eer-to-relational](./eer-to-sql/eer-to-relational/) | m2m | The flagship: full EER semantics (aggregations with the cardinality key rule, integrity rules, user-defined domains, multivalued and composite attributes), every template kind, seven design issues, a rich relational target with first-class keys, verified outputs and traces |
+| [rel-to-sql-ddl](./eer-to-sql/rel-to-sql-ddl/) | m2t | DDL from the rich content: named keys and constraints with referential actions, domains, trigger stubs, physical clustering, and dialects as extension-authored preset configurations |
 
 ### Workflow suite
 

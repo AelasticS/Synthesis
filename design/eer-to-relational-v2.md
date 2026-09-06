@@ -504,6 +504,20 @@ declares no source reference (the preset form), while a declared
 mismatching source still fails. The chain finder in the verification
 learned to skip the triggers document.
 
+## Stage 5 delivery notes (2026-09-06)
+
+The canonical mapping-rules page landed in the developer guide's
+Examples section ("The flagship: EER to relational mapping rules"):
+every rule family with its rationale, the aggregation key rule, the
+integrity pair table (including the two unmapped pairs), the
+dialect-as-configuration story with the extension-authored presets,
+the physical clustering divergence, the validation story, and the
+twelve-issue design-space table. Both suite READMEs stay concise and
+point at the page; the catalogs' flagship rows updated; the
+variability guide gained the presets pattern (extension by
+composition, source-agnostic configurations); CHANGELOG carries the
+three v2 entries.
+
 ## Deferred, out of v2
 
 withHistoryColumns; constraint representation in the
