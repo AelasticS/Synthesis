@@ -1,6 +1,6 @@
 # eer-to-relational
 
-The flagship configuration-based transformation: a full-semantics EER
+The full-featured configuration-based transformation: a full-semantics EER
 schema (aggregations with the cardinality key rule, weak chains,
 JPA-style hierarchies, user-defined domains with checks,
 composite attributes, connect/disconnect integrity rules) becomes
@@ -9,7 +9,7 @@ composite capable, referential actions, wired domains, indexes; a
 table is a name scope for its columns). Every design question without
 a single right answer is an explicit decision closed per run by a
 configuration model. The mapping rules are explained canonically in
-the docs page "The flagship: EER to relational mapping rules"
+the docs page "A full-featured EER to SQL transformation"
 (developer guide, Examples section); this README stays with what the
 package is and how to run it. Nine issues are on offer:
 

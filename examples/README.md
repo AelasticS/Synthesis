@@ -71,7 +71,7 @@ rel-to-sql-ddl consumes.
 
 | Example | Kind | Shows |
 | --- | --- | --- |
-| [eer-to-relational](./eer-to-sql/eer-to-relational/) | m2m | The flagship: full EER semantics (aggregations with the cardinality key rule, integrity rules, user-defined domains, composite attributes, row history as a composite design option), every template kind, nine design issues, a rich relational target with first-class keys, verified outputs and traces |
+| [eer-to-relational](./eer-to-sql/eer-to-relational/) | m2m | The full-featured EER to relational mapping: full EER semantics (aggregations with the cardinality key rule, integrity rules, user-defined domains, composite attributes, row history as a composite design option), every template kind, nine design issues, a rich relational target with first-class keys, verified outputs and traces |
 | [rel-to-sql-ddl](./eer-to-sql/rel-to-sql-ddl/) | m2t | DDL from the rich content: named keys and constraints with referential actions, domains, trigger stubs, physical clustering, and dialects as extension-authored preset configurations |
 
 ### Workflow suite

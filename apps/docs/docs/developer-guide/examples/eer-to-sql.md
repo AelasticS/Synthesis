@@ -1,16 +1,30 @@
 ---
 sidebar_position: 2
-title: "The flagship: EER to relational mapping rules"
+title: "A full-featured EER to SQL transformation"
 ---
 
-# The flagship: EER to relational mapping rules
+# A full-featured EER to SQL transformation
 
-This page is the canonical explanation of the mapping the flagship
-suite (`examples/eer-to-sql`) implements: what each EER construct
-becomes in the relational model, why, and which decisions a
-configuration closes. The package READMEs stay deliberately short and
-point here; every rule described below is enforced by the suite's
-executable verification on every merge.
+The `examples/eer-to-sql` suite turns a conceptual entity-relationship
+schema into a production-shaped relational database. Its goals are
+completeness and explicitness. Completeness: every semantic fact the
+EER schema states (identification, integrity rules, domains,
+optionality) reaches the relational side as a first-class fact
+instead of being lost in translation. Explicitness: every design
+question with more than one defensible answer (how hierarchies map,
+which tables are audited or versioned, how columns are named, which
+dialect is emitted) stays open as a declared decision, closed per run
+by a configuration model rather than hardcoded in the rules. The
+result of a run is a rich relational model, tables with first-class
+keys, constraints, indexes, and domains, and from it executable SQL:
+a schema script and a triggers script in the dialect a configuration
+chooses, plus a trace recording which decision produced which table.
+
+This page is the canonical explanation of the suite: the two
+metamodels, what each construct becomes and why, and the design
+space. The package READMEs stay deliberately short and point here;
+every rule described below is enforced by the suite's executable
+verification on every merge.
 
 Two doctrine points shape the whole mapping. Relationships are
 strictly binary: relating more than two entities (and sometimes two)
@@ -21,6 +35,94 @@ one place: key-ness is membership in a table's `PrimaryKey` element
 exactly when a `ForeignKey` pair names it, and semantic completeness
 rules are declared constraints on the metamodel, run by
 `synth model validate`.
+
+## The metamodels
+
+The suite owns both metamodels (`eer-metamodel` and
+`relational-metamodel`, under `examples/eer-to-sql/metamodels/`).
+They carry full semantics, richer than the
+[tutorial's](../tutorial/model-to-model/index.md) deliberately simple
+ones, and this section is all you need to read the rest of the page.
+
+### The EER side
+
+An `EERSchema` holds domains, entities, relationships, and
+specializations. Entities come in three identification kinds:
+
+- A **Kernel** is identified by its own key attributes.
+- A **Weak** entity is identified through an owner: a `WeakMapping`
+  names the owner, and the weak entity's full key is the owner's key
+  plus its own partial key. It is existence-dependent: no owner row,
+  no weak row.
+- An **Aggregation** is identified by the entities it relates: at
+  least two `AggregationMapping` elements name the participants. This
+  is also the doctrine's answer to n-ary or attribute-carrying
+  relationships: a `Relationship` is strictly binary (two `Role`
+  elements with `lowerBound`/`upperBound` cardinalities) and carries
+  no attributes, and anything richer is an aggregation.
+
+A `Specialization` declares a one-level hierarchy: its
+`SpecializationMapping` names the root entity (which may be
+`isAbstract`) and its `Subtype` children extend it. An `Attribute`
+carries `isKey` and `isOptional`, may be composite (one level of
+nested component attributes), and takes its type from a `Domain`:
+a primitive name (`number`, `string`, `date`, ...) or a user-defined
+domain with `baseType`, `check`, and `defaultValue`. An entity is a
+name scope, so every entity can have its own plain `id`.
+
+Every mapping guards the association it represents with an integrity
+pair: `cn`, the connect rule (the association is established: a
+referencing row inserted or its foreign key set), and `dcn`, the
+disconnect rule (the association is broken: the row deleted or the
+key changed). The rule letters are R (restrict), C (cascade),
+N (set null), and D (set default).
+
+A taste of the authoring style, from the Library sample
+(`eer-to-relational/sample/library.tsx`):
+
+```tsx
+<Entity name="Book">
+  <Attribute name="id" isKey={true}><Domain $refByName="number" /></Attribute>
+  <Attribute name="title" isKey={false} isOptional={true}><Domain $refByName="string" /></Attribute>
+</Entity>
+<Weak name="BookCopy">
+  <Attribute name="no" isKey={true}><Domain $refByName="number" /></Attribute>
+</Weak>
+<WeakMapping name="copyOf"
+  domain={<Entity $refByName="Book" />}
+  codomain={<Weak $refByName="BookCopy" />}
+  lowerBound="1" upperBound="1" cnMapp="R" dcnMapp="R"
+  cnWeakOwner="R" dcnWeakOwner="R" />
+```
+
+### The relational side
+
+A `RelSchema` holds domains and tables. A `Table` is a name scope for
+its columns, keys, and indexes, and every structural fact is a
+first-class element: the `PrimaryKey` is an ordered list of column
+references, a `ForeignKey` is composite-capable through its
+`ForeignKeyColumn` pairs and carries the referential actions
+(`onDelete`, `onUpdate`, and `onConnect` for the trigger layer), an
+`Index` lists its columns, a `Domain` is a named type with an
+optional check and default that columns may reference, and a table
+keeping another table's row history names its base with `historyOf`.
+
+```tsx
+<Table name="copy">
+  <Column name="book_id" type="INTEGER" isNullable={false} isAutoincrement={false} />
+  <Column name="no" type="INTEGER" isNullable={false} isAutoincrement={false} />
+  <PrimaryKey name="pk_copy">
+    <Column $refByName="book_id" />
+    <Column $refByName="no" />
+  </PrimaryKey>
+  <ForeignKey name="fk_copy_book" isUnique={false} referencedTable={<Table $refByName="book" />}>
+    <ForeignKeyColumn name="p1">
+      <Column $refByName="book_id" />
+      <Column $refByName="book/id" />
+    </ForeignKeyColumn>
+  </ForeignKey>
+</Table>
+```
 
 ## Entities
 
@@ -71,12 +173,10 @@ table, under TablePerClass on the subtype's own table.
 
 ## Relationships
 
-Binary, by doctrine. M:N becomes a join table with one foreign key
-per role. 1:N is the genuinely open decision (`OneToManyStrategy`):
-a join table by default, or a foreign key grafted into the N side's
-table. 1:1 becomes a UNIQUE foreign key on the optional side. A
-relationship carries no attributes; a relationship that needs data is
-an aggregation.
+M:N becomes a join table with one foreign key per role. 1:N is the
+genuinely open decision (`OneToManyStrategy`): a join table by
+default, or a foreign key grafted into the N side's table. 1:1
+becomes a UNIQUE foreign key on the optional side.
 
 ## Attributes
 
@@ -99,17 +199,10 @@ are inlined. The DDL renders domains per the `DomainHandling` issue:
 with `VALUE` replaced by the column identifier; `EmitDomains` writes
 `CREATE DOMAIN` statements and types columns by domain name.
 
-## Integrity rules: connect and disconnect
+## Integrity rules become referential actions
 
-Every mapping in the EER metamodel carries a pair of rules over the
-association it represents: `cn`, the CONNECT rule (the association is
-established: the referencing row inserted or its foreign key set),
-and `dcn`, the DISCONNECT rule (the association is broken: the row
-deleted or the key changed). The letters are R (restrict), C
-(cascade), N (set null), D (set default).
-
-For every emitted foreign key, the governing pair is the one guarding
-the REFERENCED end:
+For every emitted foreign key, the governing integrity pair is the
+one guarding the REFERENCED end:
 
 | Foreign key | Governing pair |
 | --- | --- |
@@ -126,7 +219,7 @@ a BEFORE INSERT OR UPDATE trigger stub for it, always. Under the
 `ReferentialActions` issue's TriggerEmulation option (for dialects
 without action clauses), the disconnect rules join the triggers
 document as AFTER DELETE OR UPDATE stubs instead of clauses. Two
-pairs have no foreign-key form and are not mapped in v2: the
+pairs have no foreign-key form and are not mapped: the
 SpecializationMapping's own `cnMapp`/`dcnMapp` and the Subtype's
 `cnSubtype`/`dcnSubtype` (rules over subtype-row events).
 
@@ -169,6 +262,36 @@ the discriminator (see the
 [composite options section](../guides/variability.md#composite-options-an-option-that-opens-sub-issues)
 of the variability guide).
 
+## The higher-order templates
+
+Auditing and row history are not special cases wired into the rules:
+each is a higher-order template, a step wrapping a step, and the two
+sit at different granularities on purpose:
+
+```tsx
+// audit.tsx: a columns step in, a columns step out
+withAuditColumns: (columns: () => Column[]) => () => Column[]
+
+// history.tsx: a table step in, a table SET out
+withHistoryTable: (discriminator: () => Column) => (table: () => Table) => () => Table[]
+```
+
+Signature preservation is the composability contract: the wrapped
+step is a drop-in replacement for the plain one, which is exactly
+what lets a design option choose between them. The `TableAuditing`
+issue's AuditColumns option wraps the entity's columns step; the
+`RowHistory` issue's HistoryTable option wraps the entity's whole
+table step. And because `withHistoryTable` derives the history table
+from whatever its wrapped step produced, the two stack without
+knowing about each other: a versioned audited table's history
+carries `createdBy` and `createdAt` like any other column.
+
+Both templates are plain module exports in the target domain
+(`audit.tsx`, `history.tsx`); the engine knows nothing about them,
+which is the point: policies of this kind are authored, not built
+in. The [Templates guide](../guides/templates.md) explains the
+underlying pattern.
+
 ## Dialects are configurations, not code
 
 The DDL generator declares emission issues; a dialect is a shipped
@@ -204,7 +327,64 @@ with the rule's own message. See the
 [Constraints section](../guides/defining-metamodels.md#constraints)
 of the metamodel guide for the mechanism.
 
-## The design space at a glance
+## The design space
+
+Every issue passes the same admission test: it is a question with
+more than one defensible answer, and it is asked exactly where
+answers may differ, which is what fixes its granularity. How issues
+are declared as data, bound to metamodel concepts, and closed by
+configurations or presets is the
+[variability guide's](../guides/variability.md) subject; this page
+records the decisions and their reasons.
+
+On the EER to relational side:
+
+- **TableAuditing** (per entity, AuditColumns default): whether a
+  table carries operational provenance (`createdBy`, `createdAt`).
+  Per entity because reference data often opts out while
+  transactional tables opt in.
+- **RowHistory** (per entity, NoHistory default): row versioning
+  costs a second table and a trigger, so it is opt-in per entity.
+  Choosing HistoryTable opens **HistoryDiscriminator**: a validity
+  timestamp reads naturally as the start of a state's validity, a
+  version counter is robust where clock order cannot be trusted.
+  Only versioned tables ever face this second question, which is why
+  it is a sub-issue and not a top-level one.
+- **InheritanceStrategy** (per hierarchy, JoinedTables default): the
+  classic trio. Joined stays normalized, SingleTable buys polymorphic
+  reads at the price of nullable columns, TablePerClass avoids joins
+  by copying. Per hierarchy because one schema can reasonably mix
+  them.
+- **OneToManyStrategy** (per 1:N relationship, JoinTable default): a
+  grafted foreign key is the lean idiom; a join table leaves the N
+  side's table untouched and survives a later cardinality change.
+  Genuinely open, so decided per relationship.
+- **PrimaryKeyStrategy** (per key attribute, UseAutoIncrement
+  default): whether single-column INTEGER keys autoincrement or are
+  assigned by the application.
+- **IndexOnForeignKey** (global, IndexAllForeignKeys default): the
+  standard prescription for join performance; off when the index
+  budget is managed by hand.
+- **ForeignKeyColumnNaming** (global, ShortNames default): ShortNames
+  keeps a referenced column's meaningful name and prefixes only where
+  the prefix IS the meaning; TablePrefixed prefixes every hop. Global
+  because naming is a schema-wide convention.
+- **NamingConvention** (global, SnakeCase default): identifier
+  casing, snake_case or camelCase.
+
+On the DDL side, closed together by a dialect preset or one by one:
+
+- **SqlDialect** (global, StandardSql default): which dialect
+  flavors the physical emissions.
+- **ReferentialActions** (global, NativeDdl default): action clauses
+  on the constraints, or trigger emulation for dialects without them.
+- **DomainHandling** (global, InlineTypes default): checks and
+  defaults inlined per column, or `CREATE DOMAIN` statements.
+- **IdentifierQuoting** (global, Unquoted default).
+- **Clustering** (per table, None default): physical row order is
+  paid for per table, and only hot, large tables warrant it.
+
+At a glance:
 
 | Issue | Granularity | Options (default first) | Transformation |
 | --- | --- | --- | --- |
@@ -226,5 +406,5 @@ of the metamodel guide for the mechanism.
 Everything on this page is asserted by
 `eer-to-relational/scripts/verify.mjs` and
 `rel-to-sql-ddl/scripts/verify.mjs` through the real CLI on every
-gate run: outputs, traces, constraint rejections, both presets, and
-both clustering emissions.
+gate run: outputs, traces, constraint rejections, both presets, both
+clustering emissions, and the row-history leg.

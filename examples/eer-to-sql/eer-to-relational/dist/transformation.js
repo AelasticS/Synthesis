@@ -6,7 +6,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 /**
- * The flagship configuration-based EER to relational transformation.
+ * The full-featured configuration-based EER to relational
+ * transformation.
  * Nine design issues are left open and closed per run by a
  * configuration model (see decision-model.tsx); the target is the rich
  * relational metamodel (real foreign keys, composite capable, and
