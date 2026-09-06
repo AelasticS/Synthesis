@@ -137,6 +137,9 @@ the nearest enclosing scope first, probing outward to the model, while
 a path such as `book/id` reaches into a sibling scope. Metamodels that
 declare no scopes keep the flat one-name-per-model rule unchanged.
 
+In the metamodel-as-model, the classification is recorded as the
+`isNamespace` marker on the concept's type object, so the data form of
+the metamodel carries the same fact as the code.
 The [building-models guide](./building-models.md#name-scopes) describes
 resolution in detail, and
 [Part 4 of the model-to-model tutorial](../tutorial/model-to-model/part-4-name-scopes/index.md)

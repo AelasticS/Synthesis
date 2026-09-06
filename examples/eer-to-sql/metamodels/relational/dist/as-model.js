@@ -45,7 +45,7 @@ export const RELModel = (store) => (createExprNode(TypeModel, { name: "RELMetamo
         createExprNode(Property, { name: "indexColumns", domain: createExprNode(TypeArray, { name: "ArrayOfIndexColumns", elementType: createExprNode(TypeObject, { "$refByName": "Column" }) }) }),
         createExprNode(Property, { name: "indexIsUnique" },
             createExprNode(PropertyDomain, { "$refByName": "boolean" }))),
-    createExprNode(TypeObject, { name: "Table" },
+    createExprNode(TypeObject, { name: "Table", isNamespace: true },
         createExprNode(Property, { name: "tableColumns", domain: createExprNode(TypeArray, { name: "ArrayOfColumns", elementType: createExprNode(TypeObject, { "$refByName": "Column" }) }) }),
         createExprNode(Property, { name: "foreignKeys", domain: createExprNode(TypeArray, { name: "ArrayOfForeignKeys", elementType: createExprNode(TypeObject, { "$refByName": "ForeignKey" }) }) }),
         createExprNode(Property, { name: "indexes", domain: createExprNode(TypeArray, { name: "ArrayOfIndexes", elementType: createExprNode(TypeObject, { "$refByName": "Index" }) }) })),

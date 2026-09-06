@@ -85,7 +85,7 @@ export const RELModel = (store: ModelStore): ExprNode<t.ITypeModel> => (
       </Property>
     </TypeObject>
 
-    <TypeObject name="Table">
+    <TypeObject name="Table" isNamespace={true}>
       <Property name="tableColumns"
                 domain={<TypeArray name="ArrayOfColumns" elementType={<TypeObject $refByName="Column" />} />}
       />

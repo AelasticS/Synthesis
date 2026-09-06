@@ -443,8 +443,13 @@ plus smoke, all example and template smokes, docs build), merge
 
 ## Deferred, out of v2
 
-withHistoryColumns; exhaustive dialect coverage (each future dialect
-is a configuration model); configuration layering at run time
+withHistoryColumns; constraint representation in the
+metamodel-as-model (a Constraint concept in the types meta-metamodel;
+belongs with the platform's metamodel-as-data contract);
+Union-of-Literals value restrictions in the as-models (expressible
+today, flat-name-pool caution); exhaustive dialect coverage (each
+future dialect is a configuration model); configuration layering at
+run time
 (--config stacking with per-issue precedence, level two of the
 extension section); model extension as an envelope relationship
 (level three, platform alignment, ADR-015); the domain mapping as an
@@ -530,3 +535,10 @@ validate` running the traversal (CLI tests; suite verification
 asserts the positive run and three negative rejections through the
 real CLI), docs in defining-metamodels and managing-models. The
 relational metamodel still awaits the user's review comments.
+
+Review round four delivered the metamodel-as-model namespace marker:
+the types meta-metamodel's Object concept carries an optional
+isNamespace boolean, and both suite as-models declare it truthfully
+(Entity and Table); constraint representation and Union-of-Literals
+value restrictions are recorded as named follow-ups in the deferred
+list.

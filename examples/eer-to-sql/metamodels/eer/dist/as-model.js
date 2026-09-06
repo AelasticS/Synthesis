@@ -24,7 +24,7 @@ export const EERModel = (store) => (createExprNode(TypeModel, { name: "ERMetamod
         createExprNode(Property, { name: "attrLowerBound", domain: createExprNode(TypeOptional, { name: "OptionalAttrLb", optionalType: createExprNode(TypeString, { "$refByName": "string" }) }) }),
         createExprNode(Property, { name: "attrUpperBound", domain: createExprNode(TypeOptional, { name: "OptionalAttrUb", optionalType: createExprNode(TypeString, { "$refByName": "string" }) }) }),
         createExprNode(Property, { name: "components", domain: createExprNode(TypeArray, { name: "ArrayOfComponents", elementType: createExprNode(TypeObject, { "$refByName": "Attribute" }) }) }),
-        createExprNode(Property, { name: "attrEntity", domain: createExprNode(TypeSubtype, { name: "Entity", superType: createExprNode(TypeObject, { "$refByName": "ERConcept" }) },
+        createExprNode(Property, { name: "attrEntity", domain: createExprNode(TypeSubtype, { name: "Entity", superType: createExprNode(TypeObject, { "$refByName": "ERConcept" }), isNamespace: true },
                 createExprNode(Property, { name: "attributes", domain: createExprNode(TypeArray, { name: "ArrayOfAttributes", elementType: createExprNode(TypeObject, { "$refByName": "Attribute" }) }) }),
                 createExprNode(Property, { name: "mappings", domain: createExprNode(TypeArray, { name: "ArrayOfMappings", elementType: createExprNode(TypeSubtype, { name: "Mapping", superType: createExprNode(TypeObject, { "$refByName": "ERConcept" }) },
                             createExprNode(Property, { name: "domain", domain: createExprNode(TypeSubtype, { "$refByName": "Entity" }) }),

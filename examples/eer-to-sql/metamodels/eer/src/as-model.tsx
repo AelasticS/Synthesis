@@ -81,7 +81,7 @@ export const EERModel = (store: ModelStore): ExprNode<t.ITypeModel> => (
       />
       <Property name="attrEntity"
                 domain={
-                  <TypeSubtype name="Entity" superType={<TypeObject $refByName="ERConcept" />}>
+                  <TypeSubtype name="Entity" superType={<TypeObject $refByName="ERConcept" />} isNamespace={true}>
                     <Property name="attributes"
                               domain={<TypeArray name="ArrayOfAttributes"
                                                  elementType={<TypeObject $refByName="Attribute" />} />}
