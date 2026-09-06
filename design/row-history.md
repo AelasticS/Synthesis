@@ -216,7 +216,50 @@ stage and at merge):
 
 Merge --no-ff to main, ladder repeated on merged main, no push.
 
+## Delivery notes (2026-09-06)
+
+All five stages delivered as planned; three facts surfaced by the
+build are recorded here.
+
+**The CLI's decision-model index is containment-first now.** The
+rendered graph creates a composite option's whole subtree BEFORE the
+option itself (props render first), so the CLI's document-order
+attribution would have filed HistoryTable under its own sub-issue,
+corrupting announcements, serialized issue references, and coverage
+checks. The index now walks the materialized containment
+(decisionModel.issues, possibleOptions, subIssues), indexing
+sub-issues like issues; the document-order walk remains as the
+fallback for models without containment. The old claim that the
+rendered graph does not materialize the containment was stale: the
+library's own generator has always depended on it.
+
+**The verification exercises every new path.** The flagship's patched
+run versions Book (explicit VersionCounter sub-issue choice, passing
+structural validation and traced with its choice reference) and
+BookCopy (discriminator defaulted at run time, traced byDefault);
+under that run's ForeignKey option the borrows graft into book_copy
+is mirrored, so book_copy_history carries the member key copy. The
+SingleTable mirror was probe-verified (person_history gains `type`
+and the subtype columns) but is not a standing verification run. The
+DDL leg runs the history configuration through a PERSISTED
+intermediate, which also proves historyOf round-trips the workspace
+file; a single chain invocation with a step-1 configuration plus
+generated defaults for step 2 was not used and remains a
+packaged-chains question.
+
+**Serialized grafts stay fragments.** The m2m serializer keeps
+after-the-fact grafts as separate `<Table $refByName>` fragments
+rather than merging them into the named table block; the mirror
+assertions read those fragments.
+
 ## Status
 
 Drafted 2026-09-06 after the user's go; committed as stage 0 on the
-branch.
+branch. DELIVERED the same day on feat/row-history: stage 1
+(generator traversal + containment-first index, bdb99b6), stage 2
+(Table.historyOf + mirror + rich-db, e7d366f), stage 3
+(withHistoryTable, the RowHistory/HistoryDiscriminator design space,
+graft mirrors, verification, b32b475), stage 4 (capture stubs + the
+DDL history leg, 041825d), stage 5 (docs and CHANGELOG). Full ladder
+green at every stage; merged to main with --no-ff and the ladder
+repeated there; not pushed.

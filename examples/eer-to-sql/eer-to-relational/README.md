@@ -11,12 +11,21 @@ a single right answer is an explicit decision closed per run by a
 configuration model. The mapping rules are explained canonically in
 the docs page "The flagship: EER to relational mapping rules"
 (developer guide, Examples section); this README stays with what the
-package is and how to run it. Seven issues are on offer:
+package is and how to run it. Nine issues are on offer:
 
 - TableAuditing (per entity, on by default): whether a table carries
   `createdBy`/`createdAt` columns. The audited option applies the
   higher-order `withAuditColumns` template ([src/audit.tsx](./src/audit.tsx)):
   a columns step in, a columns step out, so further policies can stack.
+- RowHistory (per entity, off by default): whether a table keeps its
+  rows' past states in a derived `<table>_history` table, keyed by the
+  base key plus a discriminator and carrying no foreign keys (history
+  outlives deletion). The HistoryTable option applies the higher-order
+  `withHistoryTable` template ([src/history.tsx](./src/history.tsx)),
+  a table-set step stacked one granularity above the audit step, and
+  opens the HistoryDiscriminator sub-issue (ValidFromTimestamp by
+  default, or VersionCounter), the design space's first composite
+  option.
 - InheritanceStrategy (per specialization hierarchy, JPA-style):
   JoinedTables, SingleTable (discriminator plus grafted columns), or
   TablePerClass (root columns copied; an abstract root gets no table).
@@ -40,6 +49,9 @@ package is and how to run it. Seven issues are on offer:
   subtypes, and relationship keys.
 - [src/audit.tsx](./src/audit.tsx): the higher-order audit template in
   its zero-argument form, pure target-domain.
+- [src/history.tsx](./src/history.tsx): the higher-order row-history
+  template, a table step in and a table set out, deriving the history
+  table from the base table's own node.
 - [src/decision-model.tsx](./src/decision-model.tsx): the design space as
   data (issues, options, defaults).
 - [src/binding-model.tsx](./src/binding-model.tsx): connects issues to

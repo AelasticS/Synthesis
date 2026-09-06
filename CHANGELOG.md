@@ -12,6 +12,29 @@ overall version history.
 
 ### Added
 
+- **Row history as a composite design option.** The flagship gains the
+  per-entity RowHistory issue: the HistoryTable option wraps the
+  entity's table step with the higher-order `withHistoryTable`
+  template (a table-set step, stacked one granularity above the audit
+  columns step) and derives a `<table>_history` table keyed by the
+  base key plus a temporal discriminator, deliberately without foreign
+  keys since history outlives deletion. HistoryTable is the first live
+  CompositeOption: it opens the HistoryDiscriminator sub-issue
+  (ValidFromTimestamp default, VersionCounter), while configurations
+  stay flat and an unconsulted sub-issue needs no choice. Late grafts
+  (relationship foreign keys, SingleTable hierarchy columns) are
+  mirrored into versioned tables' histories. The relational Table
+  carries the `historyOf` link, and the DDL generator emits an AFTER
+  UPDATE OR DELETE capture trigger stub per history table.
+
+- **Default configurations traverse chosen composite options.**
+  `config init` (and `--default-configs`) now answers, recursively,
+  the sub-issues a chosen option opens, in the same decision context;
+  sub-issues behind unchosen options stay out. The CLI's
+  decision-model index reads the rendered containment (a composite
+  option's subtree renders before the option itself, so document-order
+  attribution would misfile it) and indexes sub-issues like issues.
+
 - **The flagship maps full EER semantics (v2).** Aggregations with the
   cardinality key rule (an at-most-once participant's copied key IS
   the primary key, surplus candidates become UNIQUE foreign keys, no
