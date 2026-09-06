@@ -89,14 +89,23 @@ on every mapping, plus `cnWeakOwner/dcnWeakOwner`,
 `cn/dcnSubtype` slots on Subtype. The transformation currently drops
 them all; v2 consumes them.
 
-Reading to be confirmed as decision 1: `cn` is the rule applied when
-the referenced instance is DELETED and `dcn` the rule applied when
-its key is MODIFIED, so a pair translates directly to
-`onDelete`/`onUpdate` on a foreign key: R to RESTRICT, C to CASCADE,
-N to SET NULL, D to SET DEFAULT. The Mapp versus Owner pairs guard
-the two directions of the same association; the exact
-direction-to-foreign-key assignment per mapping kind is part of
-decision 1, settled with the user before stage 3.
+Semantics RESOLVED 2026-09-06, decision 1, in the user's definition:
+the rules govern the ASSOCIATION between two entities. `cn` is the
+CONNECT rule: what to do when the association is established, which
+in the table world is the insertion of the referencing row or the
+setting of its foreign key. `dcn` is the DISCONNECT rule: what to do
+when the association is broken, by deletion of the corresponding row
+or by setting another key value. The translation follows directly:
+`dcn` maps to the declarative referential actions ON DELETE and ON
+UPDATE (R to RESTRICT, C to CASCADE, N to SET NULL, D to SET
+DEFAULT). `cn` equal to R is what a plain foreign key already
+enforces: a row cannot connect to a nonexistent target. Connect
+rules other than R are not expressible declaratively in ANY SQL
+dialect and are emitted as insert/update triggers by the trigger
+machinery below, which therefore serves every dialect, not only the
+constrained ones. The Mapp versus Owner pairs are the two directions
+of one association; the per-kind assignment of pair to foreign key
+is worked out in stage 3 and documented on the mapping-rules page.
 
 The relational metamodel stays dialect-neutral: `ForeignKey` gains
 optional `onDelete` and `onUpdate` carrying the neutral vocabulary
@@ -111,27 +120,51 @@ A dialect in this framework is not code, it is a configuration. The
 DDL generator declares emission ISSUES; a dialect is a shipped
 configuration model closing them all at once:
 
-- `ReferentialActions`: NativeDdl (emit ON DELETE and ON UPDATE
-  clauses) or TriggerEmulation (emit triggers for actions the dialect
-  cannot express). Standard SQL takes all four actions in plain DDL,
-  so NativeDdl is the default.
+- `ReferentialActions`: NativeDdl (disconnect rules as ON DELETE and
+  ON UPDATE clauses; connect rules other than R as insert/update
+  triggers) or TriggerEmulation (everything as triggers, for dialects
+  without declarative actions). Standard SQL and PostgreSQL take all
+  four disconnect actions in plain DDL, so NativeDdl is the default.
 - `DomainHandling` (from the domain workstream): EmitDomains (CREATE
   DOMAIN, columns reference it) or InlineTypes (base type plus inline
   CHECK per column).
 - `IdentifierQuoting`: retained from v1.
 
-Shipped preset configurations, decision 9: `standard-sql` (default:
-NativeDdl, EmitDomains or InlineTypes per decision, DoubleQuoted) and
-`oracle` as the demonstrative gap (Oracle has no ON UPDATE actions,
-so its preset selects TriggerEmulation for update rules). Exhaustive
-dialect coverage is a product, not an example; v2 demonstrates the
-mechanism once and any future dialect is one more configuration
-model.
+Shipped preset configurations, decision 9 RESOLVED 2026-09-06:
+`standard-sql` (the default) and `postgres`, the dialect the user
+wants specifically supported: it takes every disconnect action
+natively, selects EmitDomains (PostgreSQL has CREATE DOMAIN), and
+carries the physical option below. The oracle preset from the draft
+is dropped: the trigger machinery no longer needs a demonstrative
+dialect gap, because connect rules exercise it under every dialect.
+Exhaustive dialect coverage is a product, not an example; any future
+dialect is one more configuration model.
 
-Trigger emulation emits into its own document (`triggers.sql`) next
-to the constraints file, using the multi-document layout the m2t
-machinery already has. Trigger naming follows the constraint naming
-scheme.
+Triggers emit into their own document (`triggers.sql`) next to the
+constraints file, using the multi-document layout the m2t machinery
+already has: connect rules other than R land there under every
+dialect, and under TriggerEmulation the disconnect rules join them.
+Trigger naming follows the constraint naming scheme.
+
+## Physical design, first step (clustering)
+
+Physical characteristics belong neither in the EER model nor in the
+logical relational model: they are decisions about one installation,
+which is exactly what the configuration machinery is for. The home
+for physical design is a set of issues on the DDL generator, closed
+by dialect presets or by a project-specific configuration.
+
+V2 demonstrates the pattern with one per-table issue, decision 12:
+`Clustering`, an ElementIssue on Table with options `None` (default)
+and `ClusterPrimaryKey`. Under the postgres preset the chosen tables
+get `CLUSTER <table> USING <primary key index>` emitted into a
+physical section of the DDL, with the documented caveat that
+PostgreSQL has no maintained clustered indexes (unlike SQL Server or
+Oracle's index-organized tables): CLUSTER is a one-time physical
+reordering, refreshed only by running it again. Deeper physical
+design (partitioning, fillfactor, tablespaces, covering indexes) is
+deferred to its own future workstream; each item would be one more
+issue in this same design space.
 
 ## Full semantic domains (the v1 decision 5 workstream, executed)
 
@@ -211,8 +244,9 @@ their keys (both variants), UNIQUE indexes for surplus at-most-once
 participants, onDelete/onUpdate actions in the model and the DDL,
 CREATE DOMAIN under EmitDomains and inline CHECK under InlineTypes,
 the discriminator under SingleTable, the multivalued attribute's
-table, and the trigger document under the oracle preset. The chain
-verification extends over the same content.
+table, the trigger document carrying a non-R connect rule, and the
+CLUSTER statement under the postgres preset if decision 12 lands.
+The chain verification extends over the same content.
 
 ## Documentation
 
@@ -240,35 +274,50 @@ ERConcept stays untouched (used by authoring components).
 
 ## Open decisions
 
-1. cn/dcn semantics. Confirm: cn = on-delete rule, dcn = on-key-update
-   rule; and fix the direction-to-foreign-key assignment for each
-   pair (Mapp versus WeakOwner/AggrOwner, and the four Subtype
-   slots). BLOCKS stage 3.
-2. Attribute cardinality shape. Recommendation: lb/ub on Attribute
-   subsuming nullability and multivalued; alternative: boolean flags.
-3. Composite attributes in v2. Recommendation: yes, one level,
-   flattened `attribute_component` columns.
-4. Relationship attributes. Recommendation: OUT forever, per the
-   doctrine (a relationship with data is an aggregation).
-5. Categories/union types. Recommendation: OUT of v2 (the school's
-   repertoire is kernel/weak/aggregation/specialization; categories
-   add little here and cost much).
-6. Domain check representation. Recommendation: a boolean SQL
-   expression string over VALUE, plus baseType and defaultValue;
-   structured constraint objects deferred.
-7. Aggregation key edge case. Recommendation: first declared
-   at-most-once participant keys the table; other at-most-once
-   participants get UNIQUE indexes on their foreign keys.
-8. Discriminator name. Recommendation: `type`, NOT NULL, in the root
-   table's scope.
-9. Dialect presets to ship. Recommendation: standard-sql (default)
-   and oracle (demonstrates TriggerEmulation); more later as
-   configurations only.
-10. EER Entity namespace and natural sample naming. Recommendation:
-    adopt; and the user's explicit word on the simplified
-    withAuditColumns form (unqualified createdBy/createdAt) is taken
-    here if given, otherwise the qualified form stays.
-11. IntegityRule typo. Recommendation: rename with deprecated alias.
+1. cn/dcn semantics. RESOLVED 2026-09-06, user's definition: cn is
+   the CONNECT rule (association established: referencing row
+   inserted or foreign key set), dcn the DISCONNECT rule
+   (association broken: row deleted or key value changed). dcn maps
+   to ON DELETE and ON UPDATE; cn = R is the plain foreign key's own
+   enforcement; cn in {C, N, D} becomes insert/update triggers. The
+   per-kind pair-to-foreign-key assignment is stage 3 work,
+   documented on the mapping-rules page.
+2. Attribute cardinality shape. RESOLVED 2026-09-06 as recommended:
+   lb/ub on Attribute subsuming nullability and multivalued.
+3. Composite attributes. RESOLVED 2026-09-06 as recommended: in,
+   one level, flattened `attribute_component` columns.
+4. Relationship attributes. RESOLVED 2026-09-06, user confirmed the
+   doctrine: relationships cannot have attributes; a relationship
+   that needs them must become an aggregation.
+5. Categories/union types. OPEN: explanation delivered to the user
+   (a category is a subclass over the UNION of several key-
+   incompatible superclasses, mapped via a surrogate key).
+   Recommendation stands: OUT of v2.
+6. Domain check representation. RESOLVED 2026-09-06 as recommended:
+   boolean SQL expression string over VALUE, plus baseType and
+   defaultValue.
+7. Aggregation key edge case. RESOLVED 2026-09-06 as recommended:
+   first declared at-most-once participant keys the table; other
+   at-most-once participants get UNIQUE indexes on their foreign
+   keys.
+8. Discriminator name. RESOLVED 2026-09-06 as recommended: `type`,
+   NOT NULL, in the root table's scope.
+9. Dialect presets. RESOLVED 2026-09-06: standard-sql (default) and
+   postgres (user wants PostgreSQL specifically supported); the
+   draft's oracle preset dropped, connect rules demonstrate the
+   trigger machinery in every dialect.
+10. EER Entity namespace, natural sample naming, and the simplified
+    withAuditColumns form. OPEN: explanation delivered to the user;
+    recommendation: adopt the scope and natural names; the
+    CONFIRMED qualified withAuditColumns form stays authoritative
+    until the user explicitly confirms the simplified one.
+11. IntegityRule typo. RESOLVED 2026-09-06 as recommended: rename to
+    IntegrityRule with a deprecated alias.
+12. Clustering (new, from the user's physical-design question).
+    OPEN: recommendation include the minimal `Clustering`
+    ElementIssue on Table (None default, ClusterPrimaryKey) with
+    postgres emission of CLUSTER statements; everything deeper
+    deferred to a physical-design workstream.
 
 ## Execution order and gates
 
@@ -313,3 +362,15 @@ v1 deferrals stand.
 Drafted 2026-09-06 from the user discussions of 2026-09-05/06.
 Awaiting the user's approval and the open-decision answers; no
 building before that.
+
+Decisions round 2026-09-06, same day: the user resolved 1 (the
+connect/disconnect semantics, correcting the draft's delete/update
+reading; the integrity and dialect sections were rewritten
+accordingly, and triggers became first-class for connect rules), 2,
+3, 6, 7, 8, 11 as recommended, 4 by re-stating the doctrine, and 9
+as standard-sql plus postgres with the oracle preset dropped. New
+decision 12 (Clustering) added from the user's physical-design
+question, with the physical-design section. Still open: 5
+(categories, explanation delivered), 10 (Entity scope, natural
+naming, and the withAuditColumns word, explanation delivered), and
+12 (clustering inclusion).
