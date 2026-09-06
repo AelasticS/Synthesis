@@ -130,15 +130,21 @@ configuration model closing them all at once:
   CHECK per column).
 - `IdentifierQuoting`: retained from v1.
 
-Shipped preset configurations, decision 9 RESOLVED 2026-09-06:
-`standard-sql` (the default) and `postgres`, the dialect the user
-wants specifically supported: it takes every disconnect action
-natively, selects EmitDomains (PostgreSQL has CREATE DOMAIN), and
-carries the physical option below. The oracle preset from the draft
-is dropped: the trigger machinery no longer needs a demonstrative
-dialect gap, because connect rules exercise it under every dialect.
-Exhaustive dialect coverage is a product, not an example; any future
-dialect is one more configuration model.
+Shipped preset configurations, decision 9 AMENDED and RESOLVED in
+the second round 2026-09-06: THREE presets, `standard-sql` (the
+default), `postgres`, and `oracle`, with the user's requirement that
+the dialect presets be built BY EXTENSION: postgres and oracle are
+authored as the standard-sql choices plus deltas, demonstrating
+configuration reuse (see the extension section below). postgres
+takes every disconnect action natively, selects EmitDomains
+(PostgreSQL has CREATE DOMAIN), and emits one-time CLUSTER
+statements for the physical option. oracle selects TriggerEmulation
+for update rules (classic Oracle has no ON UPDATE actions),
+InlineTypes (SQL domains only arrived in Oracle 23ai; the preset
+targets the widely deployed releases), and emits index-organized
+tables for the physical option. Exhaustive dialect coverage is a
+product, not an example; any future dialect is one more
+configuration model.
 
 Triggers emit into their own document (`triggers.sql`) next to the
 constraints file, using the multi-document layout the m2t machinery
@@ -159,12 +165,44 @@ V2 demonstrates the pattern with one per-table issue, decision 12:
 and `ClusterPrimaryKey`. Under the postgres preset the chosen tables
 get `CLUSTER <table> USING <primary key index>` emitted into a
 physical section of the DDL, with the documented caveat that
-PostgreSQL has no maintained clustered indexes (unlike SQL Server or
-Oracle's index-organized tables): CLUSTER is a one-time physical
-reordering, refreshed only by running it again. Deeper physical
+PostgreSQL has no maintained clustered indexes: CLUSTER is a
+one-time physical reordering, refreshed only by running it again.
+Under the oracle preset the same logical choice emits an
+index-organized table (`ORGANIZATION INDEX` on CREATE TABLE), which
+IS maintained continuously: one logical option, two dialect-true
+physical emissions, which is the whole point of keeping physical
+design in configurations. Deeper physical
 design (partitioning, fillfactor, tablespaces, covering indexes) is
 deferred to its own future workstream; each item would be one more
 issue in this same design space.
+
+## Extending configurations, and models in general
+
+The user's wider question: how do postgres and oracle extend
+standard-sql, and how are models extended and customized at all.
+Three levels, the first in scope for v2.
+
+Level one, composition in the authoring language, IN v2: a
+configuration model is a JSX program, so reuse is ordinary import
+and spread. The standard-sql choices are exported as fragments from
+a shared module; the postgres and oracle configurations import them,
+spread them, and override or add exactly the choices where they
+differ. This is the withAuditColumns pattern applied to
+configurations, it needs no engine changes, and authoring the three
+presets this way is itself the demonstration the user asked to see.
+
+Level two, configuration LAYERING at run time, recorded as a
+follow-up, NOT in v2: `transformation run --config dialect --config
+project`, later choices winning per issue, so a project closes its
+own decisions on top of a dialect preset without copying it. A CLI
+and decision-framework feature (merge semantics over choice lists)
+with real value and moderate cost.
+
+Level three, the platform horizon: extension as a RELATIONSHIP
+between models (a configuration referencing its base, resolution
+merging at load), which per ADR-015 belongs to the envelope and the
+platform's model repository, alongside general model overlays. Out
+of scope here; noted for the platform-alignment workstream.
 
 ## Full semantic domains (the v1 decision 5 workstream, executed)
 
@@ -221,16 +259,28 @@ inside the table's own scope), NOT NULL.
 ## Names and scopes on the EER side
 
 `declareNamespace(Entity)` on the flagship EER metamodel, decision
-10. Verified in v1 discussions: no flagship sample references
-attributes across entities, so nothing breaks structurally; the
-samples rename to natural attribute names (`id`, `title`), which
-flows through attributeToColumn into naturally named columns exactly
-as tutorial Part 4 demonstrated. This interacts with the
-withAuditColumns simplification: under Table scopes the table
-qualifier is unnecessary, and the simplified form (plain `createdBy`
-and `createdAt` columns) awaits the user's explicit re-confirmation;
-the CONFIRMED qualified form stays authoritative until that word is
-given.
+10, RESOLVED 2026-09-06: adopted. Verified in v1 discussions: no
+flagship sample references attributes across entities, so nothing
+breaks structurally; the samples rename to natural attribute names
+(`id`, `title`), which flows through attributeToColumn into
+naturally named columns exactly as tutorial Part 4 demonstrated.
+
+The withAuditColumns simplification is CONFIRMED by the user
+2026-09-06 (decision 10) and SUPERSEDES the qualified form confirmed
+in v1: the audit step takes no table argument and emits plain
+`createdBy` and `createdAt` columns, unique inside their table's
+scope; the zero-argument step shape and the Approval-style
+composition are preserved, only the qualifier is gone. The new
+authoritative form:
+
+```tsx
+withAuditColumns = (columns: () => ExprNode<rmT.IColumn>[]) =>
+  (): ExprNode<rmT.IColumn>[] => [
+    ...columns(),
+    <Column name="createdBy" type="VARCHAR(255)" isKey={false} isNullable={false} isAutoincrement={false} />,
+    <Column name="createdAt" type="DATE" isKey={false} isNullable={false} isAutoincrement={false} />,
+  ]
+```
 
 ## Samples and verification
 
@@ -289,10 +339,11 @@ ERConcept stays untouched (used by authoring components).
 4. Relationship attributes. RESOLVED 2026-09-06, user confirmed the
    doctrine: relationships cannot have attributes; a relationship
    that needs them must become an aggregation.
-5. Categories/union types. OPEN: explanation delivered to the user
-   (a category is a subclass over the UNION of several key-
-   incompatible superclasses, mapped via a surrogate key).
-   Recommendation stands: OUT of v2.
+5. Categories/union types. RESOLVED 2026-09-06: OUT. The user's
+   language covers classification with multiple independent
+   specializations of one entity (a Person specialized by gender
+   and, separately, by occupation into student or worker) and has
+   no union concept, so nothing is missing.
 6. Domain check representation. RESOLVED 2026-09-06 as recommended:
    boolean SQL expression string over VALUE, plus baseType and
    defaultValue.
@@ -307,17 +358,17 @@ ERConcept stays untouched (used by authoring components).
    draft's oracle preset dropped, connect rules demonstrate the
    trigger machinery in every dialect.
 10. EER Entity namespace, natural sample naming, and the simplified
-    withAuditColumns form. OPEN: explanation delivered to the user;
-    recommendation: adopt the scope and natural names; the
-    CONFIRMED qualified withAuditColumns form stays authoritative
-    until the user explicitly confirms the simplified one.
+    withAuditColumns form. RESOLVED 2026-09-06: Entity IS a name
+    scope, samples take natural names, and the user explicitly
+    confirmed the SIMPLIFIED audit form (no table-name prefix); the
+    new authoritative form is in the names-and-scopes section and
+    supersedes v1's qualified form.
 11. IntegityRule typo. RESOLVED 2026-09-06 as recommended: rename to
     IntegrityRule with a deprecated alias.
 12. Clustering (new, from the user's physical-design question).
-    OPEN: recommendation include the minimal `Clustering`
-    ElementIssue on Table (None default, ClusterPrimaryKey) with
-    postgres emission of CLUSTER statements; everything deeper
-    deferred to a physical-design workstream.
+    RESOLVED 2026-09-06: in, as proposed; the oracle preset emits
+    index-organized tables for the same logical option. Alongside,
+    the user grew decision 9 to three presets built by extension.
 
 ## Execution order and gates
 
@@ -352,10 +403,14 @@ plus smoke, all example and template smokes, docs build), merge
 ## Deferred, out of v2
 
 withHistoryColumns; exhaustive dialect coverage (each future dialect
-is a configuration model); the domain mapping as an installable model
-(platform alignment, ADR-015); structured domain constraints;
-categories (if decision 5 confirms); read-set capture and the other
-v1 deferrals stand.
+is a configuration model); configuration layering at run time
+(--config stacking with per-issue precedence, level two of the
+extension section); model extension as an envelope relationship
+(level three, platform alignment, ADR-015); the domain mapping as an
+installable model (platform alignment); structured domain
+constraints; categories (decision 5: out); deeper physical design
+(partitioning, fillfactor, tablespaces); read-set capture and the
+other v1 deferrals stand.
 
 ## Status
 
@@ -374,3 +429,14 @@ question, with the physical-design section. Still open: 5
 (categories, explanation delivered), 10 (Entity scope, natural
 naming, and the withAuditColumns word, explanation delivered), and
 12 (clustering inclusion).
+
+Round two, 2026-09-06, ALL TWELVE decisions resolved: 5 out
+(multiple independent specializations cover classification, no
+union concept in the language), 10 adopted with the SIMPLIFIED
+withAuditColumns form explicitly confirmed (supersedes v1's
+qualified form), 12 in with the oracle index-organized-table
+emission, and 9 re-amended to three presets (standard-sql, postgres,
+oracle) BUILT BY EXTENSION, which added the extension section and
+two new deferred items (configuration layering; model extension in
+the platform envelope). The record is decision-complete; awaiting
+the user's word to open the worktree and start stage 1.
