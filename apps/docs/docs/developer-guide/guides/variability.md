@@ -280,8 +280,8 @@ class EER2RelWithConfig
 
 ## Presets: configurations authored by extension
 
-A recurring configuration deserves a name and a file. The flagship's
-DDL generator ships dialect PRESETS: configuration models closing all
+A recurring configuration deserves a name and a file. The
+eer-to-sql suite's DDL generator ships dialect PRESETS: configuration models closing all
 its emission issues at once, so choosing a dialect means passing one
 `--config`. Two techniques make presets practical:
 
@@ -300,8 +300,8 @@ its emission issues at once, so choosing a dialect means passing one
   mismatch, exactly as before.
 
 See `examples/eer-to-sql/rel-to-sql-ddl/presets/` for the three
-shipped presets and the docs page "The flagship: EER to relational
-mapping rules" for the design space they close.
+shipped presets and the docs page "A full-featured EER to SQL
+transformation" for the design space they close.
 
 ## Composite options: an option that opens sub-issues
 
@@ -310,7 +310,7 @@ particular option is chosen. The decision metamodel states this with
 `CompositeOption`, an option carrying sub-issues, the issues that
 become meaningful exactly when that option is selected (authored with
 the `ElementSubIssue` tag). A row-versioning policy is the canonical
-shape, and it is exactly the flagship's `RowHistory` issue
+shape, and it is exactly the eer-to-sql suite's `RowHistory` issue
 (`examples/eer-to-sql/eer-to-relational`): whether a table keeps
 history is one issue, and only the history-keeping option opens the
 question of what distinguishes row versions:

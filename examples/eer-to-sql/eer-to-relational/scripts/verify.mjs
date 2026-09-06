@@ -1,5 +1,5 @@
 /**
- * The flagship's verification: beyond the generic smoke, assert the
+ * The suite's verification: beyond the generic smoke, assert the
  * exact design-space outcomes. Two runs on the Library sample: the
  * default configuration, and a patched configuration (TablePerClass,
  * the ForeignKey option for borrows, row history for Book with an
@@ -14,7 +14,7 @@ import { tmpdir } from 'node:os'
 
 const pkgDir = process.cwd()
 const cliBin = join(pkgDir, 'node_modules', '@aelastics', 'synthesis-cli', 'bin', 'run.js')
-const home = mkdtempSync(join(tmpdir(), 'synth-flagship-verify-'))
+const home = mkdtempSync(join(tmpdir(), 'synth-eer-to-sql-verify-'))
 const cli = (args) =>
   execFileSync('node', [cliBin, ...args], { env: { ...process.env, HOME: home }, stdio: 'pipe' }).toString()
 

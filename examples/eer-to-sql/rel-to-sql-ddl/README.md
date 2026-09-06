@@ -19,8 +19,8 @@ authored by extension over the compiled `rel-to-sql-ddl/presets`
 vocabulary (postgres and oracle spread the standard-sql choice set and
 override only what the dialect changes), and they are source-agnostic:
 `--config demo/cfg-postgres` fits any input schema. The mapping rules
-are explained canonically in the docs page "The flagship: EER to
-relational mapping rules".
+are explained canonically in the docs page "A full-featured EER to
+SQL transformation".
 
 ## The package anatomy
 

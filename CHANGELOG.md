@@ -12,7 +12,7 @@ overall version history.
 
 ### Added
 
-- **Row history as a composite design option.** The flagship gains the
+- **Row history as a composite design option.** The eer-to-sql suite gains the
   per-entity RowHistory issue: the HistoryTable option wraps the
   entity's table step with the higher-order `withHistoryTable`
   template (a table-set step, stacked one granularity above the audit
@@ -35,7 +35,7 @@ overall version history.
   option's subtree renders before the option itself, so document-order
   attribution would misfile it) and indexes sub-issues like issues.
 
-- **The flagship maps full EER semantics (v2).** Aggregations with the
+- **The eer-to-sql suite maps full EER semantics (v2).** Aggregations with the
   cardinality key rule (an at-most-once participant's copied key IS
   the primary key, surplus candidates become UNIQUE foreign keys, no
   such participant means the composite of all participants' keys);

@@ -40,7 +40,7 @@ every table has its own `id` column, the grafted foreign key is named
 
 ## What to look at next
 
-The flagship suite [eer-to-relational](../../eer-to-sql/eer-to-relational/)
+The full-featured suite [eer-to-relational](../../eer-to-sql/eer-to-relational/)
 combines everything the tutorial taught: specialization,
 configurations, higher-order templates, and scoped naming over a rich
 relational metamodel with composite foreign keys.

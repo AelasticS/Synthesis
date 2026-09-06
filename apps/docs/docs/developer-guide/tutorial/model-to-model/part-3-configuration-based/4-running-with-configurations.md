@@ -411,4 +411,5 @@ declaring name scopes on dedicated metamodel stages, so the same rules
 produce the natural names a database designer would have written by
 hand. Templates that take templates as parameters, the next step in
 rule reuse, are the [Templates guide's](../../../guides/templates.md)
-story, and the flagship example applies them in earnest.
+story, and the full-featured eer-to-sql suite applies them in
+earnest.
