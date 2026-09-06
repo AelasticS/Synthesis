@@ -4,7 +4,8 @@
  * The EER authoring pass: a sample exercising every concept of the
  * eer-metamodel once (kernels, a specialization with subtypes, a weak
  * entity with its weak mapping, an aggregation with its mapping, a
- * relationship with roles). The suite smoke imports every sample, so a
+ * relationship with roles, a user-defined domain, a multivalued and a
+ * composite attribute). The suite smoke imports every sample, so a
  * broken authoring path fails the gate. Fix the metamodel or the
  * components, never this file's shape.
  */
@@ -28,18 +29,40 @@ export const $synth = {
 
 export default (store: ModelStore): ExprNode<t.IEERSchema> => (
   <EERSchema name="RichLibrary" store={store}>
+    {/* the domain vocabulary: primitives, and one user-defined domain
+        with a base type, a check, and a default */}
+    <Domain name="number" />
+    <Domain name="string" />
+    <Domain name="Money" baseType="number" check="VALUE >= 0" defaultValue="0" />
+
     {/* kernels */}
     <Entity name="Person" isAbstract={true}>
-      <Attribute name="personId" isKey={true}>
-        <Domain name="number" />
+      <Attribute name="id" isKey={true}>
+        <Domain $refByName="number" />
       </Attribute>
-      <Attribute name="personName" isKey={false}>
-        <Domain name="string" />
+      <Attribute name="name" isKey={false}>
+        <Domain $refByName="string" />
+      </Attribute>
+      {/* multivalued: any number of phone numbers per person */}
+      <Attribute name="phones" isKey={false} lb="0" ub="M">
+        <Domain $refByName="string" />
+      </Attribute>
+      {/* composite, one level: an address of street and city */}
+      <Attribute name="address" isKey={false}>
+        <Attribute name="street" isKey={false}>
+          <Domain $refByName="string" />
+        </Attribute>
+        <Attribute name="city" isKey={false}>
+          <Domain $refByName="string" />
+        </Attribute>
       </Attribute>
     </Entity>
     <Entity name="Book">
-      <Attribute name="bookId" isKey={true}>
+      <Attribute name="id" isKey={true}>
         <Domain $refByName="number" />
+      </Attribute>
+      <Attribute name="price" isKey={false} lb="0">
+        <Domain $refByName="Money" />
       </Attribute>
     </Entity>
 
@@ -49,20 +72,20 @@ export default (store: ModelStore): ExprNode<t.IEERSchema> => (
         domain={<Entity $refByName="Person" />}
         lb="0" ub="1" cnMapp="R" dcnMapp="R" />
       <Subtype name="Member" cnSupertype="R" dcnSupertype="R" cnSubtype="R" dcnSubtype="R">
-        <Attribute name="memberSince" isKey={false}>
+        <Attribute name="since" isKey={false}>
           <Domain $refByName="string" />
         </Attribute>
       </Subtype>
       <Subtype name="Staff" cnSupertype="R" dcnSupertype="R" cnSubtype="R" dcnSubtype="R">
         <Attribute name="salary" isKey={false}>
-          <Domain $refByName="number" />
+          <Domain $refByName="Money" />
         </Attribute>
       </Subtype>
     </Specialization>
 
     {/* weak entity: BookCopy identified through Book */}
     <Weak name="BookCopy">
-      <Attribute name="copyNo" isKey={true}>
+      <Attribute name="no" isKey={true}>
         <Domain $refByName="number" />
       </Attribute>
     </Weak>
@@ -74,7 +97,7 @@ export default (store: ModelStore): ExprNode<t.IEERSchema> => (
 
     {/* aggregation with its mapping */}
     <Aggregation name="BookSeries">
-      <Attribute name="seriesTitle" isKey={false}>
+      <Attribute name="title" isKey={false}>
         <Domain $refByName="string" />
       </Attribute>
       <AggregationMapping name="seriesOf"

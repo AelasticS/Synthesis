@@ -60,11 +60,12 @@ export class SourceModelToDefaultConfigurationModel extends abstractM2M<IModel, 
     }
 
     const type = this.context.store.getTypeOf(sourceModelElement)
+    const scopedName = this.scopedNameOf(sourceModelElement)
 
     return (
       <cmC.ElementChoice
-        name={`ec_${sourceModelElement.name}`}
-        description={`Decision for ${sourceModelElement.name} of type ${type.name}`}
+        name={`ec_${scopedName}`}
+        description={`Decision for ${scopedName} of type ${type.name}`}
         element={sourceModelElement}
         choices={choices}
       >
@@ -72,6 +73,24 @@ export class SourceModelToDefaultConfigurationModel extends abstractM2M<IModel, 
 
       </cmC.ElementChoice>
     )
+  }
+
+  /** The element's name qualified by its scope chain: the path
+   * segments below its model, joined by underscores. In a flat model
+   * this is exactly the element's name; under name scopes it stays
+   * unique where bare names repeat (three entities, each with an
+   * attribute `id`). */
+  private scopedNameOf(el: IModelElement): string {
+    const name = String(el.name)
+    // an element's `path` is the path of its enclosing scope, so the
+    // element's own name is appended to form the qualified suffix
+    const path = (el as { path?: string }).path
+    const modelName = (el as { parentModel?: { name?: string } }).parentModel?.name
+    if (!path || !modelName) return name
+    const segments = path.split("/").filter((seg) => seg.length > 0)
+    const idx = segments.indexOf(modelName)
+    if (idx === -1) return name
+    return [...segments.slice(idx + 1), name].join("_")
   }
 
   private createChosenOptionForIssue(issue: dmT.IIssue): ExprNode<cmT.IChoice> {

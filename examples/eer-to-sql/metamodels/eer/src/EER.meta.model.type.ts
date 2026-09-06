@@ -1,15 +1,28 @@
 /*
  * Copyright (c) AelasticS 2020.
  *
+ * The full EER metamodel of the eer-to-sql suite (v2): entities scope
+ * their attributes' names, attributes carry cardinality (nullability
+ * and multivalued in one fact) and may be composite one level deep,
+ * and domains are user-definable (base type, check, default) on top of
+ * the primitive names. Relationships are strictly binary by doctrine:
+ * relating more than two entities is modeled as an Aggregation.
  */
 
 import * as t from "@aelastics/types";
-import { ModelElement, Model } from "@aelastics/synthesis/metamodel";
+import { ModelElement, Model, declareNamespace } from "@aelastics/synthesis/metamodel";
 
 // tslint:disable-next-line:variable-name
 export const EERModel_TypeSchema = t.schema("EERModelSchema");
 
-export const IntegityRule = t.string.derive().oneOf(["R", "C", "N", "D"]); // .defaultValue("R");
+// Integrity rules on associations: R restricts, C cascades, N
+// nullifies, D sets the default. Each mapping carries a pair: cn, the
+// CONNECT rule (the association is established: the referencing row
+// inserted or its foreign key set), and dcn, the DISCONNECT rule (the
+// association is broken: the row deleted or the key value changed).
+export const IntegrityRule = t.string.derive().oneOf(["R", "C", "N", "D"]);
+/** @deprecated Use IntegrityRule; kept as an alias for old imports. */
+export const IntegityRule = IntegrityRule;
 
 export const ERConcept = t.subtype(
   ModelElement,
@@ -39,7 +52,19 @@ export const ERConcept = t.subtype(
   EERModel_TypeSchema
 );
 
-export const Domain = t.subtype(ERConcept, {}, "Domain", EERModel_TypeSchema);
+// A domain without a baseType IS a primitive name (number, string,
+// boolean, ...). A user-defined domain names its base type and may
+// carry a check (a boolean SQL expression over VALUE) and a default.
+export const Domain = t.subtype(
+  ERConcept,
+  {
+    baseType: t.optional(t.string),
+    check: t.optional(t.string),
+    defaultValue: t.optional(t.string),
+  },
+  "Domain",
+  EERModel_TypeSchema
+);
 
 export const Submodel = t.subtype(
   ERConcept,
@@ -62,10 +87,20 @@ export const EERSchema = t.subtype(
 export const Attribute = t.subtype(
   ERConcept,
   {
-    attrDomain: Domain,
-    attrEntity: t.link(EERModel_TypeSchema, "Entity"),
+    // A leaf attribute carries its domain; a composite parent carries
+    // components instead. Both links are filled by nesting, so they
+    // are type-level optional (the Flow.from/to idiom).
+    attrDomain: t.optional(Domain),
+    attrEntity: t.optional(t.link(EERModel_TypeSchema, "Entity")),
     isKey: t.boolean,
     defaultValue: t.optional(t.string),
+    // Attribute cardinality, (1,1) when absent: lb "0" makes the
+    // attribute nullable, ub "M" makes it multivalued (an own table
+    // in the relational mapping).
+    lb: t.optional(t.string.derive().oneOf(["0", "1"])),
+    ub: t.optional(t.string.derive().oneOf(["1", "M"])),
+    // One level of composition: the parts of a composite attribute.
+    components: t.arrayOf(t.link(EERModel_TypeSchema, "Attribute")),
   },
   "Attribute",
   EERModel_TypeSchema
@@ -86,6 +121,10 @@ export const Entity = t.subtype(
 );
 
 t.inverseProps(Attribute, "attrEntity", Entity, "attributes");
+
+// An entity scopes its attributes' names: every entity can carry its
+// own `id`, and the samples use natural names throughout.
+declareNamespace(Entity);
 
 export const Kernel = t.subtype(Entity, {}, "Kernel", EERModel_TypeSchema);
 
@@ -111,10 +150,10 @@ export const Subtype = t.subtype(
   Entity,
   {
     supertype: t.link(EERModel_TypeSchema, "Specialization"),
-    cnSupertype: IntegityRule,
-    dcnSupertype: IntegityRule,
-    cnSubtype: IntegityRule,
-    dcnSubtype: IntegityRule,
+    cnSupertype: IntegrityRule,
+    dcnSupertype: IntegrityRule,
+    cnSubtype: IntegrityRule,
+    dcnSubtype: IntegrityRule,
   },
   "Subtype",
   EERModel_TypeSchema
@@ -126,8 +165,8 @@ export const Mapping = t.subtype(
     domain: Entity,
     lb: t.string.derive().oneOf(["0", "1", "M", "m", "*"]), // .defaultValue("0"),
     ub: t.string.derive().oneOf(["1", "M", "m", "*"]), // .defaultValue("M"),
-    cnMapp: IntegityRule,
-    dcnMapp: IntegityRule,
+    cnMapp: IntegrityRule,
+    dcnMapp: IntegrityRule,
   },
   "Mapping",
   EERModel_TypeSchema
@@ -137,8 +176,8 @@ export const WeakMapping = t.subtype(
   Mapping,
   {
     codomain: Weak,
-    cnWeakOwner: IntegityRule,
-    dcnWeakOwner: IntegityRule,
+    cnWeakOwner: IntegrityRule,
+    dcnWeakOwner: IntegrityRule,
   },
   "WeakMapping",
   EERModel_TypeSchema
@@ -148,8 +187,8 @@ export const AggregationMapping = t.subtype(
   Mapping,
   {
     codomain: Aggregation,
-    cnAggrOwner: IntegityRule,
-    dcnAggrOwner: IntegityRule,
+    cnAggrOwner: IntegrityRule,
+    dcnAggrOwner: IntegrityRule,
   },
   "AggregationMapping",
   EERModel_TypeSchema
@@ -239,8 +278,3 @@ export const getInverse = (mapping: IOrdinaryMapping): IOrdinaryMapping => {
 
   return first === mapping ? second : first;
 };
-
-function asdf(r: IRelationship) {
-  return ((r.roles[0].lb === "0" || r.roles[0].ub === "1") && r.roles[1].ub === "M") ||
-    ((r.roles[1].lb === "0" || r.roles[1].ub === "1") && r.roles[0].ub === "M");
-}

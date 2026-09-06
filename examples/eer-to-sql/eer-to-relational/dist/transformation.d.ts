@@ -17,7 +17,8 @@ export declare class EerToRelational extends DecisionAwareM2M<em.IEERSchema, rmT
      * The audited or plain columns of an entity's table: a rule pair
      * selected by the TableAuditing issue, the higher-order
      * withAuditColumns applied inside the audited option (the confirmed
-     * zero-argument composition).
+     * simplified zero-argument composition, no table qualifier under
+     * table scopes).
      */
     tableColumns(e: em.IEntity): ExprNode<rmT.IColumn>[];
     auditedColumns(e: em.IEntity): ExprNode<rmT.IColumn>[];
@@ -81,6 +82,9 @@ export declare class EerToRelational extends DecisionAwareM2M<em.IEERSchema, rmT
      * emitted, types mirrored. One source of truth for emission and
      * referencing. */
     private keyColumnsPlan;
+    /** A leaf attribute's domain; composite parents have components
+     * instead and are mapped by their components (v2 stage 3). */
+    private domainOf;
     private keyAttrsOf;
     private ownerOf;
     private rootOf;

@@ -128,7 +128,8 @@ export class EerToRelational extends DecisionAwareM2M<
    * The audited or plain columns of an entity's table: a rule pair
    * selected by the TableAuditing issue, the higher-order
    * withAuditColumns applied inside the audited option (the confirmed
-   * zero-argument composition).
+   * simplified zero-argument composition, no table qualifier under
+   * table scopes).
    */
   @E2E()
   @VarPoint("TableAuditing")
@@ -140,7 +141,7 @@ export class EerToRelational extends DecisionAwareM2M<
   @VarOption("tableColumns", Option("AuditColumns"))
   auditedColumns(e: em.IEntity): ExprNode<rmT.IColumn>[] {
     const base = () => (e.attributes as em.IAttribute[]).map((a) => this.attributeToColumn(a))
-    return withAuditColumns(this.tableNameOf(e))(base)()
+    return withAuditColumns(base)()
   }
 
   @VarOption("tableColumns", Option("NoAuditColumns"))
@@ -154,10 +155,10 @@ export class EerToRelational extends DecisionAwareM2M<
     return (
       <Column
         name={this.applyNaming(a.name)}
-        type={this.getColumnType(a.attrDomain)}
+        type={this.getColumnType(this.domainOf(a))}
         isKey={a.isKey}
         isNullable={!a.isKey}
-        isAutoincrement={a.isKey && !composite && this.primaryKeyStrategy(a) && this.getColumnType(a.attrDomain) === "INTEGER"}
+        isAutoincrement={a.isKey && !composite && this.primaryKeyStrategy(a) && this.getColumnType(this.domainOf(a)) === "INTEGER"}
       />
     )
   }
@@ -231,7 +232,7 @@ export class EerToRelational extends DecisionAwareM2M<
     return (
       <Column
         name={this.applyNaming(a.name)}
-        type={this.getColumnType(a.attrDomain)}
+        type={this.getColumnType(this.domainOf(a))}
         isKey={a.isKey}
         isNullable={!a.isKey}
         isAutoincrement={false}
@@ -500,7 +501,7 @@ export class EerToRelational extends DecisionAwareM2M<
       const taken = new Set<string>((e.attributes as em.IAttribute[]).map((a) => this.applyNaming(a.name)))
       plan = [
         ...ownerPlan.map((c) => ({ name: this.uniqueName(this.fkColumnName(ownerTable, c.name), taken), type: c.type })),
-        ...this.keyAttrsOf(e).map((a) => ({ name: this.applyNaming(a.name), type: this.getColumnType(a.attrDomain) })),
+        ...this.keyAttrsOf(e).map((a) => ({ name: this.applyNaming(a.name), type: this.getColumnType(this.domainOf(a)) })),
       ]
     } else if (store.isTypeOf(e, em.Subtype)) {
       const spec = (e as em.ISubtype).supertype as em.ISpecialization
@@ -517,10 +518,20 @@ export class EerToRelational extends DecisionAwareM2M<
         plan = rootPlan.map((c) => ({ name: this.uniqueName(this.fkColumnName(rootTable, c.name), taken), type: c.type }))
       }
     } else {
-      plan = this.keyAttrsOf(e).map((a) => ({ name: this.applyNaming(a.name), type: this.getColumnType(a.attrDomain) }))
+      plan = this.keyAttrsOf(e).map((a) => ({ name: this.applyNaming(a.name), type: this.getColumnType(this.domainOf(a)) }))
     }
     this.keyPlans.set(e, plan)
     return plan
+  }
+
+  /** A leaf attribute's domain; composite parents have components
+   * instead and are mapped by their components (v2 stage 3). */
+  private domainOf(a: em.IAttribute): em.IDomain {
+    const d = a.attrDomain as em.IDomain | undefined
+    if (!d) {
+      throw new Error(`Attribute '${a.name}' has no domain; composite attributes are mapped from their components.`)
+    }
+    return d
   }
 
   private keyAttrsOf(e: em.IEntity): em.IAttribute[] {

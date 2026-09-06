@@ -45,11 +45,11 @@ try {
   expect('the weak chain produces a composite foreign key to book_copy',
     out.includes('<ForeignKey name="fk_reservation_book_copy"')
     && out.includes('$refByName="book_copy/book_id"')
-    && out.includes('$refByName="book_copy/copy_no"'))
+    && out.includes('$refByName="book_copy/no"'))
   expect('M:N becomes a join table', out.includes('<Table name="written_by"'))
   expect('1:N defaults to a join table', out.includes('<Table name="borrows"'))
-  expect('auditing defaults on: audit columns appear',
-    out.includes('book_createdBy') && out.includes('book_createdAt'))
+  expect('auditing defaults on: audit columns appear (simplified form, scoped per table)',
+    out.includes('name="createdBy"') && out.includes('name="createdAt"'))
   expect('every foreign key gets an index by default', out.includes('<Index name="ix_fk_member_person"'))
   expect('no legacy flat foreign-key marks', !out.includes('isForeignKey={true}'))
 
@@ -76,10 +76,12 @@ try {
   const out2 = read('demo/out2')
 
   expect('an abstract root under TablePerClass gets no table', !out2.includes('<Table name="person"'))
+  // natural names: the copied root column is plain `name`, so member
+  // and staff each add one occurrence beyond author's own
   expect('TablePerClass copies the root columns into the subtype table',
-    out2.includes('<Table name="member"') && out2.includes('person_name'))
+    out2.includes('<Table name="member"') && out2.split('<Column name="name"').length >= 4)
   expect('the ForeignKey option grafts the borrows key into book_copy',
-    out2.includes('<ForeignKey name="fk_book_copy_borrows"') && out2.includes('$refByName="member/person_id"'))
+    out2.includes('<ForeignKey name="fk_book_copy_borrows"') && out2.includes('$refByName="member/id"'))
   expect('no join table for borrows under the ForeignKey option', !out2.includes('<Table name="borrows"'))
 
   const tr2 = read('demo/tr2')

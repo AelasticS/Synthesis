@@ -490,8 +490,10 @@ describe('tx run --config with deleted choices (default materialization)', () =>
   })
 
   it('applies and announces the per-element default when one element choice was deleted', async () => {
-    const edited = removeDecisionBlock(readFileSync(matCfgPath(), 'utf-8'), 'ec_personId')
-    expect(edited).not.toContain('ec_personId')
+    // element choices carry scope-qualified names since entities became
+    // name scopes (ec_<Entity>_<attribute>)
+    const edited = removeDecisionBlock(readFileSync(matCfgPath(), 'utf-8'), 'ec_Person_personId')
+    expect(edited).not.toContain('ec_Person_personId')
     writeFileSync(join(modelsDir, 'com', 'example', 'mat-cfg-no-pid.tsx'), edited)
 
     const { stdout, error } = await run([

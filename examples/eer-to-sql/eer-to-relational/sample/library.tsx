@@ -17,31 +17,40 @@ export const $synth = {
   description: 'The Library: kernels, an abstract root with a hierarchy, a weak chain, an M:N and a 1:N relationship'
 } as const
 
+/**
+ * Entities scope their attributes' names, so every key is simply `id`
+ * and the shared domain vocabulary is declared once at the model
+ * level, where every entity's bare references reach it by outward
+ * probing.
+ */
 export default (store: ModelStore): ExprNode<t.IEERSchema> => (
   <EERSchema name="Library" store={store}>
+    <Domain name="number" />
+    <Domain name="string" />
+
     <Entity name="Book">
-      <Attribute name="bookId" isKey={true}>
-        <Domain name="number" />
+      <Attribute name="id" isKey={true}>
+        <Domain $refByName="number" />
       </Attribute>
-      <Attribute name="bookTitle" isKey={false}>
-        <Domain name="string" />
+      <Attribute name="title" isKey={false}>
+        <Domain $refByName="string" />
       </Attribute>
     </Entity>
     <Entity name="Author">
-      <Attribute name="authorId" isKey={true}>
+      <Attribute name="id" isKey={true}>
         <Domain $refByName="number" />
       </Attribute>
-      <Attribute name="authorName" isKey={false}>
+      <Attribute name="name" isKey={false}>
         <Domain $refByName="string" />
       </Attribute>
     </Entity>
 
     {/* An abstract root: every person is a member or a staff member. */}
     <Entity name="Person" isAbstract={true}>
-      <Attribute name="personId" isKey={true}>
+      <Attribute name="id" isKey={true}>
         <Domain $refByName="number" />
       </Attribute>
-      <Attribute name="personName" isKey={false}>
+      <Attribute name="name" isKey={false}>
         <Domain $refByName="string" />
       </Attribute>
     </Entity>
@@ -50,7 +59,7 @@ export default (store: ModelStore): ExprNode<t.IEERSchema> => (
         domain={<Entity $refByName="Person" />}
         lb="0" ub="1" cnMapp="R" dcnMapp="R" />
       <Subtype name="Member" cnSupertype="R" dcnSupertype="R" cnSubtype="R" dcnSubtype="R">
-        <Attribute name="memberSince" isKey={false}>
+        <Attribute name="since" isKey={false}>
           <Domain $refByName="string" />
         </Attribute>
       </Subtype>
@@ -64,7 +73,7 @@ export default (store: ModelStore): ExprNode<t.IEERSchema> => (
     {/* The weak chain: a copy belongs to a book, a reservation to a
         copy, so a reservation's key and foreign key are composite. */}
     <Weak name="BookCopy">
-      <Attribute name="copyNo" isKey={true}>
+      <Attribute name="no" isKey={true}>
         <Domain $refByName="number" />
       </Attribute>
     </Weak>
@@ -74,10 +83,10 @@ export default (store: ModelStore): ExprNode<t.IEERSchema> => (
       lb="1" ub="1" cnMapp="R" dcnMapp="R"
       cnWeakOwner="R" dcnWeakOwner="R" />
     <Weak name="Reservation">
-      <Attribute name="resNo" isKey={true}>
+      <Attribute name="no" isKey={true}>
         <Domain $refByName="number" />
       </Attribute>
-      <Attribute name="resDate" isKey={false}>
+      <Attribute name="date" isKey={false}>
         <Domain $refByName="string" />
       </Attribute>
     </Weak>

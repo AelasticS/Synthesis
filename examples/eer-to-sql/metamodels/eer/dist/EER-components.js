@@ -1,5 +1,5 @@
 import * as e from "./EER.meta.model.type.js";
-import { allowedAsTopLevelElement, ExprNode, } from "@aelastics/synthesis/jsx";
+import { allowedAsTopLevelElement, defaultConnectionInfo, ExprNode, } from "@aelastics/synthesis/jsx";
 export const EERSchema = (props) => {
     return new ExprNode(e.EERSchema, props, undefined);
 };
@@ -19,11 +19,19 @@ export const Weak = (props) => {
     // { objectClassification: "Weak", ...props },
     props, undefined);
 };
+// An Attribute nests in an Entity (via attributes) or, one level deep,
+// in a composite parent Attribute (via components); ordered candidates
+// with first-available semantics pick the right one per context.
 export const Attribute = (props) => {
-    return new ExprNode(e.Attribute, props, "attributes");
+    return new ExprNode(e.Attribute, props, defaultConnectionInfo(["attributes", "components"]));
 };
+// A Domain is declared once as model-level vocabulary (a direct child
+// of the schema connects into `elements`) or types an attribute (a
+// child of an Attribute connects into `attrDomain`). Model-level
+// declaration matters under entity scopes: a domain declared inside an
+// entity would land in that entity's scope.
 export const Domain = (props) => {
-    return new ExprNode(e.Domain, props, "attrDomain");
+    return new ExprNode(e.Domain, props, defaultConnectionInfo(["attrDomain", "elements"]));
 };
 export const Relationship = (props) => {
     return new ExprNode(e.Relationship, props, undefined);

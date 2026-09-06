@@ -79,21 +79,22 @@ let EerToRelational = class EerToRelational extends DecisionAwareM2M {
      * The audited or plain columns of an entity's table: a rule pair
      * selected by the TableAuditing issue, the higher-order
      * withAuditColumns applied inside the audited option (the confirmed
-     * zero-argument composition).
+     * simplified zero-argument composition, no table qualifier under
+     * table scopes).
      */
     tableColumns(e) {
         throw new Error("Not implemented VarOptions for VarPoint TableAuditing");
     }
     auditedColumns(e) {
         const base = () => e.attributes.map((a) => this.attributeToColumn(a));
-        return withAuditColumns(this.tableNameOf(e))(base)();
+        return withAuditColumns(base)();
     }
     plainColumns(e) {
         return e.attributes.map((a) => this.attributeToColumn(a));
     }
     attributeToColumn(a) {
         const composite = this.keyAttrsOf(a.attrEntity).length > 1;
-        return (createExprNode(Column, { name: this.applyNaming(a.name), type: this.getColumnType(a.attrDomain), isKey: a.isKey, isNullable: !a.isKey, isAutoincrement: a.isKey && !composite && this.primaryKeyStrategy(a) && this.getColumnType(a.attrDomain) === "INTEGER" }));
+        return (createExprNode(Column, { name: this.applyNaming(a.name), type: this.getColumnType(this.domainOf(a)), isKey: a.isKey, isNullable: !a.isKey, isAutoincrement: a.isKey && !composite && this.primaryKeyStrategy(a) && this.getColumnType(this.domainOf(a)) === "INTEGER" }));
     }
     // ── the hierarchies pass ─────────────────────────────────────────────
     hierarchyToTables(spec) {
@@ -132,7 +133,7 @@ let EerToRelational = class EerToRelational extends DecisionAwareM2M {
      * table: a new element with the same name (the table scope keeps it
      * unambiguous) and no autoincrement. */
     copiedColumn(a) {
-        return (createExprNode(Column, { name: this.applyNaming(a.name), type: this.getColumnType(a.attrDomain), isKey: a.isKey, isNullable: !a.isKey, isAutoincrement: false }));
+        return (createExprNode(Column, { name: this.applyNaming(a.name), type: this.getColumnType(this.domainOf(a)), isKey: a.isKey, isNullable: !a.isKey, isAutoincrement: false }));
     }
     // A second point on the same issue, answering with the strategy VALUE
     // for the places that must know where an entity's rows live (tableFor,
@@ -303,7 +304,7 @@ let EerToRelational = class EerToRelational extends DecisionAwareM2M {
             const taken = new Set(e.attributes.map((a) => this.applyNaming(a.name)));
             plan = [
                 ...ownerPlan.map((c) => ({ name: this.uniqueName(this.fkColumnName(ownerTable, c.name), taken), type: c.type })),
-                ...this.keyAttrsOf(e).map((a) => ({ name: this.applyNaming(a.name), type: this.getColumnType(a.attrDomain) })),
+                ...this.keyAttrsOf(e).map((a) => ({ name: this.applyNaming(a.name), type: this.getColumnType(this.domainOf(a)) })),
             ];
         }
         else if (store.isTypeOf(e, em.Subtype)) {
@@ -324,10 +325,19 @@ let EerToRelational = class EerToRelational extends DecisionAwareM2M {
             }
         }
         else {
-            plan = this.keyAttrsOf(e).map((a) => ({ name: this.applyNaming(a.name), type: this.getColumnType(a.attrDomain) }));
+            plan = this.keyAttrsOf(e).map((a) => ({ name: this.applyNaming(a.name), type: this.getColumnType(this.domainOf(a)) }));
         }
         this.keyPlans.set(e, plan);
         return plan;
+    }
+    /** A leaf attribute's domain; composite parents have components
+     * instead and are mapped by their components (v2 stage 3). */
+    domainOf(a) {
+        const d = a.attrDomain;
+        if (!d) {
+            throw new Error(`Attribute '${a.name}' has no domain; composite attributes are mapped from their components.`);
+        }
+        return d;
     }
     keyAttrsOf(e) {
         return (e.attributes ?? []).filter((a) => a.isKey);

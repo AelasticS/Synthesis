@@ -39,16 +39,16 @@ try {
   const sql = sqlFile ? readFileSync(join(genDir, sqlFile), 'utf-8') : ''
 
   expect('composite primary key down the weak chain',
-    sql.includes('PRIMARY KEY (book_id, copy_no, res_no)'))
+    sql.includes('PRIMARY KEY (book_id, book_copy_no, no)'))
   expect('named composite foreign key as an ALTER TABLE constraint',
     sql.includes('ALTER TABLE reservation ADD CONSTRAINT fk_reservation_book_copy')
-    && sql.includes('FOREIGN KEY (book_id, copy_no) REFERENCES book_copy (book_id, copy_no);'))
+    && sql.includes('FOREIGN KEY (book_id, book_copy_no) REFERENCES book_copy (book_id, no);'))
   expect('the joined subtype constraint references the root',
     sql.includes('ALTER TABLE member ADD CONSTRAINT fk_member_person')
-    && sql.includes('REFERENCES person (person_id);'))
+    && sql.includes('REFERENCES person (id);'))
   expect('foreign keys get indexes',
     sql.includes('CREATE INDEX ix_fk_member_person ON member (person_id);'))
-  expect('audit columns reach the DDL', sql.includes('book_createdAt DATE'))
+  expect('audit columns reach the DDL', sql.includes('createdAt DATE'))
   expect('no inline REFERENCES remain (constraints are separate)',
     !sql.split('ALTER TABLE').at(0).includes('REFERENCES'))
 

@@ -48,13 +48,33 @@ export const EERModel = (store: ModelStore): ExprNode<t.ITypeModel> => (
 
     <TypeSubtype name="Attribute" superType={<TypeObject $refByName="ERConcept" />}>
       <Property name="attrDomain"
-                domain={<TypeSubtype name="Domain" superType={<TypeObject $refByName="ERConcept" />} />}
+                domain={
+                  <TypeSubtype name="Domain" superType={<TypeObject $refByName="ERConcept" />}>
+                    <Property name="baseType"
+                              domain={<TypeOptional name="OptionalBaseType" optionalType={<TypeString $refByName="string" />} />} />
+                    <Property name="check"
+                              domain={<TypeOptional name="OptionalCheck" optionalType={<TypeString $refByName="string" />} />} />
+                    {/* named domainDefault: property-definition names are
+                        unique per model until per-type property scopes land */}
+                    <Property name="domainDefault"
+                              domain={<TypeOptional name="OptionalDomainDefault" optionalType={<TypeString $refByName="string" />} />} />
+                  </TypeSubtype>
+                }
       />
       <Property name="isKey">
         <PropertyDomain $refByName="boolean" />
       </Property>
       <Property name="defaultValue"
                 domain={<TypeOptional name="OptionalString" optionalType={<TypeString $refByName="string" />} />}
+      />
+      <Property name="lb"
+                domain={<TypeOptional name="OptionalAttrLb" optionalType={<TypeString $refByName="string" />} />}
+      />
+      <Property name="ub"
+                domain={<TypeOptional name="OptionalAttrUb" optionalType={<TypeString $refByName="string" />} />}
+      />
+      <Property name="components"
+                domain={<TypeArray name="ArrayOfComponents" elementType={<TypeObject $refByName="Attribute" />} />}
       />
       <Property name="attrEntity"
                 domain={
