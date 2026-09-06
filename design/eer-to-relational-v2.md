@@ -532,7 +532,19 @@ absent concepts.
 
 ## Deferred, out of v2
 
-withHistoryColumns; constraint representation in the
+withHistoryTable (reshaped from withHistoryColumns in the 2026-09-06
+discussion: history is a SEPARATE table per versioned base table,
+identification-dependent like a weak entity, key = base key plus a
+temporal discriminator, deliberately NOT existence-dependent since
+history outlives deletion, so no cascading foreign key; a table-set
+step transformer, the higher-order pattern one granularity above the
+column-step audit transformer, maintained by the stage 4 trigger
+machinery; the design space is a RowHistory issue whose HistoryTable
+option is a CompositeOption opening the HistoryDiscriminator
+sub-issue, ValidFromTimestamp default or VersionCounter; agreed: the
+nesting is design-space structure only, configurations stay flat and
+dispatch is unchanged, with config init's sub-issue traversal a
+small separate generator improvement); constraint representation in the
 metamodel-as-model (a Constraint concept in the types meta-metamodel;
 belongs with the platform's metamodel-as-data contract);
 Union-of-Literals value restrictions in the as-models (expressible

@@ -303,6 +303,52 @@ See `examples/eer-to-sql/rel-to-sql-ddl/presets/` for the three
 shipped presets and the docs page "The flagship: EER to relational
 mapping rules" for the design space they close.
 
+## Composite options: an option that opens sub-issues
+
+A design space is not always flat: some questions only exist once a
+particular option is chosen. The decision metamodel states this with
+`CompositeOption`, an option carrying sub-issues, the issues that
+become meaningful exactly when that option is selected (authored with
+the `ElementSubIssue` tag). A row-versioning policy is the canonical
+shape: whether a table keeps history is one issue, and only the
+history-keeping option opens the question of what distinguishes row
+versions:
+
+```tsx
+<ElementIssue name="RowHistory" description="Whether this table keeps row history">
+  <Option name="NoHistory" description="Current rows only" isDefault={true}
+          optionType={<SimpleOption name="NoHistoryOption" />} />
+  <Option name="HistoryTable" description="A separate history table records row versions"
+          optionType={
+            <CompositeOption name="HistoryTableOption">
+              <ElementSubIssue name="HistoryDiscriminator" description="What distinguishes row versions">
+                <Option name="ValidFromTimestamp" description="A validity timestamp" isDefault={true}
+                        optionType={<SimpleOption name="ValidFromOption" />} />
+                <Option name="VersionCounter" description="A monotonic version number"
+                        optionType={<SimpleOption name="VersionCounterOption" />} />
+              </ElementSubIssue>
+            </CompositeOption>
+          } />
+</ElementIssue>
+```
+
+The nesting is a fact about the design space, not about execution. A
+configuration remains a flat list of choices, each naming its issue
+and option, and the engine resolves a sub-issue exactly like a
+top-level one. The conditionality polices itself at run time: a
+variation point inside the composite option's code path is only
+consulted when that option was chosen, so an unconsulted sub-issue
+needs no choice, and a consulted one without a choice falls back to
+its declared default, announced as usual. One tooling note:
+`config init` enumerates the model's top-level issues, so today a
+sub-issue's choice comes from a preset or a hand-written
+configuration.
+
+The decision metamodel also carries cross-tree `Constraint` elements
+(`Requires` and `Exclude` between options) for dependencies that span
+issues; like all declared constraints they are validation-time facts
+over a configuration's choice set, never execution machinery.
+
 ## Guarantees
 
 The framework provides several guarantees for well-formed transformations with design decisions.
