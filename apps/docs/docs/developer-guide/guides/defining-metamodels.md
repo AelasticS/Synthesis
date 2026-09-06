@@ -142,6 +142,62 @@ resolution in detail, and
 [Part 4 of the model-to-model tutorial](../tutorial/model-to-model/part-4-name-scopes/index.md)
 shows what the declaration changes across a whole transformation.
 
+## Constraints
+
+A metamodel can declare semantic rules directly on its concepts with
+`addValidator`, the same mechanism every aelastics type carries (see
+[Specifying Constraints](../../types/defining-types/constraints.md)).
+The predicate receives the element instance with its links live, so
+rules can span the graph:
+
+```typescript
+// an aggregation relates at least two participants
+Aggregation.addValidator({
+  predicate: (v) => (v?.agrMapp?.length ?? 0) >= 2,
+  message: (_v, label) => `${label}: an aggregation relates at least two participants`,
+})
+
+// identification dependencies must not loop: ONE rule on the schema
+// walks the COMBINED graph (weak ownership, aggregation
+// participation, subtyping) once per validation, because kind-local
+// checks would miss mixed cycles, e.g. a weak entity owned by an
+// aggregation it participates in. Typed with the metamodel's own
+// interfaces; the message names the elements on the cycles.
+const identityDependencies = (el: IEntity): IEntity[] => { /* weakMap.domain, agrMapp[].domain, supertype.mapping.domain */ }
+const elementsOnIdentityCycles = (schema: IEERSchema): IEntity[] => { /* colored DFS over schema.elements */ }
+
+EERSchema.addValidator({
+  predicate: (v: IEERSchema) => elementsOnIdentityCycles(v).length === 0,
+  message: (v: IEERSchema, label?: string) =>
+    `${label}: cyclic identification dependency involving ${elementsOnIdentityCycles(v).map((e) => e.name).join(", ")}`,
+})
+```
+
+Placement follows the rule's nature: an element-local rule (arity, a
+required mapping) sits on the element's type, while a whole-graph rule
+(acyclicity) sits on the schema type, so it runs once per validation
+rather than once per element. The full walker is in the eer-metamodel
+source (EER.meta.model.type.ts).
+
+Timing is the point to understand. Validators never run during
+authoring or rendering, because a model under construction is
+legitimately incomplete: a weak entity exists before the mapping that
+names its owner, and arrays grow one element at a time. Declared
+constraints are judgments about the finished model, and they run at a
+validation point: `synth model validate <ref>` renders the model and
+then executes every element's declared validators, reporting each
+violation with the rule's own message. The same reasoning explains a
+modeling guideline from the creation order: a backlink on a child
+(`Subtype.supertype`, filled the moment the child connects to its
+parent) may be a mandatory property, while a slot filled by a later
+element (`Weak.weakMap`) must be type-level optional, with the
+completeness rule declared as a constraint instead.
+
+The full EER metamodel of the eer-to-sql suite declares its doctrine
+this way: binary relationships (the message points the modeler to
+Aggregation), aggregation arity, weak-mapping presence, and the
+schema-level identification-dependency acyclicity shown above.
+
 ## Extracting TypeScript Interfaces
 
 Use `t.TypeOf<>` to extract a TypeScript interface from any type definition. This gives you compile-time type checking when working with model instances.

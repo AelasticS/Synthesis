@@ -88,6 +88,82 @@ try {
   expect('trace records the explicit strategy with a choice reference',
     tr2.includes('issue="InheritanceStrategy" option="TablePerClass"') && !tr2.includes('option="TablePerClass" byDefault'))
 
+  // ── declared constraints: the validation point ────────────────────
+  const validateOut = cli(['model', 'validate', 'demo/library'])
+  expect('model validate runs the declared constraints', validateOut.includes('[ok] declared constraints hold'))
+
+  // a model that renders fine but violates the doctrine five ways: a
+  // weak-ownership cycle, a MIXED cycle (a weak owned by an aggregation
+  // it participates in), a subtype cycle, a one-participant
+  // aggregation, and a one-role relationship
+  const badPath = join(home, 'invalid.tsx')
+  writeFileSync(badPath, `/** @jsx createExprNode */
+import { createExprNode } from '@aelastics/synthesis/jsx'
+import { EERSchema, Entity, Weak, Attribute, Domain, Relationship, Role, WeakMapping, Aggregation, AggregationMapping, Specialization, SpecializationMapping, Subtype } from 'eer-metamodel'
+
+export const $synth = { kind: 'model', metamodel: 'eer-metamodel', author: 'verify', version: '0.1.0', description: 'constraint violations on purpose' }
+
+export default (store) => (
+  <EERSchema name="Invalid" store={store}>
+    <Domain name="number" />
+    <Entity name="K">
+      <Attribute name="id" isKey={true}><Domain $refByName="number" /></Attribute>
+    </Entity>
+    <Weak name="WA">
+      <Attribute name="no" isKey={true}><Domain $refByName="number" /></Attribute>
+    </Weak>
+    <Weak name="WB">
+      <Attribute name="no" isKey={true}><Domain $refByName="number" /></Attribute>
+    </Weak>
+    <WeakMapping name="m1" domain={<Weak $refByName="WB" />} codomain={<Weak $refByName="WA" />} lowerBound="1" upperBound="1" cnMapp="R" dcnMapp="R" cnWeakOwner="R" dcnWeakOwner="R" />
+    <WeakMapping name="m2" domain={<Weak $refByName="WA" />} codomain={<Weak $refByName="WB" />} lowerBound="1" upperBound="1" cnMapp="R" dcnMapp="R" cnWeakOwner="R" dcnWeakOwner="R" />
+    <Weak name="W2">
+      <Attribute name="no" isKey={true}><Domain $refByName="number" /></Attribute>
+    </Weak>
+    <Aggregation name="G2">
+      <AggregationMapping name="g2k" domain={<Entity $refByName="K" />} lowerBound="0" upperBound="M" cnMapp="R" dcnMapp="R" cnAggrOwner="R" dcnAggrOwner="R" />
+      <AggregationMapping name="g2w" domain={<Weak $refByName="W2" />} lowerBound="0" upperBound="M" cnMapp="R" dcnMapp="R" cnAggrOwner="R" dcnAggrOwner="R" />
+    </Aggregation>
+    <WeakMapping name="m3" domain={<Aggregation $refByName="G2" />} codomain={<Weak $refByName="W2" />} lowerBound="1" upperBound="1" cnMapp="R" dcnMapp="R" cnWeakOwner="R" dcnWeakOwner="R" />
+    <Specialization name="S1">
+      <Subtype name="SubB" cnSupertype="R" dcnSupertype="R" cnSubtype="R" dcnSubtype="R" />
+    </Specialization>
+    <Specialization name="S2">
+      <SpecializationMapping name="s2m" domain={<Subtype $refByName="SubB" />} lowerBound="0" upperBound="1" cnMapp="R" dcnMapp="R" />
+      <Subtype name="SubA" cnSupertype="R" dcnSupertype="R" cnSubtype="R" dcnSubtype="R" />
+    </Specialization>
+    <Specialization $refByName="S1">
+      <SpecializationMapping name="s1m" domain={<Subtype $refByName="SubA" />} lowerBound="0" upperBound="1" cnMapp="R" dcnMapp="R" />
+    </Specialization>
+    <Aggregation name="Solo">
+      <AggregationMapping name="only" domain={<Entity $refByName="K" />} lowerBound="0" upperBound="M" cnMapp="R" dcnMapp="R" cnAggrOwner="R" dcnAggrOwner="R" />
+    </Aggregation>
+    <Relationship name="half">
+      <Role name="one" lowerBound="0" upperBound="M" domain={<Entity $refByName="K" />} />
+    </Relationship>
+  </EERSchema>
+)
+`)
+  cli(['model', 'import', badPath, '--as', 'demo/invalid'])
+  let constraintFailure = ''
+  try {
+    cli(['model', 'validate', 'demo/invalid'])
+    expect('a violating model fails validation', false)
+  } catch (err) {
+    constraintFailure = String(err.stdout ?? '') + String(err.stderr ?? '')
+  }
+  // one schema-level violation, its message naming the cycle members
+  expect('identification-dependency cycles are rejected once, on the schema',
+    constraintFailure.includes("[fail] EERSchema 'Invalid'")
+    && constraintFailure.includes('cyclic identification dependency'))
+  expect('the weak-chain cycle members are named', constraintFailure.includes('WA') && constraintFailure.includes('WB'))
+  expect('the MIXED weak-aggregation cycle members are named',
+    constraintFailure.includes('W2') && constraintFailure.includes('G2'))
+  expect('the subtype cycle members are named',
+    constraintFailure.includes('SubA') && constraintFailure.includes('SubB'))
+  expect('the aggregation arity is enforced', constraintFailure.includes('at least two participants'))
+  expect('the binary-relationship doctrine is enforced', constraintFailure.includes('binary'))
+
   if (failures > 0) {
     console.error(`eer-to-relational verify: ${failures} assertion(s) failed`)
     process.exit(1)

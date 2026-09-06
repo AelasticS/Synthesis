@@ -204,6 +204,43 @@ merging at load), which per ADR-015 belongs to the envelope and the
 platform's model repository, alongside general model overlays. Out
 of scope here; noted for the platform-alignment workstream.
 
+## Declared constraints and the validation point
+
+Added to scope 2026-09-06 (decision 13, from the user's metamodel
+review). The EER metamodel declares its semantic rules on the types
+with addValidator: weak-mapping presence, aggregation arity (at least
+two participants), binary relationships (the message teaches the
+doctrine: relate more entities with an Aggregation), and ONE
+schema-level identification-dependency acyclicity rule on EERSchema,
+walking the combined graph of weak ownership, aggregation
+participation, and subtyping with a colored DFS, once per validation,
+its message naming the elements on the cycles. Both refinements are
+the user's review catches: kind-local walkers miss mixed cycles (a
+weak entity owned by an aggregation it participates in is the
+canonical case) and subtyping belongs in the same graph (round two);
+a whole-graph rule belongs on the schema, run once, and the walker is
+typed with the metamodel's own interfaces rather than unknown (round
+three). The suite verification rejects all five doctrine violations
+through the real CLI: a weak chain cycle, the mixed weak-aggregation
+cycle, a subtype cycle, a one-participant aggregation, a one-role
+relationship.
+Validators run only in a validation traversal, never during authoring
+or rendering, because a model under construction is legitimately
+incomplete; the creation-order rule follows: a backlink on a child
+(Subtype.supertype) may be mandatory, a slot filled by a later
+element (Weak.weakMap) stays type-level optional with the
+completeness rule declared as a constraint.
+
+The traversal is a library helper (metamodel-core
+checkModelConstraints: every element checked against its concrete
+type's validators via checkValidators, shallow, no deep structural
+recursion) and the CLI's `model validate` runs it after the gate
+render, reporting each violation with the rule's own message; the
+import gate is intentionally unchanged (gate-time enforcement is a
+recorded follow-up option). Documented in the defining-metamodels
+guide (Constraints section) and the managing-models user guide; the
+tutorial stays untouched per the standing simplicity directive.
+
 ## Full semantic domains (the v1 decision 5 workstream, executed)
 
 EER side: `Domain` grows from an empty named concept to a user-defined
@@ -369,6 +406,10 @@ ERConcept stays untouched (used by authoring components).
     RESOLVED 2026-09-06: in, as proposed; the oracle preset emits
     index-organized tables for the same logical option. Alongside,
     the user grew decision 9 to three presets built by extension.
+13. Declared constraints and the validation point (new, from the
+    user's metamodel review). RESOLVED 2026-09-06: in scope as the
+    section above describes; import-gate enforcement stays a
+    follow-up.
 
 ## Execution order and gates
 
@@ -474,3 +515,18 @@ fkOnUpdate), and rich-db exercising a checked money domain, a
 domain-linked column, and actions on the composite foreign key.
 PAUSED at the user's request for the metamodel review before stage 3
 begins.
+
+Review round one, 2026-09-06, folded in (commits f813839, e012885 and
+the constraint slice): full cardinality names lowerBound/upperBound
+across the metamodel, samples, transformation, binding condition, and
+CLI fixtures; the at-least-two aggregation arity with the BookSeries
+sample gaining Publisher; the binary doctrine commented on
+Relationship; weakMap kept optional with the verified creation-order
+reason documented (a mandatory link breaks rendering; backlinks
+filled at child creation may be mandatory). Decision 13 delivered:
+doctrine constraints plus acyclicity walkers declared on the EER
+types, the checkModelConstraints helper (library test), `model
+validate` running the traversal (CLI tests; suite verification
+asserts the positive run and three negative rejections through the
+real CLI), docs in defining-metamodels and managing-models. The
+relational metamodel still awaits the user's review comments.

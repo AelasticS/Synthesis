@@ -167,6 +167,53 @@ Relationship.addValidator({
     predicate: (v) => (v?.roles?.length ?? 0) === 2,
     message: (_v, label) => `${label ?? "Relationship"}: a relationship is binary (exactly two roles); relate more entities with an Aggregation`,
 });
+const identityDependencies = (el) => {
+    const e = el;
+    const deps = [];
+    const owner = e.weakMap?.domain;
+    if (owner !== undefined)
+        deps.push(owner);
+    for (const m of (e.agrMapp ?? [])) {
+        const participant = m?.domain;
+        if (participant !== undefined)
+            deps.push(participant);
+    }
+    const spec = e.supertype;
+    const root = spec?.mapping?.domain;
+    if (root !== undefined)
+        deps.push(root);
+    return deps;
+};
+const elementsOnIdentityCycles = (schema) => {
+    const WHITE = 0, GRAY = 1, BLACK = 2;
+    const color = new Map();
+    const offenders = new Set();
+    const visit = (el, stack) => {
+        const c = color.get(el) ?? WHITE;
+        if (c === GRAY) {
+            for (const s of stack.slice(stack.indexOf(el)))
+                offenders.add(s);
+            return;
+        }
+        if (c === BLACK)
+            return;
+        color.set(el, GRAY);
+        stack.push(el);
+        for (const d of identityDependencies(el))
+            visit(d, stack);
+        stack.pop();
+        color.set(el, BLACK);
+    };
+    for (const el of (schema.elements ?? []))
+        visit(el, []);
+    return [...offenders];
+};
+EERSchema.addValidator({
+    predicate: (v) => elementsOnIdentityCycles(v).length === 0,
+    message: (v, label) => `${label ?? "EERSchema"}: cyclic identification dependency (weak ownership, aggregation participation, and subtyping must not loop) involving ${elementsOnIdentityCycles(v)
+        .map((e) => String(e.name))
+        .join(", ")}`,
+});
 export const getCodomain = (mapping) => {
     return getInverse(mapping).domain;
 };

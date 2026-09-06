@@ -272,7 +272,7 @@ export async function renderForGate(
   filePath: string,
   txName: string | undefined,
   modelsDir: string
-): Promise<{ header: unknown }> {
+): Promise<Pick<RenderedModel, 'header' | 'root' | 'store'>> {
   let txPackageDir: string | undefined
   let manifest: TxManifest | undefined
   if (txName !== undefined) {
@@ -283,7 +283,7 @@ export async function renderForGate(
       txPackageDir === undefined
         ? await renderModel(filePath)
         : await renderModelWithTxContext(filePath, txPackageDir, new ModelStore(), modelsDir, manifest)
-    return { header: rendered.header }
+    return { header: rendered.header, root: rendered.root, store: rendered.store }
   } catch (err) {
     const message = errorMessage(err)
     // A configuration model's references only resolve with its

@@ -94,8 +94,16 @@ synth model show com.example/persons       # header and file location
 synth model validate com.example/persons   # render for real, check metamodel
 ```
 
-`model validate` also accepts `--against <metamodel>` to assert the header
-declares a specific metamodel. Configuration models reference their
+`model validate` also runs the metamodel's declared constraints: a
+metamodel may attach semantic rules to its concepts (an aggregation
+relates at least two participants, a relationship is binary,
+identification dependencies such as weak ownership, aggregation
+participation, and subtyping must not cycle, even combined), and
+validation reports each violation with the rule's own message. A model can import fine and still fail here,
+because importing only proves the model renders, while constraints
+judge the finished content. `model validate` also accepts
+`--against <metamodel>` to assert the header declares a specific
+metamodel. Configuration models reference their
 transformation's decision and binding models, which live in the installed
 package rather than the workspace; pass `--tx <name>` so the validation
 render pre-loads the package's parts.

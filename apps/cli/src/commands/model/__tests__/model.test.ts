@@ -282,9 +282,26 @@ describe('model validate', () => {
     expect(error).toBeUndefined()
     expect(stdout).toContain('[ok] file transpiles and imports')
     expect(stdout).toContain('[ok] default export renders')
+    expect(stdout).toContain('[ok] declared constraints hold')
     expect(stdout).toContain('[ok] $synth header present')
     expect(stdout).toContain('[ok] header.metamodel matches the metamodel import')
     expect(stdout).toContain('Model com.example/persons is valid')
+  })
+
+  it('runs declared metamodel constraints and fails on a violation', async () => {
+    // renders fine (the import gate admits it), but the metamodel's
+    // binary-relationship constraint rejects it at the validation point
+    const invalidFixture = join(packageRoot, 'src/models/__tests__/fixtures/persons-invalid.tsx')
+    const invalidCopy = join(tempDir, 'persons-invalid.tsx')
+    cpSync(invalidFixture, invalidCopy)
+    const imported = await run(['model', 'import', invalidCopy, '--as', 'com.example/persons-invalid'])
+    expect(imported.error).toBeUndefined()
+
+    const { stdout, stderr, error } = await run(['model', 'validate', 'com.example/persons-invalid'])
+    expect(error).toBeDefined()
+    expect(stdout).toContain("[fail] Relationship 'worksIn'")
+    expect(stdout + stderr).toContain('binary')
+    expect(stderr).toContain('1 declared constraint violation(s)')
   })
 
   it('warns but succeeds when the header is missing', async () => {

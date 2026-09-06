@@ -285,6 +285,62 @@ Relationship.addValidator({
     `${label ?? "Relationship"}: a relationship is binary (exactly two roles); relate more entities with an Aggregation`,
 });
 
+// One identification-dependency graph spans the kinds: a weak entity
+// depends on its owner, an aggregation on its participants, a subtype
+// on its hierarchy's root. The graph must be acyclic, because an
+// identity cannot derive from itself: a weak entity owned by an
+// aggregation that the same weak entity participates in is just as
+// circular as a weak chain that loops, and only the combined walk
+// catches such mixed cases. Acyclicity is a property of the WHOLE
+// schema's graph, so the rule sits on EERSchema and runs once per
+// validation, not once per element; the message names the elements on
+// the cycles.
+type IDependencyCarrier = Partial<IWeak> & Partial<IAggregation> & Partial<ISubtype>;
+
+const identityDependencies = (el: IEntity): IEntity[] => {
+  const e = el as IDependencyCarrier;
+  const deps: IEntity[] = [];
+  const owner = (e.weakMap as IWeakMapping | undefined)?.domain as IEntity | undefined;
+  if (owner !== undefined) deps.push(owner);
+  for (const m of (e.agrMapp ?? []) as IAggregationMapping[]) {
+    const participant = m?.domain as IEntity | undefined;
+    if (participant !== undefined) deps.push(participant);
+  }
+  const spec = e.supertype as ISpecialization | undefined;
+  const root = (spec?.mapping as ISpecializationMapping | undefined)?.domain as IEntity | undefined;
+  if (root !== undefined) deps.push(root);
+  return deps;
+};
+
+const elementsOnIdentityCycles = (schema: IEERSchema): IEntity[] => {
+  const WHITE = 0, GRAY = 1, BLACK = 2;
+  const color = new Map<IEntity, number>();
+  const offenders = new Set<IEntity>();
+  const visit = (el: IEntity, stack: IEntity[]): void => {
+    const c = color.get(el) ?? WHITE;
+    if (c === GRAY) {
+      for (const s of stack.slice(stack.indexOf(el))) offenders.add(s);
+      return;
+    }
+    if (c === BLACK) return;
+    color.set(el, GRAY);
+    stack.push(el);
+    for (const d of identityDependencies(el)) visit(d, stack);
+    stack.pop();
+    color.set(el, BLACK);
+  };
+  for (const el of (schema.elements ?? []) as IEntity[]) visit(el, []);
+  return [...offenders];
+};
+
+EERSchema.addValidator({
+  predicate: (v: IEERSchema) => elementsOnIdentityCycles(v).length === 0,
+  message: (v: IEERSchema, label?: string) =>
+    `${label ?? "EERSchema"}: cyclic identification dependency (weak ownership, aggregation participation, and subtyping must not loop) involving ${elementsOnIdentityCycles(v)
+      .map((e) => String(e.name))
+      .join(", ")}`,
+});
+
 export type IERConcept = t.TypeOf<typeof ERConcept>;
 export type IDomain = t.TypeOf<typeof Domain>;
 export type ISubmodel = t.TypeOf<typeof Submodel>;
