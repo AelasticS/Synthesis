@@ -3,9 +3,9 @@ import { ExprNode } from "@aelastics/synthesis/jsx";
 import { ModelStore } from "@aelastics/synthesis/store";
 import * as t from "@aelastics/synthesis/metamodels/binding/model";
 /**
- * Binding of the relational metamodel to the DDL generation design space.
- * The only issue (IdentifierQuoting) is a global one, so there are no
- * per-element bindings; the default-configuration generator derives one
- * model-wide choice from the decision model alone.
+ * Binding of the relational metamodel to the DDL generation design
+ * space. The global issues need no bindings; the per-table Clustering
+ * issue binds to the Table concept, so configurations carry one
+ * clustering choice per table of the source schema.
  */
 export declare const Rel_Bindings: (store: ModelStore) => ExprNode<t.IBindingModel>;

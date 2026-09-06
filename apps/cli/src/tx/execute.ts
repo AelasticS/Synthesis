@@ -405,10 +405,13 @@ export async function executeRun(request: ExecuteRequest): Promise<void> {
     } catch {
       declaredSourceRef = declaredSource
     }
-    if (declaredSourceRef !== inRef) {
+    // A configuration that declares no source reference is
+    // source-agnostic (a shipped preset closing global issues); it
+    // fits any input. Only a DECLARED source that differs is an error.
+    if (declaredSourceRef !== undefined && declaredSourceRef !== inRef) {
       fail(
         EXIT_CODES.VALIDATION_FAILURE,
-        `Configuration model ${configTarget.ref} was created for source model '${declaredSourceRef ?? '(none declared)'}' but this run transforms '${inRef}'. Generate a configuration for ${inRef} with 'synth config init'.`
+        `Configuration model ${configTarget.ref} was created for source model '${declaredSourceRef}' but this run transforms '${inRef}'. Generate a configuration for ${inRef} with 'synth config init'.`
       )
     }
     if (configHeader.generatedBy !== null && configHeader.generatedBy.tx !== first.manifest.name) {

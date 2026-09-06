@@ -470,6 +470,40 @@ Mapp pair and the Subtype's cnSubtype/dcnSubtype have no declarative
 foreign-key form and are documented as unmapped on the mapping-rules
 page.
 
+## Stage 4 delivery notes (2026-09-06)
+
+Delivered per the dialect and physical sections: the DDL generator
+grew three global issues (ReferentialActions with NativeDdl default
+and TriggerEmulation; DomainHandling with InlineTypes default and
+EmitDomains; SqlDialect with StandardSql, PostgreSql, Oracle) and the
+per-table Clustering ElementIssue bound to Table. Native emission
+appends ON DELETE and ON UPDATE clauses; connect rules always become
+BEFORE INSERT OR UPDATE trigger stubs in a separate
+<schema>-triggers.sql document, and under TriggerEmulation the
+disconnect rules join them as AFTER DELETE OR UPDATE stubs. Inline
+domain handling renders DEFAULT and CHECK on the column with VALUE
+replaced by the column identifier; EmitDomains renders CREATE DOMAIN
+statements and types columns by domain name. Clustering under
+PostgreSql emits one-time CLUSTER statements naming the PrimaryKey;
+under Oracle the CREATE TABLE gains ORGANIZATION INDEX: one logical
+choice, two dialect-true emissions, both exercised by the
+verification alongside both preset runs and the default chain.
+
+The three presets live in presets/ as configuration models AUTHORED
+BY EXTENSION: the choice vocabulary and the standard-sql choice set
+are compiled package exports (rel-to-sql-ddl/presets), and postgres
+and oracle are the standard set spread with dialect overrides, the
+level-one extension mechanism demonstrated as required. Two facts
+this surfaced, both recorded as architecture: a workspace model is
+re-transpiled from its WORKSPACE COPY at run time, so models must be
+self-contained (bare package imports only; a relative fragment import
+works at import time and dies at run time, which is why the preset
+vocabulary is a package export); and `transformation run --config`
+now accepts SOURCE-AGNOSTIC configurations, configs whose header
+declares no source reference (the preset form), while a declared
+mismatching source still fails. The chain finder in the verification
+learned to skip the triggers document.
+
 ## Deferred, out of v2
 
 withHistoryColumns; constraint representation in the

@@ -34,7 +34,7 @@ try {
   cli(['transformation', 'run', 'eer-to-relational', 'rel-to-sql-ddl',
     '--in', 'demo/library', '--default-configs', '--out-dir', genDir])
 
-  const sqlFile = readdirSync(genDir).find((f) => f.endsWith('.sql'))
+  const sqlFile = readdirSync(genDir).find((f) => f.endsWith('.sql') && !f.endsWith('-triggers.sql'))
   expect('the chain generates a SQL file', sqlFile !== undefined)
   const sql = sqlFile ? readFileSync(join(genDir, sqlFile), 'utf-8') : ''
 
@@ -49,6 +49,13 @@ try {
   expect('foreign keys get indexes',
     sql.includes('CREATE INDEX ix_fk_member_person ON member (person_id);'))
   expect('audit columns reach the DDL', sql.includes('createdAt DATE'))
+  expect('disconnect rules reach the constraints natively',
+    sql.includes('REFERENCES book_copy (book_id, no) ON DELETE CASCADE ON UPDATE CASCADE;'))
+  expect('inline domain handling puts default and check on the column',
+    sql.includes('salary INTEGER DEFAULT 0 NOT NULL CHECK (salary >= 0)'))
+  const triggersFile = readdirSync(genDir).find((f) => f.endsWith('-triggers.sql'))
+  expect('the connect rule lands in the triggers document', triggersFile !== undefined
+    && readFileSync(join(genDir, triggersFile), 'utf-8').includes('trg_fk_borrows_borrower_connect'))
   expect('no inline REFERENCES remain (constraints are separate)',
     !sql.split('ALTER TABLE').at(0).includes('REFERENCES'))
 
@@ -98,6 +105,48 @@ export default (store) => (
     relFailure.includes('column of the owning table'))
   expect('a foreign key column from another table is rejected',
     relFailure.includes('belong to the owning table'))
+
+  // ── the dialect presets, authored by extension ────────────────────
+  cli(['model', 'import', join(pkgDir, 'presets', 'postgres.tsx'), '--as', 'demo/cfg-pg', '--tx', 'rel-to-sql-ddl'])
+  cli(['model', 'import', join(pkgDir, 'presets', 'oracle.tsx'), '--as', 'demo/cfg-ora', '--tx', 'rel-to-sql-ddl'])
+
+  // the m2m half persisted once, then one DDL run per preset
+  cli(['transformation', 'run', 'eer-to-relational', '--in', 'demo/library', '--default-configs', '--out', 'demo/rel'])
+  const pgDir = join(home, 'gen-pg')
+  cli(['transformation', 'run', 'rel-to-sql-ddl', '--in', 'demo/rel', '--config', 'demo/cfg-pg', '--out-dir', pgDir])
+  const pgSql = readFileSync(join(pgDir, readdirSync(pgDir).find((f) => f.endsWith('.sql') && !f.endsWith('-triggers.sql'))), 'utf-8')
+  expect('a source-agnostic preset runs against any input (no declared source)', pgSql.length > 0)
+  expect('the postgres preset emits domains',
+    pgSql.includes('CREATE DOMAIN "money" AS INTEGER DEFAULT 0 CHECK (VALUE >= 0);'))
+  expect('domain-typed columns reference the domain by name', pgSql.includes('"salary" "money" NOT NULL'))
+
+  const oraDir = join(home, 'gen-ora')
+  cli(['transformation', 'run', 'rel-to-sql-ddl', '--in', 'demo/rel', '--config', 'demo/cfg-ora', '--out-dir', oraDir])
+  const oraSql = readFileSync(join(oraDir, 'library_rel.sql'), 'utf-8')
+  const oraTrg = readFileSync(join(oraDir, 'library_rel-triggers.sql'), 'utf-8')
+  expect('the oracle preset emulates every rule with triggers (no action clauses)',
+    !oraSql.includes('ON DELETE') && oraTrg.includes('trg_fk_loan_of_copy_disconnect'))
+
+  // ── clustering: one logical choice, two dialect-true emissions ────
+  cli(['config', 'init', 'rel-to-sql-ddl', '--for', 'demo/rel', '--out', 'demo/ddl-cfg'])
+  const ddlCfgPath = join(home, '.synth', 'models', 'demo', 'ddl-cfg.tsx')
+  const baseCfg = readFileSync(ddlCfgPath, 'utf-8')
+
+  const pgClustered = baseCfg.replaceAll('StandardSql', 'PostgreSql').replace('/None"', '/ClusterPrimaryKey"')
+  writeFileSync(join(home, '.synth', 'models', 'demo', 'ddl-cfg-pgc.tsx'), pgClustered)
+  const pgcDir = join(home, 'gen-pgc')
+  cli(['transformation', 'run', 'rel-to-sql-ddl', '--in', 'demo/rel', '--config', 'demo/ddl-cfg-pgc', '--out-dir', pgcDir])
+  const pgcSql = readFileSync(join(pgcDir, 'library_rel.sql'), 'utf-8')
+  expect('postgres clustering is a one-time CLUSTER statement',
+    pgcSql.includes('CLUSTER ') && pgcSql.includes(' USING pk_'))
+
+  const oraClustered = baseCfg.replaceAll('StandardSql', 'Oracle').replace('/None"', '/ClusterPrimaryKey"')
+  writeFileSync(join(home, '.synth', 'models', 'demo', 'ddl-cfg-orac.tsx'), oraClustered)
+  const oracDir = join(home, 'gen-orac')
+  cli(['transformation', 'run', 'rel-to-sql-ddl', '--in', 'demo/rel', '--config', 'demo/ddl-cfg-orac', '--out-dir', oracDir])
+  const oracSql = readFileSync(join(oracDir, 'library_rel.sql'), 'utf-8')
+  expect('oracle clustering is an index-organized table',
+    oracSql.includes(') ORGANIZATION INDEX;'))
 
   if (failures > 0) {
     console.error(`rel-to-sql-ddl verify: ${failures} assertion(s) failed`)
