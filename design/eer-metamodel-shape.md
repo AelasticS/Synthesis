@@ -111,6 +111,30 @@ Synthesis-wt-history). Stages, each on the ladder: 1 metamodel +
 samples + verification negatives, 2 transformation + SingleTable run,
 3 docs and CHANGELOG. Merge --no-ff, ladder on main, no push.
 
+## Delivery notes (2026-09-07)
+
+Delivered as designed, with three build-time findings. The
+Specialization-as-Mapping reading turned out to be the minimal
+implementation: nesting into the EXISTING `mappings` containment
+means no new metamodel property anywhere, and the inherited
+`domain`/bounds/pair are exactly the facts the discussion assigned.
+The re-opening idiom needed `allowedAsTopLevelElement` on the
+Specialization component (a top-level `$refByName` re-opening still
+runs the connection attempt, and `mappings` does not exist on the
+schema); a genuinely new top-level specialization renders but fails
+the added root-presence constraint. The new overlapping hierarchy
+made Author a TablePerClass root in the patched verification run and
+exposed a pre-existing gap: root-column copies were not
+composite-aware and crashed on the composite address attribute; both
+copy paths (TablePerClass and SingleTable) now flatten composites
+like the entity rule does.
+
 ## Status
 
 Drafted 2026-09-07 after the user's B2 decision; committed as stage 0.
+DELIVERED the same day on feat/eer-metamodel-shape: the code stage
+(926f5ea: metamodel, components, as-model, samples, transformation,
+verification with the SingleTable run and three new rejections) and
+the docs stage (suite page fragments and hierarchy semantics, the
+rule-by-rule restructure, CHANGELOG). Full ladder green; merged to
+main with --no-ff and the ladder repeated there; not pushed.

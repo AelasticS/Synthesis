@@ -61,9 +61,19 @@ specializations. Entities come in three identification kinds:
   elements with `lowerBound`/`upperBound` cardinalities) and carries
   no attributes, and anything richer is an aggregation.
 
-A `Specialization` declares a one-level hierarchy: its
-`SpecializationMapping` names the root entity (which may be
-`isAbstract`) and its `Subtype` children extend it. An `Attribute`
+Subtyping is declared by a `Specialization`, and a specialization IS
+a mapping: from the root entity's instance set into the union of its
+subtypes' sets. It nests inside the entity it specializes (which may
+be `isAbstract`), and one entity may carry SEVERAL specializations,
+each an independent category of subtyping (a person specializes by
+role; an author, separately, by engagement). Its cardinalities carry
+the two classical subtyping constraints: `lowerBound` is
+completeness (0 partial, 1 total: must every root instance belong to
+a subtype?), `upperBound` is disjointness (1 disjoint, M
+overlapping: may an instance belong to several subtypes at once, a
+worker who is also a student?). A `Subtype` is a first-class entity,
+authored at top level like any other; it declares its membership
+with a scope-qualified `supertype` reference. An `Attribute`
 carries `isKey` and `isOptional`, may be composite (one level of
 nested component attributes), and takes its type from a `Domain`:
 a primitive name (`number`, `string`, `date`, ...) or a user-defined
@@ -85,14 +95,25 @@ A taste of the authoring style, from the Library sample
   <Attribute name="id" isKey={true}><Domain $refByName="number" /></Attribute>
   <Attribute name="title" isKey={false} isOptional={true}><Domain $refByName="string" /></Attribute>
 </Entity>
+{/* the weak mapping nests inside its weak entity; the nesting is the
+    codomain */}
 <Weak name="BookCopy">
   <Attribute name="no" isKey={true}><Domain $refByName="number" /></Attribute>
+  <WeakMapping name="copyOf"
+    domain={<Entity $refByName="Book" />}
+    lowerBound="1" upperBound="1" cnMapp="R" dcnMapp="R"
+    cnWeakOwner="R" dcnWeakOwner="R" />
 </Weak>
-<WeakMapping name="copyOf"
-  domain={<Entity $refByName="Book" />}
-  codomain={<Weak $refByName="BookCopy" />}
-  lowerBound="1" upperBound="1" cnMapp="R" dcnMapp="R"
-  cnWeakOwner="R" dcnWeakOwner="R" />
+{/* a partial disjoint specialization, nested in its root; the
+    subtype is top-level and declares its membership */}
+<Entity name="Person" isAbstract={true}>
+  <Attribute name="id" isKey={true}><Domain $refByName="number" /></Attribute>
+  <Specialization name="personRoles" lowerBound="0" upperBound="1" cnMapp="R" dcnMapp="R" />
+</Entity>
+<Subtype name="Member" supertype={<Specialization $refByName="Person/personRoles" />}
+  cnSupertype="R" dcnSupertype="R" cnSubtype="R" dcnSubtype="R">
+  <Attribute name="since" isKey={false} isOptional={true}><Domain $refByName="string" /></Attribute>
+</Subtype>
 ```
 
 ### The relational side
@@ -124,7 +145,12 @@ keeping another table's row history names its base with `historyOf`.
 </Table>
 ```
 
-## Entities
+## The transformation, rule by rule
+
+The sections below are the transformation's rules: what each EER
+construct BECOMES on the relational side, and why.
+
+### Entities
 
 A kernel becomes a table: one column per leaf attribute, a
 `PrimaryKey` element over the key attributes, audit columns when the
@@ -141,7 +167,7 @@ second hop keeps `book_id` and prefixes only the ambiguous parts:
 `book_copy_no`), which is the `ForeignKeyColumnNaming` issue's
 ShortNames default.
 
-## Aggregations and the key rule
+### Aggregations and the key rule
 
 An aggregation relates at least two participants (a declared
 constraint and a transformation guard). Its table copies participant
@@ -160,25 +186,38 @@ In the Library sample, each copy is on at most one Loan, so the
 loan's key is the copy's composite key `(book_id, book_copy_no)`,
 and the member is a plain nullable foreign key.
 
-## Hierarchies
+### Hierarchies
 
 A specialization maps per the `InheritanceStrategy` issue, decided
 per hierarchy: JoinedTables (the default; subtype tables carry the
-root key as primary and foreign key), SingleTable (subtype columns
-graft into the root table, with a NOT NULL `type` discriminator
-column), or TablePerClass (subtype tables copy the root columns; an
-abstract root gets no table of its own). Foreign keys that target a
-subtype follow the strategy: under SingleTable they land on the root
-table, under TablePerClass on the subtype's own table.
+root key as primary and foreign key, and overlap comes free, an
+instance simply has rows in several subtype tables), SingleTable
+(subtype columns graft into the root table), or TablePerClass
+(subtype tables copy the root columns, composite attributes
+included; an abstract root gets no table of its own exactly when
+every hierarchy it roots is TablePerClass). Foreign keys that target
+a subtype follow the strategy: under SingleTable they land on the
+root table, under TablePerClass on the subtype's own table.
 
-## Relationships
+SingleTable follows the specialization's own bounds. A disjoint
+hierarchy (upperBound 1) gets the `type` discriminator column, NOT
+NULL exactly when the specialization is total (lowerBound 1), and
+nullable when partial, because an instance may belong to no subtype.
+An overlapping hierarchy (upperBound M) gets NO discriminator: one
+column cannot encode several memberships, so the subtype columns
+themselves carry it (a flag column per subtype is a deferred
+emission option). Subtype columns grafted into a single table are
+always nullable, whatever the attribute says, because rows of other
+subtypes have no value for them.
+
+### Relationships
 
 M:N becomes a join table with one foreign key per role. 1:N is the
 genuinely open decision (`OneToManyStrategy`): a join table by
 default, or a foreign key grafted into the N side's table. 1:1
 becomes a UNIQUE foreign key on the optional side.
 
-## Attributes
+### Attributes
 
 An optional attribute (`isOptional`) maps to a nullable column; the
 default is mandatory, NOT NULL. A **composite** attribute (one level
@@ -187,7 +226,7 @@ of components) flattens into prefixed columns: `address_street`,
 keys, judged by the table's key plan, never to parts of composite
 keys.
 
-## Domains
+### Domains
 
 The primitive names (`number`, `string`, ...) resolve through one
 mapping into SQL types. A **user-defined domain** (`baseType`,
@@ -199,7 +238,7 @@ are inlined. The DDL renders domains per the `DomainHandling` issue:
 with `VALUE` replaced by the column identifier; `EmitDomains` writes
 `CREATE DOMAIN` statements and types columns by domain name.
 
-## Integrity rules become referential actions
+### Integrity rules become referential actions
 
 For every emitted foreign key, the governing integrity pair is the
 one guarding the REFERENCED end:
@@ -220,10 +259,10 @@ a BEFORE INSERT OR UPDATE trigger stub for it, always. Under the
 without action clauses), the disconnect rules join the triggers
 document as AFTER DELETE OR UPDATE stubs instead of clauses. Two
 pairs have no foreign-key form and are not mapped: the
-SpecializationMapping's own `cnMapp`/`dcnMapp` and the Subtype's
+Specialization's own inherited `cnMapp`/`dcnMapp` and the Subtype's
 `cnSubtype`/`dcnSubtype` (rules over subtype-row events).
 
-## Row history
+### Row history
 
 Whether a table keeps its rows' past states is the per-entity
 `RowHistory` issue, bound to kernels, weak entities, and
