@@ -55,6 +55,10 @@ export const ForeignKeyColumn = t.subtype(ModelElement, {
 export const ForeignKey = t.subtype(ModelElement, {
   fkColumns: t.arrayOf(ForeignKeyColumn),
   isUnique: t.boolean,
+  // The disconnect rule as declarative actions; the connect rule has
+  // no declarative SQL form in any dialect, so a non-Restrict
+  // onConnect is emitted as insert/update triggers by the DDL layer.
+  onConnect: t.optional(ReferentialAction),
   onDelete: t.optional(ReferentialAction),
   onUpdate: t.optional(ReferentialAction),
   referencedTable: t.optional(t.link(RelModel_TypeSchema, 'Table')),

@@ -35,6 +35,8 @@ export const RELModel = (store) => (createExprNode(TypeModel, { name: "RELMetamo
         createExprNode(Property, { name: "fkPairs", domain: createExprNode(TypeArray, { name: "ArrayOfForeignKeyColumns", elementType: createExprNode(TypeObject, { "$refByName": "ForeignKeyColumn" }) }) }),
         createExprNode(Property, { name: "fkIsUnique" },
             createExprNode(PropertyDomain, { "$refByName": "boolean" })),
+        createExprNode(Property, { name: "fkOnConnect" },
+            createExprNode(PropertyDomain, { "$refByName": "string" })),
         createExprNode(Property, { name: "fkOnDelete" },
             createExprNode(PropertyDomain, { "$refByName": "string" })),
         createExprNode(Property, { name: "fkOnUpdate" },

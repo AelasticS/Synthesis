@@ -28,7 +28,7 @@ import { createExprNode } from "@aelastics/synthesis/jsx";
 import { VarPoint, VarOption, Default, Option, DecisionAwareM2M } from "@aelastics/synthesis/variability";
 import { E2E, M2M, SpecPoint, SpecOption } from "@aelastics/synthesis/m2m";
 import * as em from "eer-metamodel/model";
-import { RelSchema, Table, Column, ForeignKey, ForeignKeyColumn, Index, PrimaryKey } from "relational-metamodel";
+import { RelSchema, Table, Column, Domain as RelDomain, ForeignKey, ForeignKeyColumn, Index, PrimaryKey } from "relational-metamodel";
 import { withAuditColumns } from "./audit.js";
 let EerToRelational = class EerToRelational extends DecisionAwareM2M {
     constructor(store, {}, configModel) {
@@ -42,9 +42,6 @@ let EerToRelational = class EerToRelational extends DecisionAwareM2M {
     template(s) {
         const store = this.context.store;
         const els = (s.elements ?? []);
-        if (els.some((el) => store.isTypeOf(el, em.Aggregation))) {
-            throw new Error("eer-to-relational v1 does not map Aggregation (a stated limitation); remove the aggregation or wait for v2.");
-        }
         const hierarchies = els.filter((el) => store.isTypeOf(el, em.Specialization));
         const relationships = els.filter((el) => store.isTypeOf(el, em.Relationship));
         // The partition: every source element belongs to exactly one pass.
@@ -52,12 +49,43 @@ let EerToRelational = class EerToRelational extends DecisionAwareM2M {
         // hierarchy is TablePerClass gets no table of its own.
         const entities = els.filter((el) => store.isTypeOf(el, em.Entity) && !store.isTypeOf(el, em.Subtype)).filter((e) => !this.skipsOwnTable(e));
         const units = this.sortUnits(entities, hierarchies);
+        const userDomains = els.filter((el) => store.isTypeOf(el, em.Domain))
+            .filter((d) => d.baseType !== undefined && d.baseType !== null);
         return (createExprNode(RelSchema, { name: this.applyNaming(`${s.name}_rel`), store: this.context.store },
+            userDomains.map((d) => this.domainToDomain(d)),
             units.map((u) => u.kind === "entity"
                 ? this.entityToTable(u.element)
                 : this.hierarchyToTables(u.element)),
+            entities.flatMap((e) => (e.attributes ?? [])
+                .filter((a) => a.upperBound === "M")
+                .map((a) => this.multivaluedAttributeTable(e, a))),
             relationships.map((r) => this.relationshipToStructure(r)),
             this.indexesForForeignKeys()));
+    }
+    /** A user-defined EER domain becomes a relational domain: the base
+     * type resolved through the one primitive mapping, check and default
+     * carried over. Primitive domains stay what they always were: names
+     * the mapping resolves inline. */
+    domainToDomain(d) {
+        return (createExprNode(RelDomain, { name: this.applyNaming(String(d.name)), type: this.typeOfName(String(d.baseType)), check: d.check, defaultValue: d.defaultValue }));
+    }
+    /** A multivalued attribute (upper bound M) becomes its own table:
+     * the owner's key copied, one value column, both forming the primary
+     * key (set semantics), and a foreign key back to the owner. */
+    multivaluedAttributeTable(e, a) {
+        const owner = this.tableFor(e);
+        const table = this.applyNaming(`${owner}_${a.name}`);
+        const valueName = this.applyNaming(a.name);
+        const taken = new Set([valueName]);
+        const copies = this.keyColumnsPlan(e).map((c) => ({
+            name: this.uniqueName(this.fkColumnName(owner, c.name), taken),
+            type: c.type,
+        }));
+        return (createExprNode(Table, { name: table },
+            copies.map((c) => (createExprNode(Column, { name: c.name, type: c.type, isNullable: false, isAutoincrement: false }))),
+            createExprNode(Column, { name: valueName, type: this.getColumnType(this.domainOf(a)), isNullable: false, isAutoincrement: false }),
+            createExprNode(PrimaryKey, { name: this.applyNaming(`pk_${table}`) }, [...copies.map((c) => c.name), valueName].map((n) => (createExprNode(Column, { "$refByName": n })))),
+            this.foreignKeyTo(table, `fk_${table}_${owner}`, copies.map((c) => c.name), e, { onDelete: "Cascade", onUpdate: "Cascade" })));
     }
     // ── the entities pass ────────────────────────────────────────────────
     entityToTable(e) {
@@ -68,6 +96,60 @@ let EerToRelational = class EerToRelational extends DecisionAwareM2M {
             this.tableColumns(e),
             this.primaryKeyFor(e)));
     }
+    /**
+     * The aggregation rule. Participants attach through their mappings;
+     * the KEY rule (user 2026-09-06): a participant involved at most
+     * once functionally determines the aggregation, so its copied key IS
+     * the primary key and every other participant becomes a plain
+     * foreign key (UNIQUE when that participant is also at-most-once,
+     * preserving the surplus candidate keys); with no such participant
+     * the key is the composite of all participants' copied keys, each
+     * slice doubling as that participant's foreign key.
+     */
+    aggregationToTable(g) {
+        const table = this.tableNameOf(g);
+        const { keyed, mappings } = this.aggregationParts(g);
+        const plan = this.keyColumnsPlan(g);
+        const taken = new Set([
+            ...((g.attributes ?? []).map((a) => this.applyNaming(a.name))),
+            ...plan.map((c) => c.name),
+        ]);
+        const others = mappings.filter((m) => m !== keyed);
+        const otherParts = others.map((m) => this.plannedForeignKey(table, String(m.name), m.domain, m.lowerBound === "0", keyed !== undefined && m.upperBound === "1", this.fkActions(m.cnAggrOwner, m.dcnAggrOwner), taken));
+        let keyFks;
+        if (keyed !== undefined) {
+            keyFks = [
+                this.foreignKeyTo(table, `fk_${table}_${this.applyNaming(keyed.name)}`, plan.map((c) => c.name), keyed.domain, this.fkActions(keyed.cnAggrOwner, keyed.dcnAggrOwner)),
+            ];
+        }
+        else {
+            let offset = 0;
+            keyFks = mappings.map((m) => {
+                const participant = m.domain;
+                const len = this.keyColumnsPlan(participant).length;
+                const cols = plan.slice(offset, offset + len).map((c) => c.name);
+                offset += len;
+                return this.foreignKeyTo(table, `fk_${table}_${this.applyNaming(m.name)}`, cols, participant, this.fkActions(m.cnAggrOwner, m.dcnAggrOwner));
+            });
+        }
+        return (createExprNode(Table, { name: table },
+            plan.map((c) => (createExprNode(Column, { name: c.name, type: c.type, isNullable: false, isAutoincrement: false }))),
+            this.tableColumns(g),
+            otherParts.flatMap((p) => p.cols),
+            this.primaryKeyFor(g),
+            keyFks,
+            otherParts.flatMap((p) => p.pairs)));
+    }
+    /** The participants of an aggregation, arity-checked, with the
+     * keying participant (first declared at-most-once one) if any. */
+    aggregationParts(g) {
+        const mappings = (g.agrMapp ?? []);
+        if (mappings.length < 2) {
+            throw new Error(`Aggregation '${g.name}' relates ${mappings.length} participant(s); an aggregation relates at least two.`);
+        }
+        const keyed = mappings.find((m) => m.upperBound === "1");
+        return { keyed, mappings };
+    }
     weakToTable(w) {
         const owner = this.ownerOf(w);
         const table = this.tableNameOf(w);
@@ -76,7 +158,7 @@ let EerToRelational = class EerToRelational extends DecisionAwareM2M {
             copies.map((c) => (createExprNode(Column, { name: c.name, type: c.type, isNullable: false, isAutoincrement: false }))),
             this.tableColumns(w),
             this.primaryKeyFor(w),
-            this.foreignKeyTo(table, `fk_${table}_${this.tableFor(owner)}`, copies.map((c) => c.name), owner, false)));
+            this.foreignKeyTo(table, `fk_${table}_${this.tableFor(owner)}`, copies.map((c) => c.name), owner, this.fkActions(w.weakMap.cnWeakOwner, w.weakMap.dcnWeakOwner))));
     }
     /**
      * The audited or plain columns of an entity's table: a rule pair
@@ -89,15 +171,34 @@ let EerToRelational = class EerToRelational extends DecisionAwareM2M {
         throw new Error("Not implemented VarOptions for VarPoint TableAuditing");
     }
     auditedColumns(e) {
-        const base = () => e.attributes.map((a) => this.attributeToColumn(a));
+        const base = () => e.attributes.flatMap((a) => this.attributeColumns(a));
         return withAuditColumns(base)();
     }
     plainColumns(e) {
-        return e.attributes.map((a) => this.attributeToColumn(a));
+        return e.attributes.flatMap((a) => this.attributeColumns(a));
+    }
+    /** One attribute's columns in the entity's own table: a multivalued
+     * attribute contributes none (its table is separate), a composite
+     * parent contributes one column per leaf (attribute_component), a
+     * leaf contributes its column. */
+    attributeColumns(a) {
+        if (a.upperBound === "M")
+            return [];
+        const components = (a.components ?? []);
+        if (components.length > 0) {
+            const parentOptional = a.lowerBound === "0";
+            return components.map((leaf) => (createExprNode(Column, { name: this.applyNaming(`${a.name}_${leaf.name}`), type: this.getColumnType(this.domainOf(leaf)), isNullable: parentOptional || leaf.lowerBound === "0", isAutoincrement: false })));
+        }
+        return [this.attributeToColumn(a)];
     }
     attributeToColumn(a) {
-        const composite = this.keyAttrsOf(a.attrEntity).length > 1;
-        return (createExprNode(Column, { name: this.applyNaming(a.name), type: this.getColumnType(this.domainOf(a)), isNullable: !a.isKey, isAutoincrement: a.isKey && !composite && this.primaryKeyStrategy(a) && this.getColumnType(this.domainOf(a)) === "INTEGER" }));
+        // compositeness is a property of the TABLE key (the plan), not of
+        // the entity's own attributes: a weak entity with one key attribute
+        // still has a composite key through its owner
+        const composite = this.keyColumnsPlan(a.attrEntity).length > 1;
+        const dom = this.domainOf(a);
+        const userDefined = dom.baseType !== undefined && dom.baseType !== null;
+        return (createExprNode(Column, { name: this.applyNaming(a.name), type: this.getColumnType(dom), isNullable: a.lowerBound === "0", isAutoincrement: a.isKey && !composite && this.primaryKeyStrategy(a) && this.getColumnType(dom) === "INTEGER", ...(userDefined ? { domain: createExprNode(RelDomain, { "$refByName": this.applyNaming(String(dom.name)) }) } : {}) }));
     }
     // ── the hierarchies pass ─────────────────────────────────────────────
     hierarchyToTables(spec) {
@@ -110,7 +211,7 @@ let EerToRelational = class EerToRelational extends DecisionAwareM2M {
         const root = this.rootOf(spec);
         const rootTable = this.tableNameOf(root);
         return (createExprNode(Table, { "$refByName": rootTable },
-            createExprNode(Column, { name: `${rootTable}_type`, type: "VARCHAR(255)", isNullable: false, isAutoincrement: false }),
+            createExprNode(Column, { name: "type", type: "VARCHAR(255)", isNullable: false, isAutoincrement: false }),
             spec.subtypes.flatMap((st) => st.attributes.map((a) => this.attributeToColumn(a)))));
     }
     tablePerClassHierarchy(spec) {
@@ -124,7 +225,7 @@ let EerToRelational = class EerToRelational extends DecisionAwareM2M {
             copies.map((c) => (createExprNode(Column, { name: c.name, type: c.type, isNullable: false, isAutoincrement: false }))),
             this.tableColumns(st),
             this.primaryKeyFor(st),
-            this.foreignKeyTo(table, `fk_${table}_${this.tableFor(root)}`, copies.map((c) => c.name), root, true)));
+            this.foreignKeyTo(table, `fk_${table}_${this.tableFor(root)}`, copies.map((c) => c.name), root, this.fkActions(st.cnSupertype, st.dcnSupertype))));
     }
     tablePerClassSubtypeTable(st) {
         const root = this.rootOf(st.supertype);
@@ -138,7 +239,7 @@ let EerToRelational = class EerToRelational extends DecisionAwareM2M {
      * table: a new element with the same name (the table scope keeps it
      * unambiguous) and no autoincrement. */
     copiedColumn(a) {
-        return (createExprNode(Column, { name: this.applyNaming(a.name), type: this.getColumnType(this.domainOf(a)), isNullable: !a.isKey, isAutoincrement: false }));
+        return (createExprNode(Column, { name: this.applyNaming(a.name), type: this.getColumnType(this.domainOf(a)), isNullable: a.lowerBound === "0", isAutoincrement: false }));
     }
     // A second point on the same issue, answering with the strategy VALUE
     // for the places that must know where an entity's rows live (tableFor,
@@ -155,7 +256,7 @@ let EerToRelational = class EerToRelational extends DecisionAwareM2M {
     relationshipToStructure(r) {
         const roles = r.roles;
         if (roles.length !== 2) {
-            throw new Error(`eer-to-relational v1 maps binary relationships only; '${r.name}' has ${roles.length} roles.`);
+            throw new Error(`Relationship '${r.name}' has ${roles.length} roles; relationships are binary by doctrine. Relate more than two entities with an Aggregation.`);
         }
         const [a, b] = roles;
         const oneToN = (a.upperBound === "1" && b.upperBound === "M") || (a.upperBound === "M" && b.upperBound === "1");
@@ -174,7 +275,7 @@ let EerToRelational = class EerToRelational extends DecisionAwareM2M {
         const manySide = roles.find((m) => m.upperBound !== "1");
         const table = this.tableFor(manySide.domain);
         const nullable = oneSide.lowerBound === "0";
-        const { cols, pairs } = this.plannedForeignKey(table, rel.name, oneSide.domain, nullable);
+        const { cols, pairs } = this.plannedForeignKey(table, rel.name, oneSide.domain, nullable, false, this.fkActions(oneSide.cnMapp, oneSide.dcnMapp));
         return (createExprNode(Table, { "$refByName": table },
             cols,
             pairs));
@@ -191,7 +292,7 @@ let EerToRelational = class EerToRelational extends DecisionAwareM2M {
         const holder = roles.find((m) => m.lowerBound === "0") ?? roles[0];
         const other = roles.find((m) => m !== holder);
         const table = this.tableFor(holder.domain);
-        const { cols, pairs } = this.plannedForeignKey(table, rel.name, other.domain, holder.lowerBound === "0", true);
+        const { cols, pairs } = this.plannedForeignKey(table, rel.name, other.domain, holder.lowerBound === "0", true, this.fkActions(other.cnMapp, other.dcnMapp));
         return (createExprNode(Table, { "$refByName": table },
             cols,
             pairs));
@@ -199,7 +300,7 @@ let EerToRelational = class EerToRelational extends DecisionAwareM2M {
     buildJoinTable(rel) {
         const table = this.applyNaming(rel.name);
         const roles = rel.roles;
-        const parts = roles.map((role) => this.plannedForeignKey(table, `${rel.name}_${role.name}`, role.domain, false));
+        const parts = roles.map((role) => this.plannedForeignKey(table, String(role.name), role.domain, false, false, this.fkActions(role.cnMapp, role.dcnMapp)));
         return (createExprNode(Table, { name: table },
             parts.flatMap((p) => p.cols),
             parts.flatMap((p) => p.pairs)));
@@ -216,6 +317,32 @@ let EerToRelational = class EerToRelational extends DecisionAwareM2M {
         return [];
     }
     // ── foreign key machinery ────────────────────────────────────────────
+    /** R, C, N, D as the dialect-neutral vocabulary. */
+    actionOf(letter) {
+        switch (letter) {
+            case "R": return "Restrict";
+            case "C": return "Cascade";
+            case "N": return "SetNull";
+            case "D": return "SetDefault";
+            default: return undefined;
+        }
+    }
+    /**
+     * The integrity pair of the mapping guarding the REFERENCED end,
+     * translated to foreign key facts: the disconnect rule (a referenced
+     * row deleted or its key changed) becomes onDelete and onUpdate; the
+     * connect rule becomes onConnect (declaratively inexpressible, the
+     * DDL layer emits triggers for it). Restrict is the SQL default and
+     * is omitted, keeping models and DDL free of noise.
+     */
+    fkActions(cn, dcn) {
+        const connect = this.actionOf(cn);
+        const disconnect = this.actionOf(dcn);
+        return {
+            ...(connect !== undefined && connect !== "Restrict" ? { onConnect: connect } : {}),
+            ...(disconnect !== undefined && disconnect !== "Restrict" ? { onDelete: disconnect, onUpdate: disconnect } : {}),
+        };
+    }
     /**
      * Plan and emit one foreign key held by `table` toward `refEntity`'s
      * table: the qualified fk columns (types mirroring the referenced key
@@ -223,10 +350,10 @@ let EerToRelational = class EerToRelational extends DecisionAwareM2M {
      * the fk column (resolved in the holding table's scope) and the
      * referenced column (as <refTable>/<column>).
      */
-    plannedForeignKey(table, qualifier, refEntity, nullable, unique = false) {
+    plannedForeignKey(table, qualifier, refEntity, nullable, unique = false, actions = {}, reserved) {
         const refTable = this.tableFor(refEntity);
         const refPlan = this.keyColumnsPlan(refEntity);
-        const taken = new Set();
+        const taken = reserved ?? new Set();
         const fkCols = refPlan.map((c) => ({
             name: this.uniqueName(this.fkColumnName(refTable, c.name), taken),
             type: c.type,
@@ -234,24 +361,24 @@ let EerToRelational = class EerToRelational extends DecisionAwareM2M {
         }));
         const fkName = this.applyNaming(`fk_${table}_${qualifier}`);
         const cols = fkCols.map((c) => (createExprNode(Column, { name: c.name, type: c.type, isNullable: nullable, isAutoincrement: false })));
-        const pairs = [this.foreignKeyElement(fkName, refTable, fkCols, unique)];
+        const pairs = [this.foreignKeyElement(fkName, refTable, fkCols, unique, actions)];
         this.emittedFks.push({ table, fkName, cols: fkCols.map((c) => c.name) });
         return { cols, pairs, fkName };
     }
     /** The ForeignKey element for already-planned fk columns. */
-    foreignKeyElement(fkName, refTable, fkCols, unique) {
-        return (createExprNode(ForeignKey, { name: fkName, isUnique: unique, referencedTable: createExprNode(Table, { "$refByName": refTable }) }, fkCols.map((c, i) => (createExprNode(ForeignKeyColumn, { name: `${fkName}_p${i + 1}` },
+    foreignKeyElement(fkName, refTable, fkCols, unique, actions = {}) {
+        return (createExprNode(ForeignKey, { name: fkName, isUnique: unique, ...actions, referencedTable: createExprNode(Table, { "$refByName": refTable }) }, fkCols.map((c, i) => (createExprNode(ForeignKeyColumn, { name: `${fkName}_p${i + 1}` },
             createExprNode(Column, { "$refByName": c.name }),
             createExprNode(Column, { "$refByName": `${refTable}/${c.ref}` }))))));
     }
     /** The weak entity's and joined subtype's inline foreign key over the
      * copied key columns (already present in the table). */
-    foreignKeyTo(table, fkName, colNames, refEntity, _joined) {
+    foreignKeyTo(table, fkName, colNames, refEntity, actions = {}) {
         const refTable = this.tableFor(refEntity);
         const refPlan = this.keyColumnsPlan(refEntity);
         const named = this.applyNaming(fkName);
         this.emittedFks.push({ table, fkName: named, cols: colNames });
-        return this.foreignKeyElement(named, refTable, colNames.map((n, i) => ({ name: n, ref: refPlan[i].name })), false);
+        return this.foreignKeyElement(named, refTable, colNames.map((n, i) => ({ name: n, ref: refPlan[i].name })), false, actions);
     }
     /**
      * The name of a foreign key or copied key column, per the
@@ -329,6 +456,19 @@ let EerToRelational = class EerToRelational extends DecisionAwareM2M {
                 plan = rootPlan.map((c) => ({ name: this.uniqueName(this.fkColumnName(rootTable, c.name), taken), type: c.type }));
             }
         }
+        else if (store.isTypeOf(e, em.Aggregation)) {
+            const { keyed, mappings } = this.aggregationParts(e);
+            const taken = new Set(e.attributes.map((a) => this.applyNaming(a.name)));
+            const copiesOf = (m) => {
+                const participant = m.domain;
+                const pTable = this.tableFor(participant);
+                return this.keyColumnsPlan(participant).map((c) => ({
+                    name: this.uniqueName(this.fkColumnName(pTable, c.name), taken),
+                    type: c.type,
+                }));
+            };
+            plan = keyed !== undefined ? copiesOf(keyed) : mappings.flatMap((m) => copiesOf(m));
+        }
         else {
             plan = this.keyAttrsOf(e).map((a) => ({ name: this.applyNaming(a.name), type: this.getColumnType(this.domainOf(a)) }));
         }
@@ -405,6 +545,11 @@ let EerToRelational = class EerToRelational extends DecisionAwareM2M {
             if (store.isTypeOf(e, em.Weak)) {
                 u.deps.push(unitKeyOfEntity(this.ownerOf(e)));
             }
+            if (store.isTypeOf(e, em.Aggregation)) {
+                for (const m of (e.agrMapp ?? [])) {
+                    u.deps.push(unitKeyOfEntity(m.domain));
+                }
+            }
             units.push(u);
             byKey.set(u.key, u);
         }
@@ -454,7 +599,12 @@ let EerToRelational = class EerToRelational extends DecisionAwareM2M {
             .toLowerCase();
     }
     getColumnType(domain) {
-        const domainName = domain.name.toLowerCase();
+        const base = domain.baseType;
+        return this.typeOfName(base ?? String(domain.name));
+    }
+    /** The one primitive-name-to-SQL-type mapping. */
+    typeOfName(name) {
+        const domainName = name.toLowerCase();
         switch (domainName) {
             case "string":
                 return "VARCHAR(255)";
@@ -483,12 +633,21 @@ let EerToRelational = class EerToRelational extends DecisionAwareM2M {
     }
 };
 __decorate([
+    E2E()
+], EerToRelational.prototype, "domainToDomain", null);
+__decorate([
+    E2E()
+], EerToRelational.prototype, "multivaluedAttributeTable", null);
+__decorate([
     E2E(),
     SpecPoint()
 ], EerToRelational.prototype, "entityToTable", null);
 __decorate([
     SpecOption("entityToTable", em.Kernel)
 ], EerToRelational.prototype, "kernelToTable", null);
+__decorate([
+    SpecOption("entityToTable", em.Aggregation)
+], EerToRelational.prototype, "aggregationToTable", null);
 __decorate([
     SpecOption("entityToTable", em.Weak)
 ], EerToRelational.prototype, "weakToTable", null);

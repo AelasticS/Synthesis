@@ -441,6 +441,35 @@ plus smoke, all example and template smokes, docs build), merge
    CHANGELOG.
 6. Merge --no-ff, full ladder repeated on merged main.
 
+## Stage 3 delivery notes (2026-09-06)
+
+Delivered per the sections above: aggregationToTable as a third
+@SpecOption on the entity dispatch with the KEY rule (keyed-by-copy
+Loan verified; the composite variant shares the plan machinery, its
+foreign keys carved from plan slices), Kahn edges from aggregations to
+their participants, the integrity translation (the governing pair is
+the one guarding the referenced end: WeakMapping's Owner pair, the
+Subtype's supertype pair, the referenced role's Mapp pair, the
+AggregationMapping's AggrOwner pair; dcn to onDelete and onUpdate, cn
+to onConnect, Restrict omitted as the SQL default), cardinality-driven
+nullability, composite flattening (attribute_component), multivalued
+tables with set-semantics keys and cascading owner foreign keys, the
+domain rule (one primitive mapping, user-defined domains emitted and
+column-linked), the discriminator renamed to the scoped `type`, and
+the doctrine error message naming Aggregation. Inspection-driven
+fixes beyond the plan: autoincrement now judges compositeness by the
+TABLE key plan, not the entity's own attributes (a weak entity's
+single key attribute was wrongly autoincremented); the aggregation
+and join-table foreign keys drop their doubled qualifiers
+(fk_loan_by_member, fk_written_by_wrote). Scope notes: multivalued
+tables are emitted for the entities pass's owners (subtype-owned
+multivalued attributes are a stage 5 documentation caveat, none exist
+in samples); the surplus-unique aggregation path is exercised by
+authoring, not by a transformed sample; SpecializationMapping's own
+Mapp pair and the Subtype's cnSubtype/dcnSubtype have no declarative
+foreign-key form and are documented as unmapped on the mapping-rules
+page.
+
 ## Deferred, out of v2
 
 withHistoryColumns; constraint representation in the

@@ -54,9 +54,31 @@ try {
   expect('no legacy flat foreign-key marks', !out.includes('isForeignKey={true}'))
   expect('key-ness is the PrimaryKey element, not a mark',
     out.includes('<PrimaryKey name="pk_book"') && !out.includes('isKey='))
+  expect('the aggregation is keyed by its at-most-once participant (the key rule)',
+    out.includes('<Table name="loan"')
+    && out.includes('<PrimaryKey name="pk_loan"')
+    && out.includes('<ForeignKey name="fk_loan_of_copy"'))
+  expect('the other participant is an ordinary foreign key',
+    out.includes('<ForeignKey name="fk_loan_by_member"'))
+  expect('disconnect rules become referential actions',
+    out.includes('onDelete="Cascade" onUpdate="Cascade"'))
+  expect('connect rules are carried for the trigger layer',
+    out.includes('onConnect="Cascade"'))
+  expect('a multivalued attribute gets its own table with set semantics',
+    out.includes('<Table name="author_phones"') && out.includes('<PrimaryKey name="pk_author_phones"'))
+  expect('a composite attribute flattens to prefixed columns',
+    out.includes('name="address_street"') && out.includes('name="address_city"'))
+  expect('a user-defined domain is emitted and linked',
+    out.includes('<Domain name="money"') && out.includes('domain={<Domain $refByName="money"'))
+  expect('cardinality drives nullability (title optional, author name mandatory)',
+    out.includes('<Column name="title" type="VARCHAR(255)" isNullable={true}')
+    && out.includes('<Column name="name" type="VARCHAR(255)" isNullable={false}'))
+  expect('autoincrement stays off composite keys',
+    out.split('isAutoincrement={true}').length === 4)
 
   const tr = read('demo/tr')
-  expect('trace names executed rules', tr.includes('rule="kernelToTable"') && tr.includes('rule="joinedSubtypeTable"'))
+  expect('trace names executed rules', tr.includes('rule="kernelToTable"') && tr.includes('rule="joinedSubtypeTable"')
+    && tr.includes('rule="aggregationToTable"') && tr.includes('rule="multivaluedAttributeTable"'))
   expect('trace records the audit default on the tableColumns entries',
     tr.includes('issue="TableAuditing" option="AuditColumns" byDefault={true}'))
   expect('trace records the hierarchy strategy on the hierarchy entry',

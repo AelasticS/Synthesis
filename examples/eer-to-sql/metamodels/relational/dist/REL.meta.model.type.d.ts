@@ -62,6 +62,7 @@ export declare const ForeignKey: t.Subtype<{
         parentModel: t.OptionalType<t.LinkType>;
     }, t.ObjectType<import("@aelastics/types/lib/complex-types/ObjectType.js").InterfaceDecl, readonly ["name"]>>>;
     isUnique: t.BooleanType;
+    onConnect: t.OptionalType<t.StringType>;
     onDelete: t.OptionalType<t.StringType>;
     onUpdate: t.OptionalType<t.StringType>;
     referencedTable: t.OptionalType<t.LinkType>;
@@ -130,6 +131,7 @@ export declare const Table: t.Subtype<{
             parentModel: t.OptionalType<t.LinkType>;
         }, t.ObjectType<import("@aelastics/types/lib/complex-types/ObjectType.js").InterfaceDecl, readonly ["name"]>>>;
         isUnique: t.BooleanType;
+        onConnect: t.OptionalType<t.StringType>;
         onDelete: t.OptionalType<t.StringType>;
         onUpdate: t.OptionalType<t.StringType>;
         referencedTable: t.OptionalType<t.LinkType>;

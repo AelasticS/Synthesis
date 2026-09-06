@@ -10,8 +10,31 @@ export declare class EerToRelational extends DecisionAwareM2M<em.IEERSchema, rmT
     private emittedFks;
     private keyPlans;
     template(s: em.IEERSchema): any;
+    /** A user-defined EER domain becomes a relational domain: the base
+     * type resolved through the one primitive mapping, check and default
+     * carried over. Primitive domains stay what they always were: names
+     * the mapping resolves inline. */
+    domainToDomain(d: em.IDomain): ExprNode<rmT.IDomain>;
+    /** A multivalued attribute (upper bound M) becomes its own table:
+     * the owner's key copied, one value column, both forming the primary
+     * key (set semantics), and a foreign key back to the owner. */
+    multivaluedAttributeTable(e: em.IEntity, a: em.IAttribute): ExprNode<rmT.ITable>;
     entityToTable(e: em.IEntity): ExprNode<rmT.ITable> | undefined;
     kernelToTable(e: em.IKernel): ExprNode<rmT.ITable>;
+    /**
+     * The aggregation rule. Participants attach through their mappings;
+     * the KEY rule (user 2026-09-06): a participant involved at most
+     * once functionally determines the aggregation, so its copied key IS
+     * the primary key and every other participant becomes a plain
+     * foreign key (UNIQUE when that participant is also at-most-once,
+     * preserving the surplus candidate keys); with no such participant
+     * the key is the composite of all participants' copied keys, each
+     * slice doubling as that participant's foreign key.
+     */
+    aggregationToTable(g: em.IAggregation): ExprNode<rmT.ITable>;
+    /** The participants of an aggregation, arity-checked, with the
+     * keying participant (first declared at-most-once one) if any. */
+    private aggregationParts;
     weakToTable(w: em.IWeak): ExprNode<rmT.ITable>;
     /**
      * The audited or plain columns of an entity's table: a rule pair
@@ -23,6 +46,11 @@ export declare class EerToRelational extends DecisionAwareM2M<em.IEERSchema, rmT
     tableColumns(e: em.IEntity): ExprNode<rmT.IColumn>[];
     auditedColumns(e: em.IEntity): ExprNode<rmT.IColumn>[];
     plainColumns(e: em.IEntity): ExprNode<rmT.IColumn>[];
+    /** One attribute's columns in the entity's own table: a multivalued
+     * attribute contributes none (its table is separate), a composite
+     * parent contributes one column per leaf (attribute_component), a
+     * leaf contributes its column. */
+    private attributeColumns;
     attributeToColumn(a: em.IAttribute): ExprNode<rmT.IColumn>;
     hierarchyToTables(spec: em.ISpecialization): ExprNode<rmT.ITable> | ExprNode<rmT.ITable>[];
     joinedHierarchy(spec: em.ISpecialization): ExprNode<rmT.ITable>[];
@@ -50,6 +78,17 @@ export declare class EerToRelational extends DecisionAwareM2M<em.IEERSchema, rmT
     indexesForForeignKeys(): ExprNode<rmT.ITable>[];
     indexAllForeignKeys(): ExprNode<rmT.ITable>[];
     noForeignKeyIndexes(): ExprNode<rmT.ITable>[];
+    /** R, C, N, D as the dialect-neutral vocabulary. */
+    private actionOf;
+    /**
+     * The integrity pair of the mapping guarding the REFERENCED end,
+     * translated to foreign key facts: the disconnect rule (a referenced
+     * row deleted or its key changed) becomes onDelete and onUpdate; the
+     * connect rule becomes onConnect (declaratively inexpressible, the
+     * DDL layer emits triggers for it). Restrict is the SQL default and
+     * is omitted, keeping models and DDL free of noise.
+     */
+    private fkActions;
     /**
      * Plan and emit one foreign key held by `table` toward `refEntity`'s
      * table: the qualified fk columns (types mirroring the referenced key
@@ -107,4 +146,6 @@ export declare class EerToRelational extends DecisionAwareM2M<em.IEERSchema, rmT
     applyCamelCaseNaming(name: string): string;
     applySnakeCaseNaming(name: string): string;
     private getColumnType;
+    /** The one primitive-name-to-SQL-type mapping. */
+    private typeOfName;
 }

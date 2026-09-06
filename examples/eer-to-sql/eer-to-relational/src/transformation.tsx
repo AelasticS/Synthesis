@@ -27,7 +27,7 @@ import { ModelStore } from "@aelastics/synthesis/store"
 import * as cm from "@aelastics/synthesis/metamodels/configuration/model"
 import * as em from "eer-metamodel/model"
 import * as rmT from "relational-metamodel/model"
-import { RelSchema, Table, Column, ForeignKey, ForeignKeyColumn, Index, PrimaryKey } from "relational-metamodel"
+import { RelSchema, Table, Column, Domain as RelDomain, ForeignKey, ForeignKeyColumn, Index, PrimaryKey } from "relational-metamodel"
 import { withAuditColumns } from "./audit.js"
 
 /** A key column of a table, as planned for emission and referencing. */
@@ -65,12 +65,6 @@ export class EerToRelational extends DecisionAwareM2M<
     const store = this.context.store
     const els = ((s.elements ?? []) as em.IERConcept[])
 
-    if (els.some((el) => store.isTypeOf(el, em.Aggregation))) {
-      throw new Error(
-        "eer-to-relational v1 does not map Aggregation (a stated limitation); remove the aggregation or wait for v2.",
-      )
-    }
-
     const hierarchies = els.filter((el) => store.isTypeOf(el, em.Specialization)) as em.ISpecialization[]
     const relationships = els.filter((el) => store.isTypeOf(el, em.Relationship)) as em.IRelationship[]
     // The partition: every source element belongs to exactly one pass.
@@ -82,16 +76,70 @@ export class EerToRelational extends DecisionAwareM2M<
 
     const units = this.sortUnits(entities, hierarchies)
 
+    const userDomains = (els.filter((el) => store.isTypeOf(el, em.Domain)) as em.IDomain[])
+      .filter((d) => d.baseType !== undefined && d.baseType !== null)
+
     return (
       <RelSchema name={this.applyNaming(`${s.name}_rel`)} store={this.context.store}>
+        {userDomains.map((d) => this.domainToDomain(d))}
         {units.map((u) =>
           u.kind === "entity"
             ? this.entityToTable(u.element as em.IEntity)
             : this.hierarchyToTables(u.element as em.ISpecialization),
         )}
+        {entities.flatMap((e) =>
+          ((e.attributes ?? []) as em.IAttribute[])
+            .filter((a) => a.upperBound === "M")
+            .map((a) => this.multivaluedAttributeTable(e, a)),
+        )}
         {relationships.map((r) => this.relationshipToStructure(r))}
         {this.indexesForForeignKeys()}
       </RelSchema>
+    )
+  }
+
+  /** A user-defined EER domain becomes a relational domain: the base
+   * type resolved through the one primitive mapping, check and default
+   * carried over. Primitive domains stay what they always were: names
+   * the mapping resolves inline. */
+  @E2E()
+  domainToDomain(d: em.IDomain): ExprNode<rmT.IDomain> {
+    return (
+      <RelDomain
+        name={this.applyNaming(String(d.name))}
+        type={this.typeOfName(String(d.baseType))}
+        check={d.check as string | undefined}
+        defaultValue={d.defaultValue as string | undefined}
+      />
+    )
+  }
+
+  /** A multivalued attribute (upper bound M) becomes its own table:
+   * the owner's key copied, one value column, both forming the primary
+   * key (set semantics), and a foreign key back to the owner. */
+  @E2E()
+  multivaluedAttributeTable(e: em.IEntity, a: em.IAttribute): ExprNode<rmT.ITable> {
+    const owner = this.tableFor(e)
+    const table = this.applyNaming(`${owner}_${a.name}`)
+    const valueName = this.applyNaming(a.name)
+    const taken = new Set<string>([valueName])
+    const copies = this.keyColumnsPlan(e).map((c) => ({
+      name: this.uniqueName(this.fkColumnName(owner, c.name), taken),
+      type: c.type,
+    }))
+    return (
+      <Table name={table}>
+        {copies.map((c) => (
+          <Column name={c.name} type={c.type} isNullable={false} isAutoincrement={false} />
+        ))}
+        <Column name={valueName} type={this.getColumnType(this.domainOf(a))} isNullable={false} isAutoincrement={false} />
+        <PrimaryKey name={this.applyNaming(`pk_${table}`)}>
+          {[...copies.map((c) => c.name), valueName].map((n) => (
+            <Column $refByName={n} />
+          ))}
+        </PrimaryKey>
+        {this.foreignKeyTo(table, `fk_${table}_${owner}`, copies.map((c) => c.name), e, { onDelete: "Cascade", onUpdate: "Cascade" })}
+      </Table>
     )
   }
 
@@ -113,6 +161,83 @@ export class EerToRelational extends DecisionAwareM2M<
     )
   }
 
+  /**
+   * The aggregation rule. Participants attach through their mappings;
+   * the KEY rule (user 2026-09-06): a participant involved at most
+   * once functionally determines the aggregation, so its copied key IS
+   * the primary key and every other participant becomes a plain
+   * foreign key (UNIQUE when that participant is also at-most-once,
+   * preserving the surplus candidate keys); with no such participant
+   * the key is the composite of all participants' copied keys, each
+   * slice doubling as that participant's foreign key.
+   */
+  @SpecOption("entityToTable", em.Aggregation)
+  aggregationToTable(g: em.IAggregation): ExprNode<rmT.ITable> {
+    const table = this.tableNameOf(g)
+    const { keyed, mappings } = this.aggregationParts(g)
+    const plan = this.keyColumnsPlan(g)
+    const taken = new Set<string>([
+      ...(((g.attributes ?? []) as em.IAttribute[]).map((a) => this.applyNaming(a.name))),
+      ...plan.map((c) => c.name),
+    ])
+    const others = mappings.filter((m) => m !== keyed)
+    const otherParts = others.map((m) =>
+      this.plannedForeignKey(
+        table,
+        String(m.name),
+        m.domain as em.IEntity,
+        m.lowerBound === "0",
+        keyed !== undefined && m.upperBound === "1",
+        this.fkActions(m.cnAggrOwner, m.dcnAggrOwner),
+        taken,
+      ),
+    )
+    let keyFks: ExprNode<rmT.IForeignKey>[]
+    if (keyed !== undefined) {
+      keyFks = [
+        this.foreignKeyTo(
+          table,
+          `fk_${table}_${this.applyNaming(keyed.name)}`,
+          plan.map((c) => c.name),
+          keyed.domain as em.IEntity,
+          this.fkActions(keyed.cnAggrOwner, keyed.dcnAggrOwner),
+        ),
+      ]
+    } else {
+      let offset = 0
+      keyFks = mappings.map((m) => {
+        const participant = m.domain as em.IEntity
+        const len = this.keyColumnsPlan(participant).length
+        const cols = plan.slice(offset, offset + len).map((c) => c.name)
+        offset += len
+        return this.foreignKeyTo(table, `fk_${table}_${this.applyNaming(m.name)}`, cols, participant, this.fkActions(m.cnAggrOwner, m.dcnAggrOwner))
+      })
+    }
+    return (
+      <Table name={table}>
+        {plan.map((c) => (
+          <Column name={c.name} type={c.type} isNullable={false} isAutoincrement={false} />
+        ))}
+        {this.tableColumns(g)}
+        {otherParts.flatMap((p) => p.cols)}
+        {this.primaryKeyFor(g)}
+        {keyFks}
+        {otherParts.flatMap((p) => p.pairs)}
+      </Table>
+    )
+  }
+
+  /** The participants of an aggregation, arity-checked, with the
+   * keying participant (first declared at-most-once one) if any. */
+  private aggregationParts(g: em.IAggregation): { keyed: em.IAggregationMapping | undefined; mappings: em.IAggregationMapping[] } {
+    const mappings = ((g.agrMapp ?? []) as em.IAggregationMapping[])
+    if (mappings.length < 2) {
+      throw new Error(`Aggregation '${g.name}' relates ${mappings.length} participant(s); an aggregation relates at least two.`)
+    }
+    const keyed = mappings.find((m) => m.upperBound === "1")
+    return { keyed, mappings }
+  }
+
   @SpecOption("entityToTable", em.Weak)
   weakToTable(w: em.IWeak): ExprNode<rmT.ITable> {
     const owner = this.ownerOf(w)
@@ -125,7 +250,7 @@ export class EerToRelational extends DecisionAwareM2M<
         ))}
         {this.tableColumns(w)}
         {this.primaryKeyFor(w)}
-        {this.foreignKeyTo(table, `fk_${table}_${this.tableFor(owner)}`, copies.map((c) => c.name), owner, false)}
+        {this.foreignKeyTo(table, `fk_${table}_${this.tableFor(owner)}`, copies.map((c) => c.name), owner, this.fkActions((w.weakMap as em.IWeakMapping).cnWeakOwner, (w.weakMap as em.IWeakMapping).dcnWeakOwner))}
       </Table>
     )
   }
@@ -146,24 +271,51 @@ export class EerToRelational extends DecisionAwareM2M<
   @Default()
   @VarOption("tableColumns", Option("AuditColumns"))
   auditedColumns(e: em.IEntity): ExprNode<rmT.IColumn>[] {
-    const base = () => (e.attributes as em.IAttribute[]).map((a) => this.attributeToColumn(a))
+    const base = () => (e.attributes as em.IAttribute[]).flatMap((a) => this.attributeColumns(a))
     return withAuditColumns(base)()
   }
 
   @VarOption("tableColumns", Option("NoAuditColumns"))
   plainColumns(e: em.IEntity): ExprNode<rmT.IColumn>[] {
-    return (e.attributes as em.IAttribute[]).map((a) => this.attributeToColumn(a))
+    return (e.attributes as em.IAttribute[]).flatMap((a) => this.attributeColumns(a))
+  }
+
+  /** One attribute's columns in the entity's own table: a multivalued
+   * attribute contributes none (its table is separate), a composite
+   * parent contributes one column per leaf (attribute_component), a
+   * leaf contributes its column. */
+  private attributeColumns(a: em.IAttribute): ExprNode<rmT.IColumn>[] {
+    if (a.upperBound === "M") return []
+    const components = ((a.components ?? []) as em.IAttribute[])
+    if (components.length > 0) {
+      const parentOptional = a.lowerBound === "0"
+      return components.map((leaf) => (
+        <Column
+          name={this.applyNaming(`${a.name}_${leaf.name}`)}
+          type={this.getColumnType(this.domainOf(leaf))}
+          isNullable={parentOptional || leaf.lowerBound === "0"}
+          isAutoincrement={false}
+        />
+      ))
+    }
+    return [this.attributeToColumn(a)]
   }
 
   @E2E()
   attributeToColumn(a: em.IAttribute): ExprNode<rmT.IColumn> {
-    const composite = this.keyAttrsOf(a.attrEntity as em.IEntity).length > 1
+    // compositeness is a property of the TABLE key (the plan), not of
+    // the entity's own attributes: a weak entity with one key attribute
+    // still has a composite key through its owner
+    const composite = this.keyColumnsPlan(a.attrEntity as em.IEntity).length > 1
+    const dom = this.domainOf(a)
+    const userDefined = dom.baseType !== undefined && dom.baseType !== null
     return (
       <Column
         name={this.applyNaming(a.name)}
-        type={this.getColumnType(this.domainOf(a))}
-        isNullable={!a.isKey}
-        isAutoincrement={a.isKey && !composite && this.primaryKeyStrategy(a) && this.getColumnType(this.domainOf(a)) === "INTEGER"}
+        type={this.getColumnType(dom)}
+        isNullable={a.lowerBound === "0"}
+        isAutoincrement={a.isKey && !composite && this.primaryKeyStrategy(a) && this.getColumnType(dom) === "INTEGER"}
+        {...(userDefined ? { domain: <RelDomain $refByName={this.applyNaming(String(dom.name))} /> } : {})}
       />
     )
   }
@@ -188,7 +340,7 @@ export class EerToRelational extends DecisionAwareM2M<
     const rootTable = this.tableNameOf(root)
     return (
       <Table $refByName={rootTable}>
-        <Column name={`${rootTable}_type`} type="VARCHAR(255)" isNullable={false} isAutoincrement={false} />
+        <Column name="type" type="VARCHAR(255)" isNullable={false} isAutoincrement={false} />
         {(spec.subtypes as em.ISubtype[]).flatMap((st) =>
           (st.attributes as em.IAttribute[]).map((a) => this.attributeToColumn(a)),
         )}
@@ -213,7 +365,7 @@ export class EerToRelational extends DecisionAwareM2M<
         ))}
         {this.tableColumns(st)}
         {this.primaryKeyFor(st)}
-        {this.foreignKeyTo(table, `fk_${table}_${this.tableFor(root)}`, copies.map((c) => c.name), root, true)}
+        {this.foreignKeyTo(table, `fk_${table}_${this.tableFor(root)}`, copies.map((c) => c.name), root, this.fkActions(st.cnSupertype, st.dcnSupertype))}
       </Table>
     )
   }
@@ -240,7 +392,7 @@ export class EerToRelational extends DecisionAwareM2M<
       <Column
         name={this.applyNaming(a.name)}
         type={this.getColumnType(this.domainOf(a))}
-        isNullable={!a.isKey}
+        isNullable={a.lowerBound === "0"}
         isAutoincrement={false}
       />
     )
@@ -271,7 +423,9 @@ export class EerToRelational extends DecisionAwareM2M<
   relationshipToStructure(r: em.IRelationship): ExprNode<any> {
     const roles = r.roles as em.IOrdinaryMapping[]
     if (roles.length !== 2) {
-      throw new Error(`eer-to-relational v1 maps binary relationships only; '${r.name}' has ${roles.length} roles.`)
+      throw new Error(
+        `Relationship '${r.name}' has ${roles.length} roles; relationships are binary by doctrine. Relate more than two entities with an Aggregation.`,
+      )
     }
     const [a, b] = roles
     const oneToN = (a.upperBound === "1" && b.upperBound === "M") || (a.upperBound === "M" && b.upperBound === "1")
@@ -293,7 +447,7 @@ export class EerToRelational extends DecisionAwareM2M<
     const manySide = roles.find((m) => m.upperBound !== "1")!
     const table = this.tableFor(manySide.domain as em.IEntity)
     const nullable = oneSide.lowerBound === "0"
-    const { cols, pairs } = this.plannedForeignKey(table, rel.name, oneSide.domain as em.IEntity, nullable)
+    const { cols, pairs } = this.plannedForeignKey(table, rel.name, oneSide.domain as em.IEntity, nullable, false, this.fkActions(oneSide.cnMapp, oneSide.dcnMapp))
     return (
       <Table $refByName={table}>
         {cols}
@@ -320,7 +474,7 @@ export class EerToRelational extends DecisionAwareM2M<
     const holder = roles.find((m) => m.lowerBound === "0") ?? roles[0]
     const other = roles.find((m) => m !== holder)!
     const table = this.tableFor(holder.domain as em.IEntity)
-    const { cols, pairs } = this.plannedForeignKey(table, rel.name, other.domain as em.IEntity, holder.lowerBound === "0", true)
+    const { cols, pairs } = this.plannedForeignKey(table, rel.name, other.domain as em.IEntity, holder.lowerBound === "0", true, this.fkActions(other.cnMapp, other.dcnMapp))
     return (
       <Table $refByName={table}>
         {cols}
@@ -333,7 +487,7 @@ export class EerToRelational extends DecisionAwareM2M<
     const table = this.applyNaming(rel.name)
     const roles = rel.roles as em.IOrdinaryMapping[]
     const parts = roles.map((role) =>
-      this.plannedForeignKey(table, `${rel.name}_${role.name}`, role.domain as em.IEntity, false),
+      this.plannedForeignKey(table, String(role.name), role.domain as em.IEntity, false, false, this.fkActions(role.cnMapp, role.dcnMapp)),
     )
     return (
       <Table name={table}>
@@ -371,6 +525,34 @@ export class EerToRelational extends DecisionAwareM2M<
 
   // ── foreign key machinery ────────────────────────────────────────────
 
+  /** R, C, N, D as the dialect-neutral vocabulary. */
+  private actionOf(letter: string | undefined): "Restrict" | "Cascade" | "SetNull" | "SetDefault" | undefined {
+    switch (letter) {
+      case "R": return "Restrict"
+      case "C": return "Cascade"
+      case "N": return "SetNull"
+      case "D": return "SetDefault"
+      default: return undefined
+    }
+  }
+
+  /**
+   * The integrity pair of the mapping guarding the REFERENCED end,
+   * translated to foreign key facts: the disconnect rule (a referenced
+   * row deleted or its key changed) becomes onDelete and onUpdate; the
+   * connect rule becomes onConnect (declaratively inexpressible, the
+   * DDL layer emits triggers for it). Restrict is the SQL default and
+   * is omitted, keeping models and DDL free of noise.
+   */
+  private fkActions(cn: string | undefined, dcn: string | undefined): Partial<Pick<rmT.IForeignKey, "onConnect" | "onDelete" | "onUpdate">> {
+    const connect = this.actionOf(cn)
+    const disconnect = this.actionOf(dcn)
+    return {
+      ...(connect !== undefined && connect !== "Restrict" ? { onConnect: connect } : {}),
+      ...(disconnect !== undefined && disconnect !== "Restrict" ? { onDelete: disconnect, onUpdate: disconnect } : {}),
+    }
+  }
+
   /**
    * Plan and emit one foreign key held by `table` toward `refEntity`'s
    * table: the qualified fk columns (types mirroring the referenced key
@@ -384,10 +566,12 @@ export class EerToRelational extends DecisionAwareM2M<
     refEntity: em.IEntity,
     nullable: boolean,
     unique: boolean = false,
+    actions: Partial<Pick<rmT.IForeignKey, "onConnect" | "onDelete" | "onUpdate">> = {},
+    reserved?: Set<string>,
   ): { cols: ExprNode<rmT.IColumn>[]; pairs: ExprNode<rmT.IForeignKey>[]; fkName: string } {
     const refTable = this.tableFor(refEntity)
     const refPlan = this.keyColumnsPlan(refEntity)
-    const taken = new Set<string>()
+    const taken = reserved ?? new Set<string>()
     const fkCols = refPlan.map((c) => ({
       name: this.uniqueName(this.fkColumnName(refTable, c.name), taken),
       type: c.type,
@@ -397,7 +581,7 @@ export class EerToRelational extends DecisionAwareM2M<
     const cols = fkCols.map((c) => (
       <Column name={c.name} type={c.type} isNullable={nullable} isAutoincrement={false} />
     ))
-    const pairs = [this.foreignKeyElement(fkName, refTable, fkCols, unique)]
+    const pairs = [this.foreignKeyElement(fkName, refTable, fkCols, unique, actions)]
     this.emittedFks.push({ table, fkName, cols: fkCols.map((c) => c.name) })
     return { cols, pairs, fkName }
   }
@@ -408,9 +592,10 @@ export class EerToRelational extends DecisionAwareM2M<
     refTable: string,
     fkCols: Array<{ name: string; ref: string }>,
     unique: boolean,
+    actions: Partial<Pick<rmT.IForeignKey, "onConnect" | "onDelete" | "onUpdate">> = {},
   ): ExprNode<rmT.IForeignKey> {
     return (
-      <ForeignKey name={fkName} isUnique={unique} referencedTable={<Table $refByName={refTable} />}>
+      <ForeignKey name={fkName} isUnique={unique} {...actions} referencedTable={<Table $refByName={refTable} />}>
         {fkCols.map((c, i) => (
           <ForeignKeyColumn name={`${fkName}_p${i + 1}`}>
             <Column $refByName={c.name} />
@@ -428,7 +613,7 @@ export class EerToRelational extends DecisionAwareM2M<
     fkName: string,
     colNames: string[],
     refEntity: em.IEntity,
-    _joined: boolean,
+    actions: Partial<Pick<rmT.IForeignKey, "onConnect" | "onDelete" | "onUpdate">> = {},
   ): ExprNode<rmT.IForeignKey> {
     const refTable = this.tableFor(refEntity)
     const refPlan = this.keyColumnsPlan(refEntity)
@@ -439,6 +624,7 @@ export class EerToRelational extends DecisionAwareM2M<
       refTable,
       colNames.map((n, i) => ({ name: n, ref: refPlan[i].name })),
       false,
+      actions,
     )
   }
 
@@ -523,6 +709,18 @@ export class EerToRelational extends DecisionAwareM2M<
         const taken = new Set<string>((e.attributes as em.IAttribute[]).map((a) => this.applyNaming(a.name)))
         plan = rootPlan.map((c) => ({ name: this.uniqueName(this.fkColumnName(rootTable, c.name), taken), type: c.type }))
       }
+    } else if (store.isTypeOf(e, em.Aggregation)) {
+      const { keyed, mappings } = this.aggregationParts(e as em.IAggregation)
+      const taken = new Set<string>((e.attributes as em.IAttribute[]).map((a) => this.applyNaming(a.name)))
+      const copiesOf = (m: em.IAggregationMapping) => {
+        const participant = m.domain as em.IEntity
+        const pTable = this.tableFor(participant)
+        return this.keyColumnsPlan(participant).map((c) => ({
+          name: this.uniqueName(this.fkColumnName(pTable, c.name), taken),
+          type: c.type,
+        }))
+      }
+      plan = keyed !== undefined ? copiesOf(keyed) : mappings.flatMap((m) => copiesOf(m))
     } else {
       plan = this.keyAttrsOf(e).map((a) => ({ name: this.applyNaming(a.name), type: this.getColumnType(this.domainOf(a)) }))
     }
@@ -616,6 +814,11 @@ export class EerToRelational extends DecisionAwareM2M<
       if (store.isTypeOf(e, em.Weak)) {
         u.deps.push(unitKeyOfEntity(this.ownerOf(e as em.IWeak)))
       }
+      if (store.isTypeOf(e, em.Aggregation)) {
+        for (const m of ((e as em.IAggregation).agrMapp ?? []) as em.IAggregationMapping[]) {
+          u.deps.push(unitKeyOfEntity(m.domain as em.IEntity))
+        }
+      }
       units.push(u)
       byKey.set(u.key, u)
     }
@@ -683,7 +886,13 @@ export class EerToRelational extends DecisionAwareM2M<
   }
 
   private getColumnType(domain: em.IDomain): string {
-    const domainName = domain.name.toLowerCase()
+    const base = domain.baseType as string | undefined
+    return this.typeOfName(base ?? String(domain.name))
+  }
+
+  /** The one primitive-name-to-SQL-type mapping. */
+  private typeOfName(name: string): string {
+    const domainName = name.toLowerCase()
     switch (domainName) {
       case "string":
         return "VARCHAR(255)"

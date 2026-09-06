@@ -63,6 +63,9 @@ export const RELModel = (store: ModelStore): ExprNode<t.ITypeModel> => (
       <Property name="fkIsUnique">
         <PropertyDomain $refByName="boolean" />
       </Property>
+      <Property name="fkOnConnect">
+        <PropertyDomain $refByName="string" />
+      </Property>
       <Property name="fkOnDelete">
         <PropertyDomain $refByName="string" />
       </Property>
