@@ -7,7 +7,7 @@
  * the @VarOption methods of the transformation class.
  */
 import { createExprNode } from "@aelastics/synthesis/jsx";
-import { DecisionModel, ElementIssue, ModelIssue, Option, SimpleOption, } from "@aelastics/synthesis/metamodels/decision";
+import { CompositeOption, DecisionModel, ElementIssue, ElementSubIssue, ModelIssue, Option, SimpleOption, } from "@aelastics/synthesis/metamodels/decision";
 export const RelationSchemaDesignIssues = (store) => (createExprNode(DecisionModel, { name: "RelationSchemaDesign", description: "Design space for persistence strategies", store: store },
     createExprNode(ElementIssue, { name: "OneToManyStrategy", description: "How to implement 1:N relationships" },
         createExprNode(Option, { name: "ForeignKey", description: "Use a foreign key on the many side table", isDefault: false, optionType: createExprNode(SimpleOption, { name: "FK" }) }),
@@ -18,6 +18,12 @@ export const RelationSchemaDesignIssues = (store) => (createExprNode(DecisionMod
     createExprNode(ElementIssue, { name: "TableAuditing", description: "Which tables carry audit columns" },
         createExprNode(Option, { name: "AuditColumns", description: "Append createdBy and createdAt to the table", isDefault: true, optionType: createExprNode(SimpleOption, { name: "AuditOn" }) }),
         createExprNode(Option, { name: "NoAuditColumns", description: "No audit columns on this table", isDefault: false, optionType: createExprNode(SimpleOption, { name: "AuditOff" }) })),
+    createExprNode(ElementIssue, { name: "RowHistory", description: "Whether this table keeps row history" },
+        createExprNode(Option, { name: "NoHistory", description: "Current rows only", isDefault: true, optionType: createExprNode(SimpleOption, { name: "NoHistoryOption" }) }),
+        createExprNode(Option, { name: "HistoryTable", description: "A separate history table records row versions", isDefault: false, optionType: createExprNode(CompositeOption, { name: "HistoryTableOption" },
+                createExprNode(ElementSubIssue, { name: "HistoryDiscriminator", description: "What distinguishes row versions" },
+                    createExprNode(Option, { name: "ValidFromTimestamp", description: "A validity timestamp", isDefault: true, optionType: createExprNode(SimpleOption, { name: "ValidFromOption" }) }),
+                    createExprNode(Option, { name: "VersionCounter", description: "A monotonic version number", isDefault: false, optionType: createExprNode(SimpleOption, { name: "VersionCounterOption" }) }))) })),
     createExprNode(ElementIssue, { name: "InheritanceStrategy", description: "How a specialization hierarchy maps to tables" },
         createExprNode(Option, { name: "JoinedTables", description: "One table per subtype, joined to the root by its key", isDefault: true, optionType: createExprNode(SimpleOption, { name: "InhJoined" }) }),
         createExprNode(Option, { name: "SingleTable", description: "One table for the whole hierarchy, with a discriminator", isDefault: false, optionType: createExprNode(SimpleOption, { name: "InhSingle" }) }),

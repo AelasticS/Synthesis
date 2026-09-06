@@ -127,6 +127,34 @@ export default (store) => (
   expect('the oracle preset emulates every rule with triggers (no action clauses)',
     !oraSql.includes('ON DELETE') && oraTrg.includes('trg_fk_loan_of_copy_disconnect'))
 
+  // ── row history through the suite ─────────────────────────────────
+  // step 1 with an explicit configuration versioning Book, persisted,
+  // then the DDL defaults over the persisted intermediate (historyOf
+  // round-trips through the workspace file)
+  cli(['config', 'init', 'eer-to-relational', '--for', 'demo/library', '--out', 'demo/m2m-cfg'])
+  const m2mCfgPath = join(home, '.synth', 'models', 'demo', 'm2m-cfg.tsx')
+  const historyCfg = readFileSync(m2mCfgPath, 'utf-8').replace(
+    /name="ec_Book_NoHistory"([\s\S]*?)\/NoHistory" \/>/,
+    (m) => m.replaceAll('NoHistory', 'HistoryTable')
+  )
+  writeFileSync(m2mCfgPath, historyCfg)
+  cli(['transformation', 'run', 'eer-to-relational', '--in', 'demo/library',
+    '--config', 'demo/m2m-cfg', '--out', 'demo/rel-hist'])
+  const histDir = join(home, 'gen-history')
+  cli(['transformation', 'run', 'rel-to-sql-ddl', '--in', 'demo/rel-hist',
+    '--default-configs', '--out-dir', histDir])
+  const histSql = readFileSync(join(histDir, 'library_rel.sql'), 'utf-8')
+  const histTrg = readFileSync(join(histDir, 'library_rel-triggers.sql'), 'utf-8')
+  expect('the history table is an ordinary CREATE TABLE with its composite key',
+    histSql.includes('CREATE TABLE book_history (')
+    && histSql.includes('PRIMARY KEY (id, valid_from)'))
+  expect('no constraint targets the history table (not existence-dependent)',
+    !histSql.includes('ALTER TABLE book_history'))
+  expect('the capture stub maintains the history from the base table',
+    histTrg.includes('CREATE TRIGGER trg_book_history_capture')
+    && histTrg.includes('AFTER UPDATE OR DELETE ON book')
+    && histTrg.includes('synth_book_history_capture'))
+
   // ── clustering: one logical choice, two dialect-true emissions ────
   cli(['config', 'init', 'rel-to-sql-ddl', '--for', 'demo/rel', '--out', 'demo/ddl-cfg'])
   const ddlCfgPath = join(home, '.synth', 'models', 'demo', 'ddl-cfg.tsx')

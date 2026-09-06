@@ -19,9 +19,10 @@ import * as cm from "@aelastics/synthesis/metamodels/configuration/model"
  * satisfy them inline), CREATE INDEX statements, domain rendering per
  * the DomainHandling issue, referential rules per ReferentialActions
  * (native clauses or trigger emulation; connect rules are always
- * triggers, no dialect has a declarative form), and physical
- * clustering per the per-table Clustering issue flavored by
- * SqlDialect. Identifiers are emitted per IdentifierQuoting.
+ * triggers, no dialect has a declarative form), row-history capture
+ * stubs for every table carrying historyOf (equally unconditional),
+ * and physical clustering per the per-table Clustering issue flavored
+ * by SqlDialect. Identifiers are emitted per IdentifierQuoting.
  */
 @M2M()
 export class Rel2DdlTransformation extends DecisionAwareM2M<
@@ -43,6 +44,7 @@ export class Rel2DdlTransformation extends DecisionAwareM2M<
     const connectFks = fks.filter((fk) => fk.onConnect !== undefined && fk.onConnect !== null)
     const emulatedFks = this.disconnectTriggerFks(fks)
     const triggerFks = [...connectFks, ...emulatedFks.filter((fk) => !connectFks.includes(fk))]
+    const historyTables = tables.filter((tab) => tab.historyOf !== undefined && tab.historyOf !== null)
     return (
       <M2T name={`${s.name}_ddl`}>
         <Doc name={`${s.name}.sql`}>
@@ -61,7 +63,7 @@ export class Rel2DdlTransformation extends DecisionAwareM2M<
         {fks.map((fk) => this.foreignKeyToAlter(fk))}
         {tables.flatMap((tab) => ((tab.indexes ?? []) as rmT.IIndex[]).map((ix) => this.indexToCreate(ix)))}
         {clustered.length > 0 && this.dialect() === "postgres" ? this.postgresClusterSection(clustered) : []}
-        {triggerFks.length > 0 ? this.triggersDocument(s, connectFks, emulatedFks) : []}
+        {triggerFks.length > 0 || historyTables.length > 0 ? this.triggersDocument(s, connectFks, emulatedFks, historyTables) : []}
       </M2T>
     )
   }
@@ -83,10 +85,12 @@ export class Rel2DdlTransformation extends DecisionAwareM2M<
 
   /** The triggers document: connect rules always land here (no dialect
    * expresses them declaratively); under TriggerEmulation the
-   * disconnect rules join them. The bodies are named stubs: the rule,
-   * its event, and its meaning are the generated contract. */
+   * disconnect rules join them, and history capture stubs land here
+   * unconditionally for every table carrying historyOf. The bodies are
+   * named stubs: the rule, its event, and its meaning are the
+   * generated contract. */
   @E2E()
-  triggersDocument(s: rmT.IRelSchema, connectFks: rmT.IForeignKey[], emulatedFks: rmT.IForeignKey[]): ExprNode<m2tmm.IDocument> {
+  triggersDocument(s: rmT.IRelSchema, connectFks: rmT.IForeignKey[], emulatedFks: rmT.IForeignKey[], historyTables: rmT.ITable[]): ExprNode<m2tmm.IDocument> {
     return (
       <Doc name={`${s.name}-triggers.sql`}>
         <Sec name="triggers_header">
@@ -95,7 +99,26 @@ export class Rel2DdlTransformation extends DecisionAwareM2M<
         </Sec>
         {connectFks.map((fk) => this.connectTrigger(fk))}
         {emulatedFks.map((fk) => this.disconnectTrigger(fk))}
+        {historyTables.map((tab) => this.captureTrigger(tab))}
       </Doc>
+    )
+  }
+
+  /** The row-history capture stub, unconditional like the connect
+   * rules: no dialect maintains a history table declaratively, so
+   * every update or delete on the base table writes the previous row
+   * state (with its discriminator value) through the named
+   * procedure. */
+  private captureTrigger(tab: rmT.ITable): ExprNode<m2tmm.ISection> {
+    const base = (tab.historyOf as rmT.ITable).name
+    return (
+      <Sec name={`trg_${tab.name}_capture`}>
+        <P>{`-- row history capture for ${base}: every update or delete writes the previous row state to ${tab.name}`}</P>
+        <P>{`CREATE TRIGGER ${this.quoteIdentifier(`trg_${tab.name}_capture`)}`}</P>
+        <P>{`  AFTER UPDATE OR DELETE ON ${this.quoteIdentifier(String(base))}`}</P>
+        <P>{`  FOR EACH ROW EXECUTE PROCEDURE ${this.quoteIdentifier(`synth_${tab.name}_capture`)}();`}</P>
+        <P>{" "}</P>
+      </Sec>
     )
   }
 

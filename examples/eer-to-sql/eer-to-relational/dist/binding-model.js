@@ -31,5 +31,14 @@ export const ER_Bindings = (store) => (createExprNode(BindingModel, { name: "ER_
         ] }),
     createExprNode(Binding, { name: "InheritanceBinding", description: "Binding the inheritance strategy to specialization hierarchies", element: createExprNode(ModelElement, { "$refByName": "//www.aelastics.org/ERMetamodel/Specialization" }), issues: [
             createExprNode(ElementIssue, { "$refByName": "//www.aelastics.org/RelationSchemaDesign/InheritanceStrategy" }),
+        ] }),
+    createExprNode(Binding, { name: "KernelHistoryBinding", description: "Binding row history to kernel entities", element: createExprNode(ModelElement, { "$refByName": "//www.aelastics.org/ERMetamodel/Kernel" }), issues: [
+            createExprNode(ElementIssue, { "$refByName": "//www.aelastics.org/RelationSchemaDesign/RowHistory" }),
+        ] }),
+    createExprNode(Binding, { name: "WeakHistoryBinding", description: "Binding row history to weak entities", element: createExprNode(ModelElement, { "$refByName": "//www.aelastics.org/ERMetamodel/Weak" }), issues: [
+            createExprNode(ElementIssue, { "$refByName": "//www.aelastics.org/RelationSchemaDesign/RowHistory" }),
+        ] }),
+    createExprNode(Binding, { name: "AggregationHistoryBinding", description: "Binding row history to aggregations", element: createExprNode(ModelElement, { "$refByName": "//www.aelastics.org/ERMetamodel/Aggregation" }), issues: [
+            createExprNode(ElementIssue, { "$refByName": "//www.aelastics.org/RelationSchemaDesign/RowHistory" }),
         ] })));
 //# sourceMappingURL=binding-model.js.map

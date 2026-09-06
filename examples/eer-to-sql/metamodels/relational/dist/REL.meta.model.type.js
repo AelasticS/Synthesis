@@ -75,6 +75,12 @@ export const Table = t.subtype(ModelElement, {
     primaryKey: t.optional(PrimaryKey),
     foreignKeys: t.arrayOf(ForeignKey),
     indexes: t.arrayOf(Index),
+    // A history table names the base table whose row versions it keeps
+    // (design/row-history.md). Deliberately NOT a foreign key: history
+    // outlives the deletion of the base row, so the link is a declarative
+    // fact for the DDL layer's capture triggers, never a referential
+    // constraint.
+    historyOf: t.optional(t.link(RelModel_TypeSchema, 'Table')),
 }, "Table", RelModel_TypeSchema);
 t.inverseProps(Table, "columns", Column, "ownerTable");
 t.inverseProps(Table, "primaryKey", PrimaryKey, "ownerTable");

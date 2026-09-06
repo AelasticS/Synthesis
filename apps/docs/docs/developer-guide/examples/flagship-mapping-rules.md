@@ -130,6 +130,45 @@ pairs have no foreign-key form and are not mapped in v2: the
 SpecializationMapping's own `cnMapp`/`dcnMapp` and the Subtype's
 `cnSubtype`/`dcnSubtype` (rules over subtype-row events).
 
+## Row history
+
+Whether a table keeps its rows' past states is the per-entity
+`RowHistory` issue, bound to kernels, weak entities, and
+aggregations. Under its `HistoryTable` option the entity's table step
+is wrapped by the higher-order `withHistoryTable` template
+(`history.tsx`), a table-set step one granularity above the audit
+columns step: the base table is emitted unchanged, and a
+`<table>_history` table is derived from its node column for column,
+audit columns included and autoincrement stripped, because history
+rows arrive with their values.
+
+The history table is identified like a weak entity: its primary key
+is the base key plus a temporal discriminator. Choosing HistoryTable
+opens the `HistoryDiscriminator` sub-issue, the design space's first
+composite option: `ValidFromTimestamp` (the default) adds
+`valid_from TIMESTAMP`, `VersionCounter` adds `version INTEGER`. But
+unlike a weak entity the history table is deliberately NOT
+existence-dependent. It carries no foreign keys at all, because
+history outlives the deletion of the base row and a snapshot of a
+past state must not be rejected by current referential constraints.
+
+Columns that reach a versioned table AFTER its emission are mirrored:
+a relationship foreign key under the `ForeignKey` option and the
+columns a SingleTable hierarchy grafts into its root both copy their
+columns (and nothing else) into the history table, because a
+versioned row's relationship columns are part of its state.
+
+In the relational model the history table names its base through the
+`historyOf` link, which is what the DDL layer reads: every history
+table gets an `AFTER UPDATE OR DELETE` capture trigger stub in the
+triggers document, unconditional like the connect rules, since no
+dialect maintains a history table declaratively. A configuration
+stays a flat list of choices: the sub-issue nesting is design-space
+structure only, and an entity that keeps `NoHistory` never consults
+the discriminator (see the
+[composite options section](../guides/variability.md#composite-options-an-option-that-opens-sub-issues)
+of the variability guide).
+
 ## Dialects are configurations, not code
 
 The DDL generator declares emission issues; a dialect is a shipped
@@ -170,6 +209,8 @@ of the metamodel guide for the mechanism.
 | Issue | Granularity | Options (default first) | Transformation |
 | --- | --- | --- | --- |
 | TableAuditing | per entity | AuditColumns, NoAuditColumns | eer-to-relational |
+| RowHistory | per entity | NoHistory, HistoryTable | eer-to-relational |
+| HistoryDiscriminator | per entity, opened by HistoryTable | ValidFromTimestamp, VersionCounter | eer-to-relational |
 | InheritanceStrategy | per hierarchy | JoinedTables, SingleTable, TablePerClass | eer-to-relational |
 | OneToManyStrategy | per relationship | JoinTable, ForeignKey | eer-to-relational |
 | PrimaryKeyStrategy | per attribute | UseAutoIncrement, UseManualIncrement | eer-to-relational |

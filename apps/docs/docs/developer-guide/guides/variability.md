@@ -310,9 +310,10 @@ particular option is chosen. The decision metamodel states this with
 `CompositeOption`, an option carrying sub-issues, the issues that
 become meaningful exactly when that option is selected (authored with
 the `ElementSubIssue` tag). A row-versioning policy is the canonical
-shape: whether a table keeps history is one issue, and only the
-history-keeping option opens the question of what distinguishes row
-versions:
+shape, and it is exactly the flagship's `RowHistory` issue
+(`examples/eer-to-sql/eer-to-relational`): whether a table keeps
+history is one issue, and only the history-keeping option opens the
+question of what distinguishes row versions:
 
 ```tsx
 <ElementIssue name="RowHistory" description="Whether this table keeps row history">
@@ -339,10 +340,13 @@ top-level one. The conditionality polices itself at run time: a
 variation point inside the composite option's code path is only
 consulted when that option was chosen, so an unconsulted sub-issue
 needs no choice, and a consulted one without a choice falls back to
-its declared default, announced as usual. One tooling note:
-`config init` enumerates the model's top-level issues, so today a
-sub-issue's choice comes from a preset or a hand-written
-configuration.
+its declared default, recorded in the trace as a default resolution.
+`config init` follows the same path the defaults take: when a
+generated choice selects a composite option, the sub-issues it opens
+are answered too, recursively, in the same decision context, while
+sub-issues behind unchosen options stay out of the generated
+configuration (choosing such an option later means adding its
+sub-issue choices by hand, or trusting the run-time default).
 
 The decision metamodel also carries cross-tree `Constraint` elements
 (`Requires` and `Exclude` between options) for dependencies that span
