@@ -138,7 +138,13 @@ must therefore be a resolvable package. The rules:
 
 - The rich relational metamodel and flagship example design
   (design/engine-follow-ups.md and the flagship session).
-- The `inlineReferences` question in sql-tutorial-configuration-based.
+- The `inlineReferences` question in sql-tutorial-configuration-based:
+  RESOLVED 2026-09-07, closed as a parameter. Whether references are
+  inline is fully determined by the chosen layout (SingleFile has
+  nowhere else to put them; the split layouts have a constraints file
+  precisely so they need none inline), so declaring it as an issue
+  would admit configurations that generate broken or duplicated DDL.
+  The tutorial's Part 3 variation-points page argues this in full.
 - Packaged chains (design/packaged-chains.md; that note gets the new names
   only).
 - Publishing (versions, tags, npm); the cli-v0.1.0 tag predates the rename.
