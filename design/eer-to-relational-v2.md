@@ -549,8 +549,17 @@ with the ALTER TABLE foreign keys), explicit column ORDER for
 composite keys (previously implicit in emission order), the
 attachment point decision 12's Clustering emission needs (CLUSTER
 USING and ORGANIZATION INDEX address the key by name), and the
-derived-fact principle applied to key-ness: Column.isKey stays only
-until stage 3/4 emit and read PrimaryKey, then it is dropped.
+derived-fact principle applied to key-ness immediately: on the user's
+correction ("there is no legacy code here", the v1 analogy was false
+because no shipped rework depended on the mark), Column.isKey was
+DELETED in the same round rather than kept as a transition mark, and
+the PrimaryKey adoption was pulled forward from stages 3 and 4: the
+transformation emits a PrimaryKey element per table over its key plan
+(kernel, weak, joined, table-per-class; join tables keep v1's no-key
+shape until stage 3 decides otherwise), the DDL generator reads the
+element (clause text unchanged, order now explicit from the element),
+the audit template and all samples shed the mark, and the suite
+verification asserts the element and the mark's absence.
 
 Review round four delivered the metamodel-as-model namespace marker:
 the types meta-metamodel's Object concept carries an optional

@@ -18,6 +18,6 @@ import { Column } from "relational-metamodel"
 export const withAuditColumns = (columns: () => ExprNode<rmT.IColumn>[]) =>
   (): ExprNode<rmT.IColumn>[] => [
     ...columns(),
-    <Column name="createdBy" type="VARCHAR(255)" isKey={false} isNullable={false} isAutoincrement={false} />,
-    <Column name="createdAt" type="DATE" isKey={false} isNullable={false} isAutoincrement={false} />,
+    <Column name="createdBy" type="VARCHAR(255)" isNullable={false} isAutoincrement={false} />,
+    <Column name="createdAt" type="DATE" isNullable={false} isAutoincrement={false} />,
   ]

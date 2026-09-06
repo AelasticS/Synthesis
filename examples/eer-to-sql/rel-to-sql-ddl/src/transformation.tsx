@@ -58,8 +58,10 @@ export class Rel2DdlTransformation extends DecisionAwareM2M<
     if (cols.length === 0) {
       throw new Error(`Table '${tab.name}' has no columns; nothing to create.`)
     }
-    const keyCols = cols.filter((c) => c.isKey)
-    const lines: string[] = cols.map((c) => `  ${this.columnLine(c)}`)
+    // key-ness is membership in the table's PrimaryKey, in ITS order
+    const keyCols = ((tab.primaryKey as rmT.IPrimaryKey | undefined)?.columns ?? []) as rmT.IColumn[]
+    const keySet = new Set<rmT.IColumn>(keyCols)
+    const lines: string[] = cols.map((c) => `  ${this.columnLine(c, keySet.has(c))}`)
     if (keyCols.length > 0) {
       lines.push(`  PRIMARY KEY (${keyCols.map((c) => this.quoteIdentifier(c.name)).join(", ")})`)
     }
@@ -121,10 +123,10 @@ export class Rel2DdlTransformation extends DecisionAwareM2M<
     )
   }
 
-  private columnLine(c: rmT.IColumn): string {
+  private columnLine(c: rmT.IColumn, isKeyColumn: boolean): string {
     const parts: string[] = [this.quoteIdentifier(c.name), c.type]
     if (c.isAutoincrement) parts.push("AUTOINCREMENT")
-    if (c.isNullable === false && !c.isKey) parts.push("NOT NULL")
+    if (c.isNullable === false && !isKeyColumn) parts.push("NOT NULL")
     return parts.join(" ")
   }
 

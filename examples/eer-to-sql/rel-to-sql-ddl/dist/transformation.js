@@ -44,8 +44,10 @@ let Rel2DdlTransformation = class Rel2DdlTransformation extends DecisionAwareM2M
         if (cols.length === 0) {
             throw new Error(`Table '${tab.name}' has no columns; nothing to create.`);
         }
-        const keyCols = cols.filter((c) => c.isKey);
-        const lines = cols.map((c) => `  ${this.columnLine(c)}`);
+        // key-ness is membership in the table's PrimaryKey, in ITS order
+        const keyCols = (tab.primaryKey?.columns ?? []);
+        const keySet = new Set(keyCols);
+        const lines = cols.map((c) => `  ${this.columnLine(c, keySet.has(c))}`);
         if (keyCols.length > 0) {
             lines.push(`  PRIMARY KEY (${keyCols.map((c) => this.quoteIdentifier(c.name)).join(", ")})`);
         }
@@ -93,11 +95,11 @@ let Rel2DdlTransformation = class Rel2DdlTransformation extends DecisionAwareM2M
             createExprNode(P, null, `CREATE ${unique}INDEX ${this.quoteIdentifier(ix.name)} ON ${this.quoteIdentifier(owner.name)} (${cols.map((c) => this.quoteIdentifier(c.name)).join(", ")});`),
             createExprNode(P, null, " ")));
     }
-    columnLine(c) {
+    columnLine(c, isKeyColumn) {
         const parts = [this.quoteIdentifier(c.name), c.type];
         if (c.isAutoincrement)
             parts.push("AUTOINCREMENT");
-        if (c.isNullable === false && !c.isKey)
+        if (c.isNullable === false && !isKeyColumn)
             parts.push("NOT NULL");
         return parts.join(" ");
     }

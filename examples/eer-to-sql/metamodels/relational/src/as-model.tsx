@@ -43,9 +43,6 @@ export const RELModel = (store: ModelStore): ExprNode<t.ITypeModel> => (
         <PropertyDomain $refByName="string" />
       </Property>
       <Property name="columnDomain" domain={<TypeObject $refByName="Domain" />} />
-      <Property name="isKey">
-        <PropertyDomain $refByName="boolean" />
-      </Property>
       <Property name="isNullable">
         <PropertyDomain $refByName="boolean" />
       </Property>

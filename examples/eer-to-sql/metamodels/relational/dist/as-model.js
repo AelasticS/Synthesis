@@ -24,8 +24,6 @@ export const RELModel = (store) => (createExprNode(TypeModel, { name: "RELMetamo
         createExprNode(Property, { name: "type" },
             createExprNode(PropertyDomain, { "$refByName": "string" })),
         createExprNode(Property, { name: "columnDomain", domain: createExprNode(TypeObject, { "$refByName": "Domain" }) }),
-        createExprNode(Property, { name: "isKey" },
-            createExprNode(PropertyDomain, { "$refByName": "boolean" })),
         createExprNode(Property, { name: "isNullable" },
             createExprNode(PropertyDomain, { "$refByName": "boolean" })),
         createExprNode(Property, { name: "isAutoincrement" },

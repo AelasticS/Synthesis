@@ -28,7 +28,7 @@ import { createExprNode } from "@aelastics/synthesis/jsx";
 import { VarPoint, VarOption, Default, Option, DecisionAwareM2M } from "@aelastics/synthesis/variability";
 import { E2E, M2M, SpecPoint, SpecOption } from "@aelastics/synthesis/m2m";
 import * as em from "eer-metamodel/model";
-import { RelSchema, Table, Column, ForeignKey, ForeignKeyColumn, Index } from "relational-metamodel";
+import { RelSchema, Table, Column, ForeignKey, ForeignKeyColumn, Index, PrimaryKey } from "relational-metamodel";
 import { withAuditColumns } from "./audit.js";
 let EerToRelational = class EerToRelational extends DecisionAwareM2M {
     constructor(store, {}, configModel) {
@@ -64,15 +64,18 @@ let EerToRelational = class EerToRelational extends DecisionAwareM2M {
         return undefined; // pure dispatch: Kernel and Weak options below
     }
     kernelToTable(e) {
-        return createExprNode(Table, { name: this.tableNameOf(e) }, this.tableColumns(e));
+        return (createExprNode(Table, { name: this.tableNameOf(e) },
+            this.tableColumns(e),
+            this.primaryKeyFor(e)));
     }
     weakToTable(w) {
         const owner = this.ownerOf(w);
         const table = this.tableNameOf(w);
         const copies = this.keyColumnsPlan(w).slice(0, this.keyColumnsPlan(this.ownerOf(w)).length);
         return (createExprNode(Table, { name: table },
-            copies.map((c) => (createExprNode(Column, { name: c.name, type: c.type, isKey: true, isNullable: false, isAutoincrement: false }))),
+            copies.map((c) => (createExprNode(Column, { name: c.name, type: c.type, isNullable: false, isAutoincrement: false }))),
             this.tableColumns(w),
+            this.primaryKeyFor(w),
             this.foreignKeyTo(table, `fk_${table}_${this.tableFor(owner)}`, copies.map((c) => c.name), owner, false)));
     }
     /**
@@ -94,7 +97,7 @@ let EerToRelational = class EerToRelational extends DecisionAwareM2M {
     }
     attributeToColumn(a) {
         const composite = this.keyAttrsOf(a.attrEntity).length > 1;
-        return (createExprNode(Column, { name: this.applyNaming(a.name), type: this.getColumnType(this.domainOf(a)), isKey: a.isKey, isNullable: !a.isKey, isAutoincrement: a.isKey && !composite && this.primaryKeyStrategy(a) && this.getColumnType(this.domainOf(a)) === "INTEGER" }));
+        return (createExprNode(Column, { name: this.applyNaming(a.name), type: this.getColumnType(this.domainOf(a)), isNullable: !a.isKey, isAutoincrement: a.isKey && !composite && this.primaryKeyStrategy(a) && this.getColumnType(this.domainOf(a)) === "INTEGER" }));
     }
     // ── the hierarchies pass ─────────────────────────────────────────────
     hierarchyToTables(spec) {
@@ -107,7 +110,7 @@ let EerToRelational = class EerToRelational extends DecisionAwareM2M {
         const root = this.rootOf(spec);
         const rootTable = this.tableNameOf(root);
         return (createExprNode(Table, { "$refByName": rootTable },
-            createExprNode(Column, { name: `${rootTable}_type`, type: "VARCHAR(255)", isKey: false, isNullable: false, isAutoincrement: false }),
+            createExprNode(Column, { name: `${rootTable}_type`, type: "VARCHAR(255)", isNullable: false, isAutoincrement: false }),
             spec.subtypes.flatMap((st) => st.attributes.map((a) => this.attributeToColumn(a)))));
     }
     tablePerClassHierarchy(spec) {
@@ -118,8 +121,9 @@ let EerToRelational = class EerToRelational extends DecisionAwareM2M {
         const table = this.tableNameOf(st);
         const copies = this.keyColumnsPlan(st);
         return (createExprNode(Table, { name: table },
-            copies.map((c) => (createExprNode(Column, { name: c.name, type: c.type, isKey: true, isNullable: false, isAutoincrement: false }))),
+            copies.map((c) => (createExprNode(Column, { name: c.name, type: c.type, isNullable: false, isAutoincrement: false }))),
             this.tableColumns(st),
+            this.primaryKeyFor(st),
             this.foreignKeyTo(table, `fk_${table}_${this.tableFor(root)}`, copies.map((c) => c.name), root, true)));
     }
     tablePerClassSubtypeTable(st) {
@@ -127,13 +131,14 @@ let EerToRelational = class EerToRelational extends DecisionAwareM2M {
         const table = this.tableNameOf(st);
         return (createExprNode(Table, { name: table },
             root.attributes.map((a) => this.copiedColumn(a)),
-            this.tableColumns(st)));
+            this.tableColumns(st),
+            this.primaryKeyFor(st)));
     }
     /** A copy of a root attribute's column in a TablePerClass subtype
      * table: a new element with the same name (the table scope keeps it
      * unambiguous) and no autoincrement. */
     copiedColumn(a) {
-        return (createExprNode(Column, { name: this.applyNaming(a.name), type: this.getColumnType(this.domainOf(a)), isKey: a.isKey, isNullable: !a.isKey, isAutoincrement: false }));
+        return (createExprNode(Column, { name: this.applyNaming(a.name), type: this.getColumnType(this.domainOf(a)), isNullable: !a.isKey, isAutoincrement: false }));
     }
     // A second point on the same issue, answering with the strategy VALUE
     // for the places that must know where an entity's rows live (tableFor,
@@ -228,7 +233,7 @@ let EerToRelational = class EerToRelational extends DecisionAwareM2M {
             ref: c.name,
         }));
         const fkName = this.applyNaming(`fk_${table}_${qualifier}`);
-        const cols = fkCols.map((c) => (createExprNode(Column, { name: c.name, type: c.type, isKey: false, isNullable: nullable, isAutoincrement: false })));
+        const cols = fkCols.map((c) => (createExprNode(Column, { name: c.name, type: c.type, isNullable: nullable, isAutoincrement: false })));
         const pairs = [this.foreignKeyElement(fkName, refTable, fkCols, unique)];
         this.emittedFks.push({ table, fkName, cols: fkCols.map((c) => c.name) });
         return { cols, pairs, fkName };
@@ -329,6 +334,11 @@ let EerToRelational = class EerToRelational extends DecisionAwareM2M {
         }
         this.keyPlans.set(e, plan);
         return plan;
+    }
+    /** The table's PrimaryKey element over its key plan, in plan order:
+     * key-ness is membership here, stated once. */
+    primaryKeyFor(e) {
+        return (createExprNode(PrimaryKey, { name: this.applyNaming(`pk_${this.tableFor(e)}`) }, this.keyColumnsPlan(e).map((c) => (createExprNode(Column, { "$refByName": c.name })))));
     }
     /** A leaf attribute's domain; composite parents have components
      * instead and are mapped by their components (v2 stage 3). */

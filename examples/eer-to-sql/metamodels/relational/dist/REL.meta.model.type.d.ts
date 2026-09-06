@@ -29,7 +29,6 @@ export declare const Domain: t.Subtype<{
 }, t.ObjectType<import("@aelastics/types/lib/complex-types/ObjectType.js").InterfaceDecl, readonly ["name"]>>;
 export declare const Column: t.Subtype<{
     type: t.StringType;
-    isKey: t.BooleanType;
     isNullable: t.BooleanType;
     isAutoincrement: t.BooleanType;
     domain: t.OptionalType<t.LinkType>;
@@ -98,7 +97,6 @@ export declare const PrimaryKey: t.Subtype<{
 export declare const Table: t.Subtype<{
     columns: t.ArrayType<t.Subtype<{
         type: t.StringType;
-        isKey: t.BooleanType;
         isNullable: t.BooleanType;
         isAutoincrement: t.BooleanType;
         domain: t.OptionalType<t.LinkType>;

@@ -82,6 +82,9 @@ export declare class EerToRelational extends DecisionAwareM2M<em.IEERSchema, rmT
      * emitted, types mirrored. One source of truth for emission and
      * referencing. */
     private keyColumnsPlan;
+    /** The table's PrimaryKey element over its key plan, in plan order:
+     * key-ness is membership here, stated once. */
+    private primaryKeyFor;
     /** A leaf attribute's domain; composite parents have components
      * instead and are mapped by their components (v2 stage 3). */
     private domainOf;

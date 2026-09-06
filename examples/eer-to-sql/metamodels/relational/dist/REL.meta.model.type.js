@@ -29,7 +29,6 @@ export const Domain = t.subtype(ModelElement, {
 }, "Domain", RelModel_TypeSchema);
 export const Column = t.subtype(ModelElement, {
     type: t.string,
-    isKey: t.boolean,
     isNullable: t.boolean,
     isAutoincrement: t.boolean,
     domain: t.optional(t.link(RelModel_TypeSchema, 'Domain')),
@@ -58,11 +57,9 @@ export const Index = t.subtype(ModelElement, {
 }, "Index", RelModel_TypeSchema);
 // The primary key as a first-class named constraint: an ORDERED list
 // of the owner table's columns, symmetric with ForeignKey. Key-ness
-// of a column is semantically membership in this list; the legacy
-// Column.isKey mark stays only until the transformation and the DDL
-// generator adopt PrimaryKey (v2 stage 3 and 4), then it is dropped,
-// per the derived-fact principle: a fact is not stored beside where
-// it could disagree.
+// of a column IS membership in this list, stated once, per the
+// derived-fact principle: a fact is not stored beside where it could
+// disagree.
 export const PrimaryKey = t.subtype(ModelElement, {
     columns: t.arrayOf(t.link(RelModel_TypeSchema, "Column")),
     ownerTable: t.optional(t.link(RelModel_TypeSchema, 'Table')),

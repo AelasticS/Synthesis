@@ -28,9 +28,9 @@ export default (store: ModelStore): ExprNode<t.IRelSchema> => (
     <Domain name="money" type="DECIMAL(10,2)" check="VALUE >= 0" defaultValue="0" />
 
     <Table name="book">
-      <Column name="id" type="INTEGER" isKey={true} isNullable={false} isAutoincrement={true} />
-      <Column name="title" type="VARCHAR(255)" isKey={false} isNullable={true} isAutoincrement={false} />
-      <Column name="price" type="DECIMAL(10,2)" isKey={false} isNullable={true} isAutoincrement={false}
+      <Column name="id" type="INTEGER" isNullable={false} isAutoincrement={true} />
+      <Column name="title" type="VARCHAR(255)" isNullable={true} isAutoincrement={false} />
+      <Column name="price" type="DECIMAL(10,2)" isNullable={true} isAutoincrement={false}
         domain={<Domain $refByName="money" />} />
       <PrimaryKey name="pk_book">
         <Column $refByName="id" />
@@ -39,8 +39,8 @@ export default (store: ModelStore): ExprNode<t.IRelSchema> => (
 
     <Table name="copy">
       {/* composite primary key: the owning book plus the copy number */}
-      <Column name="book_id" type="INTEGER" isKey={true} isNullable={false} isAutoincrement={false} />
-      <Column name="no" type="INTEGER" isKey={true} isNullable={false} isAutoincrement={false} />
+      <Column name="book_id" type="INTEGER" isNullable={false} isAutoincrement={false} />
+      <Column name="no" type="INTEGER" isNullable={false} isAutoincrement={false} />
       <PrimaryKey name="pk_copy">
         <Column $refByName="book_id" />
         <Column $refByName="no" />
@@ -56,9 +56,9 @@ export default (store: ModelStore): ExprNode<t.IRelSchema> => (
     </Table>
 
     <Table name="loan">
-      <Column name="copy_book_id" type="INTEGER" isKey={false} isNullable={false} isAutoincrement={false} />
-      <Column name="copy_no" type="INTEGER" isKey={false} isNullable={false} isAutoincrement={false} />
-      <Column name="due" type="DATE" isKey={false} isNullable={true} isAutoincrement={false} />
+      <Column name="copy_book_id" type="INTEGER" isNullable={false} isAutoincrement={false} />
+      <Column name="copy_no" type="INTEGER" isNullable={false} isAutoincrement={false} />
+      <Column name="due" type="DATE" isNullable={true} isAutoincrement={false} />
       {/* composite foreign key to copy's two-column primary key */}
       <ForeignKey name="fk_loan_copy" isUnique={false}
         onDelete="Cascade" onUpdate="Restrict"

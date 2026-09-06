@@ -13,7 +13,7 @@ import { createExprNode } from "@aelastics/synthesis/jsx";
 import { Column } from "relational-metamodel";
 export const withAuditColumns = (columns) => () => [
     ...columns(),
-    createExprNode(Column, { name: "createdBy", type: "VARCHAR(255)", isKey: false, isNullable: false, isAutoincrement: false }),
-    createExprNode(Column, { name: "createdAt", type: "DATE", isKey: false, isNullable: false, isAutoincrement: false }),
+    createExprNode(Column, { name: "createdBy", type: "VARCHAR(255)", isNullable: false, isAutoincrement: false }),
+    createExprNode(Column, { name: "createdAt", type: "DATE", isNullable: false, isAutoincrement: false }),
 ];
 //# sourceMappingURL=audit.js.map

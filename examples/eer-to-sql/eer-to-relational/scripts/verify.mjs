@@ -52,6 +52,8 @@ try {
     out.includes('name="createdBy"') && out.includes('name="createdAt"'))
   expect('every foreign key gets an index by default', out.includes('<Index name="ix_fk_member_person"'))
   expect('no legacy flat foreign-key marks', !out.includes('isForeignKey={true}'))
+  expect('key-ness is the PrimaryKey element, not a mark',
+    out.includes('<PrimaryKey name="pk_book"') && !out.includes('isKey='))
 
   const tr = read('demo/tr')
   expect('trace names executed rules', tr.includes('rule="kernelToTable"') && tr.includes('rule="joinedSubtypeTable"'))

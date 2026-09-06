@@ -27,7 +27,7 @@ import { ModelStore } from "@aelastics/synthesis/store"
 import * as cm from "@aelastics/synthesis/metamodels/configuration/model"
 import * as em from "eer-metamodel/model"
 import * as rmT from "relational-metamodel/model"
-import { RelSchema, Table, Column, ForeignKey, ForeignKeyColumn, Index } from "relational-metamodel"
+import { RelSchema, Table, Column, ForeignKey, ForeignKeyColumn, Index, PrimaryKey } from "relational-metamodel"
 import { withAuditColumns } from "./audit.js"
 
 /** A key column of a table, as planned for emission and referencing. */
@@ -105,7 +105,12 @@ export class EerToRelational extends DecisionAwareM2M<
 
   @SpecOption("entityToTable", em.Kernel)
   kernelToTable(e: em.IKernel): ExprNode<rmT.ITable> {
-    return <Table name={this.tableNameOf(e)}>{this.tableColumns(e)}</Table>
+    return (
+      <Table name={this.tableNameOf(e)}>
+        {this.tableColumns(e)}
+        {this.primaryKeyFor(e)}
+      </Table>
+    )
   }
 
   @SpecOption("entityToTable", em.Weak)
@@ -116,9 +121,10 @@ export class EerToRelational extends DecisionAwareM2M<
     return (
       <Table name={table}>
         {copies.map((c) => (
-          <Column name={c.name} type={c.type} isKey={true} isNullable={false} isAutoincrement={false} />
+          <Column name={c.name} type={c.type} isNullable={false} isAutoincrement={false} />
         ))}
         {this.tableColumns(w)}
+        {this.primaryKeyFor(w)}
         {this.foreignKeyTo(table, `fk_${table}_${this.tableFor(owner)}`, copies.map((c) => c.name), owner, false)}
       </Table>
     )
@@ -156,7 +162,6 @@ export class EerToRelational extends DecisionAwareM2M<
       <Column
         name={this.applyNaming(a.name)}
         type={this.getColumnType(this.domainOf(a))}
-        isKey={a.isKey}
         isNullable={!a.isKey}
         isAutoincrement={a.isKey && !composite && this.primaryKeyStrategy(a) && this.getColumnType(this.domainOf(a)) === "INTEGER"}
       />
@@ -183,7 +188,7 @@ export class EerToRelational extends DecisionAwareM2M<
     const rootTable = this.tableNameOf(root)
     return (
       <Table $refByName={rootTable}>
-        <Column name={`${rootTable}_type`} type="VARCHAR(255)" isKey={false} isNullable={false} isAutoincrement={false} />
+        <Column name={`${rootTable}_type`} type="VARCHAR(255)" isNullable={false} isAutoincrement={false} />
         {(spec.subtypes as em.ISubtype[]).flatMap((st) =>
           (st.attributes as em.IAttribute[]).map((a) => this.attributeToColumn(a)),
         )}
@@ -204,9 +209,10 @@ export class EerToRelational extends DecisionAwareM2M<
     return (
       <Table name={table}>
         {copies.map((c) => (
-          <Column name={c.name} type={c.type} isKey={true} isNullable={false} isAutoincrement={false} />
+          <Column name={c.name} type={c.type} isNullable={false} isAutoincrement={false} />
         ))}
         {this.tableColumns(st)}
+        {this.primaryKeyFor(st)}
         {this.foreignKeyTo(table, `fk_${table}_${this.tableFor(root)}`, copies.map((c) => c.name), root, true)}
       </Table>
     )
@@ -220,6 +226,7 @@ export class EerToRelational extends DecisionAwareM2M<
       <Table name={table}>
         {(root.attributes as em.IAttribute[]).map((a) => this.copiedColumn(a))}
         {this.tableColumns(st)}
+        {this.primaryKeyFor(st)}
       </Table>
     )
   }
@@ -233,7 +240,6 @@ export class EerToRelational extends DecisionAwareM2M<
       <Column
         name={this.applyNaming(a.name)}
         type={this.getColumnType(this.domainOf(a))}
-        isKey={a.isKey}
         isNullable={!a.isKey}
         isAutoincrement={false}
       />
@@ -389,7 +395,7 @@ export class EerToRelational extends DecisionAwareM2M<
     }))
     const fkName = this.applyNaming(`fk_${table}_${qualifier}`)
     const cols = fkCols.map((c) => (
-      <Column name={c.name} type={c.type} isKey={false} isNullable={nullable} isAutoincrement={false} />
+      <Column name={c.name} type={c.type} isNullable={nullable} isAutoincrement={false} />
     ))
     const pairs = [this.foreignKeyElement(fkName, refTable, fkCols, unique)]
     this.emittedFks.push({ table, fkName, cols: fkCols.map((c) => c.name) })
@@ -522,6 +528,18 @@ export class EerToRelational extends DecisionAwareM2M<
     }
     this.keyPlans.set(e, plan)
     return plan
+  }
+
+  /** The table's PrimaryKey element over its key plan, in plan order:
+   * key-ness is membership here, stated once. */
+  private primaryKeyFor(e: em.IEntity): ExprNode<rmT.IPrimaryKey> {
+    return (
+      <PrimaryKey name={this.applyNaming(`pk_${this.tableFor(e)}`)}>
+        {this.keyColumnsPlan(e).map((c) => (
+          <Column $refByName={c.name} />
+        ))}
+      </PrimaryKey>
+    )
   }
 
   /** A leaf attribute's domain; composite parents have components
