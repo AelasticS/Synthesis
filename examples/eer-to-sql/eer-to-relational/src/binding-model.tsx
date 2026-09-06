@@ -88,5 +88,37 @@ export const ER_Bindings = (store: ModelStore): ExprNode<t.IBindingModel> => (
         <ElementIssue $refByName="//www.aelastics.org/RelationSchemaDesign/InheritanceStrategy" />,
       ]}
     />
+
+    {/* Row history binds to the entities pass's table owners: kernels,
+        weak entities, and aggregations. The HistoryDiscriminator
+        sub-issue is deliberately NOT bound: a sub-issue attaches
+        through its parent option, which keeps default configurations
+        quiet about it while NoHistory rules. */}
+    <Binding
+      name="KernelHistoryBinding"
+      description="Binding row history to kernel entities"
+      element={<ModelElement $refByName="//www.aelastics.org/ERMetamodel/Kernel" />}
+      issues={[
+        <ElementIssue $refByName="//www.aelastics.org/RelationSchemaDesign/RowHistory" />,
+      ]}
+    />
+
+    <Binding
+      name="WeakHistoryBinding"
+      description="Binding row history to weak entities"
+      element={<ModelElement $refByName="//www.aelastics.org/ERMetamodel/Weak" />}
+      issues={[
+        <ElementIssue $refByName="//www.aelastics.org/RelationSchemaDesign/RowHistory" />,
+      ]}
+    />
+
+    <Binding
+      name="AggregationHistoryBinding"
+      description="Binding row history to aggregations"
+      element={<ModelElement $refByName="//www.aelastics.org/ERMetamodel/Aggregation" />}
+      issues={[
+        <ElementIssue $refByName="//www.aelastics.org/RelationSchemaDesign/RowHistory" />,
+      ]}
+    />
   </BindingModel>
 )

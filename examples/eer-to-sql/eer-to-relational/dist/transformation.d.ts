@@ -33,6 +33,39 @@ export declare class EerToRelational extends DecisionAwareM2M<em.IEERSchema, rmT
     private aggregationParts;
     weakToTable(w: em.IWeak): ExprNode<rmT.ITable>;
     /**
+     * The RowHistory issue decides per entity whether its table is
+     * emitted alone or wrapped by withHistoryTable (history.tsx), the
+     * table-set step that derives <table>_history from the base table's
+     * own node. The HistoryDiscriminator sub-issue is consulted only on
+     * the HistoryTable path: the composite option's conditionality
+     * polices itself at run time (an unconsulted sub-issue needs no
+     * choice, a consulted one without a choice falls back to its
+     * default).
+     */
+    entityToTables(e: em.IEntity): ExprNode<rmT.ITable>[];
+    currentRowsOnly(e: em.IEntity): ExprNode<rmT.ITable>[];
+    withRowHistory(e: em.IEntity): ExprNode<rmT.ITable>[];
+    /** What distinguishes row versions in this entity's history table. */
+    historyDiscriminator(e: em.IEntity): ExprNode<rmT.IColumn>;
+    validFromDiscriminator(e: em.IEntity): ExprNode<rmT.IColumn>;
+    versionCounterDiscriminator(e: em.IEntity): ExprNode<rmT.IColumn>;
+    keepsHistory(e: em.IEntity): boolean;
+    keepsNoHistory(e: em.IEntity): boolean;
+    keepsRowHistory(e: em.IEntity): boolean;
+    /**
+     * The graft mirror: relationship foreign keys and single-table
+     * hierarchy columns land in already-emitted tables AFTER the
+     * entities pass, and a versioned row's relationship columns are part
+     * of its state. When the grafted-into table keeps history, the same
+     * columns (and nothing else: no foreign keys, no indexes, no key
+     * change) are copied into its history table. The mirror introspects
+     * the just-built graft node, so no rule runs twice.
+     */
+    private mirrorGraftIntoHistory;
+    /** The entity whose OWN table holds this entity's rows: a subtype
+     * under SingleTable defers to its hierarchy's root. */
+    private tableOwnerEntity;
+    /**
      * The audited or plain columns of an entity's table: a rule pair
      * selected by the TableAuditing issue, the higher-order
      * withAuditColumns applied inside the audited option (the confirmed
@@ -49,7 +82,7 @@ export declare class EerToRelational extends DecisionAwareM2M<em.IEERSchema, rmT
     attributeToColumn(a: em.IAttribute): ExprNode<rmT.IColumn>;
     hierarchyToTables(spec: em.ISpecialization): ExprNode<rmT.ITable> | ExprNode<rmT.ITable>[];
     joinedHierarchy(spec: em.ISpecialization): ExprNode<rmT.ITable>[];
-    singleTableHierarchy(spec: em.ISpecialization): ExprNode<rmT.ITable>;
+    singleTableHierarchy(spec: em.ISpecialization): ExprNode<rmT.ITable> | ExprNode<rmT.ITable>[];
     tablePerClassHierarchy(spec: em.ISpecialization): ExprNode<rmT.ITable>[];
     joinedSubtypeTable(st: em.ISubtype): ExprNode<rmT.ITable>;
     tablePerClassSubtypeTable(st: em.ISubtype): ExprNode<rmT.ITable>;
@@ -63,12 +96,12 @@ export declare class EerToRelational extends DecisionAwareM2M<em.IEERSchema, rmT
     strategyTpc(spec: em.ISpecialization): "tpc";
     /** Plain dispatcher: the shape of the relationship decides the rule;
      * only the genuinely open 1:N case is a configuration issue. */
-    relationshipToStructure(r: em.IRelationship): ExprNode<any>;
-    relationshipMapping(rel: em.IRelationship): ExprNode<rmT.ITable>;
-    relationshipAsForeignKey(rel: em.IRelationship): ExprNode<rmT.ITable>;
+    relationshipToStructure(r: em.IRelationship): ExprNode<any> | ExprNode<any>[];
+    relationshipMapping(rel: em.IRelationship): ExprNode<rmT.ITable> | ExprNode<rmT.ITable>[];
+    relationshipAsForeignKey(rel: em.IRelationship): ExprNode<rmT.ITable> | ExprNode<rmT.ITable>[];
     relationshipAsJoinTable(rel: em.IRelationship): ExprNode<rmT.ITable>;
     manyToManyJoinTable(rel: em.IRelationship): ExprNode<rmT.ITable>;
-    oneToOneForeignKey(rel: em.IRelationship): ExprNode<rmT.ITable>;
+    oneToOneForeignKey(rel: em.IRelationship): ExprNode<rmT.ITable> | ExprNode<rmT.ITable>[];
     private buildJoinTable;
     indexesForForeignKeys(): ExprNode<rmT.ITable>[];
     indexAllForeignKeys(): ExprNode<rmT.ITable>[];

@@ -7,14 +7,16 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 /**
  * The flagship configuration-based EER to relational transformation.
- * Seven design issues are left open and closed per run by a
+ * Nine design issues are left open and closed per run by a
  * configuration model (see decision-model.tsx); the target is the rich
  * relational metamodel (real foreign keys, composite capable, and
  * indexes; Table is a name scope). Every template kind appears: plain
  * @E2E rules, @SpecPoint specialization over the entity kinds,
- * @VarPoint configuration dispatch, and the higher-order
- * withAuditColumns template (audit.tsx) selected by the TableAuditing
- * issue.
+ * @VarPoint configuration dispatch, and the higher-order templates
+ * withAuditColumns (audit.tsx, a columns step selected by the
+ * TableAuditing issue) and withHistoryTable (history.tsx, a table-set
+ * step selected by the RowHistory issue, whose HistoryTable option
+ * opens the HistoryDiscriminator sub-issue).
  *
  * Authority over source elements is partitioned at the composition
  * site: the entities pass takes kernels and weak entities (hierarchy
@@ -30,6 +32,7 @@ import { E2E, M2M, SpecPoint, SpecOption } from "@aelastics/synthesis/m2m";
 import * as em from "eer-metamodel/model";
 import { RelSchema, Table, Column, Domain as RelDomain, ForeignKey, ForeignKeyColumn, Index, PrimaryKey } from "relational-metamodel";
 import { withAuditColumns } from "./audit.js";
+import { columnNodesOf, copiedHistoryColumn, withHistoryTable } from "./history.js";
 let EerToRelational = class EerToRelational extends DecisionAwareM2M {
     constructor(store, {}, configModel) {
         super(store, {}, configModel);
@@ -54,7 +57,7 @@ let EerToRelational = class EerToRelational extends DecisionAwareM2M {
         return (createExprNode(RelSchema, { name: this.applyNaming(`${s.name}_rel`), store: this.context.store },
             userDomains.map((d) => this.domainToDomain(d)),
             units.map((u) => u.kind === "entity"
-                ? this.entityToTable(u.element)
+                ? this.entityToTables(u.element)
                 : this.hierarchyToTables(u.element)),
             relationships.map((r) => this.relationshipToStructure(r)),
             this.indexesForForeignKeys()));
@@ -139,6 +142,75 @@ let EerToRelational = class EerToRelational extends DecisionAwareM2M {
             this.primaryKeyFor(w),
             this.foreignKeyTo(table, `fk_${table}_${this.tableFor(owner)}`, copies.map((c) => c.name), owner, this.fkActions(w.weakMap.cnWeakOwner, w.weakMap.dcnWeakOwner))));
     }
+    // ── the row-history dispatch, one granularity above entityToTable ────
+    /**
+     * The RowHistory issue decides per entity whether its table is
+     * emitted alone or wrapped by withHistoryTable (history.tsx), the
+     * table-set step that derives <table>_history from the base table's
+     * own node. The HistoryDiscriminator sub-issue is consulted only on
+     * the HistoryTable path: the composite option's conditionality
+     * polices itself at run time (an unconsulted sub-issue needs no
+     * choice, a consulted one without a choice falls back to its
+     * default).
+     */
+    entityToTables(e) {
+        throw new Error("Not implemented VarOptions for VarPoint RowHistory");
+    }
+    currentRowsOnly(e) {
+        // the SpecPoint dispatch is total: the undefined in its declared
+        // return never materializes
+        return [this.entityToTable(e)];
+    }
+    withRowHistory(e) {
+        return withHistoryTable(() => this.historyDiscriminator(e))(() => this.entityToTable(e))();
+    }
+    /** What distinguishes row versions in this entity's history table. */
+    historyDiscriminator(e) {
+        throw new Error("Not implemented VarOptions for VarPoint HistoryDiscriminator");
+    }
+    validFromDiscriminator(e) {
+        return createExprNode(Column, { name: "valid_from", type: "TIMESTAMP", isNullable: false, isAutoincrement: false });
+    }
+    versionCounterDiscriminator(e) {
+        return createExprNode(Column, { name: "version", type: "INTEGER", isNullable: false, isAutoincrement: false });
+    }
+    // A second point on the same issue, answering with the VALUE for the
+    // graft sites that must know whether a table keeps history without
+    // building anything (the strategyOf precedent).
+    keepsHistory(e) {
+        throw new Error("Not implemented VarOptions for VarPoint RowHistory");
+    }
+    keepsNoHistory(e) { return false; }
+    keepsRowHistory(e) { return true; }
+    /**
+     * The graft mirror: relationship foreign keys and single-table
+     * hierarchy columns land in already-emitted tables AFTER the
+     * entities pass, and a versioned row's relationship columns are part
+     * of its state. When the grafted-into table keeps history, the same
+     * columns (and nothing else: no foreign keys, no indexes, no key
+     * change) are copied into its history table. The mirror introspects
+     * the just-built graft node, so no rule runs twice.
+     */
+    mirrorGraftIntoHistory(e, graft) {
+        const owner = this.tableOwnerEntity(e);
+        if (!this.keepsHistory(owner))
+            return graft;
+        return [
+            graft,
+            createExprNode(Table, { "$refByName": `${this.tableFor(owner)}_history` }, columnNodesOf(graft).map((c) => copiedHistoryColumn(c))),
+        ];
+    }
+    /** The entity whose OWN table holds this entity's rows: a subtype
+     * under SingleTable defers to its hierarchy's root. */
+    tableOwnerEntity(e) {
+        const store = this.context.store;
+        if (store.isTypeOf(e, em.Subtype)) {
+            const spec = e.supertype;
+            if (this.strategyOf(spec) === "single")
+                return this.rootOf(spec);
+        }
+        return e;
+    }
     /**
      * The audited or plain columns of an entity's table: a rule pair
      * selected by the TableAuditing issue, the higher-order
@@ -186,9 +258,10 @@ let EerToRelational = class EerToRelational extends DecisionAwareM2M {
     singleTableHierarchy(spec) {
         const root = this.rootOf(spec);
         const rootTable = this.tableNameOf(root);
-        return (createExprNode(Table, { "$refByName": rootTable },
+        const graft = (createExprNode(Table, { "$refByName": rootTable },
             createExprNode(Column, { name: "type", type: "VARCHAR(255)", isNullable: false, isAutoincrement: false }),
             spec.subtypes.flatMap((st) => st.attributes.map((a) => this.attributeToColumn(a)))));
+        return this.mirrorGraftIntoHistory(root, graft);
     }
     tablePerClassHierarchy(spec) {
         return spec.subtypes.map((st) => this.tablePerClassSubtypeTable(st));
@@ -252,9 +325,10 @@ let EerToRelational = class EerToRelational extends DecisionAwareM2M {
         const table = this.tableFor(manySide.domain);
         const nullable = oneSide.lowerBound === "0";
         const { cols, pairs } = this.plannedForeignKey(table, rel.name, oneSide.domain, nullable, false, this.fkActions(oneSide.cnMapp, oneSide.dcnMapp));
-        return (createExprNode(Table, { "$refByName": table },
+        const graft = (createExprNode(Table, { "$refByName": table },
             cols,
             pairs));
+        return this.mirrorGraftIntoHistory(manySide.domain, graft);
     }
     relationshipAsJoinTable(rel) {
         return this.buildJoinTable(rel);
@@ -269,9 +343,10 @@ let EerToRelational = class EerToRelational extends DecisionAwareM2M {
         const other = roles.find((m) => m !== holder);
         const table = this.tableFor(holder.domain);
         const { cols, pairs } = this.plannedForeignKey(table, rel.name, other.domain, holder.lowerBound === "0", true, this.fkActions(other.cnMapp, other.dcnMapp));
-        return (createExprNode(Table, { "$refByName": table },
+        const graft = (createExprNode(Table, { "$refByName": table },
             cols,
             pairs));
+        return this.mirrorGraftIntoHistory(holder.domain, graft);
     }
     buildJoinTable(rel) {
         const table = this.applyNaming(rel.name);
@@ -624,6 +699,37 @@ __decorate([
 __decorate([
     SpecOption("entityToTable", em.Weak)
 ], EerToRelational.prototype, "weakToTable", null);
+__decorate([
+    E2E(),
+    VarPoint("RowHistory")
+], EerToRelational.prototype, "entityToTables", null);
+__decorate([
+    Default(),
+    VarOption("entityToTables", Option("NoHistory"))
+], EerToRelational.prototype, "currentRowsOnly", null);
+__decorate([
+    VarOption("entityToTables", Option("HistoryTable"))
+], EerToRelational.prototype, "withRowHistory", null);
+__decorate([
+    VarPoint("HistoryDiscriminator")
+], EerToRelational.prototype, "historyDiscriminator", null);
+__decorate([
+    Default(),
+    VarOption("historyDiscriminator", Option("ValidFromTimestamp"))
+], EerToRelational.prototype, "validFromDiscriminator", null);
+__decorate([
+    VarOption("historyDiscriminator", Option("VersionCounter"))
+], EerToRelational.prototype, "versionCounterDiscriminator", null);
+__decorate([
+    VarPoint("RowHistory")
+], EerToRelational.prototype, "keepsHistory", null);
+__decorate([
+    Default(),
+    VarOption("keepsHistory", Option("NoHistory"))
+], EerToRelational.prototype, "keepsNoHistory", null);
+__decorate([
+    VarOption("keepsHistory", Option("HistoryTable"))
+], EerToRelational.prototype, "keepsRowHistory", null);
 __decorate([
     E2E(),
     VarPoint("TableAuditing")

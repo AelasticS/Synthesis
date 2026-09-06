@@ -2,9 +2,10 @@
  * The flagship's verification: beyond the generic smoke, assert the
  * exact design-space outcomes. Two runs on the Library sample: the
  * default configuration, and a patched configuration (TablePerClass,
- * the ForeignKey option for borrows, one table opted out of auditing),
- * with the persisted trace checked for the resolutions that produced
- * each result.
+ * the ForeignKey option for borrows, row history for Book with an
+ * explicit VersionCounter sub-issue choice and for BookCopy with the
+ * discriminator left to its run-time default), with the persisted
+ * trace checked for the resolutions that produced each result.
  */
 import { execFileSync } from 'node:child_process'
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
@@ -73,6 +74,8 @@ try {
     && out.includes('<Column name="name" type="VARCHAR(255)" isNullable={false}'))
   expect('autoincrement stays off composite keys',
     out.split('isAutoincrement={true}').length === 4)
+  expect('row history is opt-in: the default run emits no history tables',
+    !out.includes('_history'))
 
   const tr = read('demo/tr')
   expect('trace names executed rules', tr.includes('rule="kernelToTable"') && tr.includes('rule="joinedSubtypeTable"')
@@ -91,6 +94,25 @@ try {
   // order matters: JoinedTables must be rewritten before JoinTable
   cfg = cfg.replaceAll('JoinedTables', 'TablePerClass')
   cfg = cfg.replaceAll('JoinTable', 'ForeignKey')
+  // row history: Book keeps history with an explicit VersionCounter
+  // sub-issue choice (flat in the configuration, like any choice);
+  // BookCopy keeps history and leaves the discriminator to its
+  // run-time default
+  const chooseHistory = (text, entity) => text.replace(
+    new RegExp(`name="ec_${entity}_NoHistory"([\\s\\S]*?)/NoHistory" \\/>`),
+    (m) => m.replaceAll('NoHistory', 'HistoryTable')
+  )
+  cfg = chooseHistory(cfg, 'Book')
+  cfg = chooseHistory(cfg, 'BookCopy')
+  cfg = cfg.replace(
+    /( +)<Choice\n +name="ec_Book_HistoryTable"[\s\S]*?\/>,\n/,
+    (m, indent) => m
+      + `${indent}<Choice\n`
+      + `${indent}  name="ec_Book_VersionCounter"\n`
+      + `${indent}  issue={<ElementIssue $refByName="//www.aelastics.org/RelationSchemaDesign/HistoryDiscriminator" />}\n`
+      + `${indent}  selectedOption={<Option $refByName="//www.aelastics.org/RelationSchemaDesign/VersionCounter" />}\n`
+      + `${indent}/>,\n`
+  )
   writeFileSync(cfgPath, cfg)
 
   cli(['transformation', 'run', 'eer-to-relational', '--in', 'demo/library',
@@ -106,9 +128,48 @@ try {
     out2.includes('<ForeignKey name="fk_book_copy_borrows"') && out2.includes('$refByName="member/id"'))
   expect('no join table for borrows under the ForeignKey option', !out2.includes('<Table name="borrows"'))
 
+  // row history: Book's history table is derived from its own node
+  // (audit columns captured), keyed by base key plus the chosen
+  // version counter, and linked to its base by historyOf
+  const tableBlock = (text, name) => {
+    const match = text.match(new RegExp(`<Table name="${name}"[\\s\\S]*?</Table>`))
+    return match ? match[0] : ''
+  }
+  const bookHistory = tableBlock(out2, 'book_history')
+  expect('book keeps history: the derived table with the historyOf link',
+    bookHistory.includes('historyOf={<Table $refByName="book" />}'))
+  expect('the explicit sub-issue choice yields the version counter discriminator',
+    bookHistory.includes('<Column name="version" type="INTEGER" isNullable={false}'))
+  expect('the history key is the base key plus the discriminator, in order',
+    bookHistory.includes('<PrimaryKey name="pk_book_history">')
+    && /pk_book_history">\s*<Column \$refByName="id" \/>\s*<Column \$refByName="version" \/>/.test(bookHistory))
+  expect('audit columns are captured into the history like any column',
+    bookHistory.includes('name="createdBy"'))
+  expect('history rows arrive with their values: no autoincrement in history',
+    !bookHistory.includes('isAutoincrement={true}'))
+  // BookCopy: the weak composite key is copied, the discriminator
+  // falls back to its default at run time
+  const copyHistory = tableBlock(out2, 'book_copy_history')
+  expect('the weak history key copies the composite key plus valid_from',
+    copyHistory.includes('<Column name="valid_from" type="TIMESTAMP"')
+    && /pk_book_copy_history">\s*<Column \$refByName="book_id" \/>\s*<Column \$refByName="no" \/>\s*<Column \$refByName="valid_from" \/>/.test(copyHistory))
+  expect('history tables carry no foreign keys (not existence-dependent)',
+    !bookHistory.includes('<ForeignKey') && !copyHistory.includes('<ForeignKey')
+    && !out2.includes('fk_book_history') && !out2.includes('fk_book_copy_history'))
+  expect('the borrows graft into book_copy is mirrored into its history',
+    /<Table \$refByName="book_copy_history">\s*<Column name="member_id"/.test(out2))
+  expect('the mirror copies columns only: no index lands on the history table',
+    !out2.includes('ix_fk_book_copy_history'))
+
   const tr2 = read('demo/tr2')
   expect('trace records the explicit strategy with a choice reference',
     tr2.includes('issue="InheritanceStrategy" option="TablePerClass"') && !tr2.includes('option="TablePerClass" byDefault'))
+  expect('trace records the history rule with both targets',
+    tr2.includes('rule="withRowHistory"') && tr2.includes('/book_history'))
+  expect('trace records the explicit sub-issue choice',
+    tr2.includes('issue="HistoryDiscriminator" option="VersionCounter" choice='))
+  expect('trace records the defaulted discriminator for book_copy',
+    tr2.includes('issue="HistoryDiscriminator" option="ValidFromTimestamp" byDefault={true}'))
 
   // ── declared constraints: the validation point ────────────────────
   const validateOut = cli(['model', 'validate', 'demo/library'])

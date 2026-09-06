@@ -11,8 +11,10 @@ import { createExprNode } from "@aelastics/synthesis/jsx"
 import { ExprNode } from "@aelastics/synthesis/jsx"
 import { ModelStore } from "@aelastics/synthesis/store"
 import {
+  CompositeOption,
   DecisionModel,
   ElementIssue,
+  ElementSubIssue,
   ModelIssue,
   Option,
   SimpleOption,
@@ -48,6 +50,28 @@ export const RelationSchemaDesignIssues = (store: ModelStore): ExprNode<t.IDecis
       />
       <Option name="NoAuditColumns" description="No audit columns on this table" isDefault={false}
               optionType={<SimpleOption name="AuditOff" />}
+      />
+    </ElementIssue>
+    <ElementIssue name="RowHistory" description="Whether this table keeps row history">
+      <Option name="NoHistory" description="Current rows only" isDefault={true}
+              optionType={<SimpleOption name="NoHistoryOption" />}
+      />
+      {/* the composite option: choosing it opens the sub-issue below;
+          the nesting is design-space structure only, configurations
+          stay flat choice lists (see the variability guide) */}
+      <Option name="HistoryTable" description="A separate history table records row versions" isDefault={false}
+              optionType={
+                <CompositeOption name="HistoryTableOption">
+                  <ElementSubIssue name="HistoryDiscriminator" description="What distinguishes row versions">
+                    <Option name="ValidFromTimestamp" description="A validity timestamp" isDefault={true}
+                            optionType={<SimpleOption name="ValidFromOption" />}
+                    />
+                    <Option name="VersionCounter" description="A monotonic version number" isDefault={false}
+                            optionType={<SimpleOption name="VersionCounterOption" />}
+                    />
+                  </ElementSubIssue>
+                </CompositeOption>
+              }
       />
     </ElementIssue>
     <ElementIssue name="InheritanceStrategy" description="How a specialization hierarchy maps to tables">

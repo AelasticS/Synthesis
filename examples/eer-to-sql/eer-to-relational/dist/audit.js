@@ -6,8 +6,9 @@
  * step out, no table qualifier, because the table scopes its columns'
  * names and every table can carry its own createdBy and createdAt. It
  * is pure target-domain, signature-preserving, and therefore
- * composable: a future withHistoryColumns stacks without design
- * changes.
+ * composable: withHistoryTable (history.tsx) stacks one granularity
+ * above it, capturing these columns in the history table like any
+ * other.
  */
 import { createExprNode } from "@aelastics/synthesis/jsx";
 import { Column } from "relational-metamodel";
