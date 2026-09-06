@@ -102,6 +102,9 @@ export const RELModel = (store: ModelStore): ExprNode<t.ITypeModel> => (
       <Property name="indexes"
                 domain={<TypeArray name="ArrayOfIndexes" elementType={<TypeObject $refByName="Index" />} />}
       />
+      {/* the self-reference resolves: Table exists before its
+          properties render */}
+      <Property name="tableHistoryOf" domain={<TypeObject $refByName="Table" />} />
     </TypeObject>
 
     <TypeObject name="RelSchema">

@@ -37,6 +37,23 @@ export default (store: ModelStore): ExprNode<t.IRelSchema> => (
       </PrimaryKey>
     </Table>
 
+    {/* a history table: identified like a weak entity (base key plus
+        the temporal discriminator) but deliberately without a foreign
+        key, because history outlives the deletion of the base row; the
+        historyOf link is what tells the DDL layer to emit the capture
+        trigger */}
+    <Table name="book_history" historyOf={<Table $refByName="book" />}>
+      <Column name="id" type="INTEGER" isNullable={false} isAutoincrement={false} />
+      <Column name="title" type="VARCHAR(255)" isNullable={true} isAutoincrement={false} />
+      <Column name="price" type="DECIMAL(10,2)" isNullable={true} isAutoincrement={false}
+        domain={<Domain $refByName="money" />} />
+      <Column name="valid_from" type="TIMESTAMP" isNullable={false} isAutoincrement={false} />
+      <PrimaryKey name="pk_book_history">
+        <Column $refByName="id" />
+        <Column $refByName="valid_from" />
+      </PrimaryKey>
+    </Table>
+
     <Table name="copy">
       {/* composite primary key: the owning book plus the copy number */}
       <Column name="book_id" type="INTEGER" isNullable={false} isAutoincrement={false} />

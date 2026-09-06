@@ -154,6 +154,7 @@ export declare const Table: t.Subtype<{
         path: t.OptionalType<t.StringType>;
         parentModel: t.OptionalType<t.LinkType>;
     }, t.ObjectType<import("@aelastics/types/lib/complex-types/ObjectType.js").InterfaceDecl, readonly ["name"]>>>;
+    historyOf: t.OptionalType<t.LinkType>;
 }, {
     name: t.StringType;
     label: t.OptionalType<t.StringType>;

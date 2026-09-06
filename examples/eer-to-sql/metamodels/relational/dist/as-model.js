@@ -51,7 +51,8 @@ export const RELModel = (store) => (createExprNode(TypeModel, { name: "RELMetamo
         createExprNode(Property, { name: "tablePrimaryKey", domain: createExprNode(TypeObject, { "$refByName": "PrimaryKey" }) }),
         createExprNode(Property, { name: "tableColumns", domain: createExprNode(TypeArray, { name: "ArrayOfColumns", elementType: createExprNode(TypeObject, { "$refByName": "Column" }) }) }),
         createExprNode(Property, { name: "foreignKeys", domain: createExprNode(TypeArray, { name: "ArrayOfForeignKeys", elementType: createExprNode(TypeObject, { "$refByName": "ForeignKey" }) }) }),
-        createExprNode(Property, { name: "indexes", domain: createExprNode(TypeArray, { name: "ArrayOfIndexes", elementType: createExprNode(TypeObject, { "$refByName": "Index" }) }) })),
+        createExprNode(Property, { name: "indexes", domain: createExprNode(TypeArray, { name: "ArrayOfIndexes", elementType: createExprNode(TypeObject, { "$refByName": "Index" }) }) }),
+        createExprNode(Property, { name: "tableHistoryOf", domain: createExprNode(TypeObject, { "$refByName": "Table" }) })),
     createExprNode(TypeObject, { name: "RelSchema" },
         createExprNode(Property, { name: "tables", domain: createExprNode(TypeArray, { name: "ArrayOfTables", elementType: createExprNode(TypeObject, { "$refByName": "Table" }) }) }))));
 //# sourceMappingURL=as-model.js.map
