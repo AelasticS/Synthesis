@@ -27,12 +27,14 @@ examples/
       rel-tutorial/    package rel-tutorial-metamodel: the simple relational model, the tutorial's pivot (flat base plus a name-scopes stage)
     eer-tutorial-*     model-to-model tutorial companions
     sql-tutorial-*     model-to-text tutorial companions
-  eer-to-sql/          the full-example suite, a chain pair
+  eer-to-sql/          the full-example suite, a chain and its diagram views
     metamodels/
       eer/             package eer-metamodel: the full EER metamodel
       relational/      package relational-metamodel: the full relational metamodel
     eer-to-relational/
     rel-to-sql-ddl/
+    eer-to-mermaid-er/
+    rel-to-mermaid/
   smoke.mjs            the harness every example's test script runs
 ```
 
@@ -67,14 +69,16 @@ rel-tutorial-metamodel.
 
 Larger packages that stand on their own rather than teaching one concept
 at a time. Two form a chain: eer-to-relational produces exactly what
-rel-to-sql-ddl consumes; eer-to-mermaid-er is a sibling view over the
-same EER source.
+rel-to-sql-ddl consumes. Two diagram views bracket it:
+eer-to-mermaid-er is a sibling view over the same EER source, and
+rel-to-mermaid draws the produced relational schema.
 
 | Example | Kind | Shows |
 | --- | --- | --- |
 | [eer-to-relational](./eer-to-sql/eer-to-relational/) | m2m | The full-featured EER to relational mapping: full EER semantics (aggregations with the cardinality key rule, integrity rules, user-defined domains, composite attributes, row history as a composite design option), every template kind, nine design issues, a rich relational target with first-class keys, verified outputs and traces |
 | [rel-to-sql-ddl](./eer-to-sql/rel-to-sql-ddl/) | m2t | DDL from the rich content: named keys and constraints with referential actions, domains, trigger stubs, physical clustering, and dialects as extension-authored preset configurations |
 | [eer-to-mermaid-er](./eer-to-sql/eer-to-mermaid-er/) | m2t | The ER diagram view of the same source metamodel: Mermaid erDiagram text with attribute blocks for every entity kind and the identifying/non-identifying line conventions; fixed logic, run without configuration flags |
+| [rel-to-mermaid](./eer-to-sql/rel-to-mermaid/) | m2t | The diagram of the mapping's output: Mermaid erDiagram text over the produced relational schema, chained after eer-to-relational so different configurations of the same source become visibly different diagrams; fixed logic, run without configuration flags |
 
 ### Workflow suite
 

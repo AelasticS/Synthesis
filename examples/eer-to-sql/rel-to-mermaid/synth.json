@@ -1,0 +1,11 @@
+{
+  "kind": "m2t",
+  "entry": "./dist/transformation.js",
+  "exportName": "RelToMermaid",
+  "source": {
+    "metamodel": "relational-metamodel"
+  },
+  "target": {
+    "metamodel": "text"
+  }
+}

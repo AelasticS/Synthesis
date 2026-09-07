@@ -12,6 +12,22 @@ overall version history.
 
 ### Added
 
+- **The eer-to-sql suite draws its design space.** `rel-to-mermaid`,
+  the suite's fourth member, renders the OUTPUT of the configurable
+  eer-to-relational mapping as Mermaid erDiagram text, chained as
+  `eer-to-relational` then `rel-to-mermaid`, so different
+  configurations of the same source become visibly different
+  diagrams. A block per table (type-first lines with the SQL type
+  made Mermaid-safe, `PK` and `FK` marks read from the PrimaryKey
+  element and the foreign key pairs, `"nullable"` comments), a line
+  per foreign key (identifying exactly when the key's columns sit
+  inside the owner's primary key), and a dashed one-to-one line per
+  historyOf link; domains and indexes are skipped as diagram noise.
+  The logic is fixed: the manifest declares no parts and the CLI runs
+  it without configuration flags. The suite docs page closes with the
+  three configurations drawn side by side, and its verification runs
+  exactly those three chains through the real CLI.
+
 - **The eer-to-sql suite gains its diagram view.** `eer-to-mermaid-er`
   renders the suite's EER source as Mermaid erDiagram text: an
   attribute block per entity (every kind, subtypes included; domain
