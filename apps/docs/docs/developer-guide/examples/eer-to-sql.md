@@ -37,6 +37,11 @@ What the suite contains, and what each piece shows:
   script and a triggers script, with dialects as extension-authored
   preset configurations and physical clustering. It consumes exactly
   what `eer-to-relational` produces, so the two run as a chain.
+- **`rel-to-mermaid`** (model to text): the
+  [design space, drawn](#the-design-space-drawn), a Mermaid
+  `erDiagram` per schema over the mapping's relational OUTPUT,
+  chained after `eer-to-relational`, so different configurations of
+  the same source become visibly different diagrams.
 - **A trace per run**, recording which decision produced which table.
 
 This page is the canonical explanation of all of it: the metamodels,
@@ -535,3 +540,128 @@ Everything on this page is asserted by
 `rel-to-sql-ddl/scripts/verify.mjs` through the real CLI on every
 gate run: outputs, traces, constraint rejections, both presets, both
 clustering emissions, and the row-history leg.
+
+## The design space, drawn
+
+The suite's fourth member, `rel-to-mermaid`, diagrams the OUTPUT of
+the mapping rather than its source: chained as `eer-to-relational`
+then `rel-to-mermaid`, it renders the produced relational schema as a
+Mermaid `erDiagram` (a block per table with `PK` and `FK` marks read
+from the key elements and a `"nullable"` comment on nullable columns,
+a line per foreign key, solid exactly when the key's columns sit
+inside the owner's primary key, and a dashed one-to-one line per
+`historyOf` link). Because the input is what a configuration
+produced, the design space becomes visible: the three excerpts below
+are the same Library source, drawn under three configurations,
+trimmed to the `person` hierarchy and the `borrows` relationship.
+
+Under the defaults, JoinedTables keeps `person` and both subtype
+tables, each keyed by the copied root key (marked `PK, FK`, its line
+solid because the copied key IS the primary key), and the JoinTable
+default gives `borrows` a table of its own, dashed into both sides:
+
+```mermaid
+erDiagram
+  person {
+    INTEGER id PK
+    VARCHAR(255) name "nullable"
+    VARCHAR(255) createdBy
+    DATE createdAt
+  }
+  member {
+    INTEGER person_id PK, FK
+    VARCHAR(255) since "nullable"
+    VARCHAR(255) createdBy
+    DATE createdAt
+  }
+  staff {
+    INTEGER person_id PK, FK
+    INTEGER salary
+    VARCHAR(255) createdBy
+    DATE createdAt
+  }
+  book_copy {
+    INTEGER book_id PK, FK
+    INTEGER no PK
+    VARCHAR(255) createdBy
+    DATE createdAt
+  }
+  borrows {
+    INTEGER person_id FK
+    INTEGER book_id FK
+    INTEGER book_copy_no FK
+  }
+  member }o--|| person : fk_member_person
+  staff }o--|| person : fk_staff_person
+  borrows }o..|| member : fk_borrows_borrower
+  borrows }o..|| book_copy : fk_borrows_borrowed
+```
+
+SingleTable folds the hierarchy into one `person` table: the
+discriminator `type` is nullable because `personRoles` is partial,
+the grafted `since` and `salary` columns are nullable by
+construction, and the subtype tables are gone, so the borrows lines
+now end at `person`:
+
+```mermaid
+erDiagram
+  person {
+    INTEGER id PK
+    VARCHAR(255) name "nullable"
+    VARCHAR(255) createdBy
+    DATE createdAt
+    VARCHAR(255) type "nullable"
+    VARCHAR(255) since "nullable"
+    INTEGER salary "nullable"
+  }
+  book_copy {
+    INTEGER book_id PK, FK
+    INTEGER no PK
+    VARCHAR(255) createdBy
+    DATE createdAt
+  }
+  borrows {
+    INTEGER person_id FK
+    INTEGER book_id FK
+    INTEGER book_copy_no FK
+  }
+  borrows }o..|| person : fk_borrows_borrower
+  borrows }o..|| book_copy : fk_borrows_borrowed
+```
+
+TablePerClass removes `person` entirely (the root is abstract, so its
+columns are copied into `member` and `staff`), and the ForeignKey
+option for `borrows` replaces the join table with a `member_id`
+column grafted into `book_copy`, a dashed line because a copy's
+identity does not derive from its borrower:
+
+```mermaid
+erDiagram
+  member {
+    INTEGER id PK
+    VARCHAR(255) name "nullable"
+    VARCHAR(255) since "nullable"
+    VARCHAR(255) createdBy
+    DATE createdAt
+  }
+  staff {
+    INTEGER id PK
+    VARCHAR(255) name "nullable"
+    INTEGER salary
+    VARCHAR(255) createdBy
+    DATE createdAt
+  }
+  book_copy {
+    INTEGER book_id PK, FK
+    INTEGER no PK
+    VARCHAR(255) createdBy
+    DATE createdAt
+    INTEGER member_id FK "nullable"
+  }
+  book_copy }o..|| member : fk_book_copy_borrows
+```
+
+All three excerpts are verbatim trims of the chain's real output;
+`rel-to-mermaid/scripts/verify.mjs` runs exactly these three
+configurations through the real CLI on every gate run and asserts
+each difference in the generated text.

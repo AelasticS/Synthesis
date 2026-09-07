@@ -193,6 +193,22 @@ importers:
         specifier: ~5.9.3
         version: 5.9.3
 
+  ../../examples/eer-to-sql/rel-to-mermaid:
+    dependencies:
+      '@aelastics/synthesis':
+        specifier: workspace:*
+        version: link:../../../libraries/synthesis
+      relational-metamodel:
+        specifier: workspace:*
+        version: link:../metamodels/relational
+    devDependencies:
+      '@aelastics/synthesis-cli':
+        specifier: workspace:*
+        version: link:../../../apps/cli
+      typescript:
+        specifier: ~5.9.3
+        version: 5.9.3
+
   ../../examples/eer-to-sql/rel-to-sql-ddl:
     dependencies:
       '@aelastics/synthesis':
