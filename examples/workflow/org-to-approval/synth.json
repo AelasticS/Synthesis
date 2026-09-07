@@ -1,0 +1,12 @@
+{
+  "kind": "m2m",
+  "entry": "./dist/transformation.js",
+  "exportName": "OrgToApprovalTransformation",
+  "source": {
+    "metamodel": "org-metamodel"
+  },
+  "target": {
+    "metamodel": "workflow-metamodel",
+    "components": "workflow-metamodel"
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "name": "org-metamodel",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Organizational metamodel: unit hierarchies with workers, the source of the org-to-approval example",
+  "author": "Sinisa Neskovic",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./model": {
+      "types": "./dist/org.meta.model.type.d.ts",
+      "default": "./dist/org.meta.model.type.js"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "model": ["dist/org.meta.model.type.d.ts"]
+    }
+  },
+  "dependencies": {
+    "@aelastics/types": "workspace:*",
+    "@aelastics/synthesis": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "~5.9.3"
+  }
+}

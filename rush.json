@@ -425,6 +425,10 @@
       "projectFolder": "examples/workflow/metamodels/bpmn"
     },
     {
+      "packageName": "org-metamodel",
+      "projectFolder": "examples/workflow/metamodels/org"
+    },
+    {
       "packageName": "workflow-to-bpmn",
       "projectFolder": "examples/workflow/workflow-to-bpmn"
     },
@@ -435,6 +439,10 @@
     {
       "packageName": "workflow-to-mermaid",
       "projectFolder": "examples/workflow/workflow-to-mermaid"
+    },
+    {
+      "packageName": "org-to-approval",
+      "projectFolder": "examples/workflow/org-to-approval"
     }
 
     // {

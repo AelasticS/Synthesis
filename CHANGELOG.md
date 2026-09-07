@@ -12,6 +12,33 @@ overall version history.
 
 ### Added
 
+- **The organizational example joins the workflow suite.**
+  `org-metamodel` models organizational hierarchies: an `Organization`
+  names its top unit, `OrgUnit`s form the hierarchy through the
+  parent/subUnits inverse, `Worker`s belong to units through the
+  worksIn/members inverse, a `Department` is a unit run by a manager
+  (a declared constraint requires one; the link is type-level optional
+  under the creation-order regime, since the manager is one of the
+  department's own members), and a `Board` is a unit governed by its
+  members collectively. `org-to-approval` derives a block-structured
+  workflow model (a process tree) from that hierarchy, parameterized
+  through the engine's parameter channel: `transformation run
+  org-to-approval --param '{"worker":"Judy","sensitivity":2}'` unfolds
+  the named worker's unit chain upward `sensitivity` levels and emits
+  one approval process, a writing task performed by the worker
+  followed by one approval step per unit, specialized per unit kind
+  with `@SpecPoint`/`@SpecOption`: a department contributes its
+  manager's approval task, a board a parallel block of member
+  approvals. The worker is resolved by name (a CLI parameter cannot
+  carry an element reference), a miss lists the workers the
+  organization knows, and missing or malformed parameters answer with
+  the expected form. The verbatim parameter lands in the generated
+  model's `generatedBy` provenance, and the verification runs both
+  sensitivities, the error paths, the onward
+  `workflow-to-bpmn bpmn-to-mermaid` chain (the board's parallel
+  gateway pair in the flattened drawing), and the structure view over
+  the persisted result, all through the real CLI.
+
 - **The workflow suite gains its structure view, and its page grows
   up.** `workflow-to-mermaid` draws a block-structured workflow model (a process tree)
   as a Mermaid flowchart of nested subgraphs, one subgraph per
