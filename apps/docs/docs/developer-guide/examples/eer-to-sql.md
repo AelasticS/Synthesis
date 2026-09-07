@@ -24,6 +24,10 @@ What the suite contains, and what each piece shows:
   first-class keys, constraints, indexes, wired domains, and row
   history. Their doctrine is declared as constraints and enforced by
   `synth model validate`.
+- **`eer-to-mermaid-er`** (model to text): the
+  [diagram view](#the-diagram-view-eer-to-mermaid), a Mermaid
+  `erDiagram` per schema over the same EER source, a sibling view
+  rather than a chain step.
 - **`eer-to-relational`** (model to model): the full mapping, every
   template kind, and nine design issues closed per run by a
   configuration: auditing and row history (the composite option),
@@ -33,10 +37,6 @@ What the suite contains, and what each piece shows:
   script and a triggers script, with dialects as extension-authored
   preset configurations and physical clustering. It consumes exactly
   what `eer-to-relational` produces, so the two run as a chain.
-- **`eer-to-mermaid-er`** (model to text): the
-  [diagram view](#the-diagram-view-eer-to-mermaid), a Mermaid
-  `erDiagram` per schema over the same EER source, a sibling view
-  rather than a chain step.
 - **A trace per run**, recording which decision produced which table.
 
 This page is the canonical explanation of all of it: the metamodels,
@@ -163,6 +163,71 @@ keeping another table's row history names its base with `historyOf`.
     </ForeignKeyColumn>
   </ForeignKey>
 </Table>
+```
+
+## The diagram view: EER to Mermaid
+
+Before the relational mapping, the quickest consumer of the EER side:
+`eer-to-mermaid-er` is not a chain step but a sibling view,
+model-to-text over the same EER source the relational mapping
+consumes, one Mermaid `erDiagram` document per schema. The rendered
+Library excerpt below doubles as the picture of the running example
+the rest of this page transforms. Every
+entity kind gets an attribute block, subtypes included. The type word
+is the attribute's domain name, not a SQL type, because the diagram
+speaks the model's vocabulary: `Staff` shows `Money salary`. `PK`
+marks key attributes, an `"optional"` comment marks optional ones,
+and a composite attribute flattens one level into `parent_component`
+lines, the same flattening the relational mapping below applies.
+
+The line conventions carry the semantics in Mermaid's two line
+styles. An ordinary relationship is a non-identifying (dashed) line,
+and the glyph next to each entity comes from that entity's own role
+bounds. Weak identification and aggregation participation are
+identifying (solid) lines, because the dependent's identity derives
+from the other end: the weak side is always zero-or-more under its
+owner, and each participant carries exactly-one toward the
+aggregation, since an aggregation instance relates exactly one
+instance of each participant. Mermaid has no inheritance arrow, so a
+specialization renders as one dashed one-to-one line per subtype,
+labeled with the specialization's name; one-to-one deliberately,
+because a subtype instance IS its root instance. An excerpt of the
+transformation's verbatim output for the Library sample, rendered by
+Mermaid itself:
+
+```mermaid
+erDiagram
+  Book {
+    number id PK
+    string title "optional"
+  }
+  BookCopy {
+    number no PK
+  }
+  Person {
+    number id PK
+    string name "optional"
+  }
+  Member {
+    string since "optional"
+  }
+  Loan {
+    string date "optional"
+  }
+  Member |o..o{ BookCopy : borrows
+  Book ||--o{ BookCopy : copyOf
+  BookCopy ||--o| Loan : ofCopy
+  Member ||--o{ Loan : byMember
+  Member ||..|| Person : personRoles
+```
+
+The logic is fixed on purpose: a diagram renderer has no open design
+questions at this scale, so the package declares no design space at
+all. Its manifest declares no parts, and the CLI runs it without
+configuration flags:
+
+```bash
+synth transformation run eer-to-mermaid-er --in demo/library --out-dir ./diagrams
 ```
 
 ## The transformation, rule by rule
@@ -320,68 +385,6 @@ structure only, and an entity that keeps `NoHistory` never consults
 the discriminator (see the
 [composite options section](../guides/variability.md#composite-options-an-option-that-opens-sub-issues)
 of the variability guide).
-
-## The diagram view: EER to Mermaid
-
-The suite's third member, `eer-to-mermaid-er`, is not a chain step
-but a sibling view: model-to-text over the same EER source the m2m
-step consumes, one Mermaid `erDiagram` document per schema. Every
-entity kind gets an attribute block, subtypes included. The type word
-is the attribute's domain name, not a SQL type, because the diagram
-speaks the model's vocabulary: `Staff` shows `Money salary`. `PK`
-marks key attributes, an `"optional"` comment marks optional ones,
-and a composite attribute flattens one level into `parent_component`
-lines, the same flattening the relational side applies.
-
-The line conventions carry the semantics in Mermaid's two line
-styles. An ordinary relationship is a non-identifying (dashed) line,
-and the glyph next to each entity comes from that entity's own role
-bounds. Weak identification and aggregation participation are
-identifying (solid) lines, because the dependent's identity derives
-from the other end: the weak side is always zero-or-more under its
-owner, and each participant carries exactly-one toward the
-aggregation, since an aggregation instance relates exactly one
-instance of each participant. Mermaid has no inheritance arrow, so a
-specialization renders as one dashed one-to-one line per subtype,
-labeled with the specialization's name; one-to-one deliberately,
-because a subtype instance IS its root instance. An excerpt of the
-transformation's verbatim output for the Library sample, rendered by
-Mermaid itself:
-
-```mermaid
-erDiagram
-  Book {
-    number id PK
-    string title "optional"
-  }
-  BookCopy {
-    number no PK
-  }
-  Person {
-    number id PK
-    string name "optional"
-  }
-  Member {
-    string since "optional"
-  }
-  Loan {
-    string date "optional"
-  }
-  Member |o..o{ BookCopy : borrows
-  Book ||--o{ BookCopy : copyOf
-  BookCopy ||--o| Loan : ofCopy
-  Member ||--o{ Loan : byMember
-  Member ||..|| Person : personRoles
-```
-
-The logic is fixed on purpose: a diagram renderer has no open design
-questions at this scale, so the package declares no design space at
-all. Its manifest declares no parts, and the CLI runs it without
-configuration flags:
-
-```bash
-synth transformation run eer-to-mermaid-er --in demo/library --out-dir ./diagrams
-```
 
 ## The higher-order templates
 
