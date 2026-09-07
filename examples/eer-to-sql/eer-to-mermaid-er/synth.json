@@ -1,0 +1,11 @@
+{
+  "kind": "m2t",
+  "entry": "./dist/transformation.js",
+  "exportName": "EerToMermaidEr",
+  "source": {
+    "metamodel": "eer-metamodel"
+  },
+  "target": {
+    "metamodel": "text"
+  }
+}

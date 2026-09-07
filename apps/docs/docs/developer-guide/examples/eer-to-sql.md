@@ -6,7 +6,9 @@ title: "A full-featured EER to SQL transformation"
 # A full-featured EER to SQL transformation
 
 The `examples/eer-to-sql` suite turns a conceptual entity-relationship
-schema into a production-shaped relational database. Its goals are
+schema into a production-shaped relational database, and renders the
+same conceptual schema as an ER diagram
+(see [the diagram view](#the-diagram-view)). Its goals are
 completeness and explicitness. Completeness: every semantic fact the
 EER schema states (identification, integrity rules, domains,
 optionality) reaches the relational side as a first-class fact
@@ -300,6 +302,53 @@ structure only, and an entity that keeps `NoHistory` never consults
 the discriminator (see the
 [composite options section](../guides/variability.md#composite-options-an-option-that-opens-sub-issues)
 of the variability guide).
+
+## The diagram view
+
+The suite's third member, `eer-to-mermaid-er`, is not a chain step
+but a sibling view: model-to-text over the same EER source the m2m
+step consumes, one Mermaid `erDiagram` document per schema. Every
+entity kind gets an attribute block, subtypes included. The type word
+is the attribute's domain name, not a SQL type, because the diagram
+speaks the model's vocabulary: `Staff` shows `Money salary`. `PK`
+marks key attributes, an `"optional"` comment marks optional ones,
+and a composite attribute flattens one level into `parent_component`
+lines, the same flattening the relational side applies.
+
+The line conventions carry the semantics in Mermaid's two line
+styles. An ordinary relationship is a non-identifying (dashed) line,
+and the glyph next to each entity comes from that entity's own role
+bounds. Weak identification and aggregation participation are
+identifying (solid) lines, because the dependent's identity derives
+from the other end: the weak side is always zero-or-more under its
+owner, and each participant carries exactly-one toward the
+aggregation, since an aggregation instance relates exactly one
+instance of each participant. Mermaid has no inheritance arrow, so a
+specialization renders as one dashed one-to-one line per subtype,
+labeled with the specialization's name; one-to-one deliberately,
+because a subtype instance IS its root instance. From the Library
+sample:
+
+```
+erDiagram
+  Book {
+    number id PK
+    string title "optional"
+  }
+  Member |o..o{ BookCopy : borrows
+  Book ||--o{ BookCopy : copyOf
+  BookCopy ||--o| Loan : ofCopy
+  Member ||..|| Person : personRoles
+```
+
+The logic is fixed on purpose: a diagram renderer has no open design
+questions at this scale, so the package declares no design space at
+all. Its manifest declares no parts, and the CLI runs it without
+configuration flags:
+
+```bash
+synth transformation run eer-to-mermaid-er --in demo/library --out-dir ./diagrams
+```
 
 ## The higher-order templates
 

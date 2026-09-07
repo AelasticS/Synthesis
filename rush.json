@@ -361,6 +361,10 @@
       "projectFolder": "examples/eer-to-sql/rel-to-sql-ddl"
     },
     {
+      "packageName": "eer-to-mermaid-er",
+      "projectFolder": "examples/eer-to-sql/eer-to-mermaid-er"
+    },
+    {
       "packageName": "transformation-template",
       "projectFolder": "templates/transformation-template"
     },
