@@ -2,7 +2,7 @@
   "name": "workflow-to-mermaid",
   "version": "0.1.0",
   "private": true,
-  "description": "Renders process trees as Mermaid flowcharts of nested subgraphs",
+  "description": "Renders block-structured workflow models as Mermaid flowcharts of nested subgraphs",
   "author": "Sinisa Neskovic",
   "license": "Apache-2.0",
   "type": "module",

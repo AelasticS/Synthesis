@@ -13,7 +13,7 @@ overall version history.
 ### Added
 
 - **The workflow suite gains its structure view, and its page grows
-  up.** `workflow-to-mermaid` draws a process tree (block-structured)
+  up.** `workflow-to-mermaid` draws a block-structured workflow model (a process tree)
   as a Mermaid flowchart of nested subgraphs, one subgraph per
   composite activity labeled with its kind: sequential blocks chain
   their children with edges, a parallel keeps its children
@@ -23,12 +23,17 @@ overall version history.
   no parts and the CLI runs it without configuration flags; its
   verification renders both approval samples through the real CLI.
   The suite docs page is rewritten to the suite-page standard as "The
-  workflow suite: process trees to BPMN to diagrams": the inventory
+  workflow suite: block-structured workflows to BPMN to diagrams": the inventory
   opening, both metamodels with authoring fragments, the structure
   view's conventions with the rendered Approval tree, the flattening
   and the graph rendering rule by rule, and a closing section drawing
-  one process both ways. All suite prose now says process tree, and
-  both example catalogs list the new package.
+  one process both ways. All suite prose now says block-structured workflow model, and
+  both example catalogs list the new package. Gateways in the
+  rendered graph are labeled with their DERIVED role (parallel split,
+  parallel join), computed from flow degrees exactly because the role
+  is not stored in the model, and the suite's prose leads with the
+  code's own term, block-structured workflow model, keeping process
+  tree as the parenthetical literature name.
 
 - **The eer-to-sql suite draws its design space.** `rel-to-mermaid`,
   the suite's fourth member, renders the OUTPUT of the configurable

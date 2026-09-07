@@ -22,11 +22,32 @@ export class BpmnToMermaidTransformation extends abstractM2M {
         super(store);
     }
     template(p) {
+        this.countDegrees((p.flows ?? []));
         return (createExprNode(M2T, { name: `${p.name}_mermaid` },
             createExprNode(Doc, { name: `${p.name}.mmd` },
                 createExprNode(P, null, 'flowchart TD'),
                 (p.nodes ?? []).flatMap((n) => this.nodeToLines(n, 1)),
                 (p.flows ?? []).map((f) => this.flowToLine(f, 1)))));
+    }
+    // A gateway's role is not stored, it is derived, as in BPMN: more
+    // than one outgoing flow makes it a split, more than one incoming a
+    // join. Degrees are counted per container before its nodes render.
+    outDegree = new Map();
+    inDegree = new Map();
+    countDegrees(flows) {
+        for (const f of flows) {
+            const from = f.from;
+            const to = f.to;
+            this.outDegree.set(from, (this.outDegree.get(from) ?? 0) + 1);
+            this.inDegree.set(to, (this.inDegree.get(to) ?? 0) + 1);
+        }
+    }
+    roleOf(g) {
+        if ((this.outDegree.get(g) ?? 0) > 1)
+            return `${g.kind} split`;
+        if ((this.inDegree.get(g) ?? 0) > 1)
+            return `${g.kind} join`;
+        return String(g.kind);
     }
     nodeToLines(n, depth) {
         return undefined; // pure dispatcher: the matching option supplies the lines
@@ -35,7 +56,7 @@ export class BpmnToMermaidTransformation extends abstractM2M {
         return createExprNode(P, null, `${this.ind(depth)}${this.id(t.name)}["${t.name}"]`);
     }
     gatewayLine(g, depth) {
-        return createExprNode(P, null, `${this.ind(depth)}${this.id(g.name)}{"${g.kind}"}`);
+        return createExprNode(P, null, `${this.ind(depth)}${this.id(g.name)}{"${this.roleOf(g)}"}`);
     }
     startEventLine(e, depth) {
         return createExprNode(P, null, `${this.ind(depth)}${this.id(e.name)}(["${e.name}"])`);
@@ -44,6 +65,7 @@ export class BpmnToMermaidTransformation extends abstractM2M {
         return createExprNode(P, null, `${this.ind(depth)}${this.id(e.name)}(["${e.name}"])`);
     }
     subProcessLines(s, depth) {
+        this.countDegrees((s.flows ?? []));
         return [
             createExprNode(P, null, `${this.ind(depth)}subgraph ${this.id(s.name)}["${s.name}"]`),
             ...(s.nodes ?? []).flatMap((n) => this.nodeToLines(n, depth + 1)),

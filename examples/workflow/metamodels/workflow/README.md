@@ -1,9 +1,9 @@
 # workflow-metamodel
 
-The process tree (block-structured) workflow metamodel: a `Process`
+Block-structured workflow metamodel (a process tree): a `Process`
 is a tree of activities (`Task`, `Sequence`, `Parallel`,
 `SubProcess`), the domain the documentation's template examples are
-written in. The graph view of the same process trees is produced by
+written in. The graph view of the same block-structured workflow models is produced by
 the `workflow-to-bpmn` transformation; `workflow-to-mermaid` draws
 the tree itself.
 

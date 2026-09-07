@@ -7,6 +7,10 @@ import * as bm from 'bpmn-metamodel/model';
 export declare class BpmnToMermaidTransformation extends abstractM2M<bm.IProcess, M2T_Model> {
     constructor(store: ModelStore);
     template(p: bm.IProcess): ExprNode<bm.IProcess, M2T_Model>;
+    private outDegree;
+    private inDegree;
+    private countDegrees;
+    private roleOf;
     nodeToLines(n: bm.INode, depth: number): ExprNode<any> | ExprNode<any>[];
     taskLine(t: bm.ITask, depth: number): ExprNode<any>;
     gatewayLine(g: bm.IGateway, depth: number): ExprNode<any>;
