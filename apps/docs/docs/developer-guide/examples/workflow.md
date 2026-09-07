@@ -1,9 +1,9 @@
 ---
 sidebar_position: 3
-title: "The workflow suite: block-structured workflows to BPMN to diagrams"
+title: "The workflow suite"
 ---
 
-# The workflow suite: block-structured workflows to BPMN to diagrams
+# The workflow suite
 
 The `examples/workflow` suite turns a block-structured workflow model
 (a process tree) into a graph-based BPMN process and draws both ends.
