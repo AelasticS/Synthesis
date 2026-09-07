@@ -205,9 +205,13 @@ Stage A delivered 2026-09-07, merged to main --no-ff in dependency
 order: A1 the metamodel reshape with transformations, samples, and
 verifications (325830c, merge 7d2a5d6); A2 the CLI --param channel
 with provenance (60af880, merge dd44796); A3 the organizational
-example (4a55745, merge 2ab66b1). A4, the docs pass (the suite page
+example (4a55745, merge 2ab66b1); A4 the docs pass (the suite page
 rewritten around the v2 metamodel with the organizational example as
 its generative section, the guides sweep, the suite and package
 READMEs, the consolidated CHANGELOG entry, and this record's delivery
-notes), sits on branch docs/workflow-suite-v2 awaiting review. Stage B
-(BPMN to the Descriptive conformance subclass) awaits the user.
+notes; merge cb042ac). Two follow-ups on the user's remarks landed
+after A4: the suite page title cut to the plain "The workflow suite"
+(merge f7a02a7), and workflow-to-mermaid restyled in place as the
+flowchart view (merge 47e488b, described under the delivery notes).
+Stage B (BPMN to the Descriptive conformance subclass) awaits the
+user.
