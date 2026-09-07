@@ -65,7 +65,7 @@ A typical project follows these steps:
 
 The documentation uses an **EER-to-Relational** transformation as the running example throughout all pages. An Extended Entity-Relationship metamodel (with Entities, Attributes, Domains, and subtype distinctions like Kernel vs Weak) is transformed into a Relational metamodel (Tables, Columns, Indexes, ForeignKeys).
 
-A secondary example uses **BPM workflows** (Process, Task, Sequence, Parallel) to illustrate parameterized and higher-order templates.
+A secondary example uses **block-structured workflow models** (a process tree of Process, Task, Sequence, and Parallel steps) to illustrate parameterized and higher-order templates.
 
 ## Sharing Your Work
 

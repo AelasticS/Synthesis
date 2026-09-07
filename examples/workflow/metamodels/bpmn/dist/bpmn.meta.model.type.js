@@ -3,10 +3,9 @@
  * sequence flows. Nodes are tasks, gateways, events, and sub-processes
  * (which carry their own nodes and flows). A gateway's `kind` is
  * "parallel" or "exclusive"; whether it splits or joins is determined by
- * its flows, as in BPMN. Exclusive gateways are part of the metamodel
- * although the v1 workflow-to-bpmn transformation emits only parallel
- * ones, because the block-structured source has no conditional construct
- * yet.
+ * its flows, as in BPMN. Parallel gateways carry the workflow side's
+ * parallel blocks; exclusive gateways carry its choices and loops, with
+ * the tests as guard labels on the flows leaving them.
  */
 import * as t from "@aelastics/types";
 import { ModelElement, Model } from "@aelastics/synthesis/metamodel";

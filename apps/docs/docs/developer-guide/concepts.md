@@ -21,15 +21,15 @@ pragma elided; setup is covered in [Building Model Instances](./guides/building-
 
 ```tsx
 const approval = (
-  <Process name="Approval" store={store}>
-    <Sequence>
+  <WorkflowModel name="Approval" store={store}>
+    <Process name="Approval">
       <Task name="Write" />
       <Parallel>
         <Task name="Approve 1" />
         <Task name="Approve 2" />
       </Parallel>
-    </Sequence>
-  </Process>
+    </Process>
+  </WorkflowModel>
 )
 
 const model = approval.render(new Context())
@@ -59,7 +59,7 @@ Every model expression is composed from exactly four kinds of operators:
 
 | Operator | In JSX | What evaluation does |
 |---|---|---|
-| **Model creation** | the root model tag: `<Process store={store}>`, `<EERSchema …>` | creates a **model**: a typed container with its own namespace and type schema, into which child elements are placed |
+| **Model creation** | the root model tag: `<WorkflowModel store={store}>`, `<EERSchema …>` | creates a **model**: a typed container with its own namespace and type schema, into which child elements are placed |
 | **Element creation** | element tags: `<Task>`, `<Kernel>`, `<Column>` | creates a typed **element** with its properties and connects it to its parent |
 | **Reference** | `$refByName`, `$ref`, `$refByID` | **retrieves** an existing element instead of creating one |
 | **Computation** | TypeScript in `{ … }`: `map`, conditionals, function calls | **computes** sub-expressions dynamically |
@@ -112,11 +112,9 @@ const Approval = ({ doc, approvers, parallel }: IApprovalConfig) => {
 
   return (
     <Process name={`${doc} Approval`}>
-      <Sequence>
-        <Task name={`Write ${doc}`} />
-        {parallel ? <Parallel>{tasks}</Parallel>
-                  : <Sequence>{tasks}</Sequence>}
-      </Sequence>
+      <Task name={`Write ${doc}`} />
+      {parallel ? <Parallel>{tasks}</Parallel>
+                : <Sequence>{tasks}</Sequence>}
     </Process>
   )
 }
@@ -166,45 +164,46 @@ workflow:
 const Write = () => <Task name="Write" />
 
 const ReviewedWrite = () => (
-  <SubProcess name="WriteDocument">
+  <Process name="WriteDocument">
     <Task name="Draft" />
     <Task name="ReviewDraft" />
-  </SubProcess>
+  </Process>
 )
 ```
 
 Then define the workflow as a higher-order template whose parameter is
-the whole task template (both definitions above qualify as
-`Template<IActivity>`, the common activity supertype):
+the whole step template (both definitions above qualify as
+`Template<IStep>`, the common step supertype: a plain task and an
+inline process alike):
 
 ```tsx
-const Approval = (WriteStep: Template<IActivity>) =>
+const Approval = (WriteStep: Template<IStep>) =>
   ({ doc, approvers }: { doc: string; approvers: number }) => (
     <Process name={`${doc} Approval`}>
-      <Sequence>
-        <WriteStep />
-        <Parallel>
-          {Array.from({ length: approvers }, (_, i) => <Task name={`Approve ${i + 1}`} />)}
-        </Parallel>
-      </Sequence>
+      <WriteStep />
+      <Parallel>
+        {Array.from({ length: approvers }, (_, i) => <Task name={`Approve ${i + 1}`} />)}
+      </Parallel>
     </Process>
   )
 ```
 
 Evaluation now happens in **two steps**. Applying the higher-order
-template to a task template yields an ordinary template; supplying the
-remaining parameters closes the expression into a model literal, which
-renders to the model:
+template to a step template yields an ordinary template; supplying the
+remaining parameters closes the expression, and embedding it in the
+model literal renders to the model:
 
 ```tsx
 const SimpleApproval = Approval(Write)                            // a template
-const contract = <SimpleApproval doc="Contract" approvers={2} />  // a model literal
-const model = contract.render(new Context())                      // the model
+const contract = <SimpleApproval doc="Contract" approvers={2} />  // a closed expression
+const model = (
+  <WorkflowModel name="Contracts" store={store}>{contract}</WorkflowModel>
+).render(new Context())                                           // the model
 ```
 
 Swapping the step swaps structure, not just values:
 `Approval(ReviewedWrite)` produces workflows whose writing step is a
-two-task sub-process, without touching the workflow skeleton:
+two-task inline process, without touching the workflow skeleton:
 
 ```mermaid
 flowchart LR

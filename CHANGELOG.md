@@ -12,55 +12,80 @@ overall version history.
 
 ### Added
 
-- **The organizational example joins the workflow suite.**
-  `org-metamodel` models organizational hierarchies: an `Organization`
-  names its top unit, `OrgUnit`s form the hierarchy through the
-  parent/subUnits inverse, `Worker`s belong to units through the
-  worksIn/members inverse, a `Department` is a unit run by a manager
-  (a declared constraint requires one; the link is type-level optional
-  under the creation-order regime, since the manager is one of the
-  department's own members), and a `Board` is a unit governed by its
-  members collectively. `org-to-approval` derives a block-structured
-  workflow model (a process tree) from that hierarchy, parameterized
-  through the engine's parameter channel: `transformation run
-  org-to-approval --param '{"worker":"Judy","sensitivity":2}'` unfolds
-  the named worker's unit chain upward `sensitivity` levels and emits
-  one approval process, a writing task performed by the worker
-  followed by one approval step per unit, specialized per unit kind
-  with `@SpecPoint`/`@SpecOption`: a department contributes its
-  manager's approval task, a board a parallel block of member
-  approvals. The worker is resolved by name (a CLI parameter cannot
-  carry an element reference), a miss lists the workers the
-  organization knows, and missing or malformed parameters answer with
-  the expected form. The verbatim parameter lands in the generated
-  model's `generatedBy` provenance, and the verification runs both
-  sensitivities, the error paths, the onward
-  `workflow-to-bpmn bpmn-to-mermaid` chain (the board's parallel
-  gateway pair in the flattened drawing), and the structure view over
-  the persisted result, all through the real CLI.
+- **The workflow suite v2: definitions and invocations, control flow,
+  documents, and the organizational example.** The workflow metamodel
+  is reshaped around one distinction: a definition is not an
+  occurrence. `WorkflowModel` is the model root carrying
+  `DocumentType`s and activity definitions (`Task` and `Process`, each
+  with an optional `performer` and a DocumentType inputs/outputs
+  interface); a process body is an implicit sequence of steps whose
+  operators (`Sequence`, `Parallel`, `Choice` with guarded `Branch`es
+  and a guardless else, one `Loop` concept with kind and guard)
+  complete the classical structured control-flow patterns;
+  `Invocation` calls a definition under its own occurrence name and
+  binds process-level `Document`s, typed by DocumentTypes, through
+  reads/writes; an inline Task or Process is single-use sugar (an
+  anonymous definition fused with its sole occurrence), and `Process`
+  is a name scope. `<Invoke>` is the general invocation tag,
+  `<SubProcess $refByName="X" />` its process-call sugar over the same
+  concept. The doctrine is declared constraints at the validation
+  point: an invocation names its definition, bound documents conform
+  to the called interface, a choice offers at least one branch and at
+  most one guardless one, a loop states its guard, a document is
+  typed.
 
-- **The workflow suite gains its structure view, and its page grows
-  up.** `workflow-to-mermaid` draws a block-structured workflow model (a process tree)
-  as a Mermaid flowchart of nested subgraphs, one subgraph per
-  composite activity labeled with its kind: sequential blocks chain
-  their children with edges, a parallel keeps its children
-  side-by-side with no edges between them, a sub-process nests its
-  recursively rendered body, and sanitized ids carry the authored
-  spaced names as labels. The logic is fixed: the manifest declares
-  no parts and the CLI runs it without configuration flags; its
-  verification renders both approval samples through the real CLI.
-  The suite docs page is rewritten to the suite-page standard as "The
-  workflow suite: block-structured workflows to BPMN to diagrams": the inventory
-  opening, both metamodels with authoring fragments, the structure
-  view's conventions with the rendered Approval tree, the flattening
-  and the graph rendering rule by rule, and a closing section drawing
-  one process both ways. All suite prose now says block-structured workflow model, and
-  both example catalogs list the new package. Gateways in the
-  rendered graph are labeled with their DERIVED role (parallel split,
-  parallel join), computed from flow degrees exactly because the role
-  is not stored in the model, and the suite's prose leads with the
-  code's own term, block-structured workflow model, keeping process
-  tree as the parenthetical literature name.
+  The suite's transformations carry the shape to both drawings.
+  `workflow-to-bpmn` flattens the entry process (the first definition
+  no invocation calls): implicit sequences chain their children's
+  fragments, a parallel becomes a parallel gateway pair, a choice an
+  exclusive pair with the branch guards on the outgoing flows (the
+  else flow unguarded), a loop a converging entry and a diverging exit
+  whose kind places the test (a repeatUntil closes with the
+  `not <guard>` back edge), a task invocation an occurrence-named
+  task, and a process invocation or an inline process an embedded
+  sub-process with occurrence-prefixed inner names; documents and
+  performers are deliberately not flattened (data objects, call
+  activities, and lanes are the recorded next stage).
+  `workflow-to-mermaid`, the suite's structure view, draws the entry
+  process as a Mermaid flowchart of nested subgraphs, one per
+  composite step labeled with its kind: chained children in every
+  sequential block, edge-free parallels, guard-labeled branches with
+  the else label, loop labels carrying kind and guard, subroutine
+  shapes for process invocations, and sanitized ids carrying the
+  authored spaced names as labels. `bpmn-to-mermaid` labels gateway
+  diamonds with their DERIVED roles (parallel split, exclusive join),
+  computed from flow degrees exactly because the role is not stored in
+  the model, and renders guards on edges.
+
+  The organizational example joins the suite, and the CLI gains its
+  parameter channel. `org-metamodel` models hierarchies: `OrgUnit`s
+  under the parent/subUnits inverse, `Worker`s as members through
+  worksIn/members, a `Department` run by a manager (a declared
+  constraint requires one; the link is type-level optional under the
+  creation-order regime, since the manager is one of the department's
+  own members), a `Board` governed by its members collectively.
+  `org-to-approval` derives an approval process from that hierarchy,
+  parameterized through the engine's `transform(source, param)`
+  channel, which `transformation run --param <json>` now carries:
+  parsed once in pre-flight, handed to step 1 like `--config`, and
+  recorded VERBATIM as `generatedBy.param` in the header of every
+  artifact the run writes, output models and persisted traces alike,
+  so a parameterized run stays reproducible from its outputs.
+  `--param '{"worker":"Judy","sensitivity":2}'` unfolds the named
+  worker's unit chain upward `sensitivity` levels and emits one
+  approval process, specialized per unit kind with
+  `@SpecPoint`/`@SpecOption`: a department contributes its manager's
+  approval task, a board a parallel block of member approvals. The
+  worker is resolved by name (a CLI parameter cannot carry an element
+  reference), a miss lists the workers the organization knows, and
+  missing or malformed parameters answer with the expected form.
+  Verifications assert all of it through the real CLI: the structure
+  view's conventions and the declared constraints (via a deliberately
+  invalid model), the flattened v2 shape, both sensitivities with
+  their provenance and error paths, and the onward chain. The suite
+  docs page is rewritten around the new metamodel, with the
+  organizational example as its generative section and one process
+  drawn from both ends of the chain.
 
 - **The eer-to-sql suite draws its design space.** `rel-to-mermaid`,
   the suite's fourth member, renders the OUTPUT of the configurable
@@ -88,14 +113,6 @@ overall version history.
   per subtype. The logic is fixed: the manifest declares no parts and
   the CLI runs it without configuration flags. The suite docs page
   explains the conventions and both example catalogs list the package.
-
-- **The workflow suite has its docs page.** "The workflow suite: block
-  structure to BPMN to diagrams" joins the developer guide's Examples
-  section, written to the suite-page standard: goals and result up
-  front, both metamodels described for a reader who does not know the
-  domain, the flattening rules (the fragment contract) and the Mermaid
-  rendering, and why this suite declares no design space. The examples
-  catalogs point at it.
 
 - **The EER metamodel says what the language means.** A weak mapping
   nests inside its weak entity. A Specialization IS a mapping (a

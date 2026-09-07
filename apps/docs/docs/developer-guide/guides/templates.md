@@ -79,13 +79,11 @@ const DynamicApproval = ({ processName, howManyApprovers, isParallel }: IApprova
 
   return (
     <Process name={processName}>
-      <Sequence>
-        <Task name="write proposal" />
-        {isParallel
-          ? <Parallel>{tasks}</Parallel>
-          : <Sequence>{tasks}</Sequence>
-        }
-      </Sequence>
+      <Task name="write proposal" />
+      {isParallel
+        ? <Parallel>{tasks}</Parallel>
+        : <Sequence>{tasks}</Sequence>
+      }
     </Process>
   )
 }
@@ -111,8 +109,8 @@ parameter selects among shapes a template already contains, while a
 template parameter supplies the shape itself. The example below is the
 workflow suite's executable sample, embedded from its source: the
 writing step is defined outside as a template (a plain task, or a
-two-task sub-process), the workflow takes the whole step template as a
-parameter, and evaluation happens in two steps, from higher-order
+two-task inline process), the workflow takes the whole step template
+as a parameter, and evaluation happens in two steps, from higher-order
 template to template to model literal.
 
 ```tsx file=<rootDir>/examples/workflow/workflow-to-bpmn/sample/templated-approval.tsx
@@ -129,9 +127,10 @@ synth transformation run workflow-to-bpmn bpmn-to-mermaid --in demo/templated --
 ```
 
 The generated Mermaid flowchart shows the swapped structure: the
-sub-process write step from `ReviewedWrite`, then the parallel
-approvals. Replace `Approval(ReviewedWrite)` with `Approval(Write)` and
-only the writing step changes; the workflow skeleton is untouched.
+inline write process from `ReviewedWrite`, flattened as an embedded
+sub-process, then the parallel approvals. Replace
+`Approval(ReviewedWrite)` with `Approval(Write)` and only the writing
+step changes; the workflow skeleton is untouched.
 
 ## Templates and transformation rules
 
