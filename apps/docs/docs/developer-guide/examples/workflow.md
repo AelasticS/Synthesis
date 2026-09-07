@@ -29,9 +29,10 @@ What the suite contains, and what each piece shows:
   worker and sensitivity through the engine's parameter channel, with
   the verbatim parameter recorded in the output's provenance.
 - **`workflow-to-mermaid`** (model to text): the
-  [structure view](#the-structure-view-the-workflow-model-to-mermaid),
-  drawing the SOURCE as a Mermaid flowchart of nested subgraphs, so
-  the tree itself is the picture.
+  [flowchart view](#the-flowchart-view-the-workflow-model-to-mermaid),
+  drawing the SOURCE as a classic flowchart, decision diamonds, fork
+  and join bars, and back edges, without flattening it into BPMN
+  first.
 - **`workflow-to-bpmn`** (model to model): the flattening. Every step
   contributes a graph fragment with an entry and an exit, and the
   composite rules wire their children's fragments without knowing what
@@ -44,7 +45,7 @@ What the suite contains, and what each piece shows:
   and extended to three steps when `org-to-approval` leads it.
 
 This page is the canonical explanation of all of it: the metamodels,
-the structure view's conventions, the flattening rule by rule, the
+the flowchart view's conventions, the flattening rule by rule, the
 graph rendering, the organizational example, and why this suite
 declares no design space. The package READMEs stay deliberately short
 and point here; every rule described below is enforced by the suite's
@@ -216,73 +217,83 @@ own members and so exists only after the workers do; the declared
 constraint requires it, as another requires the organization's top
 unit, and `synth model validate` judges both.
 
-## The structure view: the workflow model to Mermaid
+## The flowchart view: the workflow model to Mermaid
 
 Before the flattening, the quickest consumer of the source:
 `workflow-to-mermaid` is not a chain step but a sibling view,
 model-to-text over the workflow model itself. It draws the model's
 ENTRY PROCESS (the first process definition no invocation calls, the
-root of the call graph) as one Mermaid flowchart, and it draws the
-tree AS a tree: every composite step becomes a nested `subgraph`
-labeled with its kind, so containment, the fact the source states, is
-the fact the picture shows.
+root of the call graph) as one classic flowchart. The walk is a
+wiring contract: every step yields an entry node and a LIST of exit
+nodes, a sequence connects all previous exits to the next step's
+entry, a start stadium opens the chart wired to the first step's
+entry, and every final exit wires to the end stadium.
 
 The conventions:
 
-- A task is a box: `Approve_1["Approve 1"]`. The id is the authored
-  name with every non-alphanumeric character replaced by an underscore
+- A task is a box: `Submit["Submit"]`. The id is the authored name
+  with every non-alphanumeric character replaced by an underscore
   (names are unique per process scope, so the sanitized name is the
-  id); the label keeps the authored name, spaces included.
-- A named subgraph is titled `name (kind)`; an unnamed operator gets a
-  generated per-kind id and a bare kind label, `loop1["(loop until
-  approved)"]`.
-- A sequence is a subgraph labeled `(sequence)` whose consecutive
-  children are chained with `-->` edges, and every implicit sequence
-  chains the same way: a process body, a branch body, a loop body. An
-  edge may start or end at a subgraph id, which is how a step points
-  at a whole block.
-- A parallel is a subgraph labeled `(parallel)` with NO edges between
-  its children: side-by-side placement IS the meaning.
-- A choice is a subgraph labeled `(choice)` whose branches are inner
-  subgraphs labeled with their guards; the guardless branch is labeled
-  `else`.
-- A loop is a subgraph labeled with its kind and guard: `(loop while
-  g)` or `(loop until g)`.
-- An inline process is a subgraph labeled `(process)` carrying its
-  recursively rendered body.
-- A process invocation is a subroutine shape (`id[["name"]]`), a task
-  invocation a box, both named by the occurrence (defaulting to the
-  called definition's name).
-- Documents and performers are not drawn.
+  id); the label keeps the authored name, spaces included. A
+  performer becomes a parenthesized second label line:
+  `Write["Write<br/>(Judy)"]`.
+- An invocation is a subroutine box named by the occurrence
+  (defaulting to the called definition's name):
+  `ManagerSignoff[["ManagerSignoff"]]`. Call semantics stays opaque:
+  what the called definition does stays behind the call. An INLINE
+  process step, being single-use grouping, expands inline into its
+  steps instead; its own name does not appear in the drawing.
+- A choice is ONE decision diamond. The diamond asks the authored
+  choice name as its question; an unnamed choice with exactly one
+  guarded branch asks that guard, and any other unnamed choice asks a
+  bare `?`. Each branch's outgoing edge is labeled with its guard,
+  the guardless branch's edge with `else`, and ALL branch exits
+  become the choice's exits: the branches reconverge on whatever
+  comes next, with no merge node.
+- A loop is a guard diamond labeled `<guard>?` and a back edge. A
+  repeatUntil runs the body first and tests after it: the `no` edge
+  returns to the body's entry, the `yes` edge is the exit. A while
+  tests first: the `yes` edge enters the body, whose exits return to
+  the diamond unlabeled, and the `no` edge is the exit.
+- A parallel is a fork bar (`approvals_fork@{ shape: fork }`) fanning
+  out to every child's entry and a join bar every child's exits
+  converge on; the join is the exit.
+- An unnamed operator gets a generated per-kind id (`choice1`,
+  `loop1`).
+- Documents are not drawn.
 
 The transformation's verbatim output for the ExpenseApproval sample,
 rendered by Mermaid itself:
 
 ```mermaid
 flowchart TD
+  start_node(["start"])
   Submit["Submit"]
-  subgraph loop1["(loop until approved)"]
-    ManagerSignoff[["ManagerSignoff"]]
-  end
-  subgraph choice1["(choice)"]
-    subgraph choice1_b1["amount > 1000"]
-      NotifyFinance["NotifyFinance"]
-      ArchiveHighValue["ArchiveHighValue"]
-      NotifyFinance --> ArchiveHighValue
-    end
-    subgraph choice1_b2["else"]
-      ArchiveStandard["ArchiveStandard"]
-    end
-  end
-  Submit --> loop1
-  loop1 --> choice1
+  ManagerSignoff[["ManagerSignoff"]]
+  loop1{"approved?"}
+  choice1{"amount > 1000?"}
+  NotifyFinance["NotifyFinance"]
+  ArchiveHighValue[["ArchiveHighValue"]]
+  ArchiveStandard[["ArchiveStandard"]]
+  end_node(["end"])
+  start_node --> Submit
+  Submit --> ManagerSignoff
+  ManagerSignoff --> loop1
+  loop1 -->|no| ManagerSignoff
+  loop1 -->|yes| choice1
+  choice1 -->|amount > 1000| NotifyFinance
+  NotifyFinance --> ArchiveHighValue
+  choice1 -->|else| ArchiveStandard
+  ArchiveHighValue --> end_node
+  ArchiveStandard --> end_node
 ```
 
-The `ManagerSignoff` subroutine shape is the invocation, not the
+The `ManagerSignoff` subroutine box is the invocation, not the
 definition: the called process's own two tasks are not drawn here,
-because the structure view shows the calling process's tree. The two
-archive boxes are two occurrences of the ONE `Archive` definition,
-each under its own occurrence name.
+because the flowchart view draws the calling process. The two archive
+boxes are two occurrences of the ONE `Archive` definition, each under
+its own occurrence name, and both wire straight to the end stadium:
+the choice's branches reconverge without a merge node.
 
 The logic is fixed on purpose: a diagram renderer has no open design
 questions at this scale, so the manifest declares no parts and the
@@ -467,27 +478,38 @@ board's collective approval appears as a parallel block:
 The generated model is an ordinary workflow model, so everything on
 this page applies to it: the chain continues onward in one run
 (`org-to-approval workflow-to-bpmn bpmn-to-mermaid`), and the
-structure view draws the persisted result. Its verbatim drawing of the
-sensitivity-3 process, rendered by Mermaid itself:
+flowchart view draws the persisted result, every performer on its
+task's box. Its verbatim drawing of the sensitivity-3 process,
+rendered by Mermaid itself:
 
 ```mermaid
 flowchart TD
-  WriteDocument["WriteDocument"]
-  ApproveByGrace["ApproveByGrace"]
-  ApproveByDave["ApproveByDave"]
-  subgraph Executive_Board_approvals["Executive Board approvals (parallel)"]
-    ApproveByAlice["ApproveByAlice"]
-    ApproveByBob["ApproveByBob"]
-    ApproveByCarol["ApproveByCarol"]
-  end
+  start_node(["start"])
+  WriteDocument["WriteDocument<br/>(Judy)"]
+  ApproveByGrace["ApproveByGrace<br/>(Grace)"]
+  ApproveByDave["ApproveByDave<br/>(Dave)"]
+  Executive_Board_approvals_fork@{ shape: fork }
+  ApproveByAlice["ApproveByAlice<br/>(Alice)"]
+  ApproveByBob["ApproveByBob<br/>(Bob)"]
+  ApproveByCarol["ApproveByCarol<br/>(Carol)"]
+  Executive_Board_approvals_join@{ shape: join }
+  end_node(["end"])
+  start_node --> WriteDocument
   WriteDocument --> ApproveByGrace
   ApproveByGrace --> ApproveByDave
-  ApproveByDave --> Executive_Board_approvals
+  ApproveByDave --> Executive_Board_approvals_fork
+  Executive_Board_approvals_fork --> ApproveByAlice
+  ApproveByAlice --> Executive_Board_approvals_join
+  Executive_Board_approvals_fork --> ApproveByBob
+  ApproveByBob --> Executive_Board_approvals_join
+  Executive_Board_approvals_fork --> ApproveByCarol
+  ApproveByCarol --> Executive_Board_approvals_join
+  Executive_Board_approvals_join --> end_node
 ```
 
 The verification (`org-to-approval/scripts/verify.mjs`) runs both
 sensitivities, the parameter's error paths, the onward chain, and this
-structure view through the real CLI on every gate run.
+flowchart view through the real CLI on every gate run.
 
 ## No design space, on purpose
 
@@ -509,16 +531,24 @@ as a template parameter, resolved in two steps to a model.
 ## One process, two drawings
 
 The same Approval process, drawn from both ends of the chain. The
-structure view draws the source as a tree, verbatim:
+flowchart view draws the source, verbatim:
 
 ```mermaid
 flowchart TD
+  start_node(["start"])
   Write["Write"]
-  subgraph approvals["approvals (parallel)"]
-    Approve_1["Approve 1"]
-    Approve_2["Approve 2"]
-  end
-  Write --> approvals
+  approvals_fork@{ shape: fork }
+  Approve_1["Approve 1"]
+  Approve_2["Approve 2"]
+  approvals_join@{ shape: join }
+  end_node(["end"])
+  start_node --> Write
+  Write --> approvals_fork
+  approvals_fork --> Approve_1
+  Approve_1 --> approvals_join
+  approvals_fork --> Approve_2
+  Approve_2 --> approvals_join
+  approvals_join --> end_node
 ```
 
 The chain's other end is the same process flattened and drawn as a
@@ -542,9 +572,15 @@ flowchart TD
   approvals_join --> end_node
 ```
 
-The tree states structure by nesting; the graph states the same
-structure by gateway pairs and flows. The transformation is exactly
-the walk between the two drawings.
+The two drawings share the medium but speak different notations. The
+flowchart view speaks the classic idiom: a decision is one diamond
+asking its guard as a question, its branches reconverge invisibly on
+whatever comes next, a loop closes with a bare back edge, and
+concurrency is a pair of fork and join bars. The BPMN graph states
+every one of those joints as an explicit node: a gateway pair per
+operator, the split AND the join drawn as diamonds labeled with their
+derived roles, bracketed by start and end events. The transformation
+is exactly the walk between the two notations.
 
 ## Where the pieces live
 
@@ -553,7 +589,7 @@ the walk between the two drawings.
   `examples/workflow/metamodels/org`: the three metamodel packages,
   each exporting JSX components (bare specifier) and type schemas
   (`/model`).
-- `examples/workflow/workflow-to-mermaid`: the structure view, with a
+- `examples/workflow/workflow-to-mermaid`: the flowchart view, with a
   `release` sample and a verification rendering three samples and
   exercising the declared constraints through `synth model validate`.
 - `examples/workflow/workflow-to-bpmn`: the m2m step, with the

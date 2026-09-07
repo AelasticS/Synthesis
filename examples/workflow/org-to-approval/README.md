@@ -27,7 +27,7 @@ The generated model is an ordinary workflow model, so the suite's
 chain continues from it: run
 `org-to-approval workflow-to-bpmn bpmn-to-mermaid` with `--out-dir`
 for the flattened drawing, or `workflow-to-mermaid` on the persisted
-result for the structure view.
+result for the flowchart view.
 
 The sample `acme.tsx` is a small organization: an executive board of
 three over two nested departments, each naming its manager. The test

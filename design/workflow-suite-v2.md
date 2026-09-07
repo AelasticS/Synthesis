@@ -186,6 +186,17 @@ commits and the code's own comments:
   generated per-kind ids with bare kind labels, and named ones are
   titled `name (kind)`.
 
+After delivery, on the user's decision, `workflow-to-mermaid` was
+restyled from the nested-subgraph structure view to the classic
+flowchart idiom and renamed the flowchart view: decision diamonds
+asking the guards as questions, guard-labeled branch edges with a
+labeled else and no merge node, loop diamonds with yes/no edges and a
+back edge, fork/join bars for parallels, subroutine boxes for
+invocations, inline processes expanding in place, performers as
+second label lines, and a start/end stadium pair. The replacement is
+without trace: transformation, verifications, docs, catalogs, and the
+changelog's unreleased entry all describe only the flowchart view.
+
 ## Status
 
 Drafted 2026-09-07 from the user's decisions; committed as stage 0.

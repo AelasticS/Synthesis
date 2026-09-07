@@ -1,24 +1,32 @@
 /** @jsx createExprNode */
 /**
  * Block-structured workflow model to Mermaid flowchart text: the
- * structure view, drawing the SOURCE of the workflow chain rather than
- * its flattened graph. One document per model, drawing the entry
- * process (the first process definition no invocation calls); one
- * nested subgraph per composite step, so the tree structure stays
- * visible. A task is a box; a sequence is a subgraph whose consecutive
- * children are chained with edges; a parallel is a subgraph with no
- * edges between its children, because side-by-side placement IS the
- * meaning; an inline process is a subgraph whose steps chain (a
- * process body is implicitly a sequence); a choice is a subgraph whose
- * branch subgraphs are labeled with their guards (the else branch
- * labeled else); a loop is a subgraph labeled with its kind and guard;
- * a process invocation is a subroutine shape, a task invocation a box,
- * both named by the occurrence (defaulting to the called definition's
- * name). Documents and performers are not drawn. Node ids are the
+ * flowchart view, drawing the SOURCE of the workflow chain in the
+ * classic flowchart idiom. One document per model, drawing the entry
+ * process (the first process definition no invocation calls). The walk
+ * is a wiring contract: every step yields an entry node and a LIST of
+ * exit nodes, and a sequence connects all previous exits to the next
+ * step's entry; every implicit sequence (a process body, a branch
+ * body, a loop body) wires the same way. A start stadium opens the
+ * chart, wired to the first step's entry, and every final exit wires
+ * to the end stadium. A task is a box, its performer a parenthesized
+ * second label line; an invocation is a subroutine box named by the
+ * occurrence (call semantics stays opaque), while an INLINE process
+ * step, being single-use grouping, expands inline into its steps (its
+ * own name does not appear in the drawing). A choice is one decision
+ * diamond: each branch's outgoing edge carries its guard (the
+ * guardless branch's edge labeled else), and all branch exits become
+ * the choice's exits, reconverging on whatever comes next with no
+ * merge node. A loop is a guard diamond with a back edge: a
+ * repeatUntil runs the body first and tests after it (no returns to
+ * the body, yes exits); a while tests first (yes enters the body,
+ * whose exits return unlabeled, no exits). A parallel is a fork bar
+ * fanning out to every child's entry and a join bar every child's
+ * exits converge on. Documents are not drawn. Node ids are the
  * sanitized authored names (unique per process scope); labels keep the
  * authored names verbatim, spaces included, read from the element's
  * label (the store keeps the pre-normalization name there). An unnamed
- * operator gets a generated per-kind id and a bare kind label.
+ * operator gets a generated per-kind id.
  */
 import { createExprNode } from '@aelastics/synthesis/jsx';
 import { abstractM2M } from '@aelastics/synthesis/m2m';
@@ -32,127 +40,158 @@ export class WorkflowToMermaidTransformation extends abstractM2M {
     }
     template(m) {
         const entry = this.entryProcessOf(m);
-        const steps = this.stepsOf(entry);
+        const body = this.bodyWiring(this.stepsOf(entry));
+        const lines = [
+            'start_node(["start"])',
+            ...body.nodes,
+            'end_node(["end"])',
+            `start_node --> ${body.entry}`,
+            ...body.edges,
+            ...body.exits.map((e) => this.edge(e, 'end_node')),
+        ];
         return (createExprNode(M2T, { name: `${m.name}_mermaid` },
             createExprNode(Doc, { name: `${m.name}.mmd` },
                 createExprNode(P, null, 'flowchart TD'),
-                steps.flatMap((s) => this.stepLines(s, 1)),
-                this.chainEdges(steps, 1))));
+                lines.map((l) => createExprNode(P, null, `  ${l}`)))));
     }
     // One method per step kind, dispatched by type test; the recursion
-    // mirrors the tree's nesting.
-    stepLines(s, depth) {
+    // follows the tree while the wiring flattens it into one chart.
+    stepWiring(s) {
         const store = this.context.store;
         if (store.isTypeOf(s, wm.Task))
-            return this.taskLines(s, depth);
+            return this.taskWiring(s);
         if (store.isTypeOf(s, wm.Process))
-            return this.processLines(s, depth);
+            return this.bodyWiring(this.stepsOf(s));
         if (store.isTypeOf(s, wm.Invocation))
-            return this.invocationLines(s, depth);
+            return this.invocationWiring(s);
         if (store.isTypeOf(s, wm.Sequence))
-            return this.blockLines(s, 'sequence', depth, true);
+            return this.bodyWiring(this.childrenOf(s));
         if (store.isTypeOf(s, wm.Parallel))
-            return this.blockLines(s, 'parallel', depth, false);
+            return this.parallelWiring(s);
         if (store.isTypeOf(s, wm.Choice))
-            return this.choiceLines(s, depth);
+            return this.choiceWiring(s);
         if (store.isTypeOf(s, wm.Loop))
-            return this.loopLines(s, depth);
+            return this.loopWiring(s);
         throw new Error(`Step '${s.name}' has an unknown kind`);
     }
-    taskLines(t, depth) {
-        return [createExprNode(P, null, `${this.ind(depth)}${this.idOf(t)}["${this.labelOf(t)}"]`)];
+    // A task is a box; a performer adds a parenthesized second label
+    // line. An inline task is a single-use definition, so the box IS the
+    // occurrence.
+    taskWiring(t) {
+        const id = this.idOf(t);
+        const performer = (t.performer ?? '');
+        const label = performer === '' ? this.labelOf(t) : `${this.labelOf(t)}<br/>(${performer})`;
+        return { entry: id, exits: [{ id }], nodes: [`${id}["${label}"]`], edges: [] };
     }
-    // An inline process is a subgraph; its steps chain (implicitly a
-    // sequence).
-    processLines(p, depth) {
-        const steps = this.stepsOf(p);
-        return [
-            createExprNode(P, null, `${this.ind(depth)}subgraph ${this.idOf(p)}["${this.titleOf(p, 'process')}"]`),
-            ...steps.flatMap((s) => this.stepLines(s, depth + 1)),
-            ...this.chainEdges(steps, depth + 1),
-            createExprNode(P, null, `${this.ind(depth)}end`),
-        ];
-    }
-    // A process invocation is a subroutine shape, a task invocation a
-    // box, both named by the occurrence.
-    invocationLines(inv, depth) {
-        const called = this.calledOf(inv);
+    // An invocation is a subroutine box named by the occurrence; what
+    // the called definition does stays behind the call. (An inline
+    // process, by contrast, is single-use grouping and expands inline
+    // through the Process branch of the dispatch.)
+    invocationWiring(inv) {
+        this.calledOf(inv);
         const display = this.occurrenceDisplayOf(inv);
         const id = this.sanitizedId(display);
-        if (this.context.store.isTypeOf(called, wm.Process)) {
-            return [createExprNode(P, null, `${this.ind(depth)}${id}[["${display}"]]`)];
+        return { entry: id, exits: [{ id }], nodes: [`${id}[["${display}"]]`], edges: [] };
+    }
+    // Sequential wiring: every previous exit connects to the next step's
+    // entry. A process body, a branch body, and a loop body are implicit
+    // sequences and wire the same way.
+    bodyWiring(steps) {
+        const first = this.stepWiring(steps[0]);
+        const nodes = [...first.nodes];
+        const edges = [...first.edges];
+        let exits = first.exits;
+        for (const s of steps.slice(1)) {
+            const w = this.stepWiring(s);
+            nodes.push(...w.nodes);
+            edges.push(...exits.map((e) => this.edge(e, w.entry)), ...w.edges);
+            exits = w.exits;
         }
-        return [createExprNode(P, null, `${this.ind(depth)}${id}["${display}"]`)];
+        return { entry: first.entry, exits, nodes, edges };
     }
-    // Sequence and parallel: a subgraph labeled with its kind; the
-    // children chain with edges exactly when the block is sequential.
-    blockLines(s, kind, depth, chained) {
-        const children = this.childrenOf(s);
-        return [
-            createExprNode(P, null, `${this.ind(depth)}subgraph ${this.idOf(s)}["${this.titleOf(s, kind)}"]`),
-            ...children.flatMap((c) => this.stepLines(c, depth + 1)),
-            ...(chained ? this.chainEdges(children, depth + 1) : []),
-            createExprNode(P, null, `${this.ind(depth)}end`),
-        ];
+    // A parallel is a fork bar fanning out to every child's entry and a
+    // join bar every child's exits converge on; the join is the exit.
+    parallelWiring(p) {
+        const base = this.idOf(p);
+        const fork = `${base}_fork`;
+        const join = `${base}_join`;
+        const nodes = [`${fork}@{ shape: fork }`];
+        const edges = [];
+        for (const c of this.childrenOf(p)) {
+            const w = this.stepWiring(c);
+            nodes.push(...w.nodes);
+            edges.push(`${fork} --> ${w.entry}`, ...w.edges, ...w.exits.map((e) => this.edge(e, join)));
+        }
+        nodes.push(`${join}@{ shape: join }`);
+        return { entry: fork, exits: [{ id: join }], nodes, edges };
     }
-    // A choice is a subgraph whose branch subgraphs carry their guards
-    // as labels (the else branch labeled else); no edges between
-    // branches, because side-by-side placement means alternatives. A
-    // branch's children chain (implicitly a sequence); branch ids are
-    // positional under the choice's id.
-    choiceLines(c, depth) {
-        const choiceId = this.idOf(c);
-        const branches = this.branchesOf(c);
-        const lines = [
-            createExprNode(P, null, `${this.ind(depth)}subgraph ${choiceId}["${this.titleOf(c, 'choice')}"]`),
-        ];
-        branches.forEach((b, i) => {
-            const body = this.childrenOf(b);
-            const title = (b.guard ?? '') === '' ? 'else' : b.guard;
-            lines.push(createExprNode(P, null, `${this.ind(depth + 1)}subgraph ${choiceId}_b${i + 1}["${title}"]`), ...body.flatMap((s) => this.stepLines(s, depth + 2)), ...this.chainEdges(body, depth + 2), createExprNode(P, null, `${this.ind(depth + 1)}end`));
-        });
-        lines.push(createExprNode(P, null, `${this.ind(depth)}end`));
-        return lines;
+    // A choice is ONE decision diamond: each branch's outgoing edge
+    // carries its guard (the guardless branch's edge labeled else), the
+    // branch bodies wire normally, and all branch exits become the
+    // choice's exits, so the branches reconverge on whatever comes next
+    // without a merge node.
+    choiceWiring(c) {
+        const id = this.idOf(c);
+        const nodes = [`${id}{"${this.choiceLabelOf(c)}"}`];
+        const edges = [];
+        const exits = [];
+        for (const b of this.branchesOf(c)) {
+            const w = this.bodyWiring(this.childrenOf(b));
+            const guard = (b.guard ?? '');
+            nodes.push(...w.nodes);
+            edges.push(`${id} -->|${guard === '' ? 'else' : guard}| ${w.entry}`, ...w.edges);
+            exits.push(...w.exits);
+        }
+        return { entry: id, exits, nodes, edges };
     }
-    // A loop is a subgraph labeled with its kind and guard; its body
-    // chains (implicitly a sequence).
-    loopLines(l, depth) {
+    // The diamond's question: the authored choice name, or the single
+    // guard of an otherwise unnamed choice, or the bare question mark.
+    choiceLabelOf(c) {
+        if (c.label !== undefined)
+            return `${this.labelOf(c)}?`;
+        const guards = (c.children ?? [])
+            .map((b) => (b.guard ?? ''))
+            .filter((g) => g !== '');
+        return guards.length === 1 ? `${guards[0]}?` : '?';
+    }
+    // A loop is a guard diamond and a back edge. A repeatUntil runs the
+    // body first and tests after it: the no edge returns to the body's
+    // entry, the yes edge is the exit. A while tests first: the yes edge
+    // enters the body, whose exits return to the diamond unlabeled, and
+    // the no edge is the exit.
+    loopWiring(l) {
         const guard = (l.guard ?? '');
         if (guard === '') {
             throw new Error(`Loop '${l.name}' has no guard`);
         }
-        const kindWord = l.kind === 'while' ? 'while' : 'until';
-        const body = this.childrenOf(l);
-        return [
-            createExprNode(P, null, `${this.ind(depth)}subgraph ${this.idOf(l)}["${this.titleOf(l, `loop ${kindWord} ${guard}`)}"]`),
-            ...body.flatMap((s) => this.stepLines(s, depth + 1)),
-            ...this.chainEdges(body, depth + 1),
-            createExprNode(P, null, `${this.ind(depth)}end`),
-        ];
-    }
-    // Consecutive steps of a sequential block chain with edges. An edge
-    // may start or end at a subgraph id; that is valid Mermaid.
-    chainEdges(steps, depth) {
-        const edges = [];
-        for (let i = 0; i < steps.length - 1; i++) {
-            edges.push(createExprNode(P, null, `${this.ind(depth)}${this.idOf(steps[i])} --> ${this.idOf(steps[i + 1])}`));
+        const id = this.idOf(l);
+        const diamond = `${id}{"${guard}?"}`;
+        const body = this.bodyWiring(this.childrenOf(l));
+        if (l.kind === 'while') {
+            return {
+                entry: id,
+                exits: [{ id, label: 'no' }],
+                nodes: [diamond, ...body.nodes],
+                edges: [`${id} -->|yes| ${body.entry}`, ...body.edges, ...body.exits.map((e) => this.edge(e, id))],
+            };
         }
-        return edges;
+        return {
+            entry: body.entry,
+            exits: [{ id, label: 'yes' }],
+            nodes: [...body.nodes, diamond],
+            edges: [...body.edges, ...body.exits.map((e) => this.edge(e, id)), `${id} -->|no| ${body.entry}`],
+        };
     }
-    ind(depth) {
-        return '  '.repeat(depth);
+    // An edge line; the exit's label, when it carries one, rides on the
+    // edge.
+    edge(from, to) {
+        return from.label === undefined ? `${from.id} --> ${to}` : `${from.id} -->|${from.label}| ${to}`;
     }
     // The authored name, spaces included: the store normalizes name
     // (whitespace stripped) and keeps the pre-normalization form in
     // label, backfilling label from name when nothing was stripped.
     labelOf(s) {
         return String(s.label ?? s.name);
-    }
-    // A subgraph title: the authored name plus the kind, or the bare
-    // kind for an unnamed step (the store backfills label exactly when a
-    // name was authored, so its absence marks an unnamed step).
-    titleOf(s, kind) {
-        return s.label === undefined ? `(${kind})` : `${this.labelOf(s)} (${kind})`;
     }
     // The occurrence name defaults to the called definition's name.
     occurrenceDisplayOf(inv) {
@@ -187,10 +226,6 @@ export class WorkflowToMermaidTransformation extends abstractM2M {
             return 'loop';
         if (store.isTypeOf(s, wm.Parallel))
             return 'parallel';
-        if (store.isTypeOf(s, wm.Sequence))
-            return 'sequence';
-        if (store.isTypeOf(s, wm.Process))
-            return 'process';
         return 'step';
     }
     // Mermaid ids allow no spaces and reserve a few words; the sanitized

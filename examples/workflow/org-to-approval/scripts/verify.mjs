@@ -4,7 +4,7 @@
  * Judy at sensitivity 2 (her department's manager and its parent's,
  * no board), Judy at sensitivity 3 (the executive board's parallel
  * appears), and the onward chain to BPMN and Mermaid (the flattened
- * drawing carries the parallel gateway pair). The structure view then
+ * drawing carries the parallel gateway pair). The flowchart view then
  * draws the PERSISTED sensitivity-3 model, proving the generated
  * model is an ordinary workflow model. Each generated model's header
  * records the verbatim parameter in its generatedBy provenance, and
@@ -130,23 +130,29 @@ try {
     && flat.includes('ApproveByGrace --> ApproveByDave')
     && flat.includes('ApproveByDave --> ExecutiveBoardapprovals_split'))
 
-  // ── the structure view over the persisted sensitivity-3 model ─────
+  // ── the flowchart view over the persisted sensitivity-3 model ─────
   cli(['transformation', 'run', 'workflow-to-mermaid', '--in', 'demo/approval3', '--out-dir', gen])
-  const tree = readFileSync(join(gen, 'ApprovalForJudy.mmd'), 'utf-8')
+  const chart = readFileSync(join(gen, 'ApprovalForJudy.mmd'), 'utf-8')
 
-  expect('the parallel is a subgraph labeled with the board and its kind',
-    tree.includes('subgraph Executive_Board_approvals["Executive Board approvals (parallel)"]'))
-  expect('the member approvals sit side by side, no edges between them',
-    tree.includes('ApproveByAlice["ApproveByAlice"]')
-    && !tree.includes('ApproveByAlice --> ApproveByBob'))
-  expect('the process chains into the parallel subgraph',
-    tree.includes('ApproveByDave --> Executive_Board_approvals'))
+  expect('a task box carries its performer as a second label line',
+    chart.includes('ApproveByGrace["ApproveByGrace<br/>(Grace)"]')
+    && chart.includes('WriteDocument["WriteDocument<br/>(Judy)"]'))
+  expect('the board parallel is a fork bar and a join bar',
+    chart.includes('Executive_Board_approvals_fork@{ shape: fork }')
+    && chart.includes('Executive_Board_approvals_join@{ shape: join }'))
+  expect('the fork fans out to every member and the join converges them',
+    chart.includes('Executive_Board_approvals_fork --> ApproveByAlice')
+    && chart.includes('ApproveByAlice --> Executive_Board_approvals_join')
+    && !chart.includes('ApproveByAlice --> ApproveByBob'))
+  expect('the process wires into the fork and out of the join',
+    chart.includes('ApproveByDave --> Executive_Board_approvals_fork')
+    && chart.includes('Executive_Board_approvals_join --> end_node'))
 
   if (failures > 0) {
     console.error(`org-to-approval verify: ${failures} assertion(s) failed`)
     process.exit(1)
   }
-  console.log('org-to-approval verify: OK (two sensitivities, provenance, error paths, chain and structure view)')
+  console.log('org-to-approval verify: OK (two sensitivities, provenance, error paths, chain and flowchart view)')
 } catch (err) {
   if (err.stderr) console.error(err.stderr.toString())
   console.error(`org-to-approval verify FAILED: ${err.message}`)
