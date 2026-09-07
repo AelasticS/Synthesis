@@ -24,8 +24,7 @@ The two chain steps compose (`workflow-to-bpmn` produces exactly what
 one run; `org-to-approval` extends the chain to three steps by
 generating its input from an organizational model, and
 `workflow-to-mermaid` is a sibling view drawing the SOURCE instead.
-The suite is explained canonically in the docs page "The workflow
-suite: block-structured workflows to BPMN to diagrams" (developer guide,
+The suite is explained canonically in the docs page "The workflow suite" (developer guide,
 Examples section); design/workflow-suite.md and
 design/workflow-suite-v2.md hold the design records, and each
 package's README the usage loop.
