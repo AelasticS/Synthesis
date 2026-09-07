@@ -99,12 +99,13 @@ Some components are used both **nested** inside a structural parent (where a con
 For these cases, declare the connector propName **and** opt the component in to top-level placement using the `allowedAsTopLevelElement` helper:
 
 ```typescript
-import { allowedAsTopLevelElement, Element, Template } from '@aelastics/synthesis/jsx'
+import { allowedAsTopLevelElement, ExprNode, Template } from '@aelastics/synthesis/jsx'
 
-// Sequence can be nested in another Node (connects via 'children')
-// OR appear at the top of a Process/Model (no 'children' on Process; goes to model.elements)
-export const Sequence: Template<bpmn.ISequence> = (props) => {
-  return new ExprNode(bpmn.Sequence, props, allowedAsTopLevelElement('children'))
+// An OrgUnit can be nested in its parent unit (connects via 'subUnits')
+// OR appear at the top of the Organization model (no 'subUnits' there;
+// goes to model.elements, with the parent authored as a reference prop)
+export const OrgUnit: Template<o.IOrgUnit> = (props) => {
+  return new ExprNode(o.OrgUnit, props, allowedAsTopLevelElement(["subUnits"]))
 }
 ```
 

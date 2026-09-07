@@ -138,6 +138,65 @@ Synthesis-wt-history, branch feat/workflow-metamodel-v2); A2 the CLI
 branch feat/run-param); A3 the org example (after A1+A2); A4 the
 docs pass (after all). No push.
 
+## Delivery notes (stage A)
+
+Decisions settled during execution, recorded from the feat branches'
+commits and the code's own comments:
+
+- **The entry-process rule.** Both workflow-to-bpmn and
+  workflow-to-mermaid operate on the model's entry process: the first
+  process definition no invocation in the model calls, the root of the
+  call graph. A model with no uninvoked process definition is an error
+  that says so.
+- **Loop wiring, honestly labeled.** A while wires the entry straight
+  to the exit and guards the exit's flow INTO the body; a repeatUntil
+  runs entry to body to exit and closes with the back edge to the
+  entry labeled `not <guard>`, because the loop runs again only while
+  the guard has not yet come true. The entry converges, the exit
+  diverges, and bpmn-to-mermaid's derived roles print exactly that
+  (exclusive join, exclusive split).
+- **Occurrence prefixes.** An embedded sub-process (an inline process
+  step or a process invocation) flattens its body with the node's name
+  plus underscore prefixed to every inner name (`ManagerSignoff_Sign`),
+  because the BPMN model is one flat name scope per container,
+  workflow names are unique only per process, and one definition may
+  expand under several occurrences. Gateway pairs take the step's
+  authored name as their base, or a generated per-kind one (`par1`,
+  `choice1`, `loop1`) remembered per element, with the store's label
+  backfill marking which names were authored.
+- **Org authoring idioms.** `Manager` and `TopUnit` are reference tags
+  (the FromNode/ToNode idiom): the manager is one of the department's
+  own members, so the link is authored after the workers exist, under
+  the creation-order regime. The unit tags use
+  `allowedAsTopLevelElement(["subUnits"])`, so the sample lays the
+  hierarchy flat with `parent` as a reference prop.
+- **org-to-approval's smoke exemption.** Its test script runs
+  `scripts/verify.mjs` directly instead of the generic smoke harness,
+  because the transformation requires a parameter the harness cannot
+  supply; the verification covers what the smoke would have and more
+  (both sensitivities, provenance, error paths, the onward chain, the
+  structure view over the persisted result).
+- **--param mechanics.** Parsed once in pre-flight so invalid JSON
+  fails before any engine work; bound to step 1 of a chain, mirroring
+  --config; the header parser, serializer, and stamp salvage
+  `generatedBy.param` like config. Later chain steps receive no
+  parameter.
+- **Structure view boundaries.** Documents and performers are not
+  drawn (documents remain a recorded candidate); unnamed operators get
+  generated per-kind ids with bare kind labels, and named ones are
+  titled `name (kind)`.
+
 ## Status
 
 Drafted 2026-09-07 from the user's decisions; committed as stage 0.
+
+Stage A delivered 2026-09-07, merged to main --no-ff in dependency
+order: A1 the metamodel reshape with transformations, samples, and
+verifications (325830c, merge 7d2a5d6); A2 the CLI --param channel
+with provenance (60af880, merge dd44796); A3 the organizational
+example (4a55745, merge 2ab66b1). A4, the docs pass (the suite page
+rewritten around the v2 metamodel with the organizational example as
+its generative section, the guides sweep, the suite and package
+READMEs, the consolidated CHANGELOG entry, and this record's delivery
+notes), sits on branch docs/workflow-suite-v2 awaiting review. Stage B
+(BPMN to the Descriptive conformance subclass) awaits the user.

@@ -78,8 +78,8 @@ organizational example feeding the same chain, explained on
 
 | Example | Kind | What it shows |
 | --- | --- | --- |
-| `examples/workflow/workflow-to-mermaid` | m2t | The structure view: the workflow model drawn as a Mermaid flowchart of nested subgraphs, one subgraph per composite activity, chained children in sequential blocks and edge-free parallels; fixed logic, run without configuration flags. |
-| `examples/workflow/workflow-to-bpmn` | m2m | The workflow model flattened into a node-and-flow graph: the fragment contract (entry and exit ports per activity), gateway pairs for parallels, recursion for sub-processes. |
+| `examples/workflow/workflow-to-mermaid` | m2t | The structure view: the workflow model drawn as a Mermaid flowchart of nested subgraphs, one subgraph per composite step, chained children in sequential blocks, edge-free parallels, guard-labeled branches and loops; fixed logic, run without configuration flags. |
+| `examples/workflow/workflow-to-bpmn` | m2m | The workflow model flattened into a node-and-flow graph: the fragment contract (an entry and an exit per step), gateway pairs for parallels, choices, and loops, and invocations expanded as occurrence-named tasks and embedded sub-processes. |
 | `examples/workflow/bpmn-to-mermaid` | m2t | The graph rendered as Mermaid flowchart text, node lines by specialization, sub-processes as subgraphs. |
 | `examples/workflow/org-to-approval` | m2m | An approval workflow derived from an organizational hierarchy, parameterized by `--param '{"worker":...,"sensitivity":...}'` through the engine's parameter channel (recorded verbatim in the output's provenance): the worker's unit chain unfolds upward, a department approves through its manager, a board in parallel through its members. |
 
