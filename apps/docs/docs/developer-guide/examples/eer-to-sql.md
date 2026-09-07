@@ -38,7 +38,7 @@ What the suite contains, and what each piece shows:
   preset configurations and physical clustering. It consumes exactly
   what `eer-to-relational` produces, so the two run as a chain.
 - **`rel-to-mermaid`** (model to text): the
-  [design space, drawn](#the-design-space-drawn), a Mermaid
+  [same schema under three configurations](#one-source-three-configurations), a Mermaid
   `erDiagram` per schema over the mapping's relational OUTPUT,
   chained after `eer-to-relational`, so different configurations of
   the same source become visibly different diagrams.
@@ -541,7 +541,7 @@ Everything on this page is asserted by
 gate run: outputs, traces, constraint rejections, both presets, both
 clustering emissions, and the row-history leg.
 
-## The design space, drawn
+## One source, three configurations
 
 The suite's fourth member, `rel-to-mermaid`, diagrams the OUTPUT of
 the mapping rather than its source: chained as `eer-to-relational`
@@ -551,14 +551,20 @@ from the key elements and a `"nullable"` comment on nullable columns,
 a line per foreign key, solid exactly when the key's columns sit
 inside the owner's primary key, and a dashed one-to-one line per
 `historyOf` link). Because the input is what a configuration
-produced, the design space becomes visible: the three excerpts below
-are the same Library source, drawn under three configurations,
+produced, different configuration VALUES become visibly different
+schemas. Each subsection below names one configuration's values and
+shows the schema it produces, always from the same Library source,
 trimmed to the `person` hierarchy and the `borrows` relationship.
 
-Under the defaults, JoinedTables keeps `person` and both subtype
-tables, each keyed by the copied root key (marked `PK, FK`, its line
-solid because the copied key IS the primary key), and the JoinTable
-default gives `borrows` a table of its own, dashed into both sides:
+### JoinedTables and JoinTable, the defaults
+
+Configuration values: `InheritanceStrategy = JoinedTables` and
+`OneToManyStrategy = JoinTable`, which is what a default
+configuration chooses; every other issue at its default too.
+JoinedTables keeps `person` and both subtype tables, each keyed by
+the copied root key (marked `PK, FK`, its line solid because the
+copied key IS the primary key), and JoinTable gives `borrows` a
+table of its own, dashed into both sides:
 
 ```mermaid
 erDiagram
@@ -597,7 +603,11 @@ erDiagram
   borrows }o..|| book_copy : fk_borrows_borrowed
 ```
 
-SingleTable folds the hierarchy into one `person` table: the
+### SingleTable
+
+Configuration values: `InheritanceStrategy = SingleTable` (chosen
+here for every hierarchy; the excerpt shows `personRoles`), the rest
+at the defaults. The hierarchy folds into one `person` table: the
 discriminator `type` is nullable because `personRoles` is partial,
 the grafted `since` and `salary` columns are nullable by
 construction, and the subtype tables are gone, so the borrows lines
@@ -629,11 +639,15 @@ erDiagram
   borrows }o..|| book_copy : fk_borrows_borrowed
 ```
 
-TablePerClass removes `person` entirely (the root is abstract, so its
-columns are copied into `member` and `staff`), and the ForeignKey
-option for `borrows` replaces the join table with a `member_id`
-column grafted into `book_copy`, a dashed line because a copy's
-identity does not derive from its borrower:
+### TablePerClass and ForeignKey
+
+Configuration values: `InheritanceStrategy = TablePerClass` and
+`OneToManyStrategy = ForeignKey` for `borrows`. TablePerClass
+removes `person` entirely (the root is abstract, so its columns are
+copied into `member` and `staff`), and the ForeignKey option
+replaces the join table with a `member_id` column grafted into
+`book_copy`, a dashed line because a copy's identity does not derive
+from its borrower:
 
 ```mermaid
 erDiagram
