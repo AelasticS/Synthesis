@@ -6,27 +6,45 @@ title: "A full-featured EER to SQL transformation"
 # A full-featured EER to SQL transformation
 
 The `examples/eer-to-sql` suite turns a conceptual entity-relationship
-schema into a production-shaped relational database, and renders the
-same conceptual schema as an ER diagram
-(see [the diagram view](#the-diagram-view)). Its goals are
-completeness and explicitness. Completeness: every semantic fact the
-EER schema states (identification, integrity rules, domains,
-optionality) reaches the relational side as a first-class fact
+schema into a production-shaped relational database, and draws it.
+Its goals are completeness and explicitness. Completeness: every
+semantic fact the EER schema states (identification, integrity rules,
+domains, optionality) reaches the output as a first-class fact
 instead of being lost in translation. Explicitness: every design
-question with more than one defensible answer (how hierarchies map,
-which tables are audited or versioned, how columns are named, which
-dialect is emitted) stays open as a declared decision, closed per run
-by a configuration model rather than hardcoded in the rules. The
-result of a run is a rich relational model, tables with first-class
-keys, constraints, indexes, and domains, and from it executable SQL:
-a schema script and a triggers script in the dialect a configuration
-chooses, plus a trace recording which decision produced which table.
+question with more than one defensible answer stays open as a
+declared decision, closed per run by a configuration model rather
+than hardcoded in the rules.
 
-This page is the canonical explanation of the suite: the two
-metamodels, what each construct becomes and why, and the design
-space. The package READMEs stay deliberately short and point here;
-every rule described below is enforced by the suite's executable
-verification on every merge.
+What the suite contains, and what each piece shows:
+
+- **Two full-semantics metamodels** (`eer-metamodel`,
+  `relational-metamodel`): entities in three identification kinds,
+  specializations as mappings with completeness and disjointness
+  bounds, integrity rule pairs, user-definable domains; tables with
+  first-class keys, constraints, indexes, wired domains, and row
+  history. Their doctrine is declared as constraints and enforced by
+  `synth model validate`.
+- **`eer-to-relational`** (model to model): the full mapping, every
+  template kind, and nine design issues closed per run by a
+  configuration: auditing and row history (the composite option),
+  inheritance strategies, relationship mapping, naming, keys, and
+  indexing.
+- **`rel-to-sql-ddl`** (model to text): executable SQL, a schema
+  script and a triggers script, with dialects as extension-authored
+  preset configurations and physical clustering. It consumes exactly
+  what `eer-to-relational` produces, so the two run as a chain.
+- **`eer-to-mermaid-er`** (model to text): the
+  [diagram view](#the-diagram-view-eer-to-mermaid), a Mermaid
+  `erDiagram` per schema over the same EER source, a sibling view
+  rather than a chain step.
+- **A trace per run**, recording which decision produced which table.
+
+This page is the canonical explanation of all of it: the metamodels,
+the relational mapping rule by rule, the diagram conventions, the
+dialects, and the design space with each decision's rationale. The
+package READMEs stay deliberately short and point here; every rule
+described below is enforced by the suite's executable verification
+on every merge.
 
 Two doctrine points shape the whole mapping. Relationships are
 strictly binary: relating more than two entities (and sometimes two)
@@ -303,7 +321,7 @@ the discriminator (see the
 [composite options section](../guides/variability.md#composite-options-an-option-that-opens-sub-issues)
 of the variability guide).
 
-## The diagram view
+## The diagram view: EER to Mermaid
 
 The suite's third member, `eer-to-mermaid-er`, is not a chain step
 but a sibling view: model-to-text over the same EER source the m2m
@@ -326,18 +344,33 @@ aggregation, since an aggregation instance relates exactly one
 instance of each participant. Mermaid has no inheritance arrow, so a
 specialization renders as one dashed one-to-one line per subtype,
 labeled with the specialization's name; one-to-one deliberately,
-because a subtype instance IS its root instance. From the Library
-sample:
+because a subtype instance IS its root instance. An excerpt of the
+transformation's verbatim output for the Library sample, rendered by
+Mermaid itself:
 
-```
+```mermaid
 erDiagram
   Book {
     number id PK
     string title "optional"
   }
+  BookCopy {
+    number no PK
+  }
+  Person {
+    number id PK
+    string name "optional"
+  }
+  Member {
+    string since "optional"
+  }
+  Loan {
+    string date "optional"
+  }
   Member |o..o{ BookCopy : borrows
   Book ||--o{ BookCopy : copyOf
   BookCopy ||--o| Loan : ofCopy
+  Member ||--o{ Loan : byMember
   Member ||..|| Person : personRoles
 ```
 
