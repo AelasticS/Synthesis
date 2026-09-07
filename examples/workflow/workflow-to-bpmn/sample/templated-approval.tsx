@@ -11,7 +11,7 @@
 import { createExprNode } from '@aelastics/synthesis/jsx'
 import type { ExprNode, Template } from '@aelastics/synthesis/jsx'
 import type { ModelStore } from '@aelastics/synthesis/store'
-import { Process, Sequence, Task, Parallel, SubProcess } from 'workflow-metamodel'
+import { WorkflowModel, Process, Sequence, Task, Parallel } from 'workflow-metamodel'
 import type * as wm from 'workflow-metamodel/model'
 
 export const $synth = {
@@ -26,16 +26,16 @@ export const $synth = {
 const Write = () => <Task name="Write" />
 
 const ReviewedWrite = () => (
-  <SubProcess name="WriteDocument">
+  <Process name="WriteDocument">
     <Task name="Draft" />
     <Task name="ReviewDraft" />
-  </SubProcess>
+  </Process>
 )
 
 // The workflow as a higher-order template: the whole writing step is
-// the parameter (any activity template qualifies, a plain task or a
-// sub-process alike).
-const Approval = (WriteStep: Template<wm.IActivity>) =>
+// the parameter (any step template qualifies, a plain task or an
+// inline process alike).
+const Approval = (WriteStep: Template<wm.IStep>) =>
   ({ doc, approvers }: { doc: string; approvers: number }) => (
     <Sequence name={`${doc}_main`}>
       <WriteStep />
@@ -53,8 +53,10 @@ const Approval = (WriteStep: Template<wm.IActivity>) =>
 // workflow's structure changes without touching its skeleton.
 const ReviewedApproval = Approval(ReviewedWrite)
 
-export default (store: ModelStore): ExprNode<wm.IProcess> => (
-  <Process name="TemplatedApproval" store={store}>
-    <ReviewedApproval doc="Contract" approvers={2} />
-  </Process>
+export default (store: ModelStore): ExprNode<wm.IWorkflowModel> => (
+  <WorkflowModel name="TemplatedApproval" store={store}>
+    <Process name="ContractApproval">
+      <ReviewedApproval doc="Contract" approvers={2} />
+    </Process>
+  </WorkflowModel>
 )
