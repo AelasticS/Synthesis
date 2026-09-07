@@ -1,6 +1,6 @@
 # workflow-to-bpmn
 
-Model-to-model transformation flattening a process tree
+Model-to-model transformation flattening a block-structured workflow model
 (block-structured; `workflow-metamodel`: tasks, sequences, parallels,
 sub-processes) into a graph-based BPMN process (`bpmn-metamodel`:
 nodes and sequence flows).

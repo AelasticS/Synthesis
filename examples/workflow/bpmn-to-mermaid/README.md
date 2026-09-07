@@ -16,7 +16,7 @@ synth transformation run bpmn-to-mermaid --in demo/approval-bpmn --out-dir ./gen
 ```
 
 It chains with `workflow-to-bpmn` (its source metamodel is that
-transformation's target), so a process tree (block-structured) becomes
+transformation's target), so a block-structured workflow model becomes
 a diagram in one run:
 
 ```bash

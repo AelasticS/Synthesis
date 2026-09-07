@@ -1,6 +1,7 @@
 /** @jsx createExprNode */
 /**
- * Process tree to Mermaid flowchart text: the structure view, drawing
+ * Block-structured workflow model to Mermaid flowchart text: the
+ * structure view, drawing
  * the SOURCE of the workflow chain rather than its flattened graph.
  * One document per process, one nested subgraph per composite
  * activity, so the tree structure stays visible. A task is a box; a
@@ -10,7 +11,7 @@
  * subgraph carrying its recursively rendered body (implicitly a
  * sequence, so its children chain too). Node ids are the authored
  * names with every non-alphanumeric character replaced by an
- * underscore (names are unique per process tree, so the sanitized
+ * underscore (names are unique per workflow model, so the sanitized
  * name is the id); labels keep the authored names verbatim, spaces
  * included, read from the element's label (the store keeps the
  * pre-normalization name there).
@@ -91,7 +92,7 @@ export class WorkflowToMermaidTransformation extends abstractM2M {
     }
     // Mermaid ids allow no spaces and reserve a few words; the sanitized
     // authored name is collision-free because names are unique per
-    // process tree, and the label keeps the authored name. A reserved
+    // block-structured workflow model, and the label keeps the authored name. A reserved
     // name gets a suffix in the id, as in bpmn-to-mermaid.
     id(a) {
         const sanitized = this.labelOf(a).replace(/[^A-Za-z0-9]/g, '_');

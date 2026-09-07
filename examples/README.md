@@ -37,7 +37,7 @@ examples/
     rel-to-mermaid/
   workflow/            the workflow suite, a chain and its structure view
     metamodels/
-      workflow/        package workflow-metamodel: process trees (block-structured)
+      workflow/        package workflow-metamodel: block-structured workflow models (process trees)
       bpmn/            package bpmn-metamodel: simplified graph-based BPMN
     workflow-to-mermaid/
     workflow-to-bpmn/
@@ -89,15 +89,16 @@ rel-to-mermaid draws the produced relational schema.
 
 ### Workflow suite
 
-The documentation's workflow domain, executable: a chain from process
-trees (block-structured) to BPMN graphs to Mermaid diagrams, plus a
+The documentation's workflow domain, executable: a chain from
+block-structured workflow models (process trees) to BPMN graphs to
+Mermaid diagrams, plus a
 structure view drawing the tree itself. See
 [the suite README](./workflow/).
 
 | Example | Kind | Shows |
 | --- | --- | --- |
-| [workflow-to-mermaid](./workflow/workflow-to-mermaid/) | m2t | The process tree drawn as a Mermaid flowchart of nested subgraphs, one per composite activity; the suite's structure view |
-| [workflow-to-bpmn](./workflow/workflow-to-bpmn/) | m2m | The process tree flattened into a node-and-flow graph by specialization rules |
+| [workflow-to-mermaid](./workflow/workflow-to-mermaid/) | m2t | The workflow model drawn as a Mermaid flowchart of nested subgraphs, one per composite activity; the suite's structure view |
+| [workflow-to-bpmn](./workflow/workflow-to-bpmn/) | m2m | The workflow model flattened into a node-and-flow graph by specialization rules |
 | [bpmn-to-mermaid](./workflow/bpmn-to-mermaid/) | m2t | The graph rendered as Mermaid flowchart text, sub-processes as subgraphs |
 
 Further examples (text generation from EER models,

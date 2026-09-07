@@ -1,12 +1,12 @@
 ---
 sidebar_position: 3
-title: "The workflow suite: process trees to BPMN to diagrams"
+title: "The workflow suite: block-structured workflows to BPMN to diagrams"
 ---
 
-# The workflow suite: process trees to BPMN to diagrams
+# The workflow suite: block-structured workflows to BPMN to diagrams
 
-The `examples/workflow` suite turns a process tree (block-structured)
-into a graph-based BPMN process and draws both ends. Its goal is to
+The `examples/workflow` suite turns a block-structured workflow
+model (a process tree) into a graph-based BPMN process and draws both ends. Its goal is to
 show a chain done right: two small metamodels at different levels of
 abstraction, transformations whose manifests make them composable
 (the first's target metamodel is the second's source), and one
@@ -15,12 +15,12 @@ structural translation, tree to graph, as the interesting step.
 What the suite contains, and what each piece shows:
 
 - **Two metamodels** (`workflow-metamodel`, `bpmn-metamodel`): the
-  process tree side, where structure is pure nesting, and the
+  block-structured workflow model side, where structure is pure nesting, and the
   graph-based BPMN side, where nodes and flows state everything
   explicitly. The gap between the two is exactly what the chain's
   first step bridges.
 - **`workflow-to-mermaid`** (model to text): the
-  [structure view](#the-structure-view-process-trees-to-mermaid),
+  [structure view](#the-structure-view-the-workflow-model-to-mermaid),
   drawing the SOURCE as a Mermaid flowchart of nested subgraphs, so
   the tree itself is the picture.
 - **`workflow-to-bpmn`** (model to model): the flattening. Every
@@ -46,7 +46,7 @@ The suite owns both metamodels, under `examples/workflow/metamodels/`.
 They are deliberately small, and this section is all you need to read
 the rest of the page.
 
-### The process tree side
+### The workflow model side
 
 In `workflow-metamodel`, a `Process` owns one body activity, and an
 activity is a `Task` (atomic), a `Sequence` (children run in order),
@@ -76,7 +76,7 @@ running example, the Approval process
 edges, each with typed `from` and `to` links and an optional `guard`
 label, meaningful on flows out of an exclusive gateway. A gateway's
 `kind` is parallel or exclusive; whether it splits or joins is
-determined by its flows, as in BPMN. What the process tree guarantees
+determined by its flows, as in BPMN. What the workflow model guarantees
 by nesting, this side states explicitly as edges. Authored directly,
 the graph reads like this
 (from `bpmn-to-mermaid/sample/approval-bpmn.tsx`):
@@ -91,11 +91,11 @@ the graph reads like this
 <Flow name="f3"><FromNode $refByName="split" /><ToNode $refByName="Approve1" /></Flow>
 ```
 
-## The structure view: process trees to Mermaid
+## The structure view: the workflow model to Mermaid
 
 Before the flattening, the quickest consumer of the source:
 `workflow-to-mermaid` is not a chain step but a sibling view,
-model-to-text over the process tree itself, one Mermaid flowchart per
+model-to-text over the workflow model itself, one Mermaid flowchart per
 process. It draws the tree AS a tree: every composite activity
 becomes a nested `subgraph` labeled with its kind, so containment,
 the fact the source states, is the fact the picture shows. The
@@ -106,7 +106,7 @@ The conventions:
 
 - A task is a box: `Approve_1["Approve 1"]`. The id is the authored
   name with every non-alphanumeric character replaced by an
-  underscore (names are unique per process tree, so the sanitized
+  underscore (names are unique per workflow model, so the sanitized
   name is the id); the label keeps the authored name, spaces
   included.
 - A sequence is a subgraph labeled `(sequence)`, and its consecutive
@@ -177,10 +177,14 @@ elements are named `f1..fn`; all names are unique per model.
 process, a declaration line per node and an edge line per flow.
 Mermaid has no BPMN diagram type, so the flowchart carries the
 notation with one shape per node kind, chosen by specialization, one
-option per kind: tasks render as boxes, gateways as diamonds labeled
-with their kind, events as stadium shapes, and a sub-process as a
-nested `subgraph` holding its own body. A flow with a `guard` renders
-its label on the edge.
+option per kind: tasks render as boxes, gateways as diamonds, events
+as stadium shapes, and a sub-process as a nested `subgraph` holding
+its own body. A gateway's diamond is labeled with its kind AND its
+derived role, `parallel split` or `parallel join`: the role is not
+stored in the model (as in BPMN, it is determined by the flows), so
+the renderer derives it from the gateway's degrees, more than one
+outgoing flow making it a split, more than one incoming a join. A
+flow with a `guard` renders its label on the edge.
 
 ## No design space, on purpose
 
@@ -192,7 +196,7 @@ configuration-based transformation is shown in earnest). What the
 suite adds instead is the composition story: the chain
 (`synth transformation run workflow-to-bpmn bpmn-to-mermaid --in demo/approval --out-dir ./generated`)
 type-checks against the manifests before anything runs, and the
-`templated-approval.tsx` sample builds its process tree from a
+`templated-approval.tsx` sample builds its block-structured workflow model from a
 higher-order template, a template taking the writing step as a
 template parameter, resolved in two steps to a model.
 
@@ -206,10 +210,10 @@ the chain run in the previous section produces this, verbatim:
 flowchart TD
   start(["start"])
   Write["Write"]
-  approvals_split{"parallel"}
+  approvals_split{"parallel split"}
   Approve1["Approve1"]
   Approve2["Approve2"]
-  approvals_join{"parallel"}
+  approvals_join{"parallel join"}
   end_node(["end"])
   approvals_split --> Approve1
   approvals_split --> Approve2

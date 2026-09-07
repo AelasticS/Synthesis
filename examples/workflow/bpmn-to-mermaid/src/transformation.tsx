@@ -22,6 +22,7 @@ export class BpmnToMermaidTransformation extends abstractM2M<bm.IProcess, M2T_Mo
   }
 
   template(p: bm.IProcess): ExprNode<bm.IProcess, M2T_Model> {
+    this.countDegrees((p.flows ?? []) as bm.IFlow[])
     return (
       <M2T name={`${p.name}_mermaid`}>
         <Doc name={`${p.name}.mmd`}>
@@ -31,6 +32,27 @@ export class BpmnToMermaidTransformation extends abstractM2M<bm.IProcess, M2T_Mo
         </Doc>
       </M2T>
     )
+  }
+
+  // A gateway's role is not stored, it is derived, as in BPMN: more
+  // than one outgoing flow makes it a split, more than one incoming a
+  // join. Degrees are counted per container before its nodes render.
+  private outDegree = new Map<bm.INode, number>()
+  private inDegree = new Map<bm.INode, number>()
+
+  private countDegrees(flows: bm.IFlow[]): void {
+    for (const f of flows) {
+      const from = f.from as bm.INode
+      const to = f.to as bm.INode
+      this.outDegree.set(from, (this.outDegree.get(from) ?? 0) + 1)
+      this.inDegree.set(to, (this.inDegree.get(to) ?? 0) + 1)
+    }
+  }
+
+  private roleOf(g: bm.IGateway): string {
+    if ((this.outDegree.get(g) ?? 0) > 1) return `${g.kind} split`
+    if ((this.inDegree.get(g) ?? 0) > 1) return `${g.kind} join`
+    return String(g.kind)
   }
 
   @SpecPoint()
@@ -45,7 +67,7 @@ export class BpmnToMermaidTransformation extends abstractM2M<bm.IProcess, M2T_Mo
 
   @SpecOption('nodeToLines', bm.Gateway)
   gatewayLine(g: bm.IGateway, depth: number): ExprNode<any> {
-    return <P>{`${this.ind(depth)}${this.id(g.name)}{"${g.kind}"}`}</P>
+    return <P>{`${this.ind(depth)}${this.id(g.name)}{"${this.roleOf(g)}"}`}</P>
   }
 
   @SpecOption('nodeToLines', bm.StartEvent)
@@ -60,6 +82,7 @@ export class BpmnToMermaidTransformation extends abstractM2M<bm.IProcess, M2T_Mo
 
   @SpecOption('nodeToLines', bm.SubProcess)
   subProcessLines(s: bm.ISubProcess, depth: number): ExprNode<any>[] {
+    this.countDegrees((s.flows ?? []) as bm.IFlow[])
     return [
       <P>{`${this.ind(depth)}subgraph ${this.id(s.name)}["${s.name}"]`}</P>,
       ...((s.nodes ?? []) as bm.INode[]).flatMap((n) => this.nodeToLines(n, depth + 1)),

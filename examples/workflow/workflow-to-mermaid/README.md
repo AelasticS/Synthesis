@@ -1,7 +1,7 @@
 # workflow-to-mermaid
 
-Model-to-text over the workflow metamodel: a process tree
-(block-structured) rendered as a Mermaid flowchart of nested
+Model-to-text over the workflow metamodel: a block-structured workflow model
+(a process tree) rendered as a Mermaid flowchart of nested
 subgraphs, the suite's structure view. It draws the SOURCE the chain
 consumes, where `bpmn-to-mermaid` draws the flattened graph the chain
 produces. A task is a box; a sequence is a subgraph whose consecutive
@@ -10,7 +10,7 @@ between its children; a sub-process is a subgraph carrying its
 recursively rendered body. The logic is fixed: the manifest declares
 no parts and the CLI runs it without configuration flags. The
 conventions are explained canonically in the docs page "The workflow
-suite: process trees to BPMN to diagrams".
+suite: block-structured workflows to BPMN to diagrams".
 
 Try it (from a workspace):
 

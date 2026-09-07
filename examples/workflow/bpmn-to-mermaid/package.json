@@ -7,11 +7,20 @@
   "license": "Apache-2.0",
   "type": "module",
   "main": "dist/transformation.js",
-  "files": ["dist", "synth.json"],
-  "scripts": { "build": "tsc", "test": "node ../../smoke.mjs" },
+  "files": [
+    "dist",
+    "synth.json"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "node ../../smoke.mjs && node scripts/verify.mjs"
+  },
   "dependencies": {
     "@aelastics/synthesis": "workspace:*",
     "bpmn-metamodel": "workspace:*"
   },
-  "devDependencies": { "typescript": "~5.9.3", "@aelastics/synthesis-cli": "workspace:*" }
+  "devDependencies": {
+    "typescript": "~5.9.3",
+    "@aelastics/synthesis-cli": "workspace:*"
+  }
 }
