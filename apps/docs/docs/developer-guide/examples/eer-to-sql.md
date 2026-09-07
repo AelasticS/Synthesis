@@ -173,9 +173,12 @@ model-to-text over the same EER source the relational mapping
 consumes, one Mermaid `erDiagram` document per schema. The rendered
 Library excerpt below doubles as the picture of the running example
 the rest of this page transforms. Every
-entity kind gets an attribute block, subtypes included. The type word
-is the attribute's domain name, not a SQL type, because the diagram
-speaks the model's vocabulary: `Staff` shows `Money salary`. `PK`
+entity kind gets an attribute block, subtypes included. An attribute
+line reads type first, then name (`number id`): that order is
+Mermaid's own attribute grammar, the declaration order of C and
+Java, and the renderer draws the type column on the left. The type
+word is the attribute's domain name, not a SQL type, because the
+diagram speaks the model's vocabulary: `Staff` shows `Money salary`. `PK`
 marks key attributes, an `"optional"` comment marks optional ones,
 and a composite attribute flattens one level into `parent_component`
 lines, the same flattening the relational mapping below applies.
