@@ -1,0 +1,7 @@
+{
+  "kind": "m2t",
+  "entry": "./dist/transformation.js",
+  "exportName": "WorkflowToMermaidTransformation",
+  "source": { "metamodel": "workflow-metamodel" },
+  "target": { "metamodel": "text" }
+}
