@@ -1,6 +1,5 @@
 import * as w from "./workflow.meta.model.type.js"
 import {
-  ConnectionInfo,
   CpxTemplate,
   defaultConnectionInfo,
   ExprNode,
@@ -9,31 +8,75 @@ import {
   WithRefProps,
 } from "@aelastics/synthesis/jsx"
 
-export type IModelProps = WithRefProps<w.IProcess> & { store?: IStore };
+export type IModelProps = WithRefProps<w.IWorkflowModel> & { store?: IStore };
 
-export const Process: CpxTemplate<IModelProps, w.IProcess> = (props) => {
-  return new ExprNode(w.Process, props, undefined)
+export const WorkflowModel: CpxTemplate<IModelProps, w.IWorkflowModel> = (props) => {
+  return new ExprNode(w.WorkflowModel, props, undefined)
 }
 
-// Every activity connects into the first containment its parent
-// declares: the process body at the top level, a block's children when
-// nested. A second top-level block is refused (the body is single).
-const activityConnection: ConnectionInfo = {
-  ...defaultConnectionInfo(["body", "children"]),
-  isReconnectAllowed: false,
+// Model-level vocabulary: declared once, referenced by name from
+// interfaces (inputs/outputs) and documents.
+export const DocumentType: Template<w.IDocumentType> = (props) => {
+  return new ExprNode(w.DocumentType, props, "documentTypes")
 }
+
+// An activity connects into the first containment its parent declares:
+// an operator's children when nested, a process body's steps, the
+// model's definitions at top level.
+const activityConnection = defaultConnectionInfo(["children", "steps", "definitions"])
+
 export const Task: Template<w.ITask> = (props) => {
   return new ExprNode(w.Task, props, activityConnection)
 }
 
+export const Process: Template<w.IProcess> = (props) => {
+  return new ExprNode(w.Process, props, activityConnection)
+}
+
+// Operators and invocations are steps only: an operator's children
+// when nested, a process body's steps otherwise.
+const stepConnection = defaultConnectionInfo(["children", "steps"])
+
 export const Sequence: Template<w.ISequence> = (props) => {
-  return new ExprNode(w.Sequence, props, activityConnection)
+  return new ExprNode(w.Sequence, props, stepConnection)
 }
 
 export const Parallel: Template<w.IParallel> = (props) => {
-  return new ExprNode(w.Parallel, props, activityConnection)
+  return new ExprNode(w.Parallel, props, stepConnection)
 }
 
-export const SubProcess: Template<w.ISubProcess> = (props) => {
-  return new ExprNode(w.SubProcess, props, activityConnection)
+export const Choice: Template<w.IChoice> = (props) => {
+  return new ExprNode(w.Choice, props, stepConnection)
+}
+
+export const Branch: Template<w.IBranch> = (props) => {
+  return new ExprNode(w.Branch, props, "children")
+}
+
+export const Loop: Template<w.ILoop> = (props) => {
+  return new ExprNode(w.Loop, props, stepConnection)
+}
+
+// A document nests in the process whose carriers it belongs to.
+export const Document: Template<w.IDocument> = (props) => {
+  return new ExprNode(w.Document, props, "documents")
+}
+
+// The general invocation tag: the activity prop names the called
+// definition, reads/writes bind the enclosing process's documents.
+export const Invoke: Template<w.IInvocation> = (props) => {
+  return new ExprNode(w.Invocation, props, stepConnection)
+}
+
+// Process-call sugar over the SAME Invocation concept (the alias
+// idiom): <SubProcess $refByName="X" /> invokes the process definition
+// X, so the $refByName names the callee and becomes the activity link
+// rather than an element reference.
+export const SubProcess: Template<w.IInvocation> = (props) => {
+  const { $refByName, ...rest } = props as { $refByName?: string } & Record<string, unknown>
+  if ($refByName === undefined) {
+    return new ExprNode(w.Invocation, props, stepConnection)
+  }
+  const activity = new ExprNode(w.Process, { $refByName } as WithRefProps<w.IProcess>, undefined)
+  return new ExprNode(w.Invocation, { ...rest, activity } as WithRefProps<w.IInvocation>, stepConnection)
 }
