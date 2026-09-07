@@ -12,6 +12,24 @@ overall version history.
 
 ### Added
 
+- **The workflow suite gains its structure view, and its page grows
+  up.** `workflow-to-mermaid` draws a process tree (block-structured)
+  as a Mermaid flowchart of nested subgraphs, one subgraph per
+  composite activity labeled with its kind: sequential blocks chain
+  their children with edges, a parallel keeps its children
+  side-by-side with no edges between them, a sub-process nests its
+  recursively rendered body, and sanitized ids carry the authored
+  spaced names as labels. The logic is fixed: the manifest declares
+  no parts and the CLI runs it without configuration flags; its
+  verification renders both approval samples through the real CLI.
+  The suite docs page is rewritten to the suite-page standard as "The
+  workflow suite: process trees to BPMN to diagrams": the inventory
+  opening, both metamodels with authoring fragments, the structure
+  view's conventions with the rendered Approval tree, the flattening
+  and the graph rendering rule by rule, and a closing section drawing
+  one process both ways. All suite prose now says process tree, and
+  both example catalogs list the new package.
+
 - **The eer-to-sql suite draws its design space.** `rel-to-mermaid`,
   the suite's fourth member, renders the OUTPUT of the configurable
   eer-to-relational mapping as Mermaid erDiagram text, chained as

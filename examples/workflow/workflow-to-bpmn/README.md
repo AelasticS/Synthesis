@@ -1,8 +1,9 @@
 # workflow-to-bpmn
 
-Model-to-model transformation flattening a block-structured workflow
-(`workflow-metamodel`: tasks, sequences, parallels, sub-processes) into
-a graph-based BPMN process (`bpmn-metamodel`: nodes and sequence flows).
+Model-to-model transformation flattening a process tree
+(block-structured; `workflow-metamodel`: tasks, sequences, parallels,
+sub-processes) into a graph-based BPMN process (`bpmn-metamodel`:
+nodes and sequence flows).
 
 The mapping follows a fragment contract: every activity contributes
 nodes and flows plus an entry and an exit port. A `Sequence` chains its

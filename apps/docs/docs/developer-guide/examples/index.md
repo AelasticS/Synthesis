@@ -63,18 +63,20 @@ metamodel) and `relational-metamodel` (the full relational one).
 | `examples/eer-to-sql/eer-to-relational` | m2m | The full-featured EER to relational mapping: full EER semantics (aggregations with the cardinality key rule, integrity rules, user-defined domains, composite attributes, row history as a composite design option), every template kind, nine design issues, verified outputs and traces. See [the suite page](./eer-to-sql.md). |
 | `examples/eer-to-sql/rel-to-sql-ddl` | m2t | DDL from the rich content: named keys and constraints with referential actions, domains, trigger stubs, physical clustering, and dialects as extension-authored preset configurations. |
 | `examples/eer-to-sql/eer-to-mermaid-er` | m2t | The ER diagram view of the same source metamodel: Mermaid `erDiagram` text with attribute blocks for every entity kind and the identifying/non-identifying line conventions; fixed logic, run without configuration flags. |
-| `examples/eer-to-sql/rel-to-mermaid` | m2t | The diagram of the mapping's output: Mermaid `erDiagram` text over the produced relational schema, chained after `eer-to-relational` so different configurations of the same source become [visibly different diagrams](./eer-to-sql.md#the-design-space-drawn); fixed logic, run without configuration flags. |
+| `examples/eer-to-sql/rel-to-mermaid` | m2t | The diagram of the mapping's output: Mermaid `erDiagram` text over the produced relational schema, chained after `eer-to-relational` so different configurations of the same source become [visibly different diagrams](./eer-to-sql.md#one-source-three-configurations); fixed logic, run without configuration flags. |
 
 ## The workflow suite
 
 Packages under `examples/workflow/`: two suite-owned metamodels
-(block-structured `workflow-metamodel`, graph-based `bpmn-metamodel`)
-and a chain of two transformations over them, explained on
+(`workflow-metamodel` for process trees (block-structured),
+graph-based `bpmn-metamodel`), a chain of two transformations over
+them, and a structure view of the source, explained on
 [the suite page](./workflow.md).
 
 | Example | Kind | What it shows |
 | --- | --- | --- |
-| `examples/workflow/workflow-to-bpmn` | m2m | Block structure flattened into a node-and-flow graph: the fragment contract (entry and exit ports per activity), gateway pairs for parallels, recursion for sub-processes. |
+| `examples/workflow/workflow-to-mermaid` | m2t | The structure view: the process tree drawn as a Mermaid flowchart of nested subgraphs, one subgraph per composite activity, chained children in sequential blocks and edge-free parallels; fixed logic, run without configuration flags. |
+| `examples/workflow/workflow-to-bpmn` | m2m | The process tree flattened into a node-and-flow graph: the fragment contract (entry and exit ports per activity), gateway pairs for parallels, recursion for sub-processes. |
 | `examples/workflow/bpmn-to-mermaid` | m2t | The graph rendered as Mermaid flowchart text, node lines by specialization, sub-processes as subgraphs. |
 
 ## Running an example

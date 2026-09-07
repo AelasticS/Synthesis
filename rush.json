@@ -431,6 +431,10 @@
     {
       "packageName": "bpmn-to-mermaid",
       "projectFolder": "examples/workflow/bpmn-to-mermaid"
+    },
+    {
+      "packageName": "workflow-to-mermaid",
+      "projectFolder": "examples/workflow/workflow-to-mermaid"
     }
 
     // {
