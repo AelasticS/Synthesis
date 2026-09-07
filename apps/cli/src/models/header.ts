@@ -9,6 +9,8 @@ export interface SynthGeneratedBy {
   tx: string
   txVersion?: string
   config?: string
+  /** Verbatim --param JSON of the generating run, when one was given. */
+  param?: string
   date: string
 }
 
@@ -401,6 +403,12 @@ function normalizeHeader(raw: Record<string, unknown>): SynthHeader {
       }
       generatedBy.config = gb.config
     }
+    if (gb.param !== undefined) {
+      if (typeof gb.param !== 'string') {
+        throw new Error(`field 'generatedBy.param' must be a string`)
+      }
+      generatedBy.param = gb.param
+    }
   }
 
   const tags: string[] = []
@@ -552,6 +560,7 @@ export function serializeSynthHeader(header: SynthHeader): string {
     generatedBy = { tx: header.generatedBy.tx }
     if (header.generatedBy.txVersion !== undefined) generatedBy.txVersion = header.generatedBy.txVersion
     if (header.generatedBy.config !== undefined) generatedBy.config = header.generatedBy.config
+    if (header.generatedBy.param !== undefined) generatedBy.param = header.generatedBy.param
     generatedBy.date = header.generatedBy.date
   }
   const fields: Record<string, unknown> = {

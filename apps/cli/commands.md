@@ -1646,8 +1646,8 @@ Run one transformation, or a chain of transformations, on a workspace model.
 ```
 USAGE
   $ synth transformation run TX... --in <value> [--workspace <value>] [--ns <value>] [--json] [-q] [-v] [--out <value>]
-    [--out-dir <value>] [--default-configs] [--save-config <value> | --config <value>] [--trace <value>] [--save-as
-    <value>] [--keep-intermediates] [--overwrite]
+    [--out-dir <value>] [--param <value>] [--default-configs] [--save-config <value> | --config <value>] [--trace
+    <value>] [--save-as <value>] [--keep-intermediates] [--overwrite]
 
 ARGUMENTS
   TX...  Installed transformation(s) to run in order.
@@ -1665,6 +1665,8 @@ FLAGS
   --out-dir=<value>      Output directory for generated files (last step m2t only).
   --overwrite            Replace existing targets (final and intermediate models, --save-config target, --save-as
                          pipeline).
+  --param=<value>        JSON value handed to step 1's transformation as its parameter; recorded verbatim in the
+                         provenance of everything the run writes.
   --save-as=<value>      After a successful run, save the steps as a pipeline at pipelines/<name>.json; run it with
                          'pipeline run <name> --in <ref>'.
   --save-config=<value>  Persist the generated default configuration as a workspace model at this ref (single step with
@@ -1979,8 +1981,8 @@ Run one transformation, or a chain of transformations, on a workspace model.
 ```
 USAGE
   $ synth tx run TX... --in <value> [--workspace <value>] [--ns <value>] [--json] [-q] [-v] [--out <value>]
-    [--out-dir <value>] [--default-configs] [--save-config <value> | --config <value>] [--trace <value>] [--save-as
-    <value>] [--keep-intermediates] [--overwrite]
+    [--out-dir <value>] [--param <value>] [--default-configs] [--save-config <value> | --config <value>] [--trace
+    <value>] [--save-as <value>] [--keep-intermediates] [--overwrite]
 
 ARGUMENTS
   TX...  Installed transformation(s) to run in order.
@@ -1998,6 +2000,8 @@ FLAGS
   --out-dir=<value>      Output directory for generated files (last step m2t only).
   --overwrite            Replace existing targets (final and intermediate models, --save-config target, --save-as
                          pipeline).
+  --param=<value>        JSON value handed to step 1's transformation as its parameter; recorded verbatim in the
+                         provenance of everything the run writes.
   --save-as=<value>      After a successful run, save the steps as a pipeline at pipelines/<name>.json; run it with
                          'pipeline run <name> --in <ref>'.
   --save-config=<value>  Persist the generated default configuration as a workspace model at this ref (single step with

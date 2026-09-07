@@ -636,6 +636,40 @@ describe('tx run m2t', () => {
   })
 })
 
+describe('tx run --param', () => {
+  it('rejects a parameter that is not valid JSON', async () => {
+    const { code, stderr } = await run([
+      'tx', 'run', 'eer-to-relational', '--in', 'com.example/persons',
+      '--default-configs', '--out', 'com.example/never-param',
+      '--param', "'{worker: Judy}'"
+    ])
+    expect(code).not.toBe(0)
+    expect(flatten(stderr)).toContain('--param is not valid JSON')
+    expect(existsSync(join(modelsDir, 'com', 'example', 'never-param.tsx'))).toBe(false)
+  })
+
+  it('hands the parameter to the run and records it verbatim in the provenance', async () => {
+    const paramJson = '{"worker":"Judy","sensitivity":2}'
+    // the harness joins argv into a shell line, so the JSON needs quoting
+    const { code } = await run([
+      'tx', 'run', 'eer-to-relational', '--in', 'com.example/persons',
+      '--default-configs', '--out', 'com.example/persons-rel-param',
+      '--trace', 'com.example/persons-param-trace',
+      '--param', `'${paramJson}'`
+    ])
+    expect(code).toBe(0)
+    // The fixture ignores the parameter (transform(root, param) simply
+    // does not read it), which is exactly the compatibility contract;
+    // the provenance must remember it anyway, on the output model AND
+    // on the trace.
+    const { stdout } = await run(['model', 'show', 'com.example/persons-rel-param', '--json'])
+    const parsed = JSON.parse(stdout)
+    expect(parsed.header.generatedBy.param).toBe(paramJson)
+    const trace = readFileSync(join(modelsDir, 'com', 'example', 'persons-param-trace.tsx'), 'utf-8')
+    expect(trace).toContain(`param: '{"worker":"Judy","sensitivity":2}'`)
+  })
+})
+
 describe('tx run --trace', () => {
   it('persists the outcome trace and the effective configuration next to it', async () => {
     const { code, stdout } = await run([

@@ -53,6 +53,10 @@ With one transformation: an m2m result is written back into the workspace as a m
     config: Flags.string({
       description: 'Configuration model ref for step 1 (configuration-based only; later steps take --default-configs).'
     }),
+    param: Flags.string({
+      description:
+        "JSON value handed to step 1's transformation as its parameter; recorded verbatim in the provenance of everything the run writes."
+    }),
     // NOT exclusive with --config: in a chain, --config steers step 1 while
     // --default-configs covers the later configuration-based steps. Single-step
     // exclusivity is enforced by the execution core (one message, one exit
@@ -163,6 +167,7 @@ With one transformation: an m2m result is written back into the workspace as a m
         outDir: flags['out-dir'],
         config: flags.config,
         saveConfig: flags['save-config'],
+        param: flags.param,
         trace: flags.trace,
         defaultConfigs: flags['default-configs'],
         keepIntermediates: flags['keep-intermediates'],

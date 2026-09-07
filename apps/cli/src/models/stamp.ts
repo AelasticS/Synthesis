@@ -192,6 +192,9 @@ function pickExisting(value: unknown): ExistingFields {
     if (typeof gb.config === 'string') {
       generatedBy.config = gb.config
     }
+    if (typeof gb.param === 'string') {
+      generatedBy.param = gb.param
+    }
     existing.generatedBy = generatedBy
   }
   for (const field of ['createdAt', 'author', 'version', 'description'] as const) {
