@@ -5,8 +5,7 @@ Organizational metamodel: an `Organization` is a hierarchy of
 (the worksIn/members inverse). `Department` is a unit run by a
 manager, `Board` a unit governed by its members collectively. The
 `org-to-approval` transformation reads this hierarchy upward to derive
-a block-structured workflow model, as explained on the docs page "The
-workflow suite: block-structured workflows to BPMN to diagrams".
+a block-structured workflow model, as explained on the docs page "The workflow suite".
 
 Subpaths: the bare package exports the JSX components; `/model` exports
 the type schemas.
