@@ -12,6 +12,17 @@ overall version history.
 
 ### Added
 
+- **The eer-to-sql suite gains its diagram view.** `eer-to-mermaid-er`
+  renders the suite's EER source as Mermaid erDiagram text: an
+  attribute block per entity (every kind, subtypes included; domain
+  names as type words, `PK` markers, `"optional"` comments, composite
+  attributes flattened one level), dashed ordinary relationships with
+  per-role glyphs, solid weak-identification and
+  aggregation-participation lines, and one dashed one-to-one is-a line
+  per subtype. The logic is fixed: the manifest declares no parts and
+  the CLI runs it without configuration flags. The suite docs page
+  explains the conventions and both example catalogs list the package.
+
 - **The workflow suite has its docs page.** "The workflow suite: block
   structure to BPMN to diagrams" joins the developer guide's Examples
   section, written to the suite-page standard: goals and result up

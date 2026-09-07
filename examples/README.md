@@ -66,13 +66,15 @@ rel-tutorial-metamodel.
 ### Full-example suite
 
 Larger packages that stand on their own rather than teaching one concept
-at a time. The two form a chain: eer-to-relational produces exactly what
-rel-to-sql-ddl consumes.
+at a time. Two form a chain: eer-to-relational produces exactly what
+rel-to-sql-ddl consumes; eer-to-mermaid-er is a sibling view over the
+same EER source.
 
 | Example | Kind | Shows |
 | --- | --- | --- |
 | [eer-to-relational](./eer-to-sql/eer-to-relational/) | m2m | The full-featured EER to relational mapping: full EER semantics (aggregations with the cardinality key rule, integrity rules, user-defined domains, composite attributes, row history as a composite design option), every template kind, nine design issues, a rich relational target with first-class keys, verified outputs and traces |
 | [rel-to-sql-ddl](./eer-to-sql/rel-to-sql-ddl/) | m2t | DDL from the rich content: named keys and constraints with referential actions, domains, trigger stubs, physical clustering, and dialects as extension-authored preset configurations |
+| [eer-to-mermaid-er](./eer-to-sql/eer-to-mermaid-er/) | m2t | The ER diagram view of the same source metamodel: Mermaid erDiagram text with attribute blocks for every entity kind and the identifying/non-identifying line conventions; fixed logic, run without configuration flags |
 
 ### Workflow suite
 
