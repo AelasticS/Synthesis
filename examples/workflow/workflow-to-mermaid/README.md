@@ -15,8 +15,7 @@ inline process is a subgraph carrying its recursively rendered body; a
 process invocation is a subroutine shape and a task invocation a box,
 both named by the occurrence. The logic is fixed: the manifest
 declares no parts and the CLI runs it without configuration flags. The
-conventions are explained canonically in the docs page "The workflow
-suite: block-structured workflows to BPMN to diagrams".
+conventions are explained canonically in the docs page "The workflow suite".
 
 Try it (from a workspace):
 

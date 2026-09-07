@@ -11,8 +11,7 @@ that many levels, and each unit contributes one approval step by kind
 manager, a board a parallel block of its members' approval tasks. The
 verbatim parameter is recorded in the generated model's `generatedBy`
 provenance, so a parameterized run stays reproducible from its output.
-The suite is explained canonically in the docs page "The workflow
-suite: block-structured workflows to BPMN to diagrams".
+The suite is explained canonically in the docs page "The workflow suite".
 
 Try it (from a workspace):
 
