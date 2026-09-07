@@ -67,11 +67,13 @@ metamodel) and `relational-metamodel` (the full relational one).
 
 ## The workflow suite
 
-Packages under `examples/workflow/`: two suite-owned metamodels
+Packages under `examples/workflow/`: three suite-owned metamodels
 (`workflow-metamodel` for block-structured workflow models, process
 trees,
-graph-based `bpmn-metamodel`), a chain of two transformations over
-them, and a structure view of the source, explained on
+graph-based `bpmn-metamodel`, and `org-metamodel` for organizational
+hierarchies), a chain of two transformations over
+them, a structure view of the source, and a parameterized
+organizational example feeding the same chain, explained on
 [the suite page](./workflow.md).
 
 | Example | Kind | What it shows |
@@ -79,6 +81,7 @@ them, and a structure view of the source, explained on
 | `examples/workflow/workflow-to-mermaid` | m2t | The structure view: the workflow model drawn as a Mermaid flowchart of nested subgraphs, one subgraph per composite activity, chained children in sequential blocks and edge-free parallels; fixed logic, run without configuration flags. |
 | `examples/workflow/workflow-to-bpmn` | m2m | The workflow model flattened into a node-and-flow graph: the fragment contract (entry and exit ports per activity), gateway pairs for parallels, recursion for sub-processes. |
 | `examples/workflow/bpmn-to-mermaid` | m2t | The graph rendered as Mermaid flowchart text, node lines by specialization, sub-processes as subgraphs. |
+| `examples/workflow/org-to-approval` | m2m | An approval workflow derived from an organizational hierarchy, parameterized by `--param '{"worker":...,"sensitivity":...}'` through the engine's parameter channel (recorded verbatim in the output's provenance): the worker's unit chain unfolds upward, a department approves through its manager, a board in parallel through its members. |
 
 ## Running an example
 

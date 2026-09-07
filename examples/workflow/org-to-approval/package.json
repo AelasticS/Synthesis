@@ -1,0 +1,27 @@
+{
+  "name": "org-to-approval",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Derives a parameterized approval workflow from an organizational hierarchy",
+  "author": "Sinisa Neskovic",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "dist/transformation.js",
+  "files": [
+    "dist",
+    "synth.json"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "node scripts/verify.mjs"
+  },
+  "dependencies": {
+    "@aelastics/synthesis": "workspace:*",
+    "org-metamodel": "workspace:*",
+    "workflow-metamodel": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "~5.9.3",
+    "@aelastics/synthesis-cli": "workspace:*"
+  }
+}

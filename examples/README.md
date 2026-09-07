@@ -35,13 +35,15 @@ examples/
     rel-to-sql-ddl/
     eer-to-mermaid-er/
     rel-to-mermaid/
-  workflow/            the workflow suite, a chain and its structure view
+  workflow/            the workflow suite, a chain, its structure view, and the organizational example
     metamodels/
       workflow/        package workflow-metamodel: block-structured workflow models (process trees)
       bpmn/            package bpmn-metamodel: simplified graph-based BPMN
+      org/             package org-metamodel: organizational hierarchies (units, workers, departments, boards)
     workflow-to-mermaid/
     workflow-to-bpmn/
     bpmn-to-mermaid/
+    org-to-approval/
   smoke.mjs            the harness every example's test script runs
 ```
 
@@ -100,6 +102,7 @@ structure view drawing the tree itself. See
 | [workflow-to-mermaid](./workflow/workflow-to-mermaid/) | m2t | The workflow model drawn as a Mermaid flowchart of nested subgraphs, one per composite activity; the suite's structure view |
 | [workflow-to-bpmn](./workflow/workflow-to-bpmn/) | m2m | The workflow model flattened into a node-and-flow graph by specialization rules |
 | [bpmn-to-mermaid](./workflow/bpmn-to-mermaid/) | m2t | The graph rendered as Mermaid flowchart text, sub-processes as subgraphs |
+| [org-to-approval](./workflow/org-to-approval/) | m2m | An approval workflow derived from an organizational hierarchy, parameterized by worker and sensitivity through `--param` (recorded in the output's provenance); departments approve via their manager, boards in parallel via their members |
 
 Further examples (text generation from EER models,
 TypeScript declarations, pipeline composition) are under discussion and
