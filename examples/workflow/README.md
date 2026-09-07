@@ -2,7 +2,7 @@
 
 The documentation's workflow domain as an executable example suite.
 Three metamodels owned by the suite, a chain of two transformations
-over them, a structure view of the source, and an organizational
+over them, a flowchart view of the source, and an organizational
 example generating the chain's input:
 
 ```text
@@ -13,7 +13,7 @@ metamodels/bpmn/       package bpmn-metamodel: simplified graph-based BPMN
                        (nodes and flows; tasks, gateways, events, sub-processes)
 metamodels/org/        package org-metamodel: organizational hierarchies
                        (units and workers; departments run by managers, boards)
-workflow-to-mermaid/   m2t: draws the workflow model as nested Mermaid subgraphs
+workflow-to-mermaid/   m2t: draws the workflow model as a classic Mermaid flowchart
 workflow-to-bpmn/      m2m: flattens the workflow model into the graph
 bpmn-to-mermaid/       m2t: renders the graph as a Mermaid flowchart
 org-to-approval/       m2m: derives an approval workflow from an organization, parameterized by --param

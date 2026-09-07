@@ -2,24 +2,32 @@
 
 /**
  * Block-structured workflow model to Mermaid flowchart text: the
- * structure view, drawing the SOURCE of the workflow chain rather than
- * its flattened graph. One document per model, drawing the entry
- * process (the first process definition no invocation calls); one
- * nested subgraph per composite step, so the tree structure stays
- * visible. A task is a box; a sequence is a subgraph whose consecutive
- * children are chained with edges; a parallel is a subgraph with no
- * edges between its children, because side-by-side placement IS the
- * meaning; an inline process is a subgraph whose steps chain (a
- * process body is implicitly a sequence); a choice is a subgraph whose
- * branch subgraphs are labeled with their guards (the else branch
- * labeled else); a loop is a subgraph labeled with its kind and guard;
- * a process invocation is a subroutine shape, a task invocation a box,
- * both named by the occurrence (defaulting to the called definition's
- * name). Documents and performers are not drawn. Node ids are the
+ * flowchart view, drawing the SOURCE of the workflow chain in the
+ * classic flowchart idiom. One document per model, drawing the entry
+ * process (the first process definition no invocation calls). The walk
+ * is a wiring contract: every step yields an entry node and a LIST of
+ * exit nodes, and a sequence connects all previous exits to the next
+ * step's entry; every implicit sequence (a process body, a branch
+ * body, a loop body) wires the same way. A start stadium opens the
+ * chart, wired to the first step's entry, and every final exit wires
+ * to the end stadium. A task is a box, its performer a parenthesized
+ * second label line; an invocation is a subroutine box named by the
+ * occurrence (call semantics stays opaque), while an INLINE process
+ * step, being single-use grouping, expands inline into its steps (its
+ * own name does not appear in the drawing). A choice is one decision
+ * diamond: each branch's outgoing edge carries its guard (the
+ * guardless branch's edge labeled else), and all branch exits become
+ * the choice's exits, reconverging on whatever comes next with no
+ * merge node. A loop is a guard diamond with a back edge: a
+ * repeatUntil runs the body first and tests after it (no returns to
+ * the body, yes exits); a while tests first (yes enters the body,
+ * whose exits return unlabeled, no exits). A parallel is a fork bar
+ * fanning out to every child's entry and a join bar every child's
+ * exits converge on. Documents are not drawn. Node ids are the
  * sanitized authored names (unique per process scope); labels keep the
  * authored names verbatim, spaces included, read from the element's
  * label (the store keeps the pre-normalization name there). An unnamed
- * operator gets a generated per-kind id and a bare kind label.
+ * operator gets a generated per-kind id.
  */
 import { createExprNode } from '@aelastics/synthesis/jsx'
 import type { ExprNode } from '@aelastics/synthesis/jsx'
@@ -32,6 +40,22 @@ import * as wm from 'workflow-metamodel/model'
 /** The shape every operator shares: children forming its body. */
 type IBlock = wm.IStep & { children?: unknown[] }
 
+/** An exit point: the node an outgoing edge leaves, and the label the
+ * edge carries (a loop diamond's yes/no answer). */
+interface Exit {
+  id: string
+  label?: string
+}
+
+/** What every step yields to the wiring: its entry node id, its exit
+ * points, its node declaration lines, and its internal edge lines. */
+interface Wiring {
+  entry: string
+  exits: Exit[]
+  nodes: string[]
+  edges: string[]
+}
+
 export class WorkflowToMermaidTransformation extends abstractM2M<wm.IWorkflowModel, M2T_Model> {
   private genIds = new Map<wm.IStep, string>()
   private genCounts = new Map<string, number>()
@@ -42,126 +66,157 @@ export class WorkflowToMermaidTransformation extends abstractM2M<wm.IWorkflowMod
 
   template(m: wm.IWorkflowModel): ExprNode<wm.IWorkflowModel, M2T_Model> {
     const entry = this.entryProcessOf(m)
-    const steps = this.stepsOf(entry)
+    const body = this.bodyWiring(this.stepsOf(entry))
+    const lines = [
+      'start_node(["start"])',
+      ...body.nodes,
+      'end_node(["end"])',
+      `start_node --> ${body.entry}`,
+      ...body.edges,
+      ...body.exits.map((e) => this.edge(e, 'end_node')),
+    ]
     return (
       <M2T name={`${m.name}_mermaid`}>
         <Doc name={`${m.name}.mmd`}>
           <P>{'flowchart TD'}</P>
-          {steps.flatMap((s) => this.stepLines(s, 1))}
-          {this.chainEdges(steps, 1)}
+          {lines.map((l) => <P>{`  ${l}`}</P>)}
         </Doc>
       </M2T>
     )
   }
 
   // One method per step kind, dispatched by type test; the recursion
-  // mirrors the tree's nesting.
-  private stepLines(s: wm.IStep, depth: number): ExprNode<any>[] {
+  // follows the tree while the wiring flattens it into one chart.
+  private stepWiring(s: wm.IStep): Wiring {
     const store = this.context.store
-    if (store.isTypeOf(s, wm.Task)) return this.taskLines(s as wm.ITask, depth)
-    if (store.isTypeOf(s, wm.Process)) return this.processLines(s as wm.IProcess, depth)
-    if (store.isTypeOf(s, wm.Invocation)) return this.invocationLines(s as wm.IInvocation, depth)
-    if (store.isTypeOf(s, wm.Sequence)) return this.blockLines(s as wm.ISequence, 'sequence', depth, true)
-    if (store.isTypeOf(s, wm.Parallel)) return this.blockLines(s as wm.IParallel, 'parallel', depth, false)
-    if (store.isTypeOf(s, wm.Choice)) return this.choiceLines(s as wm.IChoice, depth)
-    if (store.isTypeOf(s, wm.Loop)) return this.loopLines(s as wm.ILoop, depth)
+    if (store.isTypeOf(s, wm.Task)) return this.taskWiring(s as wm.ITask)
+    if (store.isTypeOf(s, wm.Process)) return this.bodyWiring(this.stepsOf(s as wm.IProcess))
+    if (store.isTypeOf(s, wm.Invocation)) return this.invocationWiring(s as wm.IInvocation)
+    if (store.isTypeOf(s, wm.Sequence)) return this.bodyWiring(this.childrenOf(s))
+    if (store.isTypeOf(s, wm.Parallel)) return this.parallelWiring(s as wm.IParallel)
+    if (store.isTypeOf(s, wm.Choice)) return this.choiceWiring(s as wm.IChoice)
+    if (store.isTypeOf(s, wm.Loop)) return this.loopWiring(s as wm.ILoop)
     throw new Error(`Step '${s.name}' has an unknown kind`)
   }
 
-  private taskLines(t: wm.ITask, depth: number): ExprNode<any>[] {
-    return [<P>{`${this.ind(depth)}${this.idOf(t)}["${this.labelOf(t)}"]`}</P>]
+  // A task is a box; a performer adds a parenthesized second label
+  // line. An inline task is a single-use definition, so the box IS the
+  // occurrence.
+  private taskWiring(t: wm.ITask): Wiring {
+    const id = this.idOf(t)
+    const performer = (t.performer ?? '') as string
+    const label = performer === '' ? this.labelOf(t) : `${this.labelOf(t)}<br/>(${performer})`
+    return { entry: id, exits: [{ id }], nodes: [`${id}["${label}"]`], edges: [] }
   }
 
-  // An inline process is a subgraph; its steps chain (implicitly a
-  // sequence).
-  private processLines(p: wm.IProcess, depth: number): ExprNode<any>[] {
-    const steps = this.stepsOf(p)
-    return [
-      <P>{`${this.ind(depth)}subgraph ${this.idOf(p)}["${this.titleOf(p, 'process')}"]`}</P>,
-      ...steps.flatMap((s) => this.stepLines(s, depth + 1)),
-      ...this.chainEdges(steps, depth + 1),
-      <P>{`${this.ind(depth)}end`}</P>,
-    ]
-  }
-
-  // A process invocation is a subroutine shape, a task invocation a
-  // box, both named by the occurrence.
-  private invocationLines(inv: wm.IInvocation, depth: number): ExprNode<any>[] {
-    const called = this.calledOf(inv)
+  // An invocation is a subroutine box named by the occurrence; what
+  // the called definition does stays behind the call. (An inline
+  // process, by contrast, is single-use grouping and expands inline
+  // through the Process branch of the dispatch.)
+  private invocationWiring(inv: wm.IInvocation): Wiring {
+    this.calledOf(inv)
     const display = this.occurrenceDisplayOf(inv)
     const id = this.sanitizedId(display)
-    if (this.context.store.isTypeOf(called, wm.Process)) {
-      return [<P>{`${this.ind(depth)}${id}[["${display}"]]`}</P>]
+    return { entry: id, exits: [{ id }], nodes: [`${id}[["${display}"]]`], edges: [] }
+  }
+
+  // Sequential wiring: every previous exit connects to the next step's
+  // entry. A process body, a branch body, and a loop body are implicit
+  // sequences and wire the same way.
+  private bodyWiring(steps: wm.IStep[]): Wiring {
+    const first = this.stepWiring(steps[0])
+    const nodes = [...first.nodes]
+    const edges = [...first.edges]
+    let exits = first.exits
+    for (const s of steps.slice(1)) {
+      const w = this.stepWiring(s)
+      nodes.push(...w.nodes)
+      edges.push(...exits.map((e) => this.edge(e, w.entry)), ...w.edges)
+      exits = w.exits
     }
-    return [<P>{`${this.ind(depth)}${id}["${display}"]`}</P>]
+    return { entry: first.entry, exits, nodes, edges }
   }
 
-  // Sequence and parallel: a subgraph labeled with its kind; the
-  // children chain with edges exactly when the block is sequential.
-  private blockLines(s: wm.IStep, kind: string, depth: number, chained: boolean): ExprNode<any>[] {
-    const children = this.childrenOf(s)
-    return [
-      <P>{`${this.ind(depth)}subgraph ${this.idOf(s)}["${this.titleOf(s, kind)}"]`}</P>,
-      ...children.flatMap((c) => this.stepLines(c, depth + 1)),
-      ...(chained ? this.chainEdges(children, depth + 1) : []),
-      <P>{`${this.ind(depth)}end`}</P>,
-    ]
+  // A parallel is a fork bar fanning out to every child's entry and a
+  // join bar every child's exits converge on; the join is the exit.
+  private parallelWiring(p: wm.IParallel): Wiring {
+    const base = this.idOf(p)
+    const fork = `${base}_fork`
+    const join = `${base}_join`
+    const nodes = [`${fork}@{ shape: fork }`]
+    const edges: string[] = []
+    for (const c of this.childrenOf(p)) {
+      const w = this.stepWiring(c)
+      nodes.push(...w.nodes)
+      edges.push(`${fork} --> ${w.entry}`, ...w.edges, ...w.exits.map((e) => this.edge(e, join)))
+    }
+    nodes.push(`${join}@{ shape: join }`)
+    return { entry: fork, exits: [{ id: join }], nodes, edges }
   }
 
-  // A choice is a subgraph whose branch subgraphs carry their guards
-  // as labels (the else branch labeled else); no edges between
-  // branches, because side-by-side placement means alternatives. A
-  // branch's children chain (implicitly a sequence); branch ids are
-  // positional under the choice's id.
-  private choiceLines(c: wm.IChoice, depth: number): ExprNode<any>[] {
-    const choiceId = this.idOf(c)
-    const branches = this.branchesOf(c)
-    const lines: ExprNode<any>[] = [
-      <P>{`${this.ind(depth)}subgraph ${choiceId}["${this.titleOf(c, 'choice')}"]`}</P>,
-    ]
-    branches.forEach((b, i) => {
-      const body = this.childrenOf(b)
-      const title = (b.guard ?? '') === '' ? 'else' : (b.guard as string)
-      lines.push(
-        <P>{`${this.ind(depth + 1)}subgraph ${choiceId}_b${i + 1}["${title}"]`}</P>,
-        ...body.flatMap((s) => this.stepLines(s, depth + 2)),
-        ...this.chainEdges(body, depth + 2),
-        <P>{`${this.ind(depth + 1)}end`}</P>
-      )
-    })
-    lines.push(<P>{`${this.ind(depth)}end`}</P>)
-    return lines
+  // A choice is ONE decision diamond: each branch's outgoing edge
+  // carries its guard (the guardless branch's edge labeled else), the
+  // branch bodies wire normally, and all branch exits become the
+  // choice's exits, so the branches reconverge on whatever comes next
+  // without a merge node.
+  private choiceWiring(c: wm.IChoice): Wiring {
+    const id = this.idOf(c)
+    const nodes = [`${id}{"${this.choiceLabelOf(c)}"}`]
+    const edges: string[] = []
+    const exits: Exit[] = []
+    for (const b of this.branchesOf(c)) {
+      const w = this.bodyWiring(this.childrenOf(b))
+      const guard = (b.guard ?? '') as string
+      nodes.push(...w.nodes)
+      edges.push(`${id} -->|${guard === '' ? 'else' : guard}| ${w.entry}`, ...w.edges)
+      exits.push(...w.exits)
+    }
+    return { entry: id, exits, nodes, edges }
   }
 
-  // A loop is a subgraph labeled with its kind and guard; its body
-  // chains (implicitly a sequence).
-  private loopLines(l: wm.ILoop, depth: number): ExprNode<any>[] {
+  // The diamond's question: the authored choice name, or the single
+  // guard of an otherwise unnamed choice, or the bare question mark.
+  private choiceLabelOf(c: wm.IChoice): string {
+    if (c.label !== undefined) return `${this.labelOf(c)}?`
+    const guards = ((c.children ?? []) as wm.IBranch[])
+      .map((b) => (b.guard ?? '') as string)
+      .filter((g) => g !== '')
+    return guards.length === 1 ? `${guards[0]}?` : '?'
+  }
+
+  // A loop is a guard diamond and a back edge. A repeatUntil runs the
+  // body first and tests after it: the no edge returns to the body's
+  // entry, the yes edge is the exit. A while tests first: the yes edge
+  // enters the body, whose exits return to the diamond unlabeled, and
+  // the no edge is the exit.
+  private loopWiring(l: wm.ILoop): Wiring {
     const guard = (l.guard ?? '') as string
     if (guard === '') {
       throw new Error(`Loop '${l.name}' has no guard`)
     }
-    const kindWord = l.kind === 'while' ? 'while' : 'until'
-    const body = this.childrenOf(l)
-    return [
-      <P>{`${this.ind(depth)}subgraph ${this.idOf(l)}["${this.titleOf(l, `loop ${kindWord} ${guard}`)}"]`}</P>,
-      ...body.flatMap((s) => this.stepLines(s, depth + 1)),
-      ...this.chainEdges(body, depth + 1),
-      <P>{`${this.ind(depth)}end`}</P>,
-    ]
-  }
-
-  // Consecutive steps of a sequential block chain with edges. An edge
-  // may start or end at a subgraph id; that is valid Mermaid.
-  private chainEdges(steps: wm.IStep[], depth: number): ExprNode<any>[] {
-    const edges: ExprNode<any>[] = []
-    for (let i = 0; i < steps.length - 1; i++) {
-      edges.push(<P>{`${this.ind(depth)}${this.idOf(steps[i])} --> ${this.idOf(steps[i + 1])}`}</P>)
+    const id = this.idOf(l)
+    const diamond = `${id}{"${guard}?"}`
+    const body = this.bodyWiring(this.childrenOf(l))
+    if (l.kind === 'while') {
+      return {
+        entry: id,
+        exits: [{ id, label: 'no' }],
+        nodes: [diamond, ...body.nodes],
+        edges: [`${id} -->|yes| ${body.entry}`, ...body.edges, ...body.exits.map((e) => this.edge(e, id))],
+      }
     }
-    return edges
+    return {
+      entry: body.entry,
+      exits: [{ id, label: 'yes' }],
+      nodes: [...body.nodes, diamond],
+      edges: [...body.edges, ...body.exits.map((e) => this.edge(e, id)), `${id} -->|no| ${body.entry}`],
+    }
   }
 
-  private ind(depth: number): string {
-    return '  '.repeat(depth)
+  // An edge line; the exit's label, when it carries one, rides on the
+  // edge.
+  private edge(from: Exit, to: string): string {
+    return from.label === undefined ? `${from.id} --> ${to}` : `${from.id} -->|${from.label}| ${to}`
   }
 
   // The authored name, spaces included: the store normalizes name
@@ -169,13 +224,6 @@ export class WorkflowToMermaidTransformation extends abstractM2M<wm.IWorkflowMod
   // label, backfilling label from name when nothing was stripped.
   private labelOf(s: wm.IStep): string {
     return String(s.label ?? s.name)
-  }
-
-  // A subgraph title: the authored name plus the kind, or the bare
-  // kind for an unnamed step (the store backfills label exactly when a
-  // name was authored, so its absence marks an unnamed step).
-  private titleOf(s: wm.IStep, kind: string): string {
-    return s.label === undefined ? `(${kind})` : `${this.labelOf(s)} (${kind})`
   }
 
   // The occurrence name defaults to the called definition's name.
@@ -208,8 +256,6 @@ export class WorkflowToMermaidTransformation extends abstractM2M<wm.IWorkflowMod
     if (store.isTypeOf(s, wm.Choice)) return 'choice'
     if (store.isTypeOf(s, wm.Loop)) return 'loop'
     if (store.isTypeOf(s, wm.Parallel)) return 'parallel'
-    if (store.isTypeOf(s, wm.Sequence)) return 'sequence'
-    if (store.isTypeOf(s, wm.Process)) return 'process'
     return 'step'
   }
 

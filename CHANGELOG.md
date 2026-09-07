@@ -46,13 +46,15 @@ overall version history.
   sub-process with occurrence-prefixed inner names; documents and
   performers are deliberately not flattened (data objects, call
   activities, and lanes are the recorded next stage).
-  `workflow-to-mermaid`, the suite's structure view, draws the entry
-  process as a Mermaid flowchart of nested subgraphs, one per
-  composite step labeled with its kind: chained children in every
-  sequential block, edge-free parallels, guard-labeled branches with
-  the else label, loop labels carrying kind and guard, subroutine
-  shapes for process invocations, and sanitized ids carrying the
-  authored spaced names as labels. `bpmn-to-mermaid` labels gateway
+  `workflow-to-mermaid`, the suite's flowchart view, draws the entry
+  process as a classic Mermaid flowchart wired from a start stadium
+  to an end stadium: one decision diamond per choice asking its guard
+  as a question, guard-labeled branch edges with the else label and
+  no merge node, loop diamonds with yes/no edges and a back edge,
+  fork and join bars for parallels, subroutine boxes for invocations,
+  inline processes expanded in place, performers as parenthesized
+  second label lines, and sanitized ids carrying the authored spaced
+  names as labels. `bpmn-to-mermaid` labels gateway
   diamonds with their DERIVED roles (parallel split, exclusive join),
   computed from flow degrees exactly because the role is not stored in
   the model, and renders guards on edges.
@@ -79,7 +81,7 @@ overall version history.
   worker is resolved by name (a CLI parameter cannot carry an element
   reference), a miss lists the workers the organization knows, and
   missing or malformed parameters answer with the expected form.
-  Verifications assert all of it through the real CLI: the structure
+  Verifications assert all of it through the real CLI: the flowchart
   view's conventions and the declared constraints (via a deliberately
   invalid model), the flattened v2 shape, both sensitivities with
   their provenance and error paths, and the onward chain. The suite

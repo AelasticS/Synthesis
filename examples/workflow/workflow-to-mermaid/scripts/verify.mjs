@@ -1,15 +1,18 @@
 /**
- * The structure view's verification: three samples rendered as
- * nested-subgraph flowcharts in one CLI run without configuration
- * flags. The approval samples assert the basic conventions (a subgraph
- * per composite step with its kind label, chain edges in sequential
- * blocks, the ABSENCE of edges inside a parallel, sanitized ids
- * carrying the authored spaced labels, the inline process recursion);
- * the expense sample asserts the v2 conventions (the choice subgraph
- * with guard-labeled branches and the else label, the loop label, the
- * process invocation as a subroutine shape, two distinct occurrence
- * nodes of one shared definition). A deliberately invalid model then
- * exercises the metamodel's declared constraints through
+ * The flowchart view's verification: three samples rendered as classic
+ * flowcharts in one CLI run without configuration flags. The approval
+ * sample asserts the basic conventions (the start stadium wired to the
+ * first step, performer-free task boxes with sanitized ids carrying
+ * the authored spaced labels, the parallel as a fork bar fanning out
+ * and a join bar converging, the final exit wired to the end stadium);
+ * the reviewed sample asserts the inline process expanding into its
+ * steps without a trace of its own name; the expense sample asserts
+ * the v2 conventions (the choice diamond with guard-labeled edges and
+ * the else edge, the repeatUntil guard diamond with its no back edge
+ * and yes exit, the process invocation as a subroutine box, two
+ * distinct occurrence boxes of one shared definition, branch exits
+ * reconverging without a merge node). A deliberately invalid model
+ * then exercises the metamodel's declared constraints through
  * `synth model validate`.
  */
 import { execFileSync } from 'node:child_process'
@@ -48,49 +51,60 @@ try {
   const reviewed = readFileSync(join(genDir, 'ReviewedApproval.mmd'), 'utf-8')
   const expense = readFileSync(join(genDir, 'ExpenseApproval.mmd'), 'utf-8')
 
-  const balanced = (text) =>
-    text.split('\n').filter((l) => /^\s*subgraph /.test(l)).length
-    === text.split('\n').filter((l) => /^\s*end$/.test(l)).length
-
   expect('the document opens with the flowchart header',
     approval.split('\n')[0] === 'flowchart TD')
-  expect('a process body is an implicit sequence: its top-level steps chain',
-    approval.includes('  Write["Write"]') && approval.includes('  Write --> approvals'))
-  expect('the parallel is a subgraph labeled with its kind',
-    approval.includes('  subgraph approvals["approvals (parallel)"]'))
+  expect('the start stadium opens the chart, wired to the first step',
+    approval.includes('  start_node(["start"])') && approval.includes('  start_node --> Write'))
+  expect('a performer-free task is a plain box',
+    approval.includes('  Write["Write"]') && !approval.includes('Write<br/>'))
+  expect('the parallel is a fork bar and a join bar',
+    approval.includes('  approvals_fork@{ shape: fork }')
+    && approval.includes('  approvals_join@{ shape: join }'))
+  expect('the fork fans out to every child',
+    approval.includes('  approvals_fork --> Approve_1')
+    && approval.includes('  approvals_fork --> Approve_2'))
+  expect('every child converges on the join',
+    approval.includes('  Approve_1 --> approvals_join')
+    && approval.includes('  Approve_2 --> approvals_join'))
   expect('a parallel has NO edge between its children',
     !approval.includes('Approve_1 --> Approve_2')
     && !approval.includes('Approve_2 --> Approve_1'))
   expect('ids are sanitized while labels keep the authored spaced names',
-    approval.includes('    Approve_1["Approve 1"]')
-    && approval.includes('    Approve_2["Approve 2"]'))
-  expect('every subgraph closes with end', balanced(approval))
+    approval.includes('  Approve_1["Approve 1"]')
+    && approval.includes('  Approve_2["Approve 2"]'))
+  expect('the final exit wires to the end stadium',
+    approval.includes('  end_node(["end"])') && approval.includes('  approvals_join --> end_node'))
 
-  expect('an inline process is a subgraph labeled with its kind',
-    reviewed.includes('  subgraph WriteDocument["WriteDocument (process)"]'))
-  expect('an inline process body is implicitly sequential: its steps chain',
-    reviewed.includes('    Draft --> ReviewDraft'))
-  expect('the enclosing body chains the inline process to its successor',
-    reviewed.includes('  WriteDocument --> approvals'))
+  expect('an inline process expands inline into its steps',
+    reviewed.includes('  Draft --> ReviewDraft'))
+  expect("the inline process's own name does not appear in the drawing",
+    !reviewed.includes('WriteDocument'))
+  expect('the enclosing body wires through the expanded steps',
+    reviewed.includes('  start_node --> Draft')
+    && reviewed.includes('  ReviewDraft --> approvals_fork'))
 
-  expect('a loop is a subgraph labeled with its kind and guard',
-    expense.includes('  subgraph loop1["(loop until approved)"]'))
-  expect('a process invocation renders as a subroutine shape',
-    expense.includes('    ManagerSignoff[["ManagerSignoff"]]'))
-  expect('a choice is a subgraph', expense.includes('  subgraph choice1["(choice)"]'))
-  expect('a branch subgraph is labeled with its guard',
-    expense.includes('    subgraph choice1_b1["amount > 1000"]'))
-  expect('the guardless branch is labeled else',
-    expense.includes('    subgraph choice1_b2["else"]'))
-  expect('one shared definition yields two distinct occurrence nodes',
-    expense.includes('      ArchiveHighValue["ArchiveHighValue"]')
-    && expense.includes('      ArchiveStandard["ArchiveStandard"]'))
+  expect('a process invocation renders as a subroutine box',
+    expense.includes('  ManagerSignoff[["ManagerSignoff"]]'))
+  expect('a repeatUntil runs the body before the guard diamond',
+    expense.includes('  loop1{"approved?"}') && expense.includes('  ManagerSignoff --> loop1'))
+  expect('the repeatUntil no edge returns to the body',
+    expense.includes('  loop1 -->|no| ManagerSignoff'))
+  expect('the repeatUntil yes edge is the exit',
+    expense.includes('  loop1 -->|yes| choice1'))
+  expect('an unnamed choice with one guard takes that guard as its question',
+    expense.includes('  choice1{"amount > 1000?"}'))
+  expect("a branch's outgoing edge is labeled with its guard",
+    expense.includes('  choice1 -->|amount > 1000| NotifyFinance'))
+  expect("the guardless branch's edge is labeled else",
+    expense.includes('  choice1 -->|else| ArchiveStandard'))
+  expect('one shared definition yields two distinct occurrence boxes',
+    expense.includes('  ArchiveHighValue[["ArchiveHighValue"]]')
+    && expense.includes('  ArchiveStandard[["ArchiveStandard"]]'))
   expect('a branch body is implicitly sequential: its steps chain',
-    expense.includes('      NotifyFinance --> ArchiveHighValue'))
-  expect('branches carry no edges between one another',
-    !expense.includes('choice1_b1 --> choice1_b2'))
-  expect('the top-level steps chain through the operators',
-    expense.includes('  Submit --> loop1') && expense.includes('  loop1 --> choice1'))
+    expense.includes('  NotifyFinance --> ArchiveHighValue'))
+  expect('all branch exits reconverge on what comes next, no merge node',
+    expense.includes('  ArchiveHighValue --> end_node')
+    && expense.includes('  ArchiveStandard --> end_node'))
 
   // ── declared constraints: the validation point ────────────────────
   const validateOut = cli(['model', 'validate', 'demo/expense'])
@@ -146,7 +160,7 @@ export default (store) => (
     console.error(`workflow-to-mermaid verify: ${failures} assertion(s) failed`)
     process.exit(1)
   }
-  console.log('workflow-to-mermaid verify: OK (three samples drawn as trees, declared constraints exercised)')
+  console.log('workflow-to-mermaid verify: OK (three samples drawn as flowcharts, declared constraints exercised)')
 } catch (err) {
   if (err.stderr) console.error(err.stderr.toString())
   console.error(`workflow-to-mermaid verify FAILED: ${err.message}`)

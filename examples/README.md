@@ -35,7 +35,7 @@ examples/
     rel-to-sql-ddl/
     eer-to-mermaid-er/
     rel-to-mermaid/
-  workflow/            the workflow suite, a chain, its structure view, and the organizational example
+  workflow/            the workflow suite, a chain, its flowchart view, and the organizational example
     metamodels/
       workflow/        package workflow-metamodel: block-structured workflow models (process trees)
       bpmn/            package bpmn-metamodel: simplified graph-based BPMN
@@ -94,12 +94,12 @@ rel-to-mermaid draws the produced relational schema.
 The documentation's workflow domain, executable: a chain from
 block-structured workflow models (process trees) to BPMN graphs to
 Mermaid diagrams, plus a
-structure view drawing the tree itself. See
+flowchart view drawing the source directly. See
 [the suite README](./workflow/).
 
 | Example | Kind | Shows |
 | --- | --- | --- |
-| [workflow-to-mermaid](./workflow/workflow-to-mermaid/) | m2t | The workflow model drawn as a Mermaid flowchart of nested subgraphs, one per composite activity; the suite's structure view |
+| [workflow-to-mermaid](./workflow/workflow-to-mermaid/) | m2t | The workflow model drawn as a classic flowchart, decision diamonds, fork and join bars, subroutine invocations; the suite's flowchart view |
 | [workflow-to-bpmn](./workflow/workflow-to-bpmn/) | m2m | The workflow model flattened into a node-and-flow graph by specialization rules |
 | [bpmn-to-mermaid](./workflow/bpmn-to-mermaid/) | m2t | The graph rendered as Mermaid flowchart text, sub-processes as subgraphs |
 | [org-to-approval](./workflow/org-to-approval/) | m2m | An approval workflow derived from an organizational hierarchy, parameterized by worker and sensitivity through `--param` (recorded in the output's provenance); departments approve via their manager, boards in parallel via their members |
