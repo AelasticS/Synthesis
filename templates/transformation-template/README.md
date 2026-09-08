@@ -6,15 +6,13 @@ transformation, a schema copy over the tutorial relational metamodel
 (`rel-tutorial-metamodel`, the same one the tutorial examples use),
 builds, installs, runs against the bundled sample model, and is smoke
 tested, so every change you make is a step from a working state to a
-working state.
-
-`synth transformation init` gives you the same layout as a minimal
-generator; this template adds a working transformation, a sample model,
-a smoke test, and CI.
+working state. `synth transformation init` gives you the same layout
+as a minimal generator; this template adds a working transformation,
+a sample model, a smoke test, and CI.
 
 ## What is inside
 
-```
+```text
 transformation-template/
 ├── package.json          npm metadata; build (tsc) and test (smoke) scripts
 ├── synth.json            the transformation manifest
@@ -31,14 +29,9 @@ transformation-template/
 
 ## Getting started
 
-While the `@synthesis/*` packages are unpublished, copy this folder
-within the Synthesis repository and register your package in
-`rush.json`; the `workspace:*` ranges resolve from the monorepo. Once
-the packages are on npm, this template becomes a standalone GitHub
-template repository ("Use this template"), with the same content and
-version ranges instead of `workspace:*`.
-
-Then make it yours:
+While the Synthesis packages are unpublished, copy this folder within
+the Synthesis repository and register your package in `rush.json`; the
+`workspace:*` ranges resolve from the monorepo. Then make it yours:
 
 1. In `package.json`: set `name`, `description`, and `author`.
 2. In `synth.json`: point `source.metamodel` and `target.metamodel` at
@@ -60,8 +53,10 @@ synth transformation run <your-name> --in <ref> --out <ref>
 
 ## Where to learn
 
-The transformation tutorial walks through exactly this package shape,
-first without variability and then with decision, binding, and
-configuration models. The `examples/` catalog of the Synthesis
-repository holds finished packages, from the minimal rel-copy to the
-configuration-based eer-to-relational; make yours look like those.
+The [developer-guide tutorial](https://AelasticS.github.io/aelastics/developer-guide/tutorial)
+walks through exactly this package shape, first without variability
+and then with decision, binding, and configuration models;
+[packaging transformations](https://AelasticS.github.io/aelastics/developer-guide/guides/packaging-transformations)
+documents the manifest. The [examples catalog](../../examples/) holds
+finished packages, from the tutorial companions to the
+configuration-based `eer-to-relational`; make yours look like those.

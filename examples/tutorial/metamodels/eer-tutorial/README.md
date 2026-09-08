@@ -1,5 +1,17 @@
 # eer-tutorial-metamodel
 
-The tutorial EER metamodel in its three stages: `basic` (entities, attributes, domains, relationships, used in Part 1 of the model-to-model tutorial), `advanced` (the basic stage plus the Kernel and Weak entity subtypes, used in Parts 2 and 3), and `name-scopes` (the basic stage plus `declareNamespace(Entity)`, so attribute names are unique per entity, used in Part 4). The eer-tutorial-basic, eer-tutorial-advanced, eer-tutorial-configuration-based, and eer-tutorial-name-scopes examples transform models written in these languages.
+The teaching EER metamodel of the tutorial suite, in three stages:
+`basic` (entities, attributes over domains, binary relationships with
+cardinality roles), `advanced` (the basic stage plus the `Kernel` and
+`Weak` entity subtypes), and `name-scopes` (the basic stage plus
+`declareNamespace(Entity)`). The four `eer-tutorial-*` examples
+transform models written in these stages: `basic` feeds Part 1,
+`advanced` Parts 2 and 3, and `name-scopes` Part 4.
 
-Subpath convention: `eer-tutorial-metamodel/basic`, `eer-tutorial-metamodel/advanced`, and `eer-tutorial-metamodel/name-scopes` export the JSX template components flat, the `/model` suffix on any stage exports its data-type schemas, and `eer-tutorial-metamodel/advanced/as-model` exports the metamodel-as-model factory (`EERTutorialMetamodel`) that the configuration-based example renders into the store.
+Subpaths: each stage specifier (`eer-tutorial-metamodel/basic`,
+`/advanced`, `/name-scopes`) exports the JSX components, its `/model`
+suffix the type schemas, and `/advanced/as-model` the
+metamodel-as-model factory (`EERTutorialMetamodel`).
+
+The metamodel is built step by step in the
+[model-to-model tutorial](https://AelasticS.github.io/aelastics/developer-guide/tutorial/model-to-model).

@@ -1,5 +1,17 @@
 # relational-metamodel
 
-The full relational metamodel of the eer-to-sql example suite: schemas, tables, domains, and columns with key, foreign-key, nullability, and autoincrement facets. It is the target language of the eer-to-relational example and the source language of the rel-to-sql-ddl example.
+The full relational metamodel of the eer-to-sql example suite:
+schemas, tables, domains, columns, first-class primary and foreign
+keys (composite capable, with referential actions), and indexes,
+where a table is a name scope for its columns. It is the target
+language of the configuration-based `eer-to-relational` mapping and
+the source language of `rel-to-sql-ddl` and of the `rel-to-mermaid`
+diagram view.
 
-Subpath convention: the bare specifier `relational-metamodel` exports the JSX template components flat, `relational-metamodel/model` exports the data-type schemas, and `relational-metamodel/as-model` exports the metamodel-as-model factory (`RELModel`) that the DDL binding model references.
+Subpaths: the bare specifier `relational-metamodel` exports the JSX
+components, `relational-metamodel/model` the type schemas, and
+`relational-metamodel/as-model` the metamodel-as-model factory
+(`RELModel`) that the DDL binding model references.
+
+The metamodel is explained on the suite page
+[A full-featured EER to SQL transformation](https://AelasticS.github.io/aelastics/developer-guide/examples/eer-to-sql#the-metamodels).
