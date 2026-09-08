@@ -44,7 +44,8 @@ underneath it.
 
 The metamodel ships inside the `@aelastics/synthesis` library rather
 than as a domain metamodel package, in
-`libraries/synthesis/src/engine/m2t/m2t-model/`, and is imported from
+[`libraries/synthesis/src/engine/m2t/m2t-model/`](https://github.com/AelasticS/Synthesis/tree/main/libraries/synthesis/src/engine/m2t/m2t-model),
+and is imported from
 `@aelastics/synthesis/m2t`. That location is a statement about what it
 is: not a domain language somebody chose, but part of the machinery,
 because the CLI has to understand it in order to write files.

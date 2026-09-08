@@ -9,7 +9,7 @@ template that decides nothing, three options that each build a complete
 output model, a second variation point three lines long, and the
 manifest entry that ties the package together.
 
-Every listing is from `examples/tutorial/sql-tutorial-configuration-based`.
+Every listing is from [`examples/tutorial/sql-tutorial-configuration-based`](https://github.com/AelasticS/Synthesis/tree/main/examples/tutorial/sql-tutorial-configuration-based).
 
 ## The class becomes decision-aware
 

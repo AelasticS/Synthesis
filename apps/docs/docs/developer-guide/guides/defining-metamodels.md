@@ -196,7 +196,9 @@ parent) may be a mandatory property, while a slot filled by a later
 element (`Weak.weakMap`) must be type-level optional, with the
 completeness rule declared as a constraint instead.
 
-The full EER metamodel of the eer-to-sql suite declares its doctrine
+The
+[full EER metamodel](https://github.com/AelasticS/Synthesis/tree/main/examples/eer-to-sql/metamodels/eer)
+of the eer-to-sql suite declares its doctrine
 this way: binary relationships (the message points the modeler to
 Aggregation), aggregation arity, weak-mapping presence, and the
 schema-level identification-dependency acyclicity shown above.
@@ -291,4 +293,4 @@ export type ITable     = t.TypeOf<typeof Table>
 export type IColumn    = t.TypeOf<typeof Column>
 ```
 
-These two metamodels are the source and target of the EER-to-Relational transformation covered in [Writing Transformations](./writing-transformations.md). The repository ships both shapes executable: the tutorial's rel-tutorial metamodel is this relational shape (a flat base stage and a name-scopes stage), and the eer-to-sql suite's full relational metamodel goes further, with first-class composite foreign keys and indexes.
+These two metamodels are the source and target of the EER-to-Relational transformation covered in [Writing Transformations](./writing-transformations.md). The repository ships both shapes executable: the tutorial's [rel-tutorial metamodel](https://github.com/AelasticS/Synthesis/tree/main/examples/tutorial/metamodels/rel-tutorial) is this relational shape (a flat base stage and a name-scopes stage), and the eer-to-sql suite's [full relational metamodel](https://github.com/AelasticS/Synthesis/tree/main/examples/eer-to-sql/metamodels/relational) goes further, with first-class composite foreign keys and indexes.

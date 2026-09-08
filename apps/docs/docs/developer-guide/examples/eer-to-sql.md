@@ -5,7 +5,9 @@ title: "A full-featured EER to SQL transformation"
 
 # A full-featured EER to SQL transformation
 
-The `examples/eer-to-sql` suite turns a conceptual entity-relationship
+The
+[`examples/eer-to-sql`](https://github.com/AelasticS/Synthesis/tree/main/examples/eer-to-sql)
+suite turns a conceptual entity-relationship
 schema into a production-shaped relational database, and draws it.
 Its goals are completeness and explicitness. Completeness: every
 semantic fact the EER schema states (identification, integrity rules,
@@ -17,27 +19,33 @@ than hardcoded in the rules.
 
 What the suite contains, and what each piece shows:
 
-- **Two full-semantics metamodels** (`eer-metamodel`,
-  `relational-metamodel`): entities in three identification kinds,
+- **Two full-semantics metamodels**
+  ([`eer-metamodel`](https://github.com/AelasticS/Synthesis/tree/main/examples/eer-to-sql/metamodels/eer),
+  [`relational-metamodel`](https://github.com/AelasticS/Synthesis/tree/main/examples/eer-to-sql/metamodels/relational)):
+  entities in three identification kinds,
   specializations as mappings with completeness and disjointness
   bounds, integrity rule pairs, user-definable domains; tables with
   first-class keys, constraints, indexes, wired domains, and row
   history. Their doctrine is declared as constraints and enforced by
   `synth model validate`.
-- **`eer-to-mermaid-er`** (model to text): the
+- **[`eer-to-mermaid-er`](https://github.com/AelasticS/Synthesis/tree/main/examples/eer-to-sql/eer-to-mermaid-er)**
+  (model to text): the
   [diagram view](#the-diagram-view-eer-to-mermaid), a Mermaid
   `erDiagram` per schema over the same EER source, a sibling view
   rather than a chain step.
-- **`eer-to-relational`** (model to model): the full mapping, every
+- **[`eer-to-relational`](https://github.com/AelasticS/Synthesis/tree/main/examples/eer-to-sql/eer-to-relational)**
+  (model to model): the full mapping, every
   template kind, and nine design issues closed per run by a
   configuration: auditing and row history (the composite option),
   inheritance strategies, relationship mapping, naming, keys, and
   indexing.
-- **`rel-to-sql-ddl`** (model to text): executable SQL, a schema
+- **[`rel-to-sql-ddl`](https://github.com/AelasticS/Synthesis/tree/main/examples/eer-to-sql/rel-to-sql-ddl)**
+  (model to text): executable SQL, a schema
   script and a triggers script, with dialects as extension-authored
   preset configurations and physical clustering. It consumes exactly
   what `eer-to-relational` produces, so the two run as a chain.
-- **`rel-to-mermaid`** (model to text): the
+- **[`rel-to-mermaid`](https://github.com/AelasticS/Synthesis/tree/main/examples/eer-to-sql/rel-to-mermaid)**
+  (model to text): the
   [same schema under three configurations](#one-source-three-configurations), a Mermaid
   `erDiagram` per schema over the mapping's relational OUTPUT,
   chained after `eer-to-relational`, so different configurations of
@@ -63,8 +71,11 @@ rules are declared constraints on the metamodel, run by
 
 ## The metamodels
 
-The suite owns both metamodels (`eer-metamodel` and
-`relational-metamodel`, under `examples/eer-to-sql/metamodels/`).
+The suite owns both metamodels
+([`eer-metamodel`](https://github.com/AelasticS/Synthesis/tree/main/examples/eer-to-sql/metamodels/eer)
+and
+[`relational-metamodel`](https://github.com/AelasticS/Synthesis/tree/main/examples/eer-to-sql/metamodels/relational),
+under `examples/eer-to-sql/metamodels/`).
 They carry full semantics, richer than the
 [tutorial's](../tutorial/model-to-model/index.md) deliberately simple
 ones, and this section is all you need to read the rest of the page.
@@ -173,7 +184,8 @@ keeping another table's row history names its base with `historyOf`.
 ## The diagram view: EER to Mermaid
 
 Before the relational mapping, the quickest consumer of the EER side:
-`eer-to-mermaid-er` is not a chain step but a sibling view,
+[`eer-to-mermaid-er`](https://github.com/AelasticS/Synthesis/tree/main/examples/eer-to-sql/eer-to-mermaid-er)
+is not a chain step but a sibling view,
 model-to-text over the same EER source the relational mapping
 consumes, one Mermaid `erDiagram` document per schema. The rendered
 Library excerpt below doubles as the picture of the running example
@@ -241,7 +253,8 @@ synth transformation run eer-to-mermaid-er --in demo/library --out-dir ./diagram
 ## The transformation, rule by rule
 
 The sections below are the transformation's rules: what each EER
-construct BECOMES on the relational side, and why.
+construct BECOMES on the relational side, and why. Source:
+[`examples/eer-to-sql/eer-to-relational`](https://github.com/AelasticS/Synthesis/tree/main/examples/eer-to-sql/eer-to-relational).
 
 ### Entities
 
@@ -430,7 +443,8 @@ The DDL generator declares emission issues; a dialect is a shipped
 configuration model closing them all: `IdentifierQuoting`,
 `ReferentialActions`, `DomainHandling`, `SqlDialect`, and the
 per-table `Clustering`. The three presets under
-`rel-to-sql-ddl/presets/` are authored **by extension**: the choice
+[`rel-to-sql-ddl/presets/`](https://github.com/AelasticS/Synthesis/tree/main/examples/eer-to-sql/rel-to-sql-ddl/presets)
+are authored **by extension**: the choice
 vocabulary and the standard-sql choice set are package exports, and
 the postgres and oracle presets spread that set and override only
 what the dialect changes, so the diff IS the dialect's definition.
@@ -543,7 +557,9 @@ clustering emissions, and the row-history leg.
 
 ## One source, three configurations
 
-The suite's fourth member, `rel-to-mermaid`, diagrams the OUTPUT of
+The suite's fourth member,
+[`rel-to-mermaid`](https://github.com/AelasticS/Synthesis/tree/main/examples/eer-to-sql/rel-to-mermaid),
+diagrams the OUTPUT of
 the mapping rather than its source: chained as `eer-to-relational`
 then `rel-to-mermaid`, it renders the produced relational schema as a
 Mermaid `erDiagram` (a block per table with `PK` and `FK` marks read

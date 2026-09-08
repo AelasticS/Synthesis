@@ -71,7 +71,8 @@ name, because once a 1:N relationship may also become a join table, one
 schema can hold two join tables referencing the same entity.
 
 The finished package exists in the repository as
-`examples/tutorial/eer-tutorial-configuration-based`. Use it as the answer key;
+[`examples/tutorial/eer-tutorial-configuration-based`](https://github.com/AelasticS/Synthesis/tree/main/examples/tutorial/eer-tutorial-configuration-based).
+Use it as the answer key;
 every listing on the following pages is taken from it verbatim.
 
 ## Prerequisites

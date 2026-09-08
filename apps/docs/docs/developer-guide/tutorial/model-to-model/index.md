@@ -37,7 +37,7 @@ install, and run. The relationship mapping is decided by one plain
 foreign key on the N side. That conditional is deliberate, and the next
 two parts each dissolve it in a different way.
 
-Answer key: `examples/tutorial/eer-tutorial-basic`.
+Answer key: [`examples/tutorial/eer-tutorial-basic`](https://github.com/AelasticS/Synthesis/tree/main/examples/tutorial/eer-tutorial-basic).
 
 ### Part 2: Advanced
 
@@ -53,7 +53,8 @@ mechanism when the variants are determined by the source model: a weak
 entity is a weak entity, and no configuration should be able to say
 otherwise.
 
-Answer key: `examples/tutorial/eer-tutorial-advanced`, which uses
+Answer key: [`examples/tutorial/eer-tutorial-advanced`](https://github.com/AelasticS/Synthesis/tree/main/examples/tutorial/eer-tutorial-advanced),
+which uses
 `eer-tutorial-metamodel/advanced` as its source
 metamodel.
 
@@ -73,7 +74,7 @@ dispatches on the configuration rather than on an `if` statement. The
 same source model and the same transformation then produce different
 relational architectures.
 
-Answer key: `examples/tutorial/eer-tutorial-configuration-based`.
+Answer key: [`examples/tutorial/eer-tutorial-configuration-based`](https://github.com/AelasticS/Synthesis/tree/main/examples/tutorial/eer-tutorial-configuration-based).
 
 ### Part 4: Name scopes
 
@@ -91,7 +92,8 @@ now has its own `id`, foreign key columns take natural names like
 `Author/id`. The diff against Part 1 is deliberately tiny, because
 scopes are a property of the metamodel, not of the rules.
 
-Answer key: `examples/tutorial/eer-tutorial-name-scopes`, which uses
+Answer key: [`examples/tutorial/eer-tutorial-name-scopes`](https://github.com/AelasticS/Synthesis/tree/main/examples/tutorial/eer-tutorial-name-scopes),
+which uses
 the `name-scopes` stages of both tutorial metamodels.
 
 ## At a glance

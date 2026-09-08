@@ -140,8 +140,9 @@ Candidates are tried in order, and the first *available* property wins:
   `isReconnectAllowed: false` on the connection info to make an
   occupied slot skip to the next candidate instead.
 
-The last rule is what makes paired references work. The full
-relational metamodel of the eer-to-sql example defines one `Column`
+The last rule is what makes paired references work. The
+[full relational metamodel](https://github.com/AelasticS/Synthesis/tree/main/examples/eer-to-sql/metamodels/relational)
+of the eer-to-sql example defines one `Column`
 tag serving three contexts, and its foreign-key column pairs depend on
 the occupied slot being skipped rather than replaced:
 

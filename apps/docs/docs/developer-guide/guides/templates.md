@@ -107,7 +107,9 @@ A higher-order template is a function that takes another template as a
 parameter, abstracting over the structure of sub-expressions: a value
 parameter selects among shapes a template already contains, while a
 template parameter supplies the shape itself. The example below is the
-workflow suite's executable sample, embedded from its source: the
+workflow suite's executable sample, embedded from its source in
+[`examples/workflow/workflow-to-bpmn`](https://github.com/AelasticS/Synthesis/tree/main/examples/workflow/workflow-to-bpmn):
+the
 writing step is defined outside as a template (a plain task, or a
 two-task inline process), the workflow takes the whole step template
 as a parameter, and evaluation happens in two steps, from higher-order

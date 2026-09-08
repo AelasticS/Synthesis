@@ -32,7 +32,8 @@ column grafted onto `Book`, and a `categorizedAs` join table. Both
 kinds of foreign key are therefore exercised by a single run.
 
 The finished package exists in the repository as
-`examples/tutorial/sql-tutorial-basic`. Use it as the answer key whenever you
+[`examples/tutorial/sql-tutorial-basic`](https://github.com/AelasticS/Synthesis/tree/main/examples/tutorial/sql-tutorial-basic).
+Use it as the answer key whenever you
 want to compare; every listing on the following pages is taken from it
 verbatim.
 

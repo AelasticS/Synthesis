@@ -8,7 +8,7 @@ The design space is declared and bound. This page is the other half:
 the rule that stops answering the question, and the manifest entry that
 makes the package configuration-based.
 
-Every listing is from `examples/tutorial/eer-tutorial-configuration-based`.
+Every listing is from [`examples/tutorial/eer-tutorial-configuration-based`](https://github.com/AelasticS/Synthesis/tree/main/examples/tutorial/eer-tutorial-configuration-based).
 
 ## The class becomes decision-aware
 

@@ -14,7 +14,9 @@ carries exactly the concepts this part needs and nothing more: entities
 with attributes over domains, and binary relationships with cardinality
 roles. It ships in the repository as the `eer-tutorial-metamodel`
 package, imported as `eer-tutorial-metamodel/basic`, and its sources
-live in `examples/tutorial/metamodels/eer-tutorial/src/basic/`. Read
+live in
+[`examples/tutorial/metamodels/eer-tutorial/src/basic/`](https://github.com/AelasticS/Synthesis/tree/main/examples/tutorial/metamodels/eer-tutorial/src/basic).
+Read
 this page as if you were writing those two files yourself, because that
 is exactly what authoring a metamodel looks like.
 
