@@ -63,9 +63,11 @@ pattern the EER package already uses for `basic` and `advanced`. The
 flat stages you used in Parts 1 to 3 are untouched, and so are the
 models and packages built on them.
 
-The EER package gains `eer-tutorial-metamodel/name-scopes`:
+The EER package gains
+[`eer-tutorial-metamodel/name-scopes`](https://github.com/AelasticS/Synthesis/tree/main/examples/tutorial/metamodels/eer-tutorial/src/name-scopes):
 structurally identical to `basic`, plus `declareNamespace(Entity)`.
-The relational package gains `rel-tutorial-metamodel/name-scopes`:
+The relational package gains
+[`rel-tutorial-metamodel/name-scopes`](https://github.com/AelasticS/Synthesis/tree/main/examples/tutorial/metamodels/rel-tutorial/src/name-scopes):
 structurally identical to the base stage, plus
 `declareNamespace(Table)`. Everything the base stage deliberately
 excludes, composite foreign keys, constraint elements, indexes, stays

@@ -299,7 +299,9 @@ its emission issues at once, so choosing a dialect means passing one
   input. A configuration that DOES declare a source still fails on a
   mismatch, exactly as before.
 
-See `examples/eer-to-sql/rel-to-sql-ddl/presets/` for the three
+See
+[`examples/eer-to-sql/rel-to-sql-ddl/presets/`](https://github.com/AelasticS/Synthesis/tree/main/examples/eer-to-sql/rel-to-sql-ddl/presets)
+for the three
 shipped presets and the docs page "A full-featured EER to SQL
 transformation" for the design space they close.
 
@@ -311,7 +313,8 @@ particular option is chosen. The decision metamodel states this with
 become meaningful exactly when that option is selected (authored with
 the `ElementSubIssue` tag). A row-versioning policy is the canonical
 shape, and it is exactly the eer-to-sql suite's `RowHistory` issue
-(`examples/eer-to-sql/eer-to-relational`): whether a table keeps
+([`examples/eer-to-sql/eer-to-relational`](https://github.com/AelasticS/Synthesis/tree/main/examples/eer-to-sql/eer-to-relational)):
+whether a table keeps
 history is one issue, and only the history-keeping option opens the
 question of what distinguishes row versions:
 

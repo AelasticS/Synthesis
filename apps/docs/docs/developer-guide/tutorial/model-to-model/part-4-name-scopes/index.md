@@ -34,7 +34,8 @@ two tutorial metamodels:
   it emits.
 
 The finished package exists in the repository as
-`examples/tutorial/eer-tutorial-name-scopes`. As always, every listing
+[`examples/tutorial/eer-tutorial-name-scopes`](https://github.com/AelasticS/Synthesis/tree/main/examples/tutorial/eer-tutorial-name-scopes).
+As always, every listing
 on the following pages is taken from it verbatim.
 
 ## Prerequisites

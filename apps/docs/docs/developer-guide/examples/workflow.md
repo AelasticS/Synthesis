@@ -5,7 +5,9 @@ title: "The workflow suite"
 
 # The workflow suite
 
-The `examples/workflow` suite turns a block-structured workflow model
+The
+[`examples/workflow`](https://github.com/AelasticS/Synthesis/tree/main/examples/workflow)
+suite turns a block-structured workflow model
 (a process tree) into a graph-based BPMN process and draws both ends.
 Its goal is to show a chain done right: small metamodels at different
 levels of abstraction, transformations whose manifests make them
@@ -17,27 +19,34 @@ transformation, feeding the same chain.
 
 What the suite contains, and what each piece shows:
 
-- **Three metamodels** (`workflow-metamodel`, `bpmn-metamodel`,
-  `org-metamodel`): the block-structured workflow side, where
+- **Three metamodels**
+  ([`workflow-metamodel`](https://github.com/AelasticS/Synthesis/tree/main/examples/workflow/metamodels/workflow),
+  [`bpmn-metamodel`](https://github.com/AelasticS/Synthesis/tree/main/examples/workflow/metamodels/bpmn),
+  [`org-metamodel`](https://github.com/AelasticS/Synthesis/tree/main/examples/workflow/metamodels/org)):
+  the block-structured workflow side, where
   definitions are invoked and structure is pure nesting; the
   graph-based BPMN side, where nodes and flows state everything
   explicitly; and the organizational side, a hierarchy of units and
   workers that the generative example reads. The gap between the first
   two is exactly what the chain's first step bridges.
-- **`org-to-approval`** (model to model): the generative example. An
+- **[`org-to-approval`](https://github.com/AelasticS/Synthesis/tree/main/examples/workflow/org-to-approval)**
+  (model to model): the generative example. An
   organizational model becomes an approval process, parameterized by
   worker and sensitivity through the engine's parameter channel, with
   the verbatim parameter recorded in the output's provenance.
-- **`workflow-to-mermaid`** (model to text): the
+- **[`workflow-to-mermaid`](https://github.com/AelasticS/Synthesis/tree/main/examples/workflow/workflow-to-mermaid)**
+  (model to text): the
   [flowchart view](#the-flowchart-view-the-workflow-model-to-mermaid),
   drawing the SOURCE as a classic flowchart, decision diamonds, fork
   and join bars, and back edges, without flattening it into BPMN
   first.
-- **`workflow-to-bpmn`** (model to model): the flattening. Every step
+- **[`workflow-to-bpmn`](https://github.com/AelasticS/Synthesis/tree/main/examples/workflow/workflow-to-bpmn)**
+  (model to model): the flattening. Every step
   contributes a graph fragment with an entry and an exit, and the
   composite rules wire their children's fragments without knowing what
   is behind them.
-- **`bpmn-to-mermaid`** (model to text): the graph drawn. Mermaid has
+- **[`bpmn-to-mermaid`](https://github.com/AelasticS/Synthesis/tree/main/examples/workflow/bpmn-to-mermaid)**
+  (model to text): the graph drawn. Mermaid has
   no native BPMN notation, so a flowchart with per-kind node shapes
   is the vehicle.
 - **The chain**: `workflow-to-bpmn` then `bpmn-to-mermaid` in one
@@ -54,12 +63,14 @@ smoke tests and executable verification on every merge.
 ## The metamodels
 
 The suite owns all three metamodels, under
-`examples/workflow/metamodels/`. They are deliberately small, and this
+[`examples/workflow/metamodels/`](https://github.com/AelasticS/Synthesis/tree/main/examples/workflow/metamodels).
+They are deliberately small, and this
 section is all you need to read the rest of the page.
 
 ### The workflow model side
 
-`workflow-metamodel` rests on one distinction: **a definition is not
+[`workflow-metamodel`](https://github.com/AelasticS/Synthesis/tree/main/examples/workflow/metamodels/workflow)
+rests on one distinction: **a definition is not
 an occurrence**. If the same signoff round runs twice in a process,
 there is one activity defined and two places that call it; collapsing
 the two ideas would force either copy-paste or a graph of shared
@@ -181,7 +192,8 @@ message.
 
 ### The BPMN side
 
-`bpmn-metamodel` is a simplified graph-based BPMN: a `Process` is
+[`bpmn-metamodel`](https://github.com/AelasticS/Synthesis/tree/main/examples/workflow/metamodels/bpmn)
+is a simplified graph-based BPMN: a `Process` is
 `nodes` (`Task`, `Gateway`, `StartEvent`, `EndEvent`, and
 `SubProcess` carrying its own nodes and flows) connected by `Flow`
 edges, each with typed `from` and `to` links and an optional `guard`
@@ -204,7 +216,8 @@ directly, the graph reads like this
 
 ### The organizational side
 
-`org-metamodel` is the generative example's source domain. An
+[`org-metamodel`](https://github.com/AelasticS/Synthesis/tree/main/examples/workflow/metamodels/org)
+is the generative example's source domain. An
 `Organization` names its top unit, and `OrgUnit`s form the hierarchy
 through the parent/subUnits inverse: a unit nests in its parent or
 names it as a reference prop, and `subUnits` fills itself. `Worker`s
@@ -220,7 +233,8 @@ unit, and `synth model validate` judges both.
 ## The flowchart view: the workflow model to Mermaid
 
 Before the flattening, the quickest consumer of the source:
-`workflow-to-mermaid` is not a chain step but a sibling view,
+[`workflow-to-mermaid`](https://github.com/AelasticS/Synthesis/tree/main/examples/workflow/workflow-to-mermaid)
+is not a chain step but a sibling view,
 model-to-text over the workflow model itself. It draws the model's
 ENTRY PROCESS (the first process definition no invocation calls, the
 root of the call graph) as one classic flowchart. The walk is a
@@ -310,7 +324,8 @@ BECOMES in the graph, and how the graph becomes a diagram.
 
 ### Flattening the tree into a graph
 
-`workflow-to-bpmn` follows a FRAGMENT CONTRACT: every step contributes
+[`workflow-to-bpmn`](https://github.com/AelasticS/Synthesis/tree/main/examples/workflow/workflow-to-bpmn)
+follows a FRAGMENT CONTRACT: every step contributes
 its nodes and flows, plus an entry and an exit, and the rule for a
 composite step wires its children's fragments without knowing what is
 behind them. The dispatch is one pure `@SpecPoint` rule
@@ -362,7 +377,8 @@ fed by performers) is the suite's recorded next stage, in
 
 ### Rendering the graph
 
-`bpmn-to-mermaid` is model-to-text over the graph: one document per
+[`bpmn-to-mermaid`](https://github.com/AelasticS/Synthesis/tree/main/examples/workflow/bpmn-to-mermaid)
+is model-to-text over the graph: one document per
 process, a declaration line per node and an edge line per flow.
 Mermaid has no BPMN diagram type, so the flowchart carries the
 notation with one shape per node kind, chosen by specialization, one
@@ -379,7 +395,8 @@ the loop's back edge reach the drawing.
 
 ## The organizational example: a model generates a process
 
-`org-to-approval` closes the loop the suite opens: instead of a
+[`org-to-approval`](https://github.com/AelasticS/Synthesis/tree/main/examples/workflow/org-to-approval)
+closes the loop the suite opens: instead of a
 process authored by hand, a process DERIVED from a domain model. The
 paper's example, executable: who must approve a worker's document is
 not workflow knowledge, it is organizational knowledge, so the
@@ -584,21 +601,27 @@ is exactly the walk between the two notations.
 
 ## Where the pieces live
 
-- `examples/workflow/metamodels/workflow`,
-  `examples/workflow/metamodels/bpmn`, and
-  `examples/workflow/metamodels/org`: the three metamodel packages,
+- [`examples/workflow/metamodels/workflow`](https://github.com/AelasticS/Synthesis/tree/main/examples/workflow/metamodels/workflow),
+  [`examples/workflow/metamodels/bpmn`](https://github.com/AelasticS/Synthesis/tree/main/examples/workflow/metamodels/bpmn),
+  and
+  [`examples/workflow/metamodels/org`](https://github.com/AelasticS/Synthesis/tree/main/examples/workflow/metamodels/org):
+  the three metamodel packages,
   each exporting JSX components (bare specifier) and type schemas
   (`/model`).
-- `examples/workflow/workflow-to-mermaid`: the flowchart view, with a
+- [`examples/workflow/workflow-to-mermaid`](https://github.com/AelasticS/Synthesis/tree/main/examples/workflow/workflow-to-mermaid):
+  the flowchart view, with a
   `release` sample and a verification rendering three samples and
   exercising the declared constraints through `synth model validate`.
-- `examples/workflow/workflow-to-bpmn`: the m2m step, with the
+- [`examples/workflow/workflow-to-bpmn`](https://github.com/AelasticS/Synthesis/tree/main/examples/workflow/workflow-to-bpmn):
+  the m2m step, with the
   `approval`, `reviewed-approval` (an inline process),
   `expense-approval` (choice, loop, invocations, documents), and
   `templated-approval` (higher-order) samples.
-- `examples/workflow/bpmn-to-mermaid`: the m2t step over the graph,
+- [`examples/workflow/bpmn-to-mermaid`](https://github.com/AelasticS/Synthesis/tree/main/examples/workflow/bpmn-to-mermaid):
+  the m2t step over the graph,
   whose verification asserts the flattened v2 shape.
-- `examples/workflow/org-to-approval`: the generative example, with
+- [`examples/workflow/org-to-approval`](https://github.com/AelasticS/Synthesis/tree/main/examples/workflow/org-to-approval):
+  the generative example, with
   the `acme` sample.
 - `design/workflow-suite.md` and `design/workflow-suite-v2.md` in the
   repository record the design.

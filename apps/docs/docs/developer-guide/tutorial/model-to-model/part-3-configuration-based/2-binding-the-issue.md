@@ -33,7 +33,8 @@ So the metamodel package ships its concepts a second time, as a model:
 the metamodel-as-model, its third facet next to the type schemas and
 the JSX components. It is exported as
 `eer-tutorial-metamodel/advanced/as-model`, its source is
-`examples/tutorial/metamodels/eer-tutorial/src/advanced/as-model.tsx`,
+`as-model.tsx` in
+[`examples/tutorial/metamodels/eer-tutorial/src/advanced`](https://github.com/AelasticS/Synthesis/tree/main/examples/tutorial/metamodels/eer-tutorial/src/advanced),
 and its header states exactly what it is and what it is not:
 
 ```tsx

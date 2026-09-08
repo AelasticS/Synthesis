@@ -89,7 +89,9 @@ by scopes (Part 4).
 The tutorial's metamodels stayed deliberately small through all four
 parts: single-column foreign keys, no constraint elements, no
 indexes, no configurable naming. The place where everything composes
-is the repository's full-featured suite, `examples/eer-to-sql`: a full EER
+is the repository's full-featured suite,
+[`examples/eer-to-sql`](https://github.com/AelasticS/Synthesis/tree/main/examples/eer-to-sql):
+a full EER
 metamodel, a relational metamodel whose tables are scopes and whose
 foreign keys are first-class composite-capable elements, a
 transformation that combines specialization, configurations,

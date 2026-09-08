@@ -148,7 +148,9 @@ schema existing only in memory between the steps.
 ## The complete source
 
 Every listing in this part is a fragment of one file. Here it is whole,
-embedded from `examples/tutorial/sql-tutorial-structured` at build time, so what
+embedded from
+[`examples/tutorial/sql-tutorial-structured`](https://github.com/AelasticS/Synthesis/tree/main/examples/tutorial/sql-tutorial-structured)
+at build time, so what
 you read is exactly what the smoke test runs:
 
 ```tsx file=<rootDir>/examples/tutorial/sql-tutorial-structured/src/transformation.tsx

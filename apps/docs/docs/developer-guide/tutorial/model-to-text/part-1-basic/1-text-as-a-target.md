@@ -44,7 +44,8 @@ underneath it.
 
 The metamodel ships inside the `@aelastics/synthesis` library rather
 than as a domain metamodel package, in
-`libraries/synthesis/src/engine/m2t/m2t-model/`, and is imported from
+[`libraries/synthesis/src/engine/m2t/m2t-model/`](https://github.com/AelasticS/Synthesis/tree/main/libraries/synthesis/src/engine/m2t/m2t-model),
+and is imported from
 `@aelastics/synthesis/m2t`. That location is a statement about what it
 is: not a domain language somebody chose, but part of the machinery,
 because the CLI has to understand it in order to write files.
@@ -134,7 +135,8 @@ documents.
 ## The tag functions
 
 The engine exports the tags for these concepts from
-`libraries/engine/src/m2t/m2t-model/m2t.jsx.ts`. Unlike the metamodel
+[`libraries/synthesis/src/engine/m2t/m2t-model/m2t.jsx.ts`](https://github.com/AelasticS/Synthesis/blob/main/libraries/synthesis/src/engine/m2t/m2t-model/m2t.jsx.ts).
+Unlike the metamodel
 you wrote in the model-to-model tutorial, this one comes with the
 engine, so you write JSX with these tags rather than declaring them.
 

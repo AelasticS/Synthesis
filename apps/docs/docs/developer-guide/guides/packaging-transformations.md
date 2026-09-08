@@ -16,7 +16,8 @@ type-check, and run the transformation without loading code.
 ## The manifest
 
 The manifest is a JSON object. Here is the manifest of the
-`eer-to-relational` example (`examples/eer-to-sql/eer-to-relational`),
+`eer-to-relational` example
+([`examples/eer-to-sql/eer-to-relational`](https://github.com/AelasticS/Synthesis/tree/main/examples/eer-to-sql/eer-to-relational)),
 a configuration-based EER-to-relational model-to-model transformation:
 
 ```json

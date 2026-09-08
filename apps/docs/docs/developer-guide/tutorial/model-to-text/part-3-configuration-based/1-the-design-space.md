@@ -225,8 +225,9 @@ to be there for it to land on. The real source metamodel is a TypeScript
 package of type objects, imported and compared by identity; it is not in
 the store. So the metamodel package ships its concepts a second time, as
 a model: its `as-model` facet, exported as
-`rel-tutorial-metamodel/as-model` from
-`examples/tutorial/metamodels/rel-tutorial/src/as-model.tsx`, written in
+`rel-tutorial-metamodel/as-model` from `as-model.tsx` in
+[`examples/tutorial/metamodels/rel-tutorial/src`](https://github.com/AelasticS/Synthesis/tree/main/examples/tutorial/metamodels/rel-tutorial/src),
+written in
 the types metamodel:
 
 ```tsx

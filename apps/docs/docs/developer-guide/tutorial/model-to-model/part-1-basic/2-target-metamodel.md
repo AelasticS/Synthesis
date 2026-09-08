@@ -21,7 +21,8 @@ The one the tutorial targets is `rel-tutorial-metamodel`, a simplified
 relational metamodel that carries only what the tutorial needs. It is
 the pivot of the whole tutorial suite: the model-to-model parts target
 it, and the model-to-text parts read from it. Its sources live in
-`examples/tutorial/metamodels/rel-tutorial/src/`, in the same three
+[`examples/tutorial/metamodels/rel-tutorial/src/`](https://github.com/AelasticS/Synthesis/tree/main/examples/tutorial/metamodels/rel-tutorial/src),
+in the same three
 files page 1 described on the source side: a types file
 (`REL-tutorial.meta.model.type.ts`), a components file
 (`REL-tutorial-components.ts`), and an `index.ts` tying them together.

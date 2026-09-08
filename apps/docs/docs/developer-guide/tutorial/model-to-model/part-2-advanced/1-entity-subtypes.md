@@ -11,7 +11,8 @@ of the tutorial's metamodel stages.
 
 It ships as `eer-tutorial-metamodel/advanced`, the second subpath of
 the same `eer-tutorial-metamodel` package, and its sources live in
-`examples/tutorial/metamodels/eer-tutorial/src/advanced/`. The shape
+[`examples/tutorial/metamodels/eer-tutorial/src/advanced/`](https://github.com/AelasticS/Synthesis/tree/main/examples/tutorial/metamodels/eer-tutorial/src/advanced).
+The shape
 is the one Part 1 described: a types file
 (`EER-advanced.meta.model.type.ts`), a components file
 (`EER-advanced-components.ts`), and an `index.ts` tying the two

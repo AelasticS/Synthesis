@@ -19,7 +19,8 @@ nonexistent element is caught rather than tolerated.
 
 Create `sample/library.tsx` in your package. Any location works; the
 examples keep sample inputs under `sample/`. Here is the file complete,
-from `examples/tutorial/eer-tutorial-basic/sample/library.tsx`:
+from `sample/library.tsx` in
+[`examples/tutorial/eer-tutorial-basic`](https://github.com/AelasticS/Synthesis/tree/main/examples/tutorial/eer-tutorial-basic):
 
 ```tsx
 /** @jsx createExprNode */

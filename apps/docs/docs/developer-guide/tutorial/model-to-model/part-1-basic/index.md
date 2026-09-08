@@ -30,7 +30,8 @@ The sample input has three entities (`Book`, `Author`, `Category`), one
 exercised by a single run.
 
 The finished package exists in the repository as
-`examples/tutorial/eer-tutorial-basic`. Use it as the answer key whenever you
+[`examples/tutorial/eer-tutorial-basic`](https://github.com/AelasticS/Synthesis/tree/main/examples/tutorial/eer-tutorial-basic).
+Use it as the answer key whenever you
 want to compare; every listing on the following pages is taken from it
 verbatim.
 

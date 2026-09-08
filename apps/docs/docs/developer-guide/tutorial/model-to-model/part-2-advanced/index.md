@@ -58,7 +58,8 @@ metamodel, the attribute rule, the domain-to-SQL-type mapping, the
 manifest, and the build, install, run loop.
 
 The finished package exists in the repository as
-`examples/tutorial/eer-tutorial-advanced`. Use it as the answer key; every
+[`examples/tutorial/eer-tutorial-advanced`](https://github.com/AelasticS/Synthesis/tree/main/examples/tutorial/eer-tutorial-advanced).
+Use it as the answer key; every
 listing on the following pages is taken from it verbatim.
 
 ## Prerequisites

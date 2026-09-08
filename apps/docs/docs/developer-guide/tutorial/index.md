@@ -8,7 +8,9 @@ Synthesis transformations come in two kinds, and this section holds one
 hands-on tutorial for each. Both build complete, installable packages
 that you run with the `synth` CLI. Every command and every output shown
 was executed against the real tools, and every part names a
-smoke-tested package from the repository's `examples/` catalog as its
+smoke-tested package from the repository's
+[`examples/`](https://github.com/AelasticS/Synthesis/tree/main/examples)
+catalog as its
 answer key.
 
 ## The two tutorials
