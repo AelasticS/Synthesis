@@ -3,7 +3,7 @@
 > Internal design documentation for contributors to Synthesis itself.
 > Strategy context for why this direction matters lives in
 > [llm-and-model-driven-engineering-v2.md](llm-and-model-driven-engineering-v2.md)
-> (the superseded first draft and a claim-to-evidence map sit alongside it).
+> (a claim-to-evidence map sits alongside it).
 
 A design outline for extending model-to-text generation beyond plain text
 to Markdown, HTML, Word, and PDF, without turning the engine into a

@@ -1,11 +1,9 @@
 # LLMs and Model-Driven Engineering: Where the Leverage Is (v2)
 
 > Internal strategy documentation for contributors to Synthesis itself.
-> Second version, 2026-08-29. The first draft is kept unchanged as
-> [llm-and-model-driven-engineering.md](llm-and-model-driven-engineering.md)
-> to preserve the record of what was claimed before review. This version
-> corrects it after its empirical claims were challenged and checked
-> against the literature. Every substantive claim below is mapped to its
+> Second version, 2026-08-29, correcting the first draft after its
+> empirical claims were challenged and checked against the literature.
+> Every substantive claim below is mapped to its
 > evidence, or explicitly marked as unsourced reasoning, in
 > [llm-and-model-driven-engineering-references.md](llm-and-model-driven-engineering-references.md).
 > The build plan this position motivates is

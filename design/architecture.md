@@ -98,5 +98,4 @@ without buying independence anyone used. One library with namespaced
 subpaths keeps responsibilities legible without the costs. Metamodels
 belong to the example world because they are domain artifacts: examples
 can be read, copied, or extracted whole, together with the metamodels they
-conform to, and nothing domain-shaped hides inside the framework. The
-full decision record is in [consolidation.md](./consolidation.md).
+conform to, and nothing domain-shaped hides inside the framework.
