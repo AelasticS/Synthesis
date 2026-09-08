@@ -135,7 +135,8 @@ documents.
 ## The tag functions
 
 The engine exports the tags for these concepts from
-`libraries/engine/src/m2t/m2t-model/m2t.jsx.ts`. Unlike the metamodel
+[`libraries/synthesis/src/engine/m2t/m2t-model/m2t.jsx.ts`](https://github.com/AelasticS/Synthesis/blob/main/libraries/synthesis/src/engine/m2t/m2t-model/m2t.jsx.ts).
+Unlike the metamodel
 you wrote in the model-to-model tutorial, this one comes with the
 engine, so you write JSX with these tags rather than declaring them.
 
