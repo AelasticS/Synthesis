@@ -15,179 +15,97 @@ overall version history.
 - **The workflow suite v2: definitions and invocations, control flow,
   documents, and the organizational example.** The workflow metamodel
   is reshaped around one distinction: a definition is not an
-  occurrence. `WorkflowModel` is the model root carrying
-  `DocumentType`s and activity definitions (`Task` and `Process`, each
-  with an optional `performer` and a DocumentType inputs/outputs
-  interface); a process body is an implicit sequence of steps whose
-  operators (`Sequence`, `Parallel`, `Choice` with guarded `Branch`es
-  and a guardless else, one `Loop` concept with kind and guard)
-  complete the classical structured control-flow patterns;
-  `Invocation` calls a definition under its own occurrence name and
-  binds process-level `Document`s, typed by DocumentTypes, through
-  reads/writes; an inline Task or Process is single-use sugar (an
-  anonymous definition fused with its sole occurrence), and `Process`
-  is a name scope. `<Invoke>` is the general invocation tag,
-  `<SubProcess $refByName="X" />` its process-call sugar over the same
-  concept. The doctrine is declared constraints at the validation
-  point: an invocation names its definition, bound documents conform
-  to the called interface, a choice offers at least one branch and at
-  most one guardless one, a loop states its guard, a document is
-  typed.
-
-  The suite's transformations carry the shape to both drawings.
-  `workflow-to-bpmn` flattens the entry process (the first definition
-  no invocation calls): implicit sequences chain their children's
-  fragments, a parallel becomes a parallel gateway pair, a choice an
-  exclusive pair with the branch guards on the outgoing flows (the
-  else flow unguarded), a loop a converging entry and a diverging exit
-  whose kind places the test (a repeatUntil closes with the
-  `not <guard>` back edge), a task invocation an occurrence-named
-  task, and a process invocation or an inline process an embedded
-  sub-process with occurrence-prefixed inner names; documents and
-  performers are deliberately not flattened (data objects, call
-  activities, and lanes are the recorded next stage).
-  `workflow-to-mermaid`, the suite's flowchart view, draws the entry
-  process as a classic Mermaid flowchart wired from a start stadium
-  to an end stadium: one decision diamond per choice asking its guard
-  as a question, guard-labeled branch edges with the else label and
-  no merge node, loop diamonds with yes/no edges and a back edge,
-  fork and join bars for parallels, subroutine boxes for invocations,
-  inline processes expanded in place, performers as parenthesized
-  second label lines, and sanitized ids carrying the authored spaced
-  names as labels. `bpmn-to-mermaid` labels gateway
-  diamonds with their DERIVED roles (parallel split, exclusive join),
-  computed from flow degrees exactly because the role is not stored in
-  the model, and renders guards on edges.
-
-  The organizational example joins the suite, and the CLI gains its
-  parameter channel. `org-metamodel` models hierarchies: `OrgUnit`s
-  under the parent/subUnits inverse, `Worker`s as members through
-  worksIn/members, a `Department` run by a manager (a declared
-  constraint requires one; the link is type-level optional under the
-  creation-order regime, since the manager is one of the department's
-  own members), a `Board` governed by its members collectively.
-  `org-to-approval` derives an approval process from that hierarchy,
-  parameterized through the engine's `transform(source, param)`
-  channel, which `transformation run --param <json>` now carries:
-  parsed once in pre-flight, handed to step 1 like `--config`, and
-  recorded VERBATIM as `generatedBy.param` in the header of every
-  artifact the run writes, output models and persisted traces alike,
-  so a parameterized run stays reproducible from its outputs.
-  `--param '{"worker":"Judy","sensitivity":2}'` unfolds the named
-  worker's unit chain upward `sensitivity` levels and emits one
-  approval process, specialized per unit kind with
-  `@SpecPoint`/`@SpecOption`: a department contributes its manager's
-  approval task, a board a parallel block of member approvals. The
-  worker is resolved by name (a CLI parameter cannot carry an element
-  reference), a miss lists the workers the organization knows, and
-  missing or malformed parameters answer with the expected form.
-  Verifications assert all of it through the real CLI: the flowchart
-  view's conventions and the declared constraints (via a deliberately
-  invalid model), the flattened v2 shape, both sensitivities with
-  their provenance and error paths, and the onward chain. The suite
-  docs page is rewritten around the new metamodel, with the
-  organizational example as its generative section and one process
-  drawn from both ends of the chain.
+  occurrence. `WorkflowModel` roots document types and activity
+  definitions (`Task` and `Process`, each with an optional performer
+  and a document-type interface); `Invocation` steps call definitions
+  under occurrence names and bind typed `Document`s through
+  reads/writes; an inline task or process is single-use sugar; and
+  `Sequence`, `Parallel`, `Choice` with an optional guardless else,
+  and one `Loop` concept complete the control flow of the
+  block-structured workflow model (a process tree). Conformance is
+  declared constraints at the validation point. `workflow-to-bpmn`
+  flattens the entry process with gateway pairs and
+  occurrence-prefixed embedded sub-processes; `workflow-to-mermaid`
+  draws it as a classic flowchart; `bpmn-to-mermaid` labels gateways
+  with derived split and join roles. The organizational example joins
+  the suite: `org-to-approval` derives an approval process from an
+  `org-metamodel` hierarchy, parameterized by worker and sensitivity
+  through the engine's parameter channel, which the new
+  `transformation run --param <json>` carries and records verbatim as
+  `generatedBy.param` on everything the run writes. The suite docs
+  page is rewritten around the new metamodel.
 
 - **The eer-to-sql suite draws its design space.** `rel-to-mermaid`,
-  the suite's fourth member, renders the OUTPUT of the configurable
-  eer-to-relational mapping as Mermaid erDiagram text, chained as
-  `eer-to-relational` then `rel-to-mermaid`, so different
-  configurations of the same source become visibly different
-  diagrams. A block per table (type-first lines with the SQL type
-  made Mermaid-safe, `PK` and `FK` marks read from the PrimaryKey
-  element and the foreign key pairs, `"nullable"` comments), a line
-  per foreign key (identifying exactly when the key's columns sit
-  inside the owner's primary key), and a dashed one-to-one line per
-  historyOf link; domains and indexes are skipped as diagram noise.
-  The logic is fixed: the manifest declares no parts and the CLI runs
-  it without configuration flags. The suite docs page closes with the
-  three configurations drawn side by side, and its verification runs
-  exactly those three chains through the real CLI.
+  the suite's fourth member, renders the OUTPUT of the
+  configuration-based eer-to-relational mapping as Mermaid erDiagram
+  text (`PK` and `FK` marks, `"nullable"` comments, identifying lines
+  exactly when the foreign key's columns sit inside the owner's
+  primary key, dashed historyOf links), so different configurations
+  of one source become visibly different diagrams. Fixed logic, run
+  without configuration flags. The suite docs page closes with the
+  three configurations drawn side by side.
 
 - **The eer-to-sql suite gains its diagram view.** `eer-to-mermaid-er`
   renders the suite's EER source as Mermaid erDiagram text: an
-  attribute block per entity (every kind, subtypes included; domain
-  names as type words, `PK` markers, `"optional"` comments, composite
-  attributes flattened one level), dashed ordinary relationships with
-  per-role glyphs, solid weak-identification and
-  aggregation-participation lines, and one dashed one-to-one is-a line
-  per subtype. The logic is fixed: the manifest declares no parts and
-  the CLI runs it without configuration flags. The suite docs page
-  explains the conventions and both example catalogs list the package.
+  attribute block for every entity kind with domain names as type
+  words, dashed ordinary relationships with per-role glyphs, solid
+  identifying lines, and one is-a line per subtype. Fixed logic, run
+  without configuration flags.
 
 - **The EER metamodel says what the language means.** A weak mapping
-  nests inside its weak entity. A Specialization IS a mapping (a
-  Mapping subtype), nested inside its root entity, its inherited
-  cardinalities carrying the two classical subtyping constraints:
-  lowerBound is completeness (partial/total), upperBound is
-  disjointness (disjoint/overlapping); several specializations inside
-  one entity are independent categories of subtyping, and
-  SpecializationMapping is gone. Subtypes are first-class top-level
-  entities declaring membership with a scope-qualified supertype
-  reference. The constraint audit adds declared rules for every
-  semantically mandatory link JSX cannot force (subtype membership,
-  specialization root and arity, leaf-attribute domains). The
-  SingleTable strategy honors the bounds: disjoint hierarchies get
-  the `type` discriminator (NOT NULL exactly when total), overlapping
-  ones get none, and grafted subtype columns are always nullable;
-  TablePerClass root copies handle composite attributes.
+  nests inside its weak entity, and a Specialization IS a mapping
+  nested inside its root entity, its inherited bounds carrying the
+  two classical constraints: lowerBound is completeness, upperBound
+  is disjointness. Subtypes are first-class top-level entities with
+  scope-qualified supertype references. Declared rules cover every
+  semantically mandatory link JSX cannot force, and the SingleTable
+  strategy honors the bounds: a discriminator only when disjoint,
+  NOT NULL exactly when total.
 
-- **Row history as a composite design option.** The eer-to-sql suite gains the
-  per-entity RowHistory issue: the HistoryTable option wraps the
-  entity's table step with the higher-order `withHistoryTable`
-  template (a table-set step, stacked one granularity above the audit
-  columns step) and derives a `<table>_history` table keyed by the
-  base key plus a temporal discriminator, deliberately without foreign
-  keys since history outlives deletion. HistoryTable is the first live
-  CompositeOption: it opens the HistoryDiscriminator sub-issue
-  (ValidFromTimestamp default, VersionCounter), while configurations
-  stay flat and an unconsulted sub-issue needs no choice. Late grafts
-  (relationship foreign keys, SingleTable hierarchy columns) are
-  mirrored into versioned tables' histories. The relational Table
-  carries the `historyOf` link, and the DDL generator emits an AFTER
-  UPDATE OR DELETE capture trigger stub per history table.
+- **Row history as a composite design option.** The eer-to-sql
+  suite's per-entity RowHistory issue wraps an entity's table step
+  with the higher-order `withHistoryTable` table-set template,
+  deriving a `<table>_history` table keyed by the base key plus a
+  temporal discriminator, deliberately without foreign keys since
+  history outlives deletion. Its HistoryTable option is the first
+  live CompositeOption, opening the HistoryDiscriminator sub-issue;
+  late grafts are mirrored into versioned tables' histories; the
+  relational Table carries the `historyOf` link; and the DDL
+  generator emits a capture trigger stub per history table.
 
 - **Default configurations traverse chosen composite options.**
-  `config init` (and `--default-configs`) now answers, recursively,
-  the sub-issues a chosen option opens, in the same decision context;
-  sub-issues behind unchosen options stay out. The CLI's
-  decision-model index reads the rendered containment (a composite
-  option's subtree renders before the option itself, so document-order
-  attribution would misfile it) and indexes sub-issues like issues.
+  `config init` and `--default-configs` now answer, recursively, the
+  sub-issues a chosen option opens; sub-issues behind unchosen
+  options stay out.
 
-- **The eer-to-sql suite maps full EER semantics (v2).** Aggregations with the
-  cardinality key rule (an at-most-once participant's copied key IS
-  the primary key, surplus candidates become UNIQUE foreign keys, no
-  such participant means the composite of all participants' keys);
-  relationships strictly binary by doctrine, with the error naming
-  Aggregation; connect/disconnect integrity rules translated into
-  referential actions and trigger stubs; user-defined domains
-  (baseType, check, default) emitted and column-linked; attribute
-  optionality driving nullability; composite attributes flattened; a first-class ordered PrimaryKey element
-  replacing the isKey mark; the SingleTable discriminator named
-  `type`; entity name scopes with naturally named samples; and the
-  simplified withAuditColumns form (plain createdBy/createdAt).
+- **The eer-to-sql suite maps full EER semantics (v2).** Aggregations
+  with the cardinality key rule, relationships strictly binary by
+  doctrine, connect/disconnect integrity rules translated into
+  referential actions and trigger stubs, user-defined domains,
+  attribute optionality driving nullability, flattened composite
+  attributes, a first-class ordered PrimaryKey element replacing the
+  isKey mark, the SingleTable discriminator named `type`, entity name
+  scopes with naturally named samples, and the simplified
+  withAuditColumns form.
 
 - **Dialects are configurations: the DDL design space grew.**
-  ReferentialActions (NativeDdl or TriggerEmulation), DomainHandling
-  (InlineTypes or EmitDomains), SqlDialect (StandardSql, PostgreSql,
-  Oracle), and the per-table Clustering issue (one-time CLUSTER under
-  PostgreSql, ORGANIZATION INDEX under Oracle) join IdentifierQuoting.
-  Three dialect presets ship as configuration models authored by
-  extension over the compiled `rel-to-sql-ddl/presets` vocabulary, and
-  `transformation run --config` accepts source-agnostic configurations
-  (no declared source reference), the preset form.
+  ReferentialActions, DomainHandling, SqlDialect, and the per-table
+  Clustering issue join IdentifierQuoting; three dialect presets ship
+  as configuration models authored by extension; and
+  `transformation run --config` accepts source-agnostic
+  configurations, the preset form.
 
-- **Declared constraints with a validation point.** Metamodels declare
-  semantic rules on their types with addValidator (arity, presence,
-  membership of key/index/foreign-key columns in their tables, and a
-  schema-level acyclicity of the combined identification-dependency
-  graph); `synth model validate` runs the traversal after the gate
-  render and reports each violation; `model import` is unchanged. The
-  types meta-metamodel records namespace classifications as data
-  (`isNamespace`), and the metamodel guide documents constraints and
-  their placement rule.
+- **Declared constraints with a validation point.** Metamodels
+  declare semantic rules on their types with addValidator;
+  `synth model validate` runs the traversal after the gate render and
+  reports each violation, while `model import` is unchanged. The
+  types meta-metamodel records namespace classifications as data.
+
+### Changed
+
+- **Docs pages link their sources.** Example, tutorial, and guide
+  pages link the repository folders holding their packages and
+  metamodels.
 
 ## [cli-v0.2.0] - 2026-09-05
 
