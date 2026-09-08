@@ -1,42 +1,35 @@
 # rel-to-mermaid
 
-Model-to-text over the relational metamodel: the OUTPUT of the suite's
-configurable `eer-to-relational` mapping, rendered as Mermaid
-`erDiagram` text, so different configurations of the same source
-become visibly different diagrams. It chains as `eer-to-relational`
-then `rel-to-mermaid`. Every table gets an attribute block (type-first
-lines with the SQL type made Mermaid-safe, `PK` and `FK` marks read
-from the PrimaryKey element and the foreign key pairs, a `"nullable"`
-comment on nullable columns); every foreign key gets a line, solid
-(identifying) exactly when its columns sit inside the owner's primary
-key; a `historyOf` link gets a dashed one-to-one line, deliberately
-not a foreign key. Domains and indexes are diagram noise and are
-skipped. The logic is fixed: a diagram renderer has no open design
-questions at this scale, so the manifest declares no parts and the
-CLI runs it without configuration flags. The conventions, with the
-three configurations drawn side by side, are explained canonically in
-the docs page "A full-featured EER to SQL transformation".
+Model-to-text transformation rendering a relational schema
+(`relational-metamodel`, the output of the suite's configuration-based
+`eer-to-relational` mapping) as Mermaid `erDiagram` text: an attribute
+block per table with `PK` and `FK` marks, a line per foreign key,
+solid (identifying) exactly when its columns sit inside the owner's
+primary key, and a dashed one-to-one line per `historyOf` link. It
+chains after `eer-to-relational`, so different configurations of the
+same source become visibly different diagrams. The logic is fixed:
+the manifest declares no parts and the CLI runs it without
+configuration flags.
 
-## The package anatomy
-
-- [src/transformation.tsx](./src/transformation.tsx): one document per
-  schema, the table blocks first, then the foreign-key lines, then the
-  historyOf lines; an incomplete foreign key is a clear error.
-- [sample/warehouse.tsx](./sample/warehouse.tsx): a compact warehouse,
-  composite keys, a history table, a nullable DECIMAL column.
-- [scripts/verify.mjs](./scripts/verify.mjs): the chain run three
-  times on the suite's Library sample (defaults, TablePerClass with
-  ForeignKey, SingleTable), each configuration asserted in the
-  generated text, plus a direct run on the warehouse sample.
-
-## Try it
+## Run
 
 ```bash
+npm run build   # from the repository root: rush build -t rel-to-mermaid
+
 synth init
 synth namespace mk demo
 synth transformation install ../eer-to-relational
 synth transformation install .
 synth model import ../eer-to-relational/sample/library.tsx --as demo/library
-synth transformation run eer-to-relational rel-to-mermaid --in demo/library --default-configs --out-dir ./generated
+
+synth transformation run eer-to-relational rel-to-mermaid \
+  --in demo/library --default-configs --out-dir ./generated
 cat generated/library_rel.mmd
 ```
+
+`npm test` runs the CLI smoke plus `scripts/verify.mjs`, which runs
+the chain under three configurations and asserts each generated text.
+
+The diagram conventions, with the three configurations drawn side by
+side, are explained on the suite page
+[A full-featured EER to SQL transformation](https://AelasticS.github.io/aelastics/developer-guide/examples/eer-to-sql#one-source-three-configurations).

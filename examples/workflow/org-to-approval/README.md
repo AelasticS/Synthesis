@@ -1,38 +1,38 @@
 # org-to-approval
 
 Model-to-model transformation deriving a block-structured workflow
-model (a process tree) from an organizational hierarchy
-(`org-metamodel`). The run is parameterized through the engine's
-parameter channel: `--param '{"worker":"<name>","sensitivity":<levels>}'`
-names the worker whose document needs approval and how many levels of
-the hierarchy approve it. The worker's unit chain is unfolded upward
-that many levels, and each unit contributes one approval step by kind
-(`@SpecPoint`/`@SpecOption`): a department the approval task of its
-manager, a board a parallel block of its members' approval tasks. The
+model (a process tree, `workflow-metamodel`) from an organizational
+hierarchy (`org-metamodel`). The logic is fixed, but every run
+requires `--param '{"worker":...,"sensitivity":...}'`: `worker` names
+the worker whose document needs approval, `sensitivity` how many
+levels of the unit chain approve it. A department approves through
+its manager, a board in parallel through its members, and the
 verbatim parameter is recorded in the generated model's `generatedBy`
-provenance, so a parameterized run stays reproducible from its output.
-The suite is explained canonically in the docs page "The workflow suite".
+provenance.
 
-Try it (from a workspace):
+## Run
 
 ```bash
-synth transformation install <path-to>/org-to-approval
-synth model import <path-to>/sample/acme.tsx --as demo/acme
+npm run build   # from the repository root: rush build -t org-to-approval
+
+synth init
+synth namespace mk demo
+synth transformation install .
+synth model import sample/acme.tsx --as demo/acme
+
 synth transformation run org-to-approval --in demo/acme --out demo/approval \
   --param '{"worker":"Judy","sensitivity":2}'
 synth model show demo/approval
 ```
 
 The generated model is an ordinary workflow model, so the suite's
-chain continues from it: run
-`org-to-approval workflow-to-bpmn bpmn-to-mermaid` with `--out-dir`
-for the flattened drawing, or `workflow-to-mermaid` on the persisted
-result for the flowchart view.
+chain continues from it: run `org-to-approval workflow-to-bpmn
+bpmn-to-mermaid` with `--out-dir`, or `workflow-to-mermaid` on the
+persisted result.
 
-The sample `acme.tsx` is a small organization: an executive board of
-three over two nested departments, each naming its manager. The test
-script runs `scripts/verify.mjs` directly instead of the generic smoke
-harness, because the transformation requires a parameter the harness
-cannot supply; the verification covers both sensitivities, the
-recorded provenance, the parameter's error paths, and the onward
-chain.
+`npm test` runs `scripts/verify.mjs` directly (the generic smoke
+harness cannot supply the required parameter), covering both
+sensitivities, the provenance, the error paths, and the onward chain.
+
+The derivation is explained on the suite page
+[The workflow suite](https://AelasticS.github.io/aelastics/developer-guide/examples/workflow#the-organizational-example-a-model-generates-a-process).

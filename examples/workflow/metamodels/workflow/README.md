@@ -1,17 +1,18 @@
 # workflow-metamodel
 
-Block-structured workflow metamodel (a process tree): a
-`WorkflowModel` carries the model-level vocabulary, `DocumentType`s
-and activity definitions (`Task`, `Process`), and a process body is an
-implicit sequence of steps: the operators (`Sequence`, `Parallel`,
-`Choice` with guarded `Branch`es, `Loop` with kind and guard), inline
-single-use activities, and `Invocation`s calling definitions under
-their own occurrence names and binding the process's `Document`s
-through reads/writes. `<Invoke>` is the general invocation tag and
-`<SubProcess $refByName="X" />` its process-call sugar. The graph view
-of the same block-structured workflow models is produced by the
-`workflow-to-bpmn` transformation; `workflow-to-mermaid` draws the
-tree itself.
+The metamodel of block-structured workflow models (process trees): a
+`WorkflowModel` carries `DocumentType`s and activity definitions
+(`Task`, `Process`), and a process body is an implicit sequence of
+steps, the operators (`Sequence`, `Parallel`, `Choice` with guarded
+`Branch`es, `Loop` with kind and guard), inline single-use
+activities, and `Invocation`s calling definitions under occurrence
+names and binding `Document`s through reads and writes. It is the
+source language of `workflow-to-bpmn` and `workflow-to-mermaid`, and
+the target language of `org-to-approval`.
 
-Subpaths: the bare package exports the JSX components; `/model` exports
-the type schemas.
+Subpaths: the bare specifier `workflow-metamodel` exports the JSX
+components (`<Invoke>` is the general invocation tag, `<SubProcess>`
+its process-call sugar); `workflow-metamodel/model` the type schemas.
+
+The metamodel is explained on the suite page
+[The workflow suite](https://AelasticS.github.io/aelastics/developer-guide/examples/workflow#the-metamodels).

@@ -1,5 +1,17 @@
 # eer-metamodel
 
-The full EER (Extended Entity-Relationship) metamodel of the eer-to-sql example suite: kernels, weak entities, aggregations, subtypes with specializations, and the mapping concepts that connect them. It is the source language of the eer-to-relational example.
+The full EER (Extended Entity-Relationship) metamodel of the
+eer-to-sql example suite: kernels, weak entities, aggregations,
+subtypes with specializations, composite attributes, user-defined
+domains with checks, integrity rules, and the mapping concepts that
+connect them. It is the source language of the configuration-based
+`eer-to-relational` mapping and of the `eer-to-mermaid-er` diagram
+view.
 
-Subpath convention: the bare specifier `eer-metamodel` exports the JSX template components flat, `eer-metamodel/model` exports the data-type schemas, and `eer-metamodel/as-model` exports the metamodel-as-model factory (`EERModel`) that the transformation's binding model references.
+Subpaths: the bare specifier `eer-metamodel` exports the JSX
+components, `eer-metamodel/model` the type schemas, and
+`eer-metamodel/as-model` the metamodel-as-model factory (`EERModel`)
+that the transformation's binding model references.
+
+The metamodel is explained on the suite page
+[A full-featured EER to SQL transformation](https://AelasticS.github.io/aelastics/developer-guide/examples/eer-to-sql#the-metamodels).
