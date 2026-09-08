@@ -4,7 +4,8 @@
 
 Synthesis is a TypeScript monorepo for **model-driven software engineering**. It
 provides an embedded domain-specific language for defining metamodels, building
-model instances with JSX, and writing model-to-model transformations.
+model instances with JSX, and writing model-to-model and model-to-text
+transformations, with design decisions captured as configurations.
 Supporting libraries handle runtime type validation, reactive state management,
 and typed error handling. A CLI tool ties everything together for code
 generation workflows.
@@ -18,6 +19,7 @@ The full documentation site lives at
 |---|---|
 | [User Guide](https://AelasticS.github.io/aelastics/user-guide) | Install the `synth` CLI, import models, run transformations, chains, and pipelines |
 | [Developer Guide](https://AelasticS.github.io/aelastics/developer-guide) | The Synthesis transformation language: define metamodels, build models with JSX, write transformations, configure variability with design decisions |
+| [Examples](https://AelasticS.github.io/aelastics/developer-guide/examples) | The example suites: the tutorial companions, the full-featured EER to SQL suite, and the workflow suite |
 | [@aelastics/types](https://AelasticS.github.io/aelastics/types/intro) | Runtime type system with schemas, validation, and graph transducers |
 | [@aelastics/store](https://AelasticS.github.io/aelastics/store/intro) | Reactive model store built on MobX |
 | [@aelastics/result](https://AelasticS.github.io/aelastics/result/intro) | Typed success/failure handling without exceptions |
@@ -46,10 +48,12 @@ Synthesis/
 │   ├── cli/                   # @aelastics/synthesis-cli: the synth CLI (oclif)
 │   └── docs/                  # Docusaurus documentation site
 ├── examples/
-│   ├── tutorial/              # tutorial suite + its metamodel packages
-│   └── eer-to-sql/            # full-example suite + its metamodel packages
+│   ├── tutorial/              # tutorial companion suite + its metamodel packages
+│   ├── eer-to-sql/            # full-featured EER to SQL suite + its metamodel packages
+│   └── workflow/              # workflow suite + its metamodel packages
 ├── templates/
 │   └── transformation-template/  # starter transformation package
+├── design/                    # design records and architecture documentation
 ├── common/                    # Rush shared configuration
 ├── .github/workflows/         # CI: docs deploy, CLI release
 └── rush.json                  # Rush workspace definition
@@ -62,8 +66,8 @@ the rules behind them are documented in
 ## Contributing
 
 See [CONTRIBUTING.md](https://github.com/AelasticS/Synthesis/blob/main/CONTRIBUTING.md)
-for development setup, branch strategy, commit conventions, testing rules, and
-the CLI release workflow.
+for the contribution policy, development setup, commit conventions, testing
+rules, and the CLI release workflow.
 
 ## History
 
