@@ -623,5 +623,4 @@ is exactly the walk between the two notations.
 - [`examples/workflow/org-to-approval`](https://github.com/AelasticS/Synthesis/tree/main/examples/workflow/org-to-approval):
   the generative example, with
   the `acme` sample.
-- `design/workflow-suite.md` and `design/workflow-suite-v2.md` in the
-  repository record the design.
+- `design/workflow-suite-v2.md` in the repository records the design.

@@ -4,8 +4,7 @@
 > [llm-and-model-driven-engineering-v2.md](llm-and-model-driven-engineering-v2.md).
 > It maps that document's claims to the sources that support, qualify, or
 > contradict them, and it names the claims that have no source because
-> they are our own reasoning. The superseded first draft is
-> [llm-and-model-driven-engineering.md](llm-and-model-driven-engineering.md).
+> they are our own reasoning.
 
 ## Method and honesty notes
 

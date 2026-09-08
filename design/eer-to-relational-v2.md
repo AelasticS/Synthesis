@@ -1,7 +1,9 @@
 # eer-to-relational v2: the full-fledged flagship
 
-The successor of the v1 flagship (design/eer-to-sql-flagship.md, merged
-538a34a). Scope agreed with the user 2026-09-05/06: all three gap
+The successor of the v1 flagship record (retired 2026-09-08; its
+outcome-trace design lives on in design/trace-model.md, the v1 work
+itself merged as 538a34a). Scope agreed with the user 2026-09-05/06:
+all three gap
 tiers are in, under the doctrine below. This record is the authority
 for v2; building starts only after the user approves it and the open
 decisions are settled as they answer. The tutorial suite is untouched
