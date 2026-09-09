@@ -1,7 +1,7 @@
 import * as t from "@aelastics/types";
 export declare const Workflow_TypeSchema: t.TypeSchema;
 export declare const WorkflowModel: t.Subtype<{
-    documentTypes: t.ArrayType<t.LinkType>;
+    documents: t.ArrayType<t.LinkType>;
     definitions: t.ArrayType<t.LinkType>;
 }, {
     elements: t.ArrayType<t.EntityType<{
@@ -18,7 +18,7 @@ export declare const WorkflowModel: t.Subtype<{
     path: t.OptionalType<t.StringType>;
     parentModel: t.OptionalType<t.LinkType>;
 }, t.ObjectType<import("@aelastics/types/lib/complex-types/ObjectType.js").InterfaceDecl, readonly string[]>>;
-export declare const DocumentType: t.Subtype<{}, {
+export declare const Document: t.Subtype<{}, {
     name: t.StringType;
     label: t.OptionalType<t.StringType>;
     description: t.OptionalType<t.StringType>;
@@ -104,7 +104,7 @@ export declare const Task: t.Subtype<{}, {
 }, t.ObjectType<import("@aelastics/types/lib/complex-types/ObjectType.js").InterfaceDecl, readonly string[]>>;
 export declare const Process: t.Subtype<{
     steps: t.ArrayType<t.LinkType>;
-    documents: t.ArrayType<t.LinkType>;
+    dataObjects: t.ArrayType<t.LinkType>;
 }, {
     performer: t.OptionalType<t.StringType>;
     inputs: t.ArrayType<t.LinkType>;
@@ -116,8 +116,8 @@ export declare const Process: t.Subtype<{
     path: t.OptionalType<t.StringType>;
     parentModel: t.OptionalType<t.LinkType>;
 }, t.ObjectType<import("@aelastics/types/lib/complex-types/ObjectType.js").InterfaceDecl, readonly string[]>>;
-export declare const Document: t.Subtype<{
-    documentType: t.OptionalType<t.LinkType>;
+export declare const DataObject: t.Subtype<{
+    document: t.OptionalType<t.LinkType>;
 }, {
     name: t.StringType;
     label: t.OptionalType<t.StringType>;
@@ -138,7 +138,7 @@ export declare const Invocation: t.Subtype<{
     parentModel: t.OptionalType<t.LinkType>;
 }, t.ObjectType<import("@aelastics/types/lib/complex-types/ObjectType.js").InterfaceDecl, readonly string[]>>;
 export type IWorkflowModel = t.TypeOf<typeof WorkflowModel>;
-export type IDocumentType = t.TypeOf<typeof DocumentType>;
+export type IDocument = t.TypeOf<typeof Document>;
 export type IStep = t.TypeOf<typeof Step>;
 export type ISequence = t.TypeOf<typeof Sequence>;
 export type IParallel = t.TypeOf<typeof Parallel>;
@@ -148,5 +148,5 @@ export type ILoop = t.TypeOf<typeof Loop>;
 export type IActivity = t.TypeOf<typeof Activity>;
 export type ITask = t.TypeOf<typeof Task>;
 export type IProcess = t.TypeOf<typeof Process>;
-export type IDocument = t.TypeOf<typeof Document>;
+export type IDataObject = t.TypeOf<typeof DataObject>;
 export type IInvocation = t.TypeOf<typeof Invocation>;

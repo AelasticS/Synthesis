@@ -31,11 +31,12 @@ overall version history.
 - **The workflow suite v2: definitions and invocations, control flow,
   documents, and the organizational example.** The workflow metamodel
   is reshaped around one distinction: a definition is not an
-  occurrence. `WorkflowModel` roots document types and activity
+  occurrence. `WorkflowModel` roots `Document` vocabulary and activity
   definitions (`Task` and `Process`, each with an optional performer
-  and a document-type interface); `Invocation` steps call definitions
-  under occurrence names and bind typed `Document`s through
-  reads/writes; an inline task or process is single-use sugar; and
+  and a document interface); `Invocation` steps call definitions
+  under occurrence names and bind `DataObject`s, each naming its
+  document, through reads/writes; an inline task or process is
+  single-use sugar; and
   `Sequence`, `Parallel`, `Choice` with an optional guardless else,
   and one `Loop` concept complete the control flow of the
   block-structured workflow model (a process tree). Conformance is

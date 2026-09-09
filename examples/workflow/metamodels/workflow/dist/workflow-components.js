@@ -4,9 +4,9 @@ export const WorkflowModel = (props) => {
     return new ExprNode(w.WorkflowModel, props, undefined);
 };
 // Model-level vocabulary: declared once, referenced by name from
-// interfaces (inputs/outputs) and documents.
-export const DocumentType = (props) => {
-    return new ExprNode(w.DocumentType, props, "documentTypes");
+// interfaces (inputs/outputs) and data objects.
+export const Document = (props) => {
+    return new ExprNode(w.Document, props, "documents");
 };
 // An activity connects into the first containment its parent declares:
 // an operator's children when nested, a process body's steps, the
@@ -36,12 +36,12 @@ export const Branch = (props) => {
 export const Loop = (props) => {
     return new ExprNode(w.Loop, props, stepConnection);
 };
-// A document nests in the process whose carriers it belongs to.
-export const Document = (props) => {
-    return new ExprNode(w.Document, props, "documents");
+// A data object nests in the process whose carriers it belongs to.
+export const DataObject = (props) => {
+    return new ExprNode(w.DataObject, props, "dataObjects");
 };
 // The general invocation tag: the activity prop names the called
-// definition, reads/writes bind the enclosing process's documents.
+// definition, reads/writes bind the enclosing process's data objects.
 export const Invoke = (props) => {
     return new ExprNode(w.Invocation, props, stepConnection);
 };

@@ -1,12 +1,12 @@
 # workflow-metamodel
 
 The metamodel of block-structured workflow models (process trees): a
-`WorkflowModel` carries `DocumentType`s and activity definitions
+`WorkflowModel` carries `Document` vocabulary and activity definitions
 (`Task`, `Process`), and a process body is an implicit sequence of
 steps, the operators (`Sequence`, `Parallel`, `Choice` with guarded
 `Branch`es, `Loop` with kind and guard), inline single-use
 activities, and `Invocation`s calling definitions under occurrence
-names and binding `Document`s through reads and writes. It is the
+names and binding `DataObject`s through reads and writes. It is the
 source language of `workflow-to-bpmn` and `workflow-to-mermaid`, and
 the target language of `org-to-approval`.
 
