@@ -14,6 +14,7 @@
 import { createExprNode } from '@aelastics/synthesis/jsx'
 import type { ExprNode } from '@aelastics/synthesis/jsx'
 import type { ModelStore } from '@aelastics/synthesis/store'
+import type { SynthHeaderInput } from '@aelastics/synthesis/envelope'
 import {
   WorkflowModel, DocumentType, Task, Process, Document,
   Choice, Branch, Loop, Invoke, SubProcess
@@ -26,7 +27,7 @@ export const $synth = {
   author: 'Sinisa Neskovic',
   version: '0.1.0',
   description: 'Expense approval: a guarded choice, a repeat-until loop, a twice-invoked shared task, and a bound report document'
-} as const
+} as const satisfies SynthHeaderInput
 
 export default (store: ModelStore): ExprNode<wm.IWorkflowModel> => (
   <WorkflowModel name="ExpenseApproval" store={store}>

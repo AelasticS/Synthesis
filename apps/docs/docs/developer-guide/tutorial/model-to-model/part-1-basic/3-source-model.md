@@ -28,6 +28,7 @@ from `sample/library.tsx` in
 import { createExprNode } from '@aelastics/synthesis/jsx'
 import type { ExprNode } from '@aelastics/synthesis/jsx'
 import type { ModelStore } from '@aelastics/synthesis/store'
+import type { SynthHeaderInput } from '@aelastics/synthesis/envelope'
 import { EERSchema, Entity, Attribute, Domain, Relationship, Role } from 'eer-tutorial-metamodel/basic'
 import type * as em from 'eer-tutorial-metamodel/basic/model'
 
@@ -37,7 +38,7 @@ export const $synth = {
   author: 'Sinisa Neskovic',
   version: '0.1.0',
   description: 'Sample EER schema for tutorial Part 1: one 1:N and one M:N relationship'
-} as const
+} as const satisfies SynthHeaderInput
 
 export default (store: ModelStore): ExprNode<em.IEERSchema> => (
   <EERSchema name="Library" store={store}>
@@ -94,7 +95,10 @@ imported with `import type`, since they exist only at compile time.
 
 **The `$synth` header.** This exported constant declares what the file
 is: its kind (`model`), the metamodel it is written in, and its
-authorship metadata. The CLI maintains this header. `model import`
+authorship metadata. The `satisfies SynthHeaderInput` clause checks the
+literal against the header's authored type, published by the library's
+`@aelastics/synthesis/envelope` subpath; the import is type-only and
+erased at compile time. The CLI maintains this header. `model import`
 validates it, fills in what is missing, and derives the metamodel from
 the file's imports when the header does not state it. When a
 transformation writes a model, the CLI generates the header itself and

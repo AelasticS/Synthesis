@@ -12,6 +12,14 @@ overall version history.
 
 ### Added
 
+- **The $synth header is typed.** The library's new
+  `@aelastics/synthesis/envelope` subpath publishes the header's shared
+  TypeScript types: `SynthHeaderInput` is the authored form (only `kind`
+  and `metamodel` required), `SynthHeader` the normalized form the CLI
+  maintains. Models are authored as `as const satisfies SynthHeaderInput`
+  with a type-only import; the CLI reuses the same types, and stamping
+  keeps the clause. Docs and every sample model teach the typed form.
+
 - **The workflow suite v2: definitions and invocations, control flow,
   documents, and the organizational example.** The workflow metamodel
   is reshaped around one distinction: a definition is not an

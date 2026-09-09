@@ -3,6 +3,7 @@
 import { createExprNode } from '@aelastics/synthesis/jsx'
 import type { ExprNode } from '@aelastics/synthesis/jsx'
 import type { ModelStore } from '@aelastics/synthesis/store'
+import type { SynthHeaderInput } from '@aelastics/synthesis/envelope'
 import { RelSchema, Table, Column } from 'rel-tutorial-metamodel'
 import type * as rmT from 'rel-tutorial-metamodel/model'
 
@@ -12,7 +13,7 @@ export const $synth = {
   author: 'Your Name',
   version: '0.1.0',
   description: 'Sample input model for the starter transformation'
-} as const
+} as const satisfies SynthHeaderInput
 
 export default (store: ModelStore): ExprNode<rmT.IRelSchema> => (
   <RelSchema name="ExampleDb" store={store}>

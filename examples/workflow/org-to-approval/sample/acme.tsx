@@ -3,6 +3,7 @@
 import { createExprNode } from '@aelastics/synthesis/jsx'
 import type { ExprNode } from '@aelastics/synthesis/jsx'
 import type { ModelStore } from '@aelastics/synthesis/store'
+import type { SynthHeaderInput } from '@aelastics/synthesis/envelope'
 import { Organization, Board, Department, Worker, Manager, TopUnit, OrgUnit } from 'org-metamodel'
 import type * as om from 'org-metamodel/model'
 
@@ -12,7 +13,7 @@ export const $synth = {
   author: 'Sinisa Neskovic',
   version: '0.1.0',
   description: 'AcmeCorp: an executive board over two nested departments (the paper example)'
-} as const
+} as const satisfies SynthHeaderInput
 
 // The hierarchy is laid flat: each unit names its parent as a
 // reference prop, workers nest in the unit they work in (the inverse

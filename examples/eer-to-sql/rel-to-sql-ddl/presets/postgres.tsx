@@ -8,6 +8,7 @@
  * CLUSTER statements).
  */
 import { createExprNode } from '@aelastics/synthesis/jsx'
+import type { SynthHeaderInput } from '@aelastics/synthesis/envelope'
 import { presetModel, standardSqlChoices } from 'rel-to-sql-ddl/presets'
 
 export const $synth = {
@@ -16,7 +17,7 @@ export const $synth = {
   author: 'Sinisa Neskovic',
   version: '0.1.0',
   description: 'The PostgreSQL dialect preset for rel-to-sql-ddl: standard-sql plus the postgres physical flavor'
-} as const
+} as const satisfies SynthHeaderInput
 
 export default presetModel('PostgresPreset', {
   ...standardSqlChoices(),

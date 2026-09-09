@@ -3,6 +3,7 @@
 import { createExprNode } from '@aelastics/synthesis/jsx'
 import type { ExprNode } from '@aelastics/synthesis/jsx'
 import type { ModelStore } from '@aelastics/synthesis/store'
+import type { SynthHeaderInput } from '@aelastics/synthesis/envelope'
 import {
   EERSchema, Entity, Weak, Attribute, Domain, Relationship, Role, WeakMapping,
 } from 'eer-metamodel'
@@ -14,7 +15,7 @@ export const $synth = {
   author: 'Sinisa Neskovic',
   version: '0.1.0',
   description: 'A compact shop: two kernels, one M:N relationship, one weak entity'
-} as const
+} as const satisfies SynthHeaderInput
 
 export default (store: ModelStore): ExprNode<t.IEERSchema> => (
   <EERSchema name="Shop" store={store}>

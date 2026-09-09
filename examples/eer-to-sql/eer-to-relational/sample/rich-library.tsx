@@ -12,6 +12,7 @@
 import { createExprNode } from '@aelastics/synthesis/jsx'
 import type { ExprNode } from '@aelastics/synthesis/jsx'
 import type { ModelStore } from '@aelastics/synthesis/store'
+import type { SynthHeaderInput } from '@aelastics/synthesis/envelope'
 import {
   EERSchema, Entity, Weak, Attribute, Domain, Relationship, Role,
   Specialization, Subtype, WeakMapping,
@@ -25,7 +26,7 @@ export const $synth = {
   author: 'Sinisa Neskovic',
   version: '0.1.0',
   description: 'Rich EER schema exercising every metamodel concept'
-} as const
+} as const satisfies SynthHeaderInput
 
 export default (store: ModelStore): ExprNode<t.IEERSchema> => (
   <EERSchema name="RichLibrary" store={store}>

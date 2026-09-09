@@ -3,6 +3,7 @@
 import { createExprNode } from '@aelastics/synthesis/jsx'
 import type { ExprNode } from '@aelastics/synthesis/jsx'
 import type { ModelStore } from '@aelastics/synthesis/store'
+import type { SynthHeaderInput } from '@aelastics/synthesis/envelope'
 import { RelSchema, Table, Column } from 'rel-tutorial-metamodel'
 import type * as rmT from 'rel-tutorial-metamodel/model'
 
@@ -12,7 +13,7 @@ export const $synth = {
   author: 'Sinisa Neskovic',
   version: '0.1.0',
   description: 'Sample relational schema for the model-to-text tutorial: the output of eer-tutorial-basic'
-} as const
+} as const satisfies SynthHeaderInput
 
 /**
  * This is literally what the model-to-model tutorial hands over: run

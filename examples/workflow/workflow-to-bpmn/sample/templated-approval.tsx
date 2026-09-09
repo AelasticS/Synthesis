@@ -11,6 +11,7 @@
 import { createExprNode } from '@aelastics/synthesis/jsx'
 import type { ExprNode, Template } from '@aelastics/synthesis/jsx'
 import type { ModelStore } from '@aelastics/synthesis/store'
+import type { SynthHeaderInput } from '@aelastics/synthesis/envelope'
 import { WorkflowModel, Process, Sequence, Task, Parallel } from 'workflow-metamodel'
 import type * as wm from 'workflow-metamodel/model'
 
@@ -20,7 +21,7 @@ export const $synth = {
   author: 'Sinisa Neskovic',
   version: '0.1.0',
   description: 'Approval workflow built from a higher-order template: the writing step is itself a template'
-} as const
+} as const satisfies SynthHeaderInput
 
 // Step templates, defined outside any workflow.
 const Write = () => <Task name="Write" />
