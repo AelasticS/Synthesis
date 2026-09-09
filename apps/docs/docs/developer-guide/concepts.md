@@ -85,9 +85,12 @@ Each `Invoke` is a new step, an occurrence under its own name; the
 reference inside it is what retrieves. `<Task $refByName="Archive" />`
 creates no new task: it looks up the existing definition and connects
 it, so both occurrences point at the same element, two edges into one
-node. A reference must resolve to an element that exists when it is
-evaluated; an unresolvable name is a construction error, not a silent
-null. When the metamodel declares name scopes,
+node. Position decides the rest: `Archive`, a child of the model, is a
+reusable definition that runs only where invoked, while the inline
+`Write`, a child of the process, is a definition fused with its one
+and only occurrence, a step in place. A reference must resolve to an
+element that exists when it is evaluated; an unresolvable name is a
+construction error, not a silent null. When the metamodel declares name scopes,
 resolution is scope-aware: a bare name is probed from the nearest
 enclosing scope outward, and a path such as `Author/id` reaches into a
 sibling scope. See
