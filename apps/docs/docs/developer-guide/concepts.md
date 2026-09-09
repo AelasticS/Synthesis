@@ -67,18 +67,27 @@ Every model expression is composed from exactly four kinds of operators:
 
 The first two build structure. The third is what makes models true
 *graphs* rather than trees: nesting alone can only express containment,
-while a reference connects an element to something created elsewhere:
+while a reference connects an element to something created elsewhere.
+In the workflow above every task was defined in place; here a task
+defined once is invoked twice:
 
 ```tsx
-<Attribute name="PersonName">
-  <Domain $refByName="string" />
-</Attribute>
+<Task name="Archive" />
+
+<Process name="HandleContract">
+  <Task name="Write" />
+  <Invoke name="ArchiveDraft" activity={<Task $refByName="Archive" />} />
+  <Invoke name="ArchiveFinal" activity={<Task $refByName="Archive" />} />
+</Process>
 ```
 
-Here no new `Domain` is created; the existing element named `string` is
-looked up and connected. A reference must resolve to an element that
-exists when it is evaluated; an unresolvable name is a construction
-error, not a silent null. When the metamodel declares name scopes,
+Each `Invoke` is a new step, an occurrence under its own name; the
+reference inside it is what retrieves. `<Task $refByName="Archive" />`
+creates no new task: it looks up the existing definition and connects
+it, so both occurrences point at the same element, two edges into one
+node. A reference must resolve to an element that exists when it is
+evaluated; an unresolvable name is a construction error, not a silent
+null. When the metamodel declares name scopes,
 resolution is scope-aware: a bare name is probed from the nearest
 enclosing scope outward, and a path such as `Author/id` reaches into a
 sibling scope. See
