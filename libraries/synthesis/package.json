@@ -15,6 +15,10 @@
       "types": "./lib/index.d.ts",
       "default": "./lib/index.js"
     },
+    "./envelope": {
+      "types": "./lib/envelope.d.ts",
+      "default": "./lib/envelope.js"
+    },
     "./jsx": {
       "types": "./lib/jsx.d.ts",
       "default": "./lib/jsx.js"
@@ -90,6 +94,7 @@
   },
   "typesVersions": {
     "*": {
+      "envelope": ["lib/envelope.d.ts"],
       "jsx": ["lib/jsx.d.ts"],
       "metamodel": ["lib/metamodel.d.ts"],
       "store": ["lib/store.d.ts"],

@@ -1,33 +1,6 @@
-export type SynthHeaderKind =
-  | 'model'
-  | 'metamodel'
-  | 'decision-model'
-  | 'binding-model'
-  | 'configuration-model'
+import type { SynthGeneratedBy, SynthHeader, SynthHeaderKind } from '@aelastics/synthesis/envelope'
 
-export interface SynthGeneratedBy {
-  tx: string
-  txVersion?: string
-  config?: string
-  /** Verbatim --param JSON of the generating run, when one was given. */
-  param?: string
-  date: string
-}
-
-export interface SynthHeader {
-  kind: SynthHeaderKind
-  metamodel: string
-  references: Record<string, string>
-  generatedBy: SynthGeneratedBy | null
-  createdAt: string
-  modifiedAt: string
-  author: string
-  version: string
-  description: string
-  tags: string[]
-  license: string | null
-  custom: Record<string, unknown>
-}
+export type { SynthGeneratedBy, SynthHeader, SynthHeaderInput, SynthHeaderKind } from '@aelastics/synthesis/envelope'
 
 export interface ParseSynthHeaderResult {
   header: SynthHeader | null

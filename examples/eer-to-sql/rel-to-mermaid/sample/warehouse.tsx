@@ -11,6 +11,7 @@
 import { createExprNode } from '@aelastics/synthesis/jsx'
 import type { ExprNode } from '@aelastics/synthesis/jsx'
 import type { ModelStore } from '@aelastics/synthesis/store'
+import type { SynthHeaderInput } from '@aelastics/synthesis/envelope'
 import { RelSchema, Table, Column, Domain, ForeignKey, ForeignKeyColumn, Index, PrimaryKey } from 'relational-metamodel'
 import type * as t from 'relational-metamodel/model'
 
@@ -20,7 +21,7 @@ export const $synth = {
   author: 'Sinisa Neskovic',
   version: '0.1.0',
   description: 'A compact warehouse: composite keys, a history table, a nullable DECIMAL column'
-} as const
+} as const satisfies SynthHeaderInput
 
 export default (store: ModelStore): ExprNode<t.IRelSchema> => (
   <RelSchema name="Warehouse" store={store}>

@@ -3,6 +3,7 @@
 import { createExprNode } from '@aelastics/synthesis/jsx'
 import type { ExprNode } from '@aelastics/synthesis/jsx'
 import type { ModelStore } from '@aelastics/synthesis/store'
+import type { SynthHeaderInput } from '@aelastics/synthesis/envelope'
 import {
   EERSchema, Entity, Weak, Attribute, Domain, Relationship, Role,
   Specialization, Subtype, WeakMapping,
@@ -16,7 +17,7 @@ export const $synth = {
   author: 'Sinisa Neskovic',
   version: '0.1.0',
   description: 'The Library: kernels, an abstract root with a hierarchy, an overlapping hierarchy, a weak chain, an M:N and a 1:N relationship'
-} as const
+} as const satisfies SynthHeaderInput
 
 /**
  * Entities scope their attributes' names, so every key is simply `id`

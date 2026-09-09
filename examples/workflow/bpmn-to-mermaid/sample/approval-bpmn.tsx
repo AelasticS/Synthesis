@@ -3,6 +3,7 @@
 import { createExprNode } from '@aelastics/synthesis/jsx'
 import type { ExprNode } from '@aelastics/synthesis/jsx'
 import type { ModelStore } from '@aelastics/synthesis/store'
+import type { SynthHeaderInput } from '@aelastics/synthesis/envelope'
 import { Process, Task, StartEvent, EndEvent, Gateway, Flow, FromNode, ToNode } from 'bpmn-metamodel'
 import type * as bm from 'bpmn-metamodel/model'
 
@@ -12,7 +13,7 @@ export const $synth = {
   author: 'Sinisa Neskovic',
   version: '0.1.0',
   description: 'The approval process as a BPMN graph'
-} as const
+} as const satisfies SynthHeaderInput
 
 export default (store: ModelStore): ExprNode<bm.IProcess> => (
   <Process name="Approval" store={store}>

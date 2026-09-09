@@ -8,6 +8,7 @@
  * creation (ORGANIZATION INDEX).
  */
 import { createExprNode } from '@aelastics/synthesis/jsx'
+import type { SynthHeaderInput } from '@aelastics/synthesis/envelope'
 import { presetModel, standardSqlChoices } from 'rel-to-sql-ddl/presets'
 
 export const $synth = {
@@ -16,7 +17,7 @@ export const $synth = {
   author: 'Sinisa Neskovic',
   version: '0.1.0',
   description: 'The Oracle dialect preset for rel-to-sql-ddl: trigger emulation, inline domain types, index-organized clustering'
-} as const
+} as const satisfies SynthHeaderInput
 
 export default presetModel('OraclePreset', {
   ...standardSqlChoices(),

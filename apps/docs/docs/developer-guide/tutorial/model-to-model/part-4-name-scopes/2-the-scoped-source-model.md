@@ -14,6 +14,7 @@ names:
 import { createExprNode } from '@aelastics/synthesis/jsx'
 import type { ExprNode } from '@aelastics/synthesis/jsx'
 import type { ModelStore } from '@aelastics/synthesis/store'
+import type { SynthHeaderInput } from '@aelastics/synthesis/envelope'
 import { EERSchema, Entity, Attribute, Domain, Relationship, Role } from 'eer-tutorial-metamodel/name-scopes'
 import type * as em from 'eer-tutorial-metamodel/name-scopes/model'
 
@@ -23,7 +24,7 @@ export const $synth = {
   author: 'Sinisa Neskovic',
   version: '0.1.0',
   description: 'Sample EER schema for tutorial Part 4: the Library of Part 1 with natural names under entity scopes'
-} as const
+} as const satisfies SynthHeaderInput
 
 export default (store: ModelStore): ExprNode<em.IEERSchema> => (
   <EERSchema name="Library" store={store}>

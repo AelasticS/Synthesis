@@ -21,6 +21,7 @@ executed), not a JSON data file:
 import { createExprNode } from '@aelastics/synthesis/jsx'
 import type { ExprNode } from '@aelastics/synthesis/jsx'
 import type { ModelStore } from '@aelastics/synthesis/store'
+import type { SynthHeaderInput } from '@aelastics/synthesis/envelope'
 import { EERSchema, Entity, Attribute, Domain } from 'eer-metamodel'
 
 export const $synth = {
@@ -30,7 +31,7 @@ export const $synth = {
   author: 'Jane Doe <jane@example.org>',
   version: '0.1.0',
   description: 'Persons EER schema'
-} as const
+} as const satisfies SynthHeaderInput
 
 export default (store: ModelStore) => (
   <EERSchema name="Persons" store={store}>
@@ -48,17 +49,31 @@ constant that is **written and maintained by the tools** (`model import`,
 `transformation run`, `config init`), never required from humans. A
 hand-authored file without a header gets one derived at import.
 
-| Field | Maintained by | Meaning |
-|---|---|---|
-| `kind` | tools | `model`, `metamodel`, `decision-model`, `binding-model`, or `configuration-model` |
-| `metamodel` | tools | package of the metamodel the content instantiates |
-| `references` | tools | map of workspace refs this model depends on (e.g. `sourceModel`) |
-| `generatedBy` | tools | `{ tx, txVersion, config, date }` provenance when produced by a run; `null` for authored models |
-| `createdAt` / `modifiedAt` | tools | ISO dates, maintained on import and write |
-| `author` | you (flags) | defaults from `git config user.name` / `user.email`, override with `--author` |
-| `version` | you (flags) | the model's own semver, default `0.1.0` |
-| `description` | you (flags) | one line, shown in `model ls` and pickers |
-| `tags` | you (flags) | string list for search and filtering |
+The header's shape is published as shared TypeScript types by the library's
+`@aelastics/synthesis/envelope` subpath. `SynthHeaderInput` is the authored
+form: only `kind` and `metamodel` are required, every other field is
+optional and defaulted at import. Author the header as
+`as const satisfies SynthHeaderInput` with a type-only import, as in the
+snippet above; the compiler then checks field names, field types, and the
+allowed `kind` values while the literal keeps its exact type. The import is
+type-only, so it is erased at compile time and never affects rendering, and
+the tools keep both the import and the `satisfies` clause when they stamp
+the file. `SynthHeader`, from the same subpath, is the normalized full form
+the tools maintain in the workspace copy.
+
+| Field | Authored | Maintained by | Meaning |
+|---|---|---|---|
+| `kind` | required | tools | one of `model`, `metamodel`, `decision-model`, `binding-model`, `configuration-model` |
+| `metamodel` | required | tools | package of the metamodel the content instantiates |
+| `references` | optional | tools | map of workspace refs this model depends on (e.g. `sourceModel`) |
+| `generatedBy` | optional | tools | `{ tx, txVersion?, config?, param?, date }` provenance when produced by a run; `null` for authored models |
+| `createdAt` / `modifiedAt` | optional | tools | ISO dates, maintained on import and write |
+| `author` | optional | you (flags) | defaults from `git config user.name` / `user.email`, override with `--author` |
+| `version` | optional | you (flags) | the model's own semver, default `0.1.0` |
+| `description` | optional | you (flags) | one line, shown in `model ls` and pickers |
+| `tags` | optional | you (flags) | string list for search and filtering |
+| `license` | optional | you | license string, or `null` when unset |
+| `custom` | optional | you | free-form object for your own metadata |
 
 Commands like `model ls`, `doctor`, and shell completion read the header with
 a fast static parse; `model import` and `transformation run` read it

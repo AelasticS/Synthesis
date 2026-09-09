@@ -3,6 +3,7 @@
 import { createExprNode } from '@aelastics/synthesis/jsx'
 import type { ExprNode } from '@aelastics/synthesis/jsx'
 import type { ModelStore } from '@aelastics/synthesis/store'
+import type { SynthHeaderInput } from '@aelastics/synthesis/envelope'
 import { RelSchema, Table, Column, ForeignKey, ForeignKeyColumn, Index, PrimaryKey } from 'relational-metamodel'
 import type * as t from 'relational-metamodel/model'
 
@@ -12,7 +13,7 @@ export const $synth = {
   author: 'Sinisa Neskovic',
   version: '0.1.0',
   description: 'Sample relational schema with a real foreign key and an index: import it to try the rel-to-sql-ddl example'
-} as const
+} as const satisfies SynthHeaderInput
 
 export default (store: ModelStore): ExprNode<t.IRelSchema> => (
   <RelSchema name="LibraryDb" store={store}>
