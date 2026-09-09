@@ -12,6 +12,14 @@ overall version history.
 
 ### Added
 
+- **An invocation carries its own performer.** The workflow
+  metamodel's `Invocation` gains an optional `performer` overriding
+  the called definition's default, as in BPMN, where a call activity
+  carries its own resource assignment; the flowchart view labels each
+  occurrence box with the effective performer. A new declared
+  constraint requires an invocation to call a model-level definition,
+  never an inline step.
+
 - **The $synth header is typed.** The library's new
   `@aelastics/synthesis/envelope` subpath publishes the header's shared
   TypeScript types: `SynthHeaderInput` is the authored form (only `kind`
