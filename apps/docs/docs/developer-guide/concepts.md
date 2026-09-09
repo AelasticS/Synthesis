@@ -21,7 +21,7 @@ pragma elided; setup is covered in [Building Model Instances](./guides/building-
 
 ```tsx
 const approval = (
-  <WorkflowModel name="Approval" store={store}>
+  <WorkflowModel name="Approval">
     <Process name="Approval">
       <Task name="Write" />
       <Parallel>
@@ -31,14 +31,15 @@ const approval = (
     </Process>
   </WorkflowModel>
 )
-
-const model = approval.render(new Context())
 ```
 
 The JSX expression is a tree of unevaluated element descriptions.
-`render()` evaluates it: each tag creates a typed model element, nesting
+Rendering evaluates it: each tag creates a typed model element, nesting
 becomes association, and the result is the model: an approval
-process in which *Write* is followed by two parallel approvals:
+process in which *Write* is followed by two parallel approvals. (How
+rendering is invoked, including the model store every element is
+created in, is machinery, covered in
+[Building Model Instances](./guides/building-models.md).)
 
 ```mermaid
 flowchart LR
@@ -59,7 +60,7 @@ Every model expression is composed from exactly four kinds of operators:
 
 | Operator | In JSX | What evaluation does |
 |---|---|---|
-| **Model creation** | the root model tag: `<WorkflowModel store={store}>`, `<EERSchema …>` | creates a **model**: a typed container with its own namespace and type schema, into which child elements are placed |
+| **Model creation** | the root model tag: `<WorkflowModel …>`, `<EERSchema …>` | creates a **model**: a typed container with its own namespace and type schema, into which child elements are placed |
 | **Element creation** | element tags: `<Task>`, `<Kernel>`, `<Column>` | creates a typed **element** with its properties and connects it to its parent |
 | **Reference** | `$refByName`, `$ref`, `$refByID` | **retrieves** an existing element instead of creating one |
 | **Computation** | TypeScript in `{ … }`: `map`, conditionals, function calls | **computes** sub-expressions dynamically |
@@ -111,11 +112,13 @@ const Approval = ({ doc, approvers, parallel }: IApprovalConfig) => {
     <Task name={`Approve ${doc} ${i + 1}`} />)
 
   return (
-    <Process name={`${doc} Approval`}>
-      <Task name={`Write ${doc}`} />
-      {parallel ? <Parallel>{tasks}</Parallel>
-                : <Sequence>{tasks}</Sequence>}
-    </Process>
+    <WorkflowModel name={`${doc} Approval`}>
+      <Process name={`${doc} Approval`}>
+        <Task name={`Write ${doc}`} />
+        {parallel ? <Parallel>{tasks}</Parallel>
+                  : <Sequence>{tasks}</Sequence>}
+      </Process>
+    </WorkflowModel>
   )
 }
 ```
@@ -125,7 +128,7 @@ definition: different element counts, different topology, different
 property values.
 
 `<Approval doc="Contract" approvers={3} parallel={true} />` produces a
-process with three parallel approvals:
+model whose process has three parallel approvals:
 
 ```mermaid
 flowchart LR
@@ -139,7 +142,7 @@ flowchart LR
 ```
 
 `<Approval doc="Invoice" approvers={2} parallel={false} />` produces a
-process with two sequential approvals:
+model whose process has two sequential approvals:
 
 ```mermaid
 flowchart LR
@@ -155,7 +158,10 @@ Because templates are ordinary functions, they compose like functions,
 and nothing stops a parameter from itself being a template. A
 **higher-order template** takes another template as a parameter and
 abstracts over the *structure* of its sub-expressions, not just their
-property values.
+property values. The reusable unit also shifts: a template's result
+need not be a whole model, and the templates below deliberately return
+steps and processes, sub-expressions to be embedded under a model root
+at the end.
 
 First define the writing step as a template of its own, outside any
 workflow:
@@ -190,15 +196,16 @@ const Approval = (WriteStep: Template<IStep>) =>
 
 Evaluation now happens in **two steps**. Applying the higher-order
 template to a step template yields an ordinary template; supplying the
-remaining parameters closes the expression, and embedding it in the
-model literal renders to the model:
+remaining parameters closes the expression, and embedding it under a
+model root completes the model expression, which rendering evaluates
+to the model:
 
 ```tsx
 const SimpleApproval = Approval(Write)                            // a template
 const contract = <SimpleApproval doc="Contract" approvers={2} />  // a closed expression
-const model = (
-  <WorkflowModel name="Contracts" store={store}>{contract}</WorkflowModel>
-).render(new Context())                                           // the model
+const contracts = (
+  <WorkflowModel name="Contracts">{contract}</WorkflowModel>
+)                                                                 // the model expression
 ```
 
 Swapping the step swaps structure, not just values:
