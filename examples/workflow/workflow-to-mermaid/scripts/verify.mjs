@@ -9,8 +9,11 @@
  * steps without a trace of its own name; the expense sample asserts
  * the v2 conventions (the choice diamond with guard-labeled edges and
  * the else edge, the repeatUntil guard diamond with its no back edge
- * and yes exit, the process invocation as a subroutine box, two
- * distinct occurrence boxes of one shared definition, branch exits
+ * and yes exit, the process invocation as a subroutine box carrying
+ * the called definition's performer, two distinct occurrence boxes of
+ * one shared definition carrying their effective performers, the
+ * overriding occurrence its own and the other the definition's
+ * default, branch exits
  * reconverging without a merge node). A deliberately invalid model
  * then exercises the metamodel's declared constraints through
  * `synth model validate`.
@@ -83,8 +86,8 @@ try {
     reviewed.includes('  start_node --> Draft')
     && reviewed.includes('  ReviewDraft --> approvals_fork'))
 
-  expect('a process invocation renders as a subroutine box',
-    expense.includes('  ManagerSignoff[["ManagerSignoff"]]'))
+  expect("a process invocation renders as a subroutine box with the called definition's performer",
+    expense.includes('  ManagerSignoff[["ManagerSignoff<br/>(Manager)"]]'))
   expect('a repeatUntil runs the body before the guard diamond',
     expense.includes('  loop1{"approved?"}') && expense.includes('  ManagerSignoff --> loop1'))
   expect('the repeatUntil no edge returns to the body',
@@ -98,8 +101,12 @@ try {
   expect("the guardless branch's edge is labeled else",
     expense.includes('  choice1 -->|else| ArchiveStandard'))
   expect('one shared definition yields two distinct occurrence boxes',
-    expense.includes('  ArchiveHighValue[["ArchiveHighValue"]]')
-    && expense.includes('  ArchiveStandard[["ArchiveStandard"]]'))
+    expense.includes('  ArchiveHighValue[["ArchiveHighValue<br/>')
+    && expense.includes('  ArchiveStandard[["ArchiveStandard<br/>'))
+  expect("an invocation's own performer overrides the definition's on its occurrence box",
+    expense.includes('  ArchiveHighValue[["ArchiveHighValue<br/>(Auditor)"]]'))
+  expect("a non-overriding occurrence shows the definition's default performer",
+    expense.includes('  ArchiveStandard[["ArchiveStandard<br/>(Clerk)"]]'))
   expect('a branch body is implicitly sequential: its steps chain',
     expense.includes('  NotifyFinance --> ArchiveHighValue'))
   expect('all branch exits reconverge on what comes next, no merge node',
@@ -110,10 +117,11 @@ try {
   const validateOut = cli(['model', 'validate', 'demo/expense'])
   expect('model validate runs the declared constraints', validateOut.includes('[ok] declared constraints hold'))
 
-  // a model that renders fine but violates the doctrine three ways: an
+  // a model that renders fine but violates the doctrine four ways: an
   // invocation reading a document whose type is not among the called
-  // definition's inputs, a choice with two guardless branches, and a
-  // loop without a guard.
+  // definition's inputs, a choice with two guardless branches, a loop
+  // without a guard, and an invocation calling an inline step instead
+  // of a model-level definition.
   const badPath = join(home, 'invalid.tsx')
   writeFileSync(badPath, `/** @jsx createExprNode */
 import { createExprNode } from '@aelastics/synthesis/jsx'
@@ -136,6 +144,7 @@ export default (store) => (
       <Loop kind="while">
         <Task name="Z" />
       </Loop>
+      <Invoke name="callX" activity={<Task $refByName="X" />} />
     </Process>
   </WorkflowModel>
 )
@@ -155,6 +164,9 @@ export default (store) => (
     constraintFailure.includes('at most one branch may omit its guard (the else branch)'))
   expect('a guardless loop is rejected',
     constraintFailure.includes('a loop states the guard its kind tests'))
+  expect('an invocation of an inline step is rejected',
+    constraintFailure.includes("Invocation 'callX'")
+    && constraintFailure.includes('an invocation calls a model-level definition, not an inline step'))
 
   if (failures > 0) {
     console.error(`workflow-to-mermaid verify: ${failures} assertion(s) failed`)

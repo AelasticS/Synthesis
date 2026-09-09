@@ -12,7 +12,9 @@
  * chart, wired to the first step's entry, and every final exit wires
  * to the end stadium. A task is a box, its performer a parenthesized
  * second label line; an invocation is a subroutine box named by the
- * occurrence (call semantics stays opaque), while an INLINE process
+ * occurrence (call semantics stays opaque), carrying the effective
+ * performer, its own override or else the called definition's, the
+ * same way, while an INLINE process
  * step, being single-use grouping, expands inline into its steps (its
  * own name does not appear in the drawing). A choice is one decision
  * diamond: each branch's outgoing edge carries its guard (the
@@ -110,14 +112,19 @@ export class WorkflowToMermaidTransformation extends abstractM2M<wm.IWorkflowMod
   }
 
   // An invocation is a subroutine box named by the occurrence; what
-  // the called definition does stays behind the call. (An inline
-  // process, by contrast, is single-use grouping and expands inline
-  // through the Process branch of the dispatch.)
+  // the called definition does stays behind the call. The effective
+  // performer, the invocation's own override or else the called
+  // definition's, becomes the parenthesized second label line, as on
+  // a task box. (An inline process, by contrast, is single-use
+  // grouping and expands inline through the Process branch of the
+  // dispatch.)
   private invocationWiring(inv: wm.IInvocation): Wiring {
-    this.calledOf(inv)
+    const called = this.calledOf(inv)
     const display = this.occurrenceDisplayOf(inv)
     const id = this.sanitizedId(display)
-    return { entry: id, exits: [{ id }], nodes: [`${id}[["${display}"]]`], edges: [] }
+    const performer = ((inv.performer ?? called.performer) ?? '') as string
+    const label = performer === '' ? display : `${display}<br/>(${performer})`
+    return { entry: id, exits: [{ id }], nodes: [`${id}[["${label}"]]`], edges: [] }
   }
 
   // Sequential wiring: every previous exit connects to the next step's
