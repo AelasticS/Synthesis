@@ -4,10 +4,12 @@
  * The suite's richer sample: definitions and invocations, control
  * flow, and document bindings in one model. The Archive task is
  * defined once and invoked twice (two occurrences of one definition,
- * named ArchiveHighValue and ArchiveStandard); the ManagerSignoff
- * process is invoked through the SubProcess sugar; the loop repeats
- * the signoff round until approved; the choice guards the high-value
- * path, its guardless branch being the else; the report document is
+ * named ArchiveHighValue and ArchiveStandard, the high-value one
+ * overriding the definition's Clerk performer with Auditor); the
+ * ManagerSignoff process is invoked through the SubProcess sugar; the
+ * loop repeats the signoff round until approved; the choice guards
+ * the high-value path, its guardless branch being the else; the
+ * report document is
  * typed by the ExpenseReport document type and bound through
  * reads/writes.
  */
@@ -51,7 +53,8 @@ export default (store: ModelStore): ExprNode<wm.IWorkflowModel> => (
       <Choice>
         <Branch guard="amount > 1000">
           <Task name="NotifyFinance" />
-          <Invoke name="ArchiveHighValue" activity={<Task $refByName="Archive" />}
+          <Invoke name="ArchiveHighValue" performer="Auditor"
+                  activity={<Task $refByName="Archive" />}
                   reads={[<Document $refByName="report" />]} />
         </Branch>
         <Branch>

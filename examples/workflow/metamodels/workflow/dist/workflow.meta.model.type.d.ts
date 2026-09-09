@@ -126,6 +126,7 @@ export declare const Document: t.Subtype<{
     parentModel: t.OptionalType<t.LinkType>;
 }, t.ObjectType<import("@aelastics/types/lib/complex-types/ObjectType.js").InterfaceDecl, readonly ["name"]>>;
 export declare const Invocation: t.Subtype<{
+    performer: t.OptionalType<t.StringType>;
     activity: t.OptionalType<t.LinkType>;
     reads: t.ArrayType<t.LinkType>;
     writes: t.ArrayType<t.LinkType>;

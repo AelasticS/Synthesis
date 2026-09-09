@@ -79,9 +79,12 @@ export const Document = t.subtype(ModelElement, {
 }, "Document", Workflow_TypeSchema);
 // An occurrence of a definition: the activity link names what is
 // called (type-level optional, the same idiom as Document.documentType),
-// the optional occurrence name defaults to the definition's, and
+// the optional occurrence name defaults to the definition's, the
+// optional performer overrides the called definition's (as in BPMN,
+// where a call activity carries its own resource assignment), and
 // reads/writes bind the enclosing process's documents.
 export const Invocation = t.subtype(Step, {
+    performer: t.optional(t.string),
     activity: t.optional(t.link(Workflow_TypeSchema, "Activity")),
     reads: t.arrayOf(t.link(Workflow_TypeSchema, "Document")),
     writes: t.arrayOf(t.link(Workflow_TypeSchema, "Document")),
@@ -118,6 +121,27 @@ Invocation.addValidator({
     predicate: (v) => v.activity === undefined || v.activity === null
         || documentsConform(v.writes, v.activity.outputs),
     message: (_v, label) => `${label ?? "Invocation"}: a written document's type must be among the called definition's declared outputs`,
+});
+// An invocation calls into the model-level vocabulary: the called
+// definition must be among the model's definitions, never an inline
+// activity sitting in a process body or operator (an inline activity
+// is fused with its sole occurrence and is not callable). The
+// navigation runs through parentModel, the containment inverse the
+// core metamodel declares against Model.elements; membership in the
+// model's definitions is what makes a definition model-level. An
+// invocation without a reachable activity or model is skipped: the
+// first validator reports the missing activity.
+Invocation.addValidator({
+    predicate: (v) => {
+        const called = v.activity;
+        if (called === undefined || called === null)
+            return true;
+        const model = v.parentModel;
+        if (model === undefined || model === null)
+            return true;
+        return (model.definitions ?? []).includes(called);
+    },
+    message: (_v, label) => `${label ?? "Invocation"}: an invocation calls a model-level definition, not an inline step`,
 });
 Choice.addValidator({
     predicate: (v) => (v.children?.length ?? 0) >= 1,

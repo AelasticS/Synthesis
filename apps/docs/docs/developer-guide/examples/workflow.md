@@ -82,8 +82,12 @@ behavior action), and the metamodel keeps it explicit:
   vocabulary: `DocumentType`s and activity definitions.
 - An `Activity` definition is a `Task` (simple) or a `Process`
   (complex, carrying `steps`). Every definition declares an optional
-  `performer` and its document interface: `inputs` and `outputs` as
-  DocumentType references.
+  `performer` as the default actor, and an invocation may override
+  it, the effective performer being the override or else the
+  definition's (this mirrors BPMN, where a call activity carries its
+  own resource assignment). Each definition also declares its
+  document interface: `inputs` and `outputs` as DocumentType
+  references.
 - A process body is a list of `Step`s, and a body invokes definitions
   through `Invocation` steps: the `activity` link names what is
   called, and the optional occurrence name defaults to the
@@ -141,7 +145,8 @@ body is an implicit sequence:
 
 The richer sample (`workflow-to-bpmn/sample/expense-approval.tsx`)
 exercises everything above in one model: a document type, a task
-definition invoked twice under different occurrence names, a process
+definition invoked twice under different occurrence names (one
+occurrence overriding the definition's performer), a process
 definition called through the `<SubProcess>` sugar inside a
 repeat-until loop, a guarded choice with an else, and a report
 document bound through reads and writes:
@@ -168,7 +173,8 @@ document bound through reads and writes:
     <Choice>
       <Branch guard="amount > 1000">
         <Task name="NotifyFinance" />
-        <Invoke name="ArchiveHighValue" activity={<Task $refByName="Archive" />}
+        <Invoke name="ArchiveHighValue" performer="Auditor"
+                activity={<Task $refByName="Archive" />}
                 reads={[<Document $refByName="report" />]} />
       </Branch>
       <Branch>
@@ -183,6 +189,7 @@ document bound through reads and writes:
 The metamodel's doctrine is declared as constraints and judged at the
 validation point, never at authoring time (a model being built is
 legitimately incomplete): an invocation names the definition it calls,
+an invocation calls a model-level definition, not an inline step,
 read and written documents conform to the called definition's declared
 inputs and outputs, a choice offers at least one branch and at most
 one guardless one, a loop states its guard, and a document is typed.
@@ -253,10 +260,13 @@ The conventions:
   `Write["Write<br/>(Judy)"]`.
 - An invocation is a subroutine box named by the occurrence
   (defaulting to the called definition's name):
-  `ManagerSignoff[["ManagerSignoff"]]`. Call semantics stays opaque:
-  what the called definition does stays behind the call. An INLINE
-  process step, being single-use grouping, expands inline into its
-  steps instead; its own name does not appear in the drawing.
+  `ManagerSignoff[["ManagerSignoff<br/>(Manager)"]]`. The effective
+  performer, the invocation's own override or else the called
+  definition's, becomes the parenthesized second label line, as on a
+  task box. Call semantics stays opaque: what the called definition
+  does stays behind the call. An INLINE process step, being
+  single-use grouping, expands inline into its steps instead; its own
+  name does not appear in the drawing.
 - A choice is ONE decision diamond. The diamond asks the authored
   choice name as its question; an unnamed choice with exactly one
   guarded branch asks that guard, and any other unnamed choice asks a
@@ -283,12 +293,12 @@ rendered by Mermaid itself:
 flowchart TD
   start_node(["start"])
   Submit["Submit"]
-  ManagerSignoff[["ManagerSignoff"]]
+  ManagerSignoff[["ManagerSignoff<br/>(Manager)"]]
   loop1{"approved?"}
   choice1{"amount > 1000?"}
   NotifyFinance["NotifyFinance"]
-  ArchiveHighValue[["ArchiveHighValue"]]
-  ArchiveStandard[["ArchiveStandard"]]
+  ArchiveHighValue[["ArchiveHighValue<br/>(Auditor)"]]
+  ArchiveStandard[["ArchiveStandard<br/>(Clerk)"]]
   end_node(["end"])
   start_node --> Submit
   Submit --> ManagerSignoff
@@ -306,8 +316,10 @@ The `ManagerSignoff` subroutine box is the invocation, not the
 definition: the called process's own two tasks are not drawn here,
 because the flowchart view draws the calling process. The two archive
 boxes are two occurrences of the ONE `Archive` definition, each under
-its own occurrence name, and both wire straight to the end stadium:
-the choice's branches reconverge without a merge node.
+its own occurrence name, the high-value one showing its own `Auditor`
+override and the standard one the definition's `Clerk` default. Both
+wire straight to the end stadium: the choice's branches reconverge
+without a merge node.
 
 The logic is fixed on purpose: a diagram renderer has no open design
 questions at this scale, so the manifest declares no parts and the
