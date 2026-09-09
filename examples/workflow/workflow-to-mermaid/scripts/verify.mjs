@@ -118,25 +118,25 @@ try {
   expect('model validate runs the declared constraints', validateOut.includes('[ok] declared constraints hold'))
 
   // a model that renders fine but violates the doctrine four ways: an
-  // invocation reading a document whose type is not among the called
-  // definition's inputs, a choice with two guardless branches, a loop
-  // without a guard, and an invocation calling an inline step instead
-  // of a model-level definition.
+  // invocation reading a data object whose document is not among the
+  // called definition's inputs, a choice with two guardless branches, a
+  // loop without a guard, and an invocation calling an inline step
+  // instead of a model-level definition.
   const badPath = join(home, 'invalid.tsx')
   writeFileSync(badPath, `/** @jsx createExprNode */
 import { createExprNode } from '@aelastics/synthesis/jsx'
-import { WorkflowModel, DocumentType, Task, Process, Document, Choice, Branch, Loop, Invoke } from 'workflow-metamodel'
+import { WorkflowModel, Document, Task, Process, DataObject, Choice, Branch, Loop, Invoke } from 'workflow-metamodel'
 
 export const $synth = { kind: 'model', metamodel: 'workflow-metamodel', author: 'verify', version: '0.1.0', description: 'constraint violations on purpose' }
 
 export default (store) => (
   <WorkflowModel name="Invalid" store={store}>
-    <DocumentType name="A" />
-    <DocumentType name="B" />
-    <Task name="T" inputs={[<DocumentType $refByName="A" />]} />
+    <Document name="A" />
+    <Document name="B" />
+    <Task name="T" inputs={[<Document $refByName="A" />]} />
     <Process name="P">
-      <Document name="doc" documentType={<DocumentType $refByName="B" />} />
-      <Invoke name="callT" activity={<Task $refByName="T" />} reads={[<Document $refByName="doc" />]} />
+      <DataObject name="doc" document={<Document $refByName="B" />} />
+      <Invoke name="callT" activity={<Task $refByName="T" />} reads={[<DataObject $refByName="doc" />]} />
       <Choice>
         <Branch><Task name="X" /></Branch>
         <Branch><Task name="Y" /></Branch>
@@ -159,7 +159,7 @@ export default (store) => (
   }
   expect('a nonconforming read binding is rejected',
     constraintFailure.includes("Invocation 'callT'")
-    && constraintFailure.includes("a read document's type must be among the called definition's declared inputs"))
+    && constraintFailure.includes("a read data object's document must be among the called definition's declared inputs"))
   expect('a second guardless branch is rejected',
     constraintFailure.includes('at most one branch may omit its guard (the else branch)'))
   expect('a guardless loop is rejected',

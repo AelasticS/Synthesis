@@ -79,14 +79,14 @@ is called by a call activity; a UML activity is called by a call
 behavior action), and the metamodel keeps it explicit:
 
 - A `WorkflowModel` is the model root. At model level it carries the
-  vocabulary: `DocumentType`s and activity definitions.
+  vocabulary: `Document`s and activity definitions.
 - An `Activity` definition is a `Task` (simple) or a `Process`
   (complex, carrying `steps`). Every definition declares an optional
   `performer` as the default actor, and an invocation may override
   it, the effective performer being the override or else the
   definition's (this mirrors BPMN, where a call activity carries its
   own resource assignment). Each definition also declares its
-  document interface: `inputs` and `outputs` as DocumentType
+  document interface: `inputs` and `outputs` as Document
   references.
 - A process body is a list of `Step`s, and a body invokes definitions
   through `Invocation` steps: the `activity` link names what is
@@ -101,14 +101,15 @@ behavior action), and the metamodel keeps it explicit:
   named definition corresponds to BPMN's call activity instead.
 
 The same split organizes data, as types versus instances. A
-`DocumentType` is model-level vocabulary (BPMN's ItemDefinition); a
-definition's `inputs`/`outputs` declare the types it works over (the
-interface, BPMN's ioSpecification); a `Document` is a process-level
-concrete carrier typed by a DocumentType (BPMN's DataObject); and an
-INVOCATION binds the enclosing process's documents through `reads` and
-`writes`. Conformance is a declared constraint, not machinery: a bound
-document's type must be among the called definition's declared types,
-judged by `synth model validate`.
+`Document` is model-level vocabulary, a named kind of document (BPMN's
+ItemDefinition); a definition's `inputs`/`outputs` declare the
+documents it works over (the interface, BPMN's ioSpecification); a
+`DataObject` is a process-level concrete carrier naming its document
+(it deliberately shares BPMN's word for exactly this slot); and an
+INVOCATION binds the enclosing process's data objects through `reads`
+and `writes`. Conformance is a declared constraint, not machinery: a
+bound data object's document must be among the called definition's
+declared ones, judged by `synth model validate`.
 
 Control flow completes the operators. A `Sequence` runs its children
 in order and a `Parallel` runs them concurrently. A `Choice` holds
@@ -144,42 +145,42 @@ body is an implicit sequence:
 ```
 
 The richer sample (`workflow-to-bpmn/sample/expense-approval.tsx`)
-exercises everything above in one model: a document type, a task
+exercises everything above in one model: a document, a task
 definition invoked twice under different occurrence names (one
 occurrence overriding the definition's performer), a process
 definition called through the `<SubProcess>` sugar inside a
 repeat-until loop, a guarded choice with an else, and a report
-document bound through reads and writes:
+data object bound through reads and writes:
 
 ```tsx
 <WorkflowModel name="ExpenseApproval" store={store}>
-  <DocumentType name="ExpenseReport" />
+  <Document name="ExpenseReport" />
   <Task name="Archive" performer="Clerk"
-        inputs={[<DocumentType $refByName="ExpenseReport" />]} />
+        inputs={[<Document $refByName="ExpenseReport" />]} />
   <Process name="ManagerSignoff" performer="Manager"
-           inputs={[<DocumentType $refByName="ExpenseReport" />]}
-           outputs={[<DocumentType $refByName="ExpenseReport" />]}>
+           inputs={[<Document $refByName="ExpenseReport" />]}
+           outputs={[<Document $refByName="ExpenseReport" />]}>
     <Task name="CheckBudget" />
     <Task name="Sign" />
   </Process>
   <Process name="HandleExpense">
-    <Document name="report" documentType={<DocumentType $refByName="ExpenseReport" />} />
+    <DataObject name="report" document={<Document $refByName="ExpenseReport" />} />
     <Task name="Submit" />
     <Loop kind="repeatUntil" guard="approved">
       <SubProcess $refByName="ManagerSignoff"
-                  reads={[<Document $refByName="report" />]}
-                  writes={[<Document $refByName="report" />]} />
+                  reads={[<DataObject $refByName="report" />]}
+                  writes={[<DataObject $refByName="report" />]} />
     </Loop>
     <Choice>
       <Branch guard="amount > 1000">
         <Task name="NotifyFinance" />
         <Invoke name="ArchiveHighValue" performer="Auditor"
                 activity={<Task $refByName="Archive" />}
-                reads={[<Document $refByName="report" />]} />
+                reads={[<DataObject $refByName="report" />]} />
       </Branch>
       <Branch>
         <Invoke name="ArchiveStandard" activity={<Task $refByName="Archive" />}
-                reads={[<Document $refByName="report" />]} />
+                reads={[<DataObject $refByName="report" />]} />
       </Branch>
     </Choice>
   </Process>
@@ -190,9 +191,10 @@ The metamodel's doctrine is declared as constraints and judged at the
 validation point, never at authoring time (a model being built is
 legitimately incomplete): an invocation names the definition it calls,
 an invocation calls a model-level definition, not an inline step,
-read and written documents conform to the called definition's declared
-inputs and outputs, a choice offers at least one branch and at most
-one guardless one, a loop states its guard, and a document is typed.
+read and written data objects conform to the called definition's
+declared inputs and outputs, a choice offers at least one branch and
+at most one guardless one, a loop states its guard, and a data object
+names its document.
 `synth model import` admits what renders; `synth model validate` runs
 the constraints and reports each violation with the rule's own
 message.
@@ -379,13 +381,13 @@ way. Flow elements are named `f1..fn`.
   scope per container while workflow names are unique only per
   process, and one definition may expand under several occurrences.
 
-Stage A of the suite deliberately does NOT flatten documents or
+Stage A of the suite deliberately does NOT flatten data objects or
 performers: the graph carries control flow only. A process invocation
 expands as an embedded sub-process rather than a call, too. The BPMN
 side's growth to the standard's Descriptive conformance subclass
-(call activities for invocations, data objects for documents, lanes
-fed by performers) is the suite's recorded next stage, in
-`design/workflow-suite-v2.md`.
+(call activities for invocations, BPMN data objects for the workflow
+side's data objects, lanes fed by performers) is the suite's recorded
+next stage, in `design/workflow-suite-v2.md`.
 
 ### Rendering the graph
 

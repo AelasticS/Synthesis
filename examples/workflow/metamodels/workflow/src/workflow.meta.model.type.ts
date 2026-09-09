@@ -1,7 +1,7 @@
 /*
  * Block-structured workflow metamodel: a workflow model is a process
- * tree. Definitions and invocations are separate concepts: DocumentType
- * and Activity definitions (Task, Process) live at model level, a
+ * tree. Definitions and invocations are separate concepts: Document
+ * vocabulary and Activity definitions (Task, Process) live at model level, a
  * process body invokes them through Invocation steps with their own
  * occurrence identity, and an inline Task or Process in a body is an
  * anonymous single-use definition fused with its sole occurrence. The
@@ -15,12 +15,12 @@ import { ModelElement, Model, declareNamespace } from "@aelastics/synthesis/meta
 
 export const Workflow_TypeSchema = t.schema("WorkflowSchema")
 
-// The model root carries the model-level vocabulary: document types
+// The model root carries the model-level vocabulary: documents
 // and activity definitions.
 export const WorkflowModel = t.subtype(
   Model,
   {
-    documentTypes: t.arrayOf(t.link(Workflow_TypeSchema, "DocumentType")),
+    documents: t.arrayOf(t.link(Workflow_TypeSchema, "Document")),
     definitions: t.arrayOf(t.link(Workflow_TypeSchema, "Activity")),
   },
   "WorkflowModel",
@@ -28,8 +28,8 @@ export const WorkflowModel = t.subtype(
 )
 
 // A named kind of document: what activity interfaces declare and
-// documents are typed by.
-export const DocumentType = t.subtype(ModelElement, {}, "DocumentType", Workflow_TypeSchema)
+// data objects are typed by.
+export const Document = t.subtype(ModelElement, {}, "Document", Workflow_TypeSchema)
 
 // The unit of a process body: an operator, an invocation, or an inline
 // activity.
@@ -93,14 +93,14 @@ export const Loop = t.subtype(
 )
 
 // An activity definition: the performer and the document interface
-// (inputs/outputs name the DocumentTypes the activity works over). An
+// (inputs/outputs name the Documents the activity works over). An
 // Activity IS a Step so that inline single-use authoring works.
 export const Activity = t.subtype(
   Step,
   {
     performer: t.optional(t.string),
-    inputs: t.arrayOf(t.link(Workflow_TypeSchema, "DocumentType")),
-    outputs: t.arrayOf(t.link(Workflow_TypeSchema, "DocumentType")),
+    inputs: t.arrayOf(t.link(Workflow_TypeSchema, "Document")),
+    outputs: t.arrayOf(t.link(Workflow_TypeSchema, "Document")),
   },
   "Activity",
   Workflow_TypeSchema
@@ -108,56 +108,56 @@ export const Activity = t.subtype(
 
 export const Task = t.subtype(Activity, {}, "Task", Workflow_TypeSchema)
 
-// A process's steps are an implicit sequence; its documents are the
+// A process's steps are an implicit sequence; its data objects are the
 // concrete carriers invocations bind.
 export const Process = t.subtype(
   Activity,
   {
     steps: t.arrayOf(t.link(Workflow_TypeSchema, "Step")),
-    documents: t.arrayOf(t.link(Workflow_TypeSchema, "Document")),
+    dataObjects: t.arrayOf(t.link(Workflow_TypeSchema, "DataObject")),
   },
   "Process",
   Workflow_TypeSchema
 )
 
-// A process scopes the names of its steps and documents: inline names
-// and occurrence names are per process.
+// A process scopes the names of its steps and data objects: inline
+// names and occurrence names are per process.
 declareNamespace(Process)
 
-// A concrete carrier typed by a DocumentType. The link is filled at
+// A concrete carrier typed by a Document. The link is filled at
 // creation from a prop; type-level optional because the store
 // auto-initializes mandatory object properties, which would occupy the
 // slot (the Flow.from/to idiom); the declared constraint below
 // requires it.
-export const Document = t.subtype(
+export const DataObject = t.subtype(
   ModelElement,
   {
-    documentType: t.optional(t.link(Workflow_TypeSchema, "DocumentType")),
+    document: t.optional(t.link(Workflow_TypeSchema, "Document")),
   },
-  "Document",
+  "DataObject",
   Workflow_TypeSchema
 )
 
 // An occurrence of a definition: the activity link names what is
-// called (type-level optional, the same idiom as Document.documentType),
+// called (type-level optional, the same idiom as DataObject.document),
 // the optional occurrence name defaults to the definition's, the
 // optional performer overrides the called definition's (as in BPMN,
 // where a call activity carries its own resource assignment), and
-// reads/writes bind the enclosing process's documents.
+// reads/writes bind the enclosing process's data objects.
 export const Invocation = t.subtype(
   Step,
   {
     performer: t.optional(t.string),
     activity: t.optional(t.link(Workflow_TypeSchema, "Activity")),
-    reads: t.arrayOf(t.link(Workflow_TypeSchema, "Document")),
-    writes: t.arrayOf(t.link(Workflow_TypeSchema, "Document")),
+    reads: t.arrayOf(t.link(Workflow_TypeSchema, "DataObject")),
+    writes: t.arrayOf(t.link(Workflow_TypeSchema, "DataObject")),
   },
   "Invocation",
   Workflow_TypeSchema
 )
 
 export type IWorkflowModel = t.TypeOf<typeof WorkflowModel>
-export type IDocumentType = t.TypeOf<typeof DocumentType>
+export type IDocument = t.TypeOf<typeof Document>
 export type IStep = t.TypeOf<typeof Step>
 export type ISequence = t.TypeOf<typeof Sequence>
 export type IParallel = t.TypeOf<typeof Parallel>
@@ -167,7 +167,7 @@ export type ILoop = t.TypeOf<typeof Loop>
 export type IActivity = t.TypeOf<typeof Activity>
 export type ITask = t.TypeOf<typeof Task>
 export type IProcess = t.TypeOf<typeof Process>
-export type IDocument = t.TypeOf<typeof Document>
+export type IDataObject = t.TypeOf<typeof DataObject>
 export type IInvocation = t.TypeOf<typeof Invocation>
 
 // ── declared constraints ─────────────────────────────────────────────
@@ -176,15 +176,15 @@ export type IInvocation = t.TypeOf<typeof Invocation>
 // grow one element at a time), so these are judgments about the
 // finished model, never authoring-time checks.
 
-// Every bound document's type must be among the declared ones. A
-// document without a type is skipped here: its own validator reports
-// the missing type.
-const documentsConform = (docs: unknown[] | undefined, declared: unknown[] | undefined): boolean => {
-  const allowed = (declared ?? []) as IDocumentType[]
-  for (const d of (docs ?? []) as IDocument[]) {
-    const docType = d?.documentType as IDocumentType | undefined
-    if (docType === undefined || docType === null) continue
-    if (!allowed.includes(docType)) return false
+// Every bound data object's document must be among the declared ones.
+// A data object without a document is skipped here: its own validator
+// reports it.
+const dataObjectsConform = (bound: unknown[] | undefined, declared: unknown[] | undefined): boolean => {
+  const allowed = (declared ?? []) as IDocument[]
+  for (const d of (bound ?? []) as IDataObject[]) {
+    const doc = d?.document as IDocument | undefined
+    if (doc === undefined || doc === null) continue
+    if (!allowed.includes(doc)) return false
   }
   return true
 }
@@ -197,16 +197,16 @@ Invocation.addValidator({
 Invocation.addValidator({
   predicate: (v: IInvocation) =>
     v.activity === undefined || v.activity === null
-    || documentsConform(v.reads, (v.activity as IActivity).inputs),
+    || dataObjectsConform(v.reads, (v.activity as IActivity).inputs),
   message: (_v: IInvocation, label?: string) =>
-    `${label ?? "Invocation"}: a read document's type must be among the called definition's declared inputs`,
+    `${label ?? "Invocation"}: a read data object's document must be among the called definition's declared inputs`,
 })
 Invocation.addValidator({
   predicate: (v: IInvocation) =>
     v.activity === undefined || v.activity === null
-    || documentsConform(v.writes, (v.activity as IActivity).outputs),
+    || dataObjectsConform(v.writes, (v.activity as IActivity).outputs),
   message: (_v: IInvocation, label?: string) =>
-    `${label ?? "Invocation"}: a written document's type must be among the called definition's declared outputs`,
+    `${label ?? "Invocation"}: a written data object's document must be among the called definition's declared outputs`,
 })
 // An invocation calls into the model-level vocabulary: the called
 // definition must be among the model's definitions, never an inline
@@ -244,8 +244,8 @@ Loop.addValidator({
   message: (_v: ILoop, label?: string) =>
     `${label ?? "Loop"}: a loop states the guard its kind tests`,
 })
-Document.addValidator({
-  predicate: (v: IDocument) => v.documentType !== undefined && v.documentType !== null,
-  message: (_v: IDocument, label?: string) =>
-    `${label ?? "Document"}: a document is typed by a document type`,
+DataObject.addValidator({
+  predicate: (v: IDataObject) => v.document !== undefined && v.document !== null,
+  message: (_v: IDataObject, label?: string) =>
+    `${label ?? "DataObject"}: a data object names its document`,
 })
