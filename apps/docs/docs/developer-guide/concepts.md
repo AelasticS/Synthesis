@@ -300,6 +300,23 @@ selects the departments of the source model and maps each through
 `departmentToApproval`, and the whole target is the value of one
 expression.
 
+For an organization with two departments, Sales run by Ana and
+Finance run by Max:
+
+```mermaid
+flowchart TB
+    O[AcmeOrg] --> S["Sales<br/>manager: Ana"]
+    O --> F["Finance<br/>manager: Max"]
+```
+
+the transformation derives this workflow model, drawn as the page
+draws workflows:
+
+```mermaid
+flowchart LR
+    St([Start]) --> W[WriteDocument] --> A1[ApproveByAna] --> A2[ApproveByMax] --> E([End])
+```
+
 Executing the transformation evaluates `topRule`'s expression in a
 fresh target model; every rule invocation is recorded in a **trace**
 linking each target element back to the source elements it came from,
@@ -312,10 +329,8 @@ whose document needs approval and how many hierarchy levels approve
 it). Rules can be made subtype-aware, so each source subtype gets its
 own rule instead of a branch inside one rule; see
 [Polymorphic Rule Dispatch](./guides/polymorphic-dispatch.md). And
-rules can leave design decisions open as variation points resolved
-per run by a configuration model; see the
-[Variability guide](./guides/variability.md) and
-[Part 3 of the tutorial](./tutorial/model-to-model/part-3-configuration-based/index.md).
+rules can leave design decisions open to a configuration, the subject
+of the last subsection below.
 None of that changes the concept: a transformation stays a template
 over a source model. The
 [model-to-model tutorial](./tutorial/model-to-model/part-1-basic/index.md)
