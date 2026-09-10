@@ -443,7 +443,16 @@ step preserves validity, so a valid target model needs no final check.
 > S. Nešković and D. Stojimirović, *Models as Values in a Model
 > Expression Algebra: A Functional Approach to Model Driven Engineering*.
 
-The paper is the formal foundation of the approach; this documentation
-describes the current implementation, which has continued to evolve since
-the paper was written. Where tooling details differ, the documentation is
-authoritative for practical use.
+Configuration-based transformations have their own formal framework
+in a second companion paper: definitions and theorems for variability
+points and options and for the decision, binding, configuration, and
+trace models, with proofs of determinism, completeness, and the
+guaranteed validity of generated default configurations.
+
+> D. Stojimirović and S. Nešković, *Supporting Design Decisions in
+> Rule-Based Model Transformations*.
+
+The papers are the formal foundation of the approach; this
+documentation describes the current implementation, which has
+continued to evolve since they were written. Where tooling details
+differ, the documentation is authoritative for practical use.
