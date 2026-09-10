@@ -260,42 +260,34 @@ model as the parameter.
 
 A transformation is an ordinary TypeScript class extending the
 library's abstract transformation class. The base class carries the
-engine: rule dispatch, trace recording, target resolution. The
-subclass declares the *rules*: `topRule` receives the source model
-and iterates over its elements with
-the computation operator, and every further rule is a typed method
-from one source element to a target expression, written with the
-target metamodel's tags. Because a rule body is plain TypeScript, the
-whole language is available inside it: types, generics, helper
-functions and methods, closures. Here is the shape, the workflow
-suite's own derivation of an approval workflow from an organizational
-model:
+engine; the subclass declares the *rules*: `topRule` receives the
+source model and iterates over its elements with the computation
+operator, and every further rule is a typed method from one source
+element to a target expression, written with the target metamodel's
+tags. Because a rule body is plain TypeScript, the whole language is
+available inside it: types, generics, helper functions and methods,
+closures. Here is a small one, deriving an approval workflow from an
+organizational model:
 
 ```tsx
 export class OrgToApproval extends abstractM2M<ot.IOrganization, wt.IWorkflowModel> {
-  topRule(m: ot.IOrganization) {
+  topRule(org: ot.IOrganization) {
     return (
-      <WorkflowModel name={`${m.name} Approval`} store={this.context.store}>
-        <Process name={`${m.name} Approval`}>
+      <WorkflowModel name={`${org.name} Approval`} store={this.context.store}>
+        <Process name={`${org.name} Approval`}>
           <Task name="WriteDocument" />
-          {m.elements
-            .filter((el) => this.context.store.isTypeOf(el, ot.OrgUnit))
-            .map((el) => this.OrgUnit2Approval(el as ot.IOrgUnit))}
+          {org.elements
+            .filter((el) => this.context.store.isTypeOf(el, ot.Department))
+            .map((el) => this.departmentToApproval(el as ot.IDepartment))}
         </Process>
       </WorkflowModel>
     )
   }
 
-  @E2E()
-  @SpecPoint()
-  OrgUnit2Approval(u: ot.IOrgUnit): ExprNode<wt.IStep> {
-    return undefined! // pure dispatcher: the matching option supplies the result
-  }
-
   // A department's approval is one task, its manager's.
-  @SpecOption('OrgUnit2Approval', ot.Department)
-  Department2Approval(d: ot.IDepartment): ExprNode<wt.ITask> {
-    return <Task name={`ApproveBy${d.manager.name}`} performer={d.manager.name} />
+  @E2E()
+  departmentToApproval(dept: ot.IDepartment): ExprNode<wt.ITask> {
+    return <Task name={`ApproveBy${dept.manager.name}`} performer={dept.manager.name} />
   }
 }
 ```
@@ -304,23 +296,28 @@ The source side is an organizational metamodel, a hierarchy of units
 with managers and members; the target side is the workflow language
 used throughout this page, so an approval process like the one at the
 top of the page can also be derived from an organization. `topRule`
-maps every unit of the source model through `OrgUnit2Approval`, and
-that rule is a *specialization point*: rules marked as its options
-dispatch on the source element's runtime type, a department
-contributing its manager's approval task, a board (its option is not
-shown) a parallel block of member approvals. This is the mechanism
-behind [Polymorphic Rule Dispatch](./guides/polymorphic-dispatch.md).
+selects the departments of the source model and maps each through
+`departmentToApproval`, and the whole target is the value of one
+expression.
 
 Executing the transformation evaluates `topRule`'s expression in a
 fresh target model; every rule invocation is recorded in a **trace**
 linking each target element back to the source elements it came from,
 giving bidirectional traceability for free.
 
-The workflow suite ships the full version of this transformation as
-its generative example: it additionally takes a run parameter, whose
-document needs approval and how many levels of the hierarchy approve
-it, and derives the chain for one worker, with the error guards the
-page omits. The
+The abstract class is also where a transformation grows beyond this
+shape, without changing what it is. A transformation can take a run
+parameter (the workflow suite's full version of this one selects
+whose document needs approval and how many hierarchy levels approve
+it). Rules can be made subtype-aware, so each source subtype gets its
+own rule instead of a branch inside one rule; see
+[Polymorphic Rule Dispatch](./guides/polymorphic-dispatch.md). And
+rules can leave design decisions open as variation points resolved
+per run by a configuration model; see the
+[Variability guide](./guides/variability.md) and
+[Part 3 of the tutorial](./tutorial/model-to-model/part-3-configuration-based/index.md).
+None of that changes the concept: a transformation stays a template
+over a source model. The
 [model-to-model tutorial](./tutorial/model-to-model/part-1-basic/index.md)
 builds a complete transformation start to finish, in the EER domain;
 the full authoring workflow is in
