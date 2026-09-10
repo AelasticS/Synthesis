@@ -368,12 +368,13 @@ produces.
 
 ### Configuration-based transformations
 
-Some transformations contain genuinely open design choices. The
-workflow chain of this page deliberately leaves none open, but the
-eer-to-sql suite is full of them: whether a source relationship
-becomes a foreign key or a join table, how identifiers are quoted,
-how generated output is laid out across files. Synthesis
-makes such a choice a first-class model rather than a hidden flag. A
+Some transformations contain genuinely open design choices: whether
+the approvals of a process run in parallel or one after another, who
+performs a step, how generated output is laid out across files. The
+template section handled the first of these as the `parallel`
+parameter, a choice made in code at the call site; Synthesis can
+instead make such a choice a first-class model rather than a hidden
+flag. A
 **decision model** declares the design space: its *issues* and the
 *options* each issue offers, globally or per source element. A
 **configuration model** records the choices made for one specific
