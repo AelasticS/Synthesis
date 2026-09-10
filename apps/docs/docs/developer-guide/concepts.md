@@ -60,10 +60,14 @@ Every model expression is composed from exactly four kinds of operators:
 
 | Operator | In JSX | What evaluation does |
 |---|---|---|
-| **Model creation** | the root model tag: `<WorkflowModel …>`, `<EERSchema …>` | creates a **model**: a typed container with its own namespace and type schema, into which child elements are placed |
-| **Element creation** | element tags: `<Task>`, `<Kernel>`, `<Column>` | creates a typed **element** with its properties and connects it to its parent |
+| **Model creation** | the root model tag: `<WorkflowModel …>` | creates a **model**: a typed container with its own namespace and type schema, into which child elements are placed |
+| **Element creation** | element tags: `<Task>`, `<Process>`, `<Document>` | creates a typed **element** with its properties and connects it to its parent |
 | **Reference** | `$refByName`, `$ref`, `$refByID` | **retrieves** an existing element instead of creating one |
 | **Computation** | TypeScript in `{ … }`: `map`, conditionals, function calls | **computes** sub-expressions dynamically |
+
+The tags are not built in: each metamodel contributes its own (an EER
+metamodel brings `<EERSchema>`, `<Entity>`, `<Attribute>`), and the
+four operators are the same in every domain.
 
 The first two build structure. The third is what makes models true
 *graphs* rather than trees: nesting alone can only express containment,
@@ -91,8 +95,8 @@ point at the same node, three edges into one element. A reference must
 resolve to an element that exists when it is evaluated; an
 unresolvable name is a construction error, not a silent null. When the metamodel declares name scopes,
 resolution is scope-aware: a bare name is probed from the nearest
-enclosing scope outward, and a path such as `Author/id` reaches into a
-sibling scope. See
+enclosing scope outward, and a path such as `ManagerSignoff/Sign`
+reaches into a sibling scope. See
 [References](./guides/building-models.md#references) for the three
 reference forms and
 [Name scopes](./guides/building-models.md#name-scopes) for scoped
@@ -248,58 +252,77 @@ it and shows how to run it.
 
 ## Transformations are templates over a source model
 
-A model-to-model transformation is a template whose parameter is a
-**source model**. It is written as a class: its `template` method is the
-top-level rule, receiving the whole source model and iterating over its
-elements with the computation operator, and every further *rule* is a
-typed method from one source element to a target model expression:
+A model-to-model transformation is the last rung of the page's ladder
+of parameters: a value parameter selects among shapes, a template
+parameter supplies a shape, and here the parameter is a whole
+**source model**, from which another model is derived.
+
+A transformation is an ordinary TypeScript class extending the
+library's abstract transformation class. The base class carries the
+engine: rule dispatch, trace recording, target resolution. The
+subclass declares the *rules*: its `template` method is the top-level
+rule, receiving the source model and iterating over its elements with
+the computation operator, and every further rule is a typed method
+from one source element to a target expression, written with the
+target metamodel's tags. Because a rule body is plain TypeScript, the
+whole language is available inside it: types, generics, helper
+functions and methods, closures. Here is the shape, the workflow
+suite's own derivation of an approval workflow from an organizational
+model:
 
 ```tsx
-export class Eer2Rel extends abstractM2M<em.IEERSchema, rmT.IRelSchema> {
-  template(s: em.IEERSchema) {
+export class OrgToApproval extends abstractM2M<ot.IOrganization, wt.IWorkflowModel> {
+  template(m: ot.IOrganization) {
     return (
-      <RelSchema name={`${s.name}_rel`} store={this.context.store}>
-        {s.elements
-          .filter((el) => this.context.store.isTypeOf(el, em.Entity))
-          .map((el) => this.entityToTable(el as em.IEntity))}
-        ...
-      </RelSchema>
+      <WorkflowModel name={`${m.name} Approval`} store={this.context.store}>
+        <Process name={`${m.name} Approval`}>
+          <Task name="WriteDocument" />
+          {m.elements
+            .filter((el) => this.context.store.isTypeOf(el, ot.OrgUnit))
+            .map((el) => this.OrgUnit2Approval(el as ot.IOrgUnit))}
+        </Process>
+      </WorkflowModel>
     )
   }
 
   @E2E()
-  entityToTable(e: em.IEntity): ExprNode<rmT.ITable> {
-    return (
-      <Table name={e.name}>
-        {e.attributes.map((a) => this.attributeToColumn(a))}
-      </Table>
-    )
+  @SpecPoint()
+  OrgUnit2Approval(u: ot.IOrgUnit): ExprNode<wt.IStep> {
+    return undefined! // pure dispatcher: the matching option supplies the result
   }
 
-  ...
+  // A department's approval is one task, its manager's.
+  @SpecOption('OrgUnit2Approval', ot.Department)
+  Department2Approval(d: ot.IDepartment): ExprNode<wt.ITask> {
+    return <Task name={`ApproveBy${d.manager.name}`} performer={d.manager.name} />
+  }
 }
 ```
 
-The three dots elide the rest of a real transformation: inside
-`template`, the sibling iterations (relationships, in this example),
-and below `entityToTable`, the further rules and helpers they invoke
-(`attributeToColumn`, the relationship rules, type mapping). The
-[model-to-model tutorial](./tutorial/model-to-model/part-1-basic/index.md)
-builds this exact class in full.
+The source side is an organizational metamodel, a hierarchy of units
+with managers and members; the target side is the workflow language
+this whole page has been using, so the approval process the page
+opened with is not just authorable, it is derivable. The `template`
+maps every unit of the source model through `OrgUnit2Approval`, and
+that rule is a *specialization point*: rules marked as its options
+dispatch on the source element's runtime type, a department
+contributing its manager's approval task, a board (its option is not
+shown) a parallel block of member approvals. This is the mechanism
+behind [Polymorphic Rule Dispatch](./guides/polymorphic-dispatch.md).
 
-Each rule is a template like any other, with the computation operator
-iterating over the source element's properties and invoking further
-rules. Executing the transformation evaluates `template`'s expression in
-a fresh target model; every rule invocation is recorded in a **trace**
+Executing the transformation evaluates `template`'s expression in a
+fresh target model; every rule invocation is recorded in a **trace**
 linking each target element back to the source elements it came from,
 giving bidirectional traceability for free.
 
-Rule selection can be made *subtype-aware*: a rule marked as a
-specialization point dispatches on the runtime type of its source
-element, so each subtype gets its own rule instead of a branch inside a
-single rule. This is the mechanism behind
-[Polymorphic Rule Dispatch](./guides/polymorphic-dispatch.md). The full
-authoring workflow is in
+The workflow suite ships the full version of this transformation as
+its generative example: it additionally takes a run parameter, whose
+document needs approval and how many levels of the hierarchy approve
+it, and derives the chain for one worker, with the error guards the
+page omits. The
+[model-to-model tutorial](./tutorial/model-to-model/part-1-basic/index.md)
+builds a complete transformation start to finish, in the EER domain;
+the full authoring workflow is in
 [Writing Transformations](./guides/writing-transformations.md).
 
 ### Model to model, and model to text
@@ -308,16 +331,17 @@ A transformation's target can be another model or it can be text, and
 Synthesis treats those as the same kind of thing.
 
 A **model-to-model** transformation (`m2m`) produces a model of the
-target metamodel: an EER schema becomes a relational schema, whose
-elements are ordinary model elements you can query, transform again, or
-store in the workspace.
+target metamodel: an organizational model becomes an approval
+workflow, whose elements are ordinary model elements you can query,
+transform again, or store in the workspace.
 
-A **model-to-text** transformation (`m2t`) produces text, and it does so
-by targeting the engine's text-document metamodel, whose concepts are
-documents, sections, and paragraphs. Generating SQL means building a
-document expression whose paragraphs happen to contain SQL. Nothing
-about the rules changes: they are the same typed functions returning JSX
-over a target metamodel's components.
+A **model-to-text** transformation (`m2t`) produces text, and it does
+so by targeting the engine's text-document metamodel, whose concepts
+are documents, sections, and paragraphs. Drawing a workflow as a
+Mermaid flowchart means building a document expression whose
+paragraphs happen to contain Mermaid text. Nothing about the rules
+changes: they are the same typed functions returning JSX over a
+target metamodel's components.
 
 The difference is what happens to the result. An m2m result is written
 back into the workspace as a model, with a provenance header recording
