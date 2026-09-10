@@ -41,7 +41,7 @@ let RelToSqlConfigurableTransformation = class RelToSqlConfigurableTransformatio
     // The template does nothing but hand over to the variation point. The
     // decision is the first thing the transformation makes, because
     // everything else depends on it.
-    template(s) {
+    topRule(s) {
         return this.documentLayout(s);
     }
     // ######### START OutputLayout variations #############

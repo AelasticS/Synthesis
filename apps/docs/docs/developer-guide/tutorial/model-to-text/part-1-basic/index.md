@@ -54,7 +54,7 @@ Three ideas carry the whole part:
 
 - **Generating text is not a mode.** The class you write extends the
   same `abstractM2M` base class a model-to-model transformation
-  extends, and its `template()` method returns JSX in exactly the same
+  extends, and its `topRule()` method returns JSX in exactly the same
   way. Only the target type is different.
 - **The target metamodel is a model of a file system subtree.** Its
   items are directories, which become folders, and documents, which

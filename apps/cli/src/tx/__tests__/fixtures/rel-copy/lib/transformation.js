@@ -20,7 +20,7 @@ export class RelCopyTransformation extends abstractM2M {
     super(store)
   }
 
-  template(s) {
+  topRule(s) {
     const tables = s.elements
       .filter((el) => this.context.store.isTypeOf(el, rmT.Table))
       .map((tab) =>

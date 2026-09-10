@@ -21,7 +21,7 @@ import * as cm from "@aelastics/synthesis/metamodels/configuration/model";
  */
 export declare class Rel2DdlTransformation extends DecisionAwareM2M<rmT.IRelSchema, m2tmm.M2T_Model, {}, cm.IConfigurationModel> {
     constructor(store: ModelStore, extra?: {}, configModel?: cm.IConfigurationModel);
-    template(s: rmT.IRelSchema): any;
+    topRule(s: rmT.IRelSchema): any;
     /** The one-time CLUSTER statements PostgreSQL offers (no maintained
      * clustered indexes there; re-running CLUSTER refreshes the order). */
     private postgresClusterSection;

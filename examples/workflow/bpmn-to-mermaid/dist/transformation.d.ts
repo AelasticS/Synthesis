@@ -6,7 +6,7 @@ import type { ModelStore } from '@aelastics/synthesis/store';
 import * as bm from 'bpmn-metamodel/model';
 export declare class BpmnToMermaidTransformation extends abstractM2M<bm.IProcess, M2T_Model> {
     constructor(store: ModelStore);
-    template(p: bm.IProcess): ExprNode<bm.IProcess, M2T_Model>;
+    topRule(p: bm.IProcess): ExprNode<bm.IProcess, M2T_Model>;
     private outDegree;
     private inDegree;
     private countDegrees;

@@ -35,7 +35,7 @@ export class Rel2DdlTransformation extends DecisionAwareM2M<
     super(store, extra ?? {}, configModel)
   }
 
-  template(s: rmT.IRelSchema) {
+  topRule(s: rmT.IRelSchema) {
     const store = this.context.store
     const tables = (s.elements ?? []).filter((el) => store.isTypeOf(el, rmT.Table)) as rmT.ITable[]
     const domains = (s.elements ?? []).filter((el) => store.isTypeOf(el, rmT.Domain)) as rmT.IDomain[]

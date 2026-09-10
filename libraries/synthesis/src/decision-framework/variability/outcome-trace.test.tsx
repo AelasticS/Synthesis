@@ -5,7 +5,7 @@
  * The scenario: a Process with two tasks and three issues. TaskStyle
  * (per element, stacked @E2E @VarPoint rule), TaskMark (per element,
  * consulted through a nested helper VarPoint), Naming (global,
- * consulted from template() outside any rule). The configuration
+ * consulted from topRule() outside any rule). The configuration
  * chooses Fancy for t1 only, Marked for t2 only, Upper globally.
  *
  * Correct per-element resolution: a decision recorded for one element
@@ -42,7 +42,7 @@ class Tx extends DecisionAwareM2M<b.IProcess, b.IProcess, {}, cmT.IConfiguration
     super(store, {}, configModel)
   }
 
-  template(m: b.IProcess) {
+  topRule(m: b.IProcess) {
     const tasks = ((m.elements ?? []) as b.INode[]).filter((e) =>
       this.context.store.isTypeOf(e, b.Task),
     ) as b.ITask[]

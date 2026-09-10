@@ -22,7 +22,7 @@ export class EER2RelAdvancedTransformation extends abstractM2M<em.IEERSchema, rm
     super(store)
   }
 
-  template(s: em.IEERSchema): ExprNode<em.IEERSchema, rmT.IRelSchema> {
+  topRule(s: em.IEERSchema): ExprNode<em.IEERSchema, rmT.IRelSchema> {
     return (
       <RelSchema name={`${s.name}_rel`} store={this.context.store}>
         {s.elements

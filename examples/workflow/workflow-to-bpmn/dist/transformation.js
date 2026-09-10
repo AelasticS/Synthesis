@@ -16,7 +16,7 @@ export class WorkflowToBpmnTransformation extends abstractM2M {
     constructor(store) {
         super(store);
     }
-    template(m) {
+    topRule(m) {
         const entry = this.entryProcessOf(m);
         const steps = this.stepsOf(entry);
         return (createExprNode(Process, { name: `${entry.name}_bpmn`, store: this.context.store },

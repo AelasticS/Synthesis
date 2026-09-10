@@ -120,6 +120,13 @@ overall version history.
 
 ### Changed
 
+- **The transformation entry rule is `topRule`.** Every transformation
+  implements `topRule(source)` in place of the former `template`
+  method. All rules are templates; what distinguishes the entry rule
+  is its position, and the name now says so (QVT's top relations draw
+  the same line). Breaking for transformations authored against
+  cli-v0.2.0.
+
 - **Docs pages link their sources.** Example, tutorial, and guide
   pages link the repository folders holding their packages and
   metamodels.
