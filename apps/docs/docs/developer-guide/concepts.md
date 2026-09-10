@@ -252,10 +252,11 @@ it and shows how to run it.
 
 ## Transformations are templates over a source model
 
-A model-to-model transformation is the last rung of the page's ladder
-of parameters: a value parameter selects among shapes, a template
-parameter supplies a shape, and here the parameter is a whole
-**source model**, from which another model is derived.
+A model-to-model transformation is a template whose parameter is a
+whole **source model**: it receives one model and derives another
+from it. The templates earlier on this page took values and other
+templates as parameters; a transformation is the same idea, with a
+model as the parameter.
 
 A transformation is an ordinary TypeScript class extending the
 library's abstract transformation class. The base class carries the
@@ -301,8 +302,8 @@ export class OrgToApproval extends abstractM2M<ot.IOrganization, wt.IWorkflowMod
 
 The source side is an organizational metamodel, a hierarchy of units
 with managers and members; the target side is the workflow language
-this whole page has been using, so the approval process the page
-opened with is not just authorable, it is derivable. The `template`
+used throughout this page, so an approval process like the one at the
+top of the page can also be derived from an organization. The `template`
 maps every unit of the source model through `OrgUnit2Approval`, and
 that rule is a *specialization point*: rules marked as its options
 dispatch on the source element's runtime type, a department
