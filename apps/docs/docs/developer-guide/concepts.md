@@ -411,18 +411,6 @@ is in [Defining Metamodels](./guides/defining-metamodels.md), and the
 components that give a metamodel its JSX tags are covered in
 [JSX Components](./guides/jsx-components.md).
 
-Two guarantees are worth knowing by name:
-
-- **Type preservation**: evaluating a well-typed model expression yields
-  a model conforming to its type schema.
-- **Type-safe execution**: if the source model conforms to the source
-  schema and every rule produces well-typed target expressions, the
-  transformation result conforms to the target schema.
-
-Together they mean conformance is preserved *compositionally*: you get a
-valid target model because every step preserves validity, not because a
-final check happened to pass.
-
 ## Models all the way down
 
 A model is itself a model element. Two useful consequences follow, with
@@ -438,9 +426,19 @@ no extra machinery:
 
 ## Formal background
 
-The algebra sketched here is developed rigorously, with full definitions,
-the type constructor system, conformance, evaluation semantics, and
-proofs of the properties named above, in the companion paper:
+The conformance behavior described on this page has a formal basis.
+The algebra is developed rigorously in the companion paper, with full
+definitions, the type constructor system, conformance, and evaluation
+semantics, and with proofs of two properties worth knowing by name:
+
+- **Type preservation**: evaluating a well-typed model expression yields
+  a model conforming to its type schema.
+- **Type-safe execution**: if the source model conforms to the source
+  schema and every rule produces well-typed target expressions, the
+  transformation result conforms to the target schema.
+
+Together they mean conformance is preserved *compositionally*: every
+step preserves validity, so a valid target model needs no final check.
 
 > S. Nešković and D. Stojimirović, *Models as Values in a Model
 > Expression Algebra: A Functional Approach to Model Driven Engineering*.
