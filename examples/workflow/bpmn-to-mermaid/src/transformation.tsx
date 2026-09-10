@@ -21,7 +21,7 @@ export class BpmnToMermaidTransformation extends abstractM2M<bm.IProcess, M2T_Mo
     super(store)
   }
 
-  template(p: bm.IProcess): ExprNode<bm.IProcess, M2T_Model> {
+  topRule(p: bm.IProcess): ExprNode<bm.IProcess, M2T_Model> {
     this.countDegrees((p.flows ?? []) as bm.IFlow[])
     return (
       <M2T name={`${p.name}_mermaid`}>

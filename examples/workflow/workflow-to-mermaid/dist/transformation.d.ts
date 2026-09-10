@@ -8,7 +8,7 @@ export declare class WorkflowToMermaidTransformation extends abstractM2M<wm.IWor
     private genIds;
     private genCounts;
     constructor(store: ModelStore);
-    template(m: wm.IWorkflowModel): ExprNode<wm.IWorkflowModel, M2T_Model>;
+    topRule(m: wm.IWorkflowModel): ExprNode<wm.IWorkflowModel, M2T_Model>;
     private stepWiring;
     private taskWiring;
     private invocationWiring;

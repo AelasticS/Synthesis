@@ -40,7 +40,7 @@ export class WorkflowToMermaidTransformation extends abstractM2M {
     constructor(store) {
         super(store);
     }
-    template(m) {
+    topRule(m) {
         const entry = this.entryProcessOf(m);
         const body = this.bodyWiring(this.stepsOf(entry));
         const lines = [

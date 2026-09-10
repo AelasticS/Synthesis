@@ -261,8 +261,8 @@ model as the parameter.
 A transformation is an ordinary TypeScript class extending the
 library's abstract transformation class. The base class carries the
 engine: rule dispatch, trace recording, target resolution. The
-subclass declares the *rules*: its `template` method is the top-level
-rule, receiving the source model and iterating over its elements with
+subclass declares the *rules*: `topRule` receives the source model
+and iterates over its elements with
 the computation operator, and every further rule is a typed method
 from one source element to a target expression, written with the
 target metamodel's tags. Because a rule body is plain TypeScript, the
@@ -273,7 +273,7 @@ model:
 
 ```tsx
 export class OrgToApproval extends abstractM2M<ot.IOrganization, wt.IWorkflowModel> {
-  template(m: ot.IOrganization) {
+  topRule(m: ot.IOrganization) {
     return (
       <WorkflowModel name={`${m.name} Approval`} store={this.context.store}>
         <Process name={`${m.name} Approval`}>
@@ -303,7 +303,7 @@ export class OrgToApproval extends abstractM2M<ot.IOrganization, wt.IWorkflowMod
 The source side is an organizational metamodel, a hierarchy of units
 with managers and members; the target side is the workflow language
 used throughout this page, so an approval process like the one at the
-top of the page can also be derived from an organization. The `template`
+top of the page can also be derived from an organization. `topRule`
 maps every unit of the source model through `OrgUnit2Approval`, and
 that rule is a *specialization point*: rules marked as its options
 dispatch on the source element's runtime type, a department
@@ -311,7 +311,7 @@ contributing its manager's approval task, a board (its option is not
 shown) a parallel block of member approvals. This is the mechanism
 behind [Polymorphic Rule Dispatch](./guides/polymorphic-dispatch.md).
 
-Executing the transformation evaluates `template`'s expression in a
+Executing the transformation evaluates `topRule`'s expression in a
 fresh target model; every rule invocation is recorded in a **trace**
 linking each target element back to the source elements it came from,
 giving bidirectional traceability for free.

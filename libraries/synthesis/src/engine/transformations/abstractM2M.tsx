@@ -39,7 +39,7 @@ export interface TraceEntryRecord {
   _jsxElements: ExprNode<IModelElement>[] // for resolveJSXElement / resolveAllJSXElements
 }
 
-// Raw data stored during template() execution; converted to trace JSX
+// Raw data stored during topRule() execution; converted to trace JSX
 // in createTraceModel() when output.instance is available. `ruleName`
 // is the EXECUTED concrete method (a dispatched option method when a
 // point decorator routed the call). `record` links the runtime lookup
@@ -99,7 +99,7 @@ export class M2MContext<P = undefined> extends Context implements IM2MContext {
   // them must receive the resolved target.
   private readonly jsxIndex: Map<ExprNode<IModelElement>, TraceEntryRecord[]> = new Map()
 
-  // Raw trace data collected during template(); converted to JSX lazily in createTraceModel()
+  // Raw trace data collected during topRule(); converted to JSX lazily in createTraceModel()
   public readonly rawTraceEntries: RawTraceEntryData[] = []
 
   // Last SpecResolution — set by SpecPoint wrapper, read and cleared by E2E.
@@ -240,7 +240,7 @@ export interface IM2M<
   context: M2MContext<P>
   extra?: EM
 
-  template(props: S): ExprNode<S, D>
+  topRule(props: S): ExprNode<S, D>
 
   transform(source: S): D
 }
@@ -260,11 +260,11 @@ export abstract class abstractM2M<
     this.extra = extra
   }
 
-  abstract template(props: S): ExprNode<S, D>
+  abstract topRule(props: S): ExprNode<S, D>
 
   public transform(source: S, param?: P): D {
     this.context.param = param
-    const targetJSXTree = this.template(source)
+    const targetJSXTree = this.topRule(source)
     const targetModel = targetJSXTree.render<D>(this.context)
 
     this.context.input.instance = source

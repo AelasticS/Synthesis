@@ -31,7 +31,7 @@ export class RelToMermaid extends abstractM2M<rmT.IRelSchema, M2T_Model> {
     super(store)
   }
 
-  template(s: rmT.IRelSchema): ExprNode<rmT.IRelSchema, M2T_Model> {
+  topRule(s: rmT.IRelSchema): ExprNode<rmT.IRelSchema, M2T_Model> {
     const store = this.context.store
     // Domains are elements too; the Table filter takes only tables.
     const tables = (s.elements ?? []).filter((el) => store.isTypeOf(el, rmT.Table)) as rmT.ITable[]

@@ -25,7 +25,7 @@ export class RelToMermaid extends abstractM2M {
     constructor(store) {
         super(store);
     }
-    template(s) {
+    topRule(s) {
         const store = this.context.store;
         // Domains are elements too; the Table filter takes only tables.
         const tables = (s.elements ?? []).filter((el) => store.isTypeOf(el, rmT.Table));

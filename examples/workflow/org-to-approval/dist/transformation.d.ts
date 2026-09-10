@@ -11,7 +11,7 @@ export interface IApprovalParam {
 }
 export declare class OrgToApprovalTransformation extends abstractM2M<ot.IOrganization, wt.IWorkflowModel, {}, IApprovalParam> {
     constructor(store: ModelStore);
-    template(m: ot.IOrganization): ExprNode<ot.IOrganization, wt.IWorkflowModel>;
+    topRule(m: ot.IOrganization): ExprNode<ot.IOrganization, wt.IWorkflowModel>;
     OrgUnit2Approval(u: ot.IOrgUnit): ExprNode<wt.IStep>;
     Department2Approval(d: ot.IDepartment): ExprNode<wt.ITask>;
     Board2Approval(b: ot.IBoard): ExprNode<wt.IParallel>;

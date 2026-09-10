@@ -21,7 +21,7 @@ export class SourceModelToDefaultConfigurationModel extends abstractM2M<IModel, 
     super(store, extra)
   }
 
-  template(s: IModel) {
+  topRule(s: IModel) {
     return (
       <cmC.ConfigurationModel
         name={s.name + " Default Configuration Model"}

@@ -27,7 +27,7 @@ export class EerToMermaidEr extends abstractM2M<em.IEERSchema, M2T_Model> {
     super(store)
   }
 
-  template(s: em.IEERSchema): ExprNode<em.IEERSchema, M2T_Model> {
+  topRule(s: em.IEERSchema): ExprNode<em.IEERSchema, M2T_Model> {
     const store = this.context.store
     const els = (s.elements ?? []) as em.IERConcept[]
     // Specialization is a Mapping, not an Entity, so the Entity filter

@@ -28,7 +28,7 @@ let Rel2DdlTransformation = class Rel2DdlTransformation extends DecisionAwareM2M
     constructor(store, extra, configModel) {
         super(store, extra ?? {}, configModel);
     }
-    template(s) {
+    topRule(s) {
         const store = this.context.store;
         const tables = (s.elements ?? []).filter((el) => store.isTypeOf(el, rmT.Table));
         const domains = (s.elements ?? []).filter((el) => store.isTypeOf(el, rmT.Domain));

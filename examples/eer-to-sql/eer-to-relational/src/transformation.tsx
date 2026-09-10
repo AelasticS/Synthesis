@@ -65,7 +65,7 @@ export class EerToRelational extends DecisionAwareM2M<
   // emission and referencing).
   private keyPlans = new Map<em.IEntity, KeyColumnPlan[]>()
 
-  template(s: em.IEERSchema) {
+  topRule(s: em.IEERSchema) {
     const store = this.context.store
     const els = ((s.elements ?? []) as em.IERConcept[])
 

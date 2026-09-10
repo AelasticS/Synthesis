@@ -62,9 +62,9 @@ import * as cm from '@aelastics/synthesis/metamodels/configuration/model'
 tag page 1 used to declare options in the decision model. The two never
 appear in the same file.
 
-## A template that decides nothing
+## A top rule that decides nothing
 
-In Parts 1 and 2, `template` was the whole transformation: it built the
+In Parts 1 and 2, `topRule` was the whole transformation: it built the
 `<M2T>` model, declared the documents, and either emitted sections in
 place or placed them by name. Here it does one thing:
 
@@ -72,7 +72,7 @@ place or placed them by name. Here it does one thing:
   // The template does nothing but hand over to the variation point. The
   // decision is the first thing the transformation makes, because
   // everything else depends on it.
-  template(s: rmT.IRelSchema): ExprNode<rmT.IRelSchema, m2tmm.M2T_Model> {
+  topRule(s: rmT.IRelSchema): ExprNode<rmT.IRelSchema, m2tmm.M2T_Model> {
     return this.documentLayout(s)
   }
 ```

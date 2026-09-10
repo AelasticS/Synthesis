@@ -56,7 +56,7 @@ export class RelToSqlConfigurableTransformation extends DecisionAwareM2M<
   // The template does nothing but hand over to the variation point. The
   // decision is the first thing the transformation makes, because
   // everything else depends on it.
-  template(s: rmT.IRelSchema): ExprNode<rmT.IRelSchema, m2tmm.M2T_Model> {
+  topRule(s: rmT.IRelSchema): ExprNode<rmT.IRelSchema, m2tmm.M2T_Model> {
     return this.documentLayout(s)
   }
 
