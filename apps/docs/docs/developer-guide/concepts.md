@@ -118,7 +118,9 @@ process at the top of this page is a model literal; here is the same
 workflow as a template:
 
 ```tsx
-const Approval = ({ doc, approvers, parallel }: IApprovalConfig) => {
+type ApprovalProps = { doc: string; approvers: number; parallel: boolean }
+
+const Approval = ({ doc, approvers, parallel }: ApprovalProps) => {
   const tasks = Array.from({ length: approvers }, (_, i) =>
     <Task name={`Approve ${doc} ${i + 1}`} />)
 
