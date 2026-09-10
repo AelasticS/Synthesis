@@ -368,9 +368,11 @@ produces.
 
 ### Configuration-based transformations
 
-Some transformations contain genuinely open design choices: whether a
-1:N relationship becomes a foreign key or a join table, how identifiers
-are quoted, how generated output is laid out across files. Synthesis
+Some transformations contain genuinely open design choices. The
+workflow chain of this page deliberately leaves none open, but the
+eer-to-sql suite is full of them: whether a source relationship
+becomes a foreign key or a join table, how identifiers are quoted,
+how generated output is laid out across files. Synthesis
 makes such a choice a first-class model rather than a hidden flag. A
 **decision model** declares the design space: its *issues* and the
 *options* each issue offers, globally or per source element. A
@@ -428,7 +430,7 @@ no extra machinery:
 - Models can contain other models: a model of models (a *megamodel*),
   used to organize collections of interrelated models.
 - An element's property can store a qualified name that designates an
-  element in *another* model, like a foreign key. Models built from such
+  element in *another* model. Models built from such
   references (*weaving models*) capture typed correspondences between
   independent models; transformation traces and cross-model links are
   built on this.
