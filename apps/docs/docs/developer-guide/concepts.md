@@ -196,8 +196,10 @@ the whole step template (both definitions above qualify as
 inline process alike):
 
 ```tsx
+type ApprovalProps = { doc: string; approvers: number }
+
 const Approval = (WriteStep: Template<IStep>) =>
-  ({ doc, approvers }: { doc: string; approvers: number }) => (
+  ({ doc, approvers }: ApprovalProps) => (
     <Process name={`${doc} Approval`}>
       <WriteStep />
       <Parallel>
