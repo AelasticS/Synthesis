@@ -12,9 +12,9 @@
  * @Default() decorator in transformation.tsx.
  */
 import { createExprNode } from '@aelastics/synthesis/jsx';
-import { DecisionModel, ElementIssue, Option, SimpleOption, } from '@aelastics/synthesis/metamodels/decision';
+import { DecisionModel, ElementIssue, Option } from '@aelastics/synthesis/metamodels/decision';
 export const RelationshipDesignIssues = (store) => (createExprNode(DecisionModel, { name: "RelationshipDesign", description: "Design space for implementing EER relationships in a relational schema", store: store },
     createExprNode(ElementIssue, { name: "OneToManyStrategy", description: "How to implement a 1:N relationship" },
-        createExprNode(Option, { name: "ForeignKey", description: "Put a foreign key column on the N side table", isDefault: true, optionType: createExprNode(SimpleOption, { name: "FK" }) }),
-        createExprNode(Option, { name: "JoinTable", description: "Give the relationship a table of its own", isDefault: false, optionType: createExprNode(SimpleOption, { name: "JT" }) }))));
+        createExprNode(Option, { name: "ForeignKey", description: "Put a foreign key column on the N side table", isDefault: true }),
+        createExprNode(Option, { name: "JoinTable", description: "Give the relationship a table of its own", isDefault: false }))));
 //# sourceMappingURL=decision-model.js.map

@@ -120,6 +120,29 @@ overall version history.
 
 ### Changed
 
+- **The decision framework drops its option and choice unions for
+  concrete subtypes.** `Option`'s `optionType` tagged union
+  (`SimpleOption`/`CompositeOption`) is gone: a plain option is
+  authored as a bare `Option`, and one that opens sub-issues is
+  authored directly as `OpeningOption` (renamed from
+  `CompositeOption`), no `optionType` wrapper needed. `Issue`'s
+  `possibleOptions` is renamed `options`, and `Option`'s `ParentIssue`
+  is renamed `parentIssue` and declared as that property's inverse
+  (`t.inverseProps`), so the renderer wires it automatically instead
+  of authors setting it. The configuration model sheds the parallel
+  `Decision` container: `BaseChoice` is renamed `Choice`, and its two
+  concrete subtypes `ElementChoice`/`GlobalChoice` (previously
+  `ElementDecision` and the base `Decision`) are themselves single
+  choices rather than containers holding a nested `choices` array;
+  `ConfigurationModel`'s `decisions` is renamed `choices`, now one
+  flat list. A `Choice` no longer carries its own `issue` field — it
+  is recovered from `selectedOption.parentIssue`. Every decision-model
+  author (eer-to-relational, rel-to-sql-ddl, both tutorial
+  configuration-based companions) drops the `optionType={<SimpleOption
+  .../>}` boilerplate, and presets build a `GlobalChoice` with
+  `selectedOption` set directly instead of nesting a nameless `Choice`
+  inside it.
+
 - **Docs pages link their sources.** Example, tutorial, and guide
   pages link the repository folders holding their packages and
   metamodels.

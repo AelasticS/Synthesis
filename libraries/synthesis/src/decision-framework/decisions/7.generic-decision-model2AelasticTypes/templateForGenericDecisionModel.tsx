@@ -67,7 +67,7 @@ export const typeForDecisionModel = (store: ModelStore, element: IModelElement, 
 
 function getAllVariationsType(issue: IIssue): ExprNode<t.IType> {
     return <TypeUnion name={`${issue.name}Union`}>
-        {issue.possibleOptions.map((option: IOption) => {
+        {issue.options.map((option: IOption) => {
             return <UnionElement>
                 <PropertyDomain $refByName="false" />
                 <PropertyDomain $refByName="true" />

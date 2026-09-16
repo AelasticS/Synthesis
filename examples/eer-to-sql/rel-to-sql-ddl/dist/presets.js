@@ -8,12 +8,10 @@
  */
 import { createExprNode, Model } from '@aelastics/synthesis/jsx';
 import { BindingModel } from '@aelastics/synthesis/metamodels/binding';
-import { Choice, ConfigurationModel, GlobalChoice } from '@aelastics/synthesis/metamodels/configuration';
-import { GlobalIssue, Option } from '@aelastics/synthesis/metamodels/decision';
+import { ConfigurationModel, GlobalChoice } from '@aelastics/synthesis/metamodels/configuration';
+import { Option } from '@aelastics/synthesis/metamodels/decision';
 const DESIGN = '//www.aelastics.org/DdlGenerationDesign';
-export const globalChoice = (issue, option) => (createExprNode(GlobalChoice, { name: `gc_${issue}`, choices: [
-        createExprNode(Choice, { name: `gc_${issue}_${option}`, issue: createExprNode(GlobalIssue, { "$refByName": `${DESIGN}/${issue}` }), selectedOption: createExprNode(Option, { "$refByName": `${DESIGN}/${option}` }) }),
-    ] }));
+export const globalChoice = (issue, option) => (createExprNode(GlobalChoice, { name: `gc_${issue}`, selectedOption: createExprNode(Option, { "$refByName": `${DESIGN}/${option}` }) }));
 /** The standard-sql choice set: portable SQL, every issue closed. */
 export const standardSqlChoices = () => ({
     IdentifierQuoting: 'DoubleQuoted',

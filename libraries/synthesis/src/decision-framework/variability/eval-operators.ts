@@ -16,28 +16,23 @@ type ChoiceLike = {
 
 type ConditionContext = {
   context?: { store?: { isTypeOf?: (value: unknown, type: unknown) => boolean } }
-  configModel?: { decisions?: unknown[] }
+  configModel?: { choices?: unknown[] }
 }
 
 type ContextStore = NonNullable<ConditionContext["context"]>["store"]
 
-const isElementDecision = (store: ContextStore, decision: unknown): boolean => {
-  return !!store?.isTypeOf?.(decision, (tcM as any).ElementDecision)
+const isElementChoice = (store: ContextStore, choice: unknown): boolean => {
+  return !!store?.isTypeOf?.(choice, (tcM as any).ElementChoice)
 }
 
-const isElementScopedDecision = (decision: unknown, element: any): boolean => {
-  const scoped = (decision as any)?.element
+const isElementScopedChoice = (choice: unknown, element: any): boolean => {
+  const scoped = (choice as any)?.element
   if (scoped === undefined || element === undefined) return false
-  // Object identity first (the decision's element links the very source
+  // Object identity first (the choice's element links the very source
   // element); the generated uuid `id` as the serialization-safe equality,
   // counted only when both sides carry one.
   return scoped === element
     || (scoped?.id !== undefined && element?.id !== undefined && scoped.id === element.id)
-}
-
-const decisionChoices = (decision: unknown): any[] => {
-  const choices = (decision as any)?.choices
-  return Array.isArray(choices) ? choices : []
 }
 
 const hasOptionName = (choice: unknown, optionName: string): boolean => {
@@ -47,15 +42,13 @@ const hasOptionName = (choice: unknown, optionName: string): boolean => {
 
 const resolveConfigChoices = (self: ConditionContext | undefined, element: any, currentContext: any): any[] => {
   const context = currentContext || self?.context
-  const decisions = self?.configModel?.decisions || []
+  const choices = self?.configModel?.choices || []
   const store = context?.store
 
-  return decisions
-    .filter(
-      (d: unknown) =>
-        !isElementDecision(store, d) || (isElementDecision(store, d) && isElementScopedDecision(d, element))
-    )
-    .flatMap((d: unknown) => decisionChoices(d))
+  return choices.filter(
+    (c: unknown) =>
+      !isElementChoice(store, c) || (isElementChoice(store, c) && isElementScopedChoice(c, element))
+  )
 }
 
 /**

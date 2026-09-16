@@ -21,26 +21,23 @@ export const ConfigurationModel: CpxTemplate<IModelProps, dm.IConfigurationModel
 //     };
 // };
 
-export const SelectedOption: Template<dm.IChoice> = (props) => {
-    return new ExprNode(dm.Choice, props, 'selectedOptions');
-}
+// export const SelectedOption: Template<dm.IChoice> = (props) => {
+//     return new ExprNode(dm.Choice, props, 'selectedOptions');
+// }
 
-export const ElementChoice: Template<dm.IElementDecision> = (props) => {
-    return new ExprNode(dm.ElementDecision, props, 'decisions');
-}
-
-export const GlobalChoice: Template<dm.IDecision> = (props)=>{
-    return new ExprNode(dm.Decision, props, 'decisions');
-}
-
-export const SimpleOption: Template<dm.ISimpleOption> = (props) => {
-    return new ExprNode(dm.SimpleOption, props, 'value');
-}
-
-export const CompositeOption: Template<dm.ICompositeOption> = (props) => {
-    return new ExprNode(dm.CompositeOption, props, 'value');
-}
-
-export const Choice: Template<dm.IChoice> = (props)=>{
+// Reference-only: points at an existing Choice (e.g. via $refByName) so
+// serialized traces can tag a choice reference distinctly from a plain
+// element reference. Not used to construct new choices as children of
+// ConfigurationModel — ElementChoice/GlobalChoice do that.
+export const Choice: Template<dm.IChoice> = (props) => {
     return new ExprNode(dm.Choice, props, undefined);
 }
+
+export const ElementChoice: Template<dm.IElementChoice> = (props) => {
+    return new ExprNode(dm.ElementChoice, props, 'choices');
+}
+
+export const GlobalChoice: Template<dm.IGlobalChoice> = (props)=>{
+    return new ExprNode(dm.GlobalChoice, props, 'choices');
+}
+

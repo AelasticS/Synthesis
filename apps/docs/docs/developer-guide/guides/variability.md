@@ -309,7 +309,7 @@ transformation" for the design space they close.
 
 A design space is not always flat: some questions only exist once a
 particular option is chosen. The decision metamodel states this with
-`CompositeOption`, an option carrying sub-issues, the issues that
+`OpeningOption`, an option carrying sub-issues, the issues that
 become meaningful exactly when that option is selected (authored with
 the `ElementSubIssue` tag). A row-versioning policy is the canonical
 shape, and it is exactly the eer-to-sql suite's `RowHistory` issue

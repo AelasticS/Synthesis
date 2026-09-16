@@ -11,7 +11,7 @@ export const DecisionModel: CpxTemplate<IDecisionModelProps, ddm.IDecisionModel>
 };
 
 export const Option: Template<ddm.IOption> = (props) => {
-    return new ExprNode(ddm.Option, props, 'possibleOptions');
+    return new ExprNode(ddm.Option, props, 'options');
 }
 
 export const ElementIssue: Template<ddm.IElementIssue> = (props) => {
@@ -38,12 +38,8 @@ export const Dependency: Template<ddm.IDependency> = (props) => {
     return new ExprNode(ddm.Constraint, props, undefined);
 }
 
-export const SimpleOption: Template<ddm.ISimpleOption> = (props) => {
-    return new ExprNode(ddm.SimpleOption, props, 'optionType');
-}
-
-export const CompositeOption: Template<ddm.ICompositeOption> = (props) => {
-    return new ExprNode(ddm.CompositeOption, props, 'optionType');
+export const OpeningOption: Template<ddm.IOpeningOption> = (props) => {
+    return new ExprNode(ddm.OpeningOption, props, 'options');
 }
 
 

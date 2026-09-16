@@ -11,21 +11,15 @@ import { createExprNode, Model } from '@aelastics/synthesis/jsx'
 import type { ExprNode } from '@aelastics/synthesis/jsx'
 import type { ModelStore } from '@aelastics/synthesis/store'
 import { BindingModel } from '@aelastics/synthesis/metamodels/binding'
-import { Choice, ConfigurationModel, GlobalChoice } from '@aelastics/synthesis/metamodels/configuration'
-import { GlobalIssue, Option } from '@aelastics/synthesis/metamodels/decision'
+import { ConfigurationModel, GlobalChoice } from '@aelastics/synthesis/metamodels/configuration'
+import { Option } from '@aelastics/synthesis/metamodels/decision'
 
 const DESIGN = '//www.aelastics.org/DdlGenerationDesign'
 
 export const globalChoice = (issue: string, option: string) => (
   <GlobalChoice
     name={`gc_${issue}`}
-    choices={[
-      <Choice
-        name={`gc_${issue}_${option}`}
-        issue={<GlobalIssue $refByName={`${DESIGN}/${issue}`} />}
-        selectedOption={<Option $refByName={`${DESIGN}/${option}`} />}
-      />,
-    ]}
+    selectedOption={<Option $refByName={`${DESIGN}/${option}`} />}
   />
 )
 

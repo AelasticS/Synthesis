@@ -80,18 +80,16 @@ const resolveConfiguredChoices = (
   element: any,
 ): tcM.IChoice[] => {
   const currentContext = transformation.context
-  const decisions = transformation.configModel?.decisions || []
+  const choices = transformation.configModel?.choices || []
 
-  return decisions
-    .filter(
-      (d: tcM.IDecision) =>
-        !currentContext.store.isTypeOf(d, tcM.ElementDecision)
-        || (
-          currentContext.store.isTypeOf(d, tcM.ElementDecision)
-          && isSameElement((d as unknown as tcM.IElementDecision).element, element)
-        ),
-    )
-    .flatMap((d: tcM.IDecision) => d.choices)
+  return choices.filter(
+    (c: tcM.IChoice) =>
+      !currentContext.store.isTypeOf(c, tcM.ElementChoice)
+      || (
+        currentContext.store.isTypeOf(c, tcM.ElementChoice)
+        && isSameElement((c as unknown as tcM.IElementChoice).element, element)
+      ),
+  )
 }
 
 const evaluateVarOption = (
@@ -184,10 +182,13 @@ export const VarPoint = (_issue: string) => {
         // attaches these facts to entries (or the model) at assembly
         // time; recording here is what guarantees that every resolved
         // option is recorded, nested consultations included.
+        // Choice no longer carries its own issue field; the issue is
+        // recovered from the option's parentIssue backlink (auto-wired by
+        // the renderer, declared as Issue.options' inverse).
         const declaredOption = chosenVarOption.optionName
         const explicitChoice = configChoices.find(
           (c: any) =>
-            c?.issue?.name === _issue
+            c?.selectedOption?.parentIssue?.name === _issue
             && (declaredOption === undefined || c?.selectedOption?.name === declaredOption),
         )
         if (typeof (currentContext as any).recordResolution === "function") {

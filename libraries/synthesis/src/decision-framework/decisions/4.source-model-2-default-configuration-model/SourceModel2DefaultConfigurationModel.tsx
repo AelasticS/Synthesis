@@ -3,7 +3,7 @@
 import { createExprNode } from "../../../jsx-runtime"
 import { abstractM2M } from "../../../engine"
 import { ExprNode } from "../../../jsx-runtime"
-import { E2E, ModelStore, M2M } from "../../../engine"
+import { ModelStore } from "../../../engine"
 import { IModel, IModelElement, Model, ModelElement } from "../../../metamodel-core"
 
 import * as dmT from "../1.decision-model/decision-meta.model"
@@ -11,7 +11,6 @@ import * as bmT from "../2.binding-model/binding-meta.model"
 
 import * as cmT from "../3.configuration-model/configuration-meta.model"
 import * as cmC from "../3.configuration-model/configuration-meta.model-components"
-import { Choice } from "../3.configuration-model/configuration-meta.model-components"
 
 
 export class SourceModelToDefaultConfigurationModel extends abstractM2M<IModel, cmT.IConfigurationModel, {
@@ -38,7 +37,7 @@ export class SourceModelToDefaultConfigurationModel extends abstractM2M<IModel, 
             return this.createGlobalChoice(issue)
           })}
 
-        {s.elements.map((r) => {
+        {s.elements.flatMap((r) => {
           return this.createElementChoices(r as IModelElement)
         })}
       </cmC.ConfigurationModel>
@@ -46,36 +45,17 @@ export class SourceModelToDefaultConfigurationModel extends abstractM2M<IModel, 
     )
   }
 
-  private createElementChoices(sourceModelElement: IModelElement): ExprNode<cmT.IDecision> | null {
+  private createElementChoices(sourceModelElement: IModelElement): ExprNode<cmT.IChoice>[] {
 
     const decisionBindingElements = this.getBindingElementBySourceModelElement(sourceModelElement)
     // this shuld be one binding element for each source model element, but eventually it can be more than one, so we need to handle thats
-    const choices = decisionBindingElements.flatMap((e) => {
+    return decisionBindingElements.flatMap((e) => {
       return e.issues
         .flatMap((issue) => this.issueWithChosenSubIssues(issue))
         .map((issue) => {
-          return this.createChosenOptionForIssue(issue) as unknown as cmT.IChoice
+          return this.createElementChoiceForIssue(issue, sourceModelElement)
         })
     })
-
-    if (choices.length === 0) {
-      return null
-    }
-
-    const type = this.context.store.getTypeOf(sourceModelElement)
-    const scopedName = this.scopedNameOf(sourceModelElement)
-
-    return (
-      <cmC.ElementChoice
-        name={`ec_${scopedName}`}
-        description={`Decision for ${scopedName} of type ${type.name}`}
-        element={sourceModelElement}
-        choices={choices}
-      >
-
-
-      </cmC.ElementChoice>
-    )
   }
 
   /** The element's name qualified by its scope chain: the path
@@ -100,8 +80,8 @@ export class SourceModelToDefaultConfigurationModel extends abstractM2M<IModel, 
    * marked isDefault, or the first declared one. */
   private chosenOptionOf(issue: dmT.IIssue): dmT.IOption | undefined {
     return (
-      issue.possibleOptions.find((o: dmT.IOption) => o.isDefault === true)
-      ?? issue.possibleOptions[0]
+      issue.options.find((o: dmT.IOption) => o.isDefault === true)
+      ?? issue.options[0]
     )
   }
 
@@ -113,11 +93,11 @@ export class SourceModelToDefaultConfigurationModel extends abstractM2M<IModel, 
    * default fallback covers them. */
   private issueWithChosenSubIssues(issue: dmT.IIssue): dmT.IIssue[] {
     const chosen = this.chosenOptionOf(issue)
-    const subIssues = ((chosen?.optionType as dmT.ICompositeOption | undefined)?.subIssues ?? []) as dmT.IIssue[]
+    const subIssues = ((chosen as dmT.IOpeningOption | undefined)?.subIssues ?? []) as dmT.IIssue[]
     return [issue, ...subIssues.flatMap((sub) => this.issueWithChosenSubIssues(sub))]
   }
 
-  private createChosenOptionForIssue(issue: dmT.IIssue): ExprNode<cmT.IChoice> {
+  private createElementChoiceForIssue(issue: dmT.IIssue, sourceModelElement: IModelElement): ExprNode<cmT.IChoice> {
 
     const defaultOption: dmT.IOption | undefined = this.chosenOptionOf(issue)
 
@@ -126,17 +106,15 @@ export class SourceModelToDefaultConfigurationModel extends abstractM2M<IModel, 
       throw new Error("No possible options available for issue: " + issue.label)
     }
 
-    // Create the specific component for this option
-    // const SelectedOptionForThisOption = dmC.SelectedOption(defaultOption);
+    const scopedName = this.scopedNameOf(sourceModelElement)
 
     return (
-      <cmC.Choice
-        name={`c_${defaultOption.name}` + Math.random().toString(16).slice(2)}
-        description={`Selected option is ${defaultOption.name}`}
-        selectedOption={defaultOption as dmT.IOption}
-        issue={(defaultOption as dmT.IOption).ParentIssue}
-      >
-      </cmC.Choice>
+      <cmC.ElementChoice
+        name={`ec_${scopedName}_${issue.name}`}
+        description={`Selected option for ${issue.name} on ${scopedName} is ${defaultOption.name}`}
+        element={sourceModelElement}
+        selectedOption={defaultOption}
+      />
     )
   }
 
@@ -155,10 +133,19 @@ export class SourceModelToDefaultConfigurationModel extends abstractM2M<IModel, 
     }) as bmT.IBindingElement[] || [] as bmT.IBindingElement[]
   }
 
-  private createGlobalChoice(issue: dmT.IModelIssue) {
-    return <cmC.GlobalChoice name={`gc_${issue.name}`}
-                             choices={[this.createChosenOptionForIssue(issue) as unknown as cmT.IChoice]}
+  private createGlobalChoice(issue: dmT.IIssue): ExprNode<cmT.IChoice> {
+    const defaultOption: dmT.IOption | undefined = this.chosenOptionOf(issue)
 
-    />
+    if (!defaultOption) {
+      throw new Error("No possible options available for issue: " + issue.label)
+    }
+
+    return (
+      <cmC.GlobalChoice
+        name={`gc_${issue.name}`}
+        description={`Selected option for ${issue.name} is ${defaultOption.name}`}
+        selectedOption={defaultOption}
+      />
+    )
   }
 }

@@ -12,39 +12,34 @@
  * configuration does not choose explicitly. It has to agree with the
  * @Default() decorator in transformation.tsx.
  */
-import { createExprNode } from '@aelastics/synthesis/jsx'
-import type { ExprNode } from '@aelastics/synthesis/jsx'
-import type { ModelStore } from '@aelastics/synthesis/store'
+import {createExprNode} from '@aelastics/synthesis/jsx'
+import type {ExprNode} from '@aelastics/synthesis/jsx'
+import type {ModelStore} from '@aelastics/synthesis/store'
 import {
-  DecisionModel,
-  ElementIssue,
-  Option,
-  SimpleOption,
+    DecisionModel,
+    ElementIssue,
+    Option
 } from '@aelastics/synthesis/metamodels/decision'
 import type * as t from '@aelastics/synthesis/metamodels/decision/model'
 
 export const RelationshipDesignIssues = (store: ModelStore): ExprNode<t.IDecisionModel> => (
-  <DecisionModel
-    name="RelationshipDesign"
-    description="Design space for implementing EER relationships in a relational schema"
-    store={store}
-  >
-    <ElementIssue
-      name="OneToManyStrategy"
-      description="How to implement a 1:N relationship"
+    <DecisionModel
+        name="RelationshipDesign"
+        description="Design space for implementing EER relationships in a relational schema"
+        store={store}
     >
-      <Option
-        name="ForeignKey"
-        description="Put a foreign key column on the N side table"
-        isDefault={true}
-        optionType={<SimpleOption name="FK" />}
-      />
-      <Option
-        name="JoinTable"
-        description="Give the relationship a table of its own"
-        isDefault={false}
-        optionType={<SimpleOption name="JT" />}
-      />
-    </ElementIssue>
-  </DecisionModel>
+        <ElementIssue
+            name="OneToManyStrategy"
+            description="How to implement a 1:N relationship"
+        >
+            <Option
+                name="ForeignKey"
+                description="Put a foreign key column on the N side table"
+                isDefault={true}/>
+            <Option
+                name="JoinTable"
+                description="Give the relationship a table of its own"
+                isDefault={false}/>
+        </ElementIssue>
+    </DecisionModel>
 )

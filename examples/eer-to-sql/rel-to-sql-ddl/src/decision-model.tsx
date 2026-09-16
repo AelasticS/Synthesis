@@ -8,7 +8,6 @@ import {
   ElementIssue,
   GlobalIssue,
   Option,
-  SimpleOption,
 } from "@aelastics/synthesis/metamodels/decision"
 
 import * as t from "@aelastics/synthesis/metamodels/decision/model"
@@ -30,47 +29,25 @@ export const DdlGenerationIssues = (store: ModelStore): ExprNode<t.IDecisionMode
     store={store}
   >
     <GlobalIssue name="IdentifierQuoting" description="How to emit SQL identifiers in the generated DDL">
-      <Option name="Unquoted" description="Emit identifiers verbatim" isDefault={true}
-              optionType={<SimpleOption name="UnquotedOption" />}
-      />
-      <Option name="DoubleQuoted" description="Wrap identifiers in double quotes" isDefault={false}
-              optionType={<SimpleOption name="DoubleQuotedOption" />}
-      />
+      <Option name="Unquoted" description="Emit identifiers verbatim" isDefault={true}/>
+      <Option name="DoubleQuoted" description="Wrap identifiers in double quotes" isDefault={false}/>
     </GlobalIssue>
     <GlobalIssue name="ReferentialActions" description="How integrity rules reach the DDL">
-      <Option name="NativeDdl" description="Disconnect rules as ON DELETE and ON UPDATE clauses; connect rules other than Restrict as triggers" isDefault={true}
-              optionType={<SimpleOption name="NativeDdlOption" />}
-      />
-      <Option name="TriggerEmulation" description="Every non-Restrict rule as a trigger, for dialects without declarative actions" isDefault={false}
-              optionType={<SimpleOption name="TriggerEmulationOption" />}
-      />
+      <Option name="NativeDdl" description="Disconnect rules as ON DELETE and ON UPDATE clauses; connect rules other than Restrict as triggers" isDefault={true}/>
+      <Option name="TriggerEmulation" description="Every non-Restrict rule as a trigger, for dialects without declarative actions" isDefault={false}/>
     </GlobalIssue>
     <GlobalIssue name="DomainHandling" description="How wired domains are rendered">
-      <Option name="InlineTypes" description="Base types inline, with per-column DEFAULT and CHECK" isDefault={true}
-              optionType={<SimpleOption name="InlineTypesOption" />}
-      />
-      <Option name="EmitDomains" description="CREATE DOMAIN statements; columns reference the domain by name" isDefault={false}
-              optionType={<SimpleOption name="EmitDomainsOption" />}
-      />
+      <Option name="InlineTypes" description="Base types inline, with per-column DEFAULT and CHECK" isDefault={true}/>
+      <Option name="EmitDomains" description="CREATE DOMAIN statements; columns reference the domain by name" isDefault={false}/>
     </GlobalIssue>
     <GlobalIssue name="SqlDialect" description="The dialect flavoring the physical emissions">
-      <Option name="StandardSql" description="Portable SQL, no dialect-specific physical statements" isDefault={true}
-              optionType={<SimpleOption name="StandardSqlOption" />}
-      />
-      <Option name="PostgreSql" description="PostgreSQL: one-time CLUSTER statements for clustered tables" isDefault={false}
-              optionType={<SimpleOption name="PostgreSqlOption" />}
-      />
-      <Option name="Oracle" description="Oracle: index-organized tables for clustered tables" isDefault={false}
-              optionType={<SimpleOption name="OracleOption" />}
-      />
+      <Option name="StandardSql" description="Portable SQL, no dialect-specific physical statements" isDefault={true}/>
+      <Option name="PostgreSql" description="PostgreSQL: one-time CLUSTER statements for clustered tables" isDefault={false}/>
+      <Option name="Oracle" description="Oracle: index-organized tables for clustered tables" isDefault={false}/>
     </GlobalIssue>
     <ElementIssue name="Clustering" description="Whether this table is physically clustered by its primary key">
-      <Option name="None" description="No physical clustering" isDefault={true}
-              optionType={<SimpleOption name="NoClusteringOption" />}
-      />
-      <Option name="ClusterPrimaryKey" description="Cluster the table by its primary key (dialect decides the emission)" isDefault={false}
-              optionType={<SimpleOption name="ClusterPrimaryKeyOption" />}
-      />
+      <Option name="None" description="No physical clustering" isDefault={true}/>
+      <Option name="ClusterPrimaryKey" description="Cluster the table by its primary key (dialect decides the emission)" isDefault={false}/>
     </ElementIssue>
   </DecisionModel>
 )
