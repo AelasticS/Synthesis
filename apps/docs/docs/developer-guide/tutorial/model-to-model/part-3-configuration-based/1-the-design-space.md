@@ -32,13 +32,11 @@ export const RelationshipDesignIssues = (store: ModelStore): ExprNode<t.IDecisio
         name="ForeignKey"
         description="Put a foreign key column on the N side table"
         isDefault={true}
-        optionType={<SimpleOption name="FK" />}
       />
       <Option
         name="JoinTable"
         description="Give the relationship a table of its own"
         isDefault={false}
-        optionType={<SimpleOption name="JT" />}
       />
     </ElementIssue>
   </DecisionModel>
@@ -53,7 +51,6 @@ import {
   DecisionModel,
   ElementIssue,
   Option,
-  SimpleOption,
 } from '@aelastics/synthesis/metamodels/decision'
 ```
 
@@ -103,13 +100,16 @@ dispatches a variation point and no option's predicate matched. In a
 well-formed package they name the same option, and page 4 shows both
 paths ending on `ForeignKey`.
 
-## `optionType`
+## Options are plain data
 
-Each option carries an `optionType`, here a `<SimpleOption />` with a
-short name. A simple option is a plain answer: selecting it selects
-nothing further. The alternative, a composite option, carries sub-issues
-of its own, so choosing it opens further questions. This tutorial only
-needs simple options, and `FK` and `JT` are labels for them.
+`<Option>` is a plain answer: selecting it selects nothing further, and
+there is no wrapper attribute left to say so. The alternative is a
+different tag entirely: an option that opens further questions is
+authored as `<OpeningOption>` instead of `<Option>`, wrapping the
+sub-issues it opens as JSX children. `ForeignKey` and `JoinTable` both
+settle the question outright, so both are plain `<Option>` elements
+here. The [design decisions guide](../../../guides/variability.md#opening-options-an-option-that-opens-sub-issues)
+covers `OpeningOption` in full.
 
 ## The three kinds of issue
 
@@ -162,7 +162,7 @@ model points into another.
 ## Further reading
 
 The [design decisions guide](../../../guides/variability.md) is the
-reference treatment of decision models, including composite options and
+reference treatment of decision models, including opening options and
 the constraints between options that this tutorial does not use.
 
 ## Next

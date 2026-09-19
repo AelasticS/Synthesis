@@ -29,19 +29,16 @@ export const SqlGenerationIssues = (store: ModelStore): ExprNode<t.IDecisionMode
         name="SingleFile"
         description="One file with every CREATE TABLE and inline REFERENCES clauses"
         isDefault={false}
-        optionType={<SimpleOption name="SingleFileOption" />}
       />
       <Option
         name="TablesAndConstraints"
         description="One file of CREATE TABLE statements and one of ALTER TABLE foreign keys"
         isDefault={true}
-        optionType={<SimpleOption name="TablesAndConstraintsOption" />}
       />
       <Option
         name="FilePerTable"
         description="One file per table, plus one file of ALTER TABLE foreign keys"
         isDefault={false}
-        optionType={<SimpleOption name="FilePerTableOption" />}
       />
     </GlobalIssue>
 
@@ -52,13 +49,11 @@ export const SqlGenerationIssues = (store: ModelStore): ExprNode<t.IDecisionMode
         name="Unquoted"
         description="Emit identifiers verbatim"
         isDefault={true}
-        optionType={<SimpleOption name="UnquotedOption" />}
       />
       <Option
         name="DoubleQuoted"
         description="Wrap identifiers in double quotes"
         isDefault={false}
-        optionType={<SimpleOption name="DoubleQuotedOption" />}
       />
     </GlobalIssue>
   </DecisionModel>
@@ -73,7 +68,6 @@ import {
   DecisionModel,
   GlobalIssue,
   Option,
-  SimpleOption
 } from '@aelastics/synthesis/metamodels/decision'
 ```
 
@@ -144,9 +138,11 @@ inline `REFERENCES` clauses unorderable in general, and a default
 should be the answer that is never actually wrong. `Unquoted` is the
 quieter output, and quoting can always be turned on.
 
-Each option also carries an `optionType`, here a `<SimpleOption />`: a
-plain answer that opens no further questions. The model-to-model
-tutorial's page 1 covers the alternative.
+Both issues here are answered with plain `<Option>` elements: a plain
+answer that opens no further questions. The model-to-model tutorial's
+[page 1](../../model-to-model/part-3-configuration-based/1-the-design-space.md#options-are-plain-data)
+covers the alternative, `<OpeningOption>`, an option that opens further
+questions of its own.
 
 ## Answered once, not once per element
 
@@ -308,7 +304,7 @@ model points into another.
 ## Further reading
 
 The [design decisions guide](../../../guides/variability.md) is the
-reference treatment of decision models, including composite options and
+reference treatment of decision models, including opening options and
 the constraints between options that this tutorial does not use.
 
 ## Next

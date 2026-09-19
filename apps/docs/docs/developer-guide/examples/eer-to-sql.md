@@ -36,7 +36,7 @@ What the suite contains, and what each piece shows:
 - **[`eer-to-relational`](https://github.com/AelasticS/Synthesis/tree/main/examples/eer-to-sql/eer-to-relational)**
   (model to model): the full mapping, every
   template kind, and nine design issues closed per run by a
-  configuration: auditing and row history (the composite option),
+  configuration: auditing and row history (the opening option),
   inheritance strategies, relationship mapping, naming, keys, and
   indexing.
 - **[`rel-to-sql-ddl`](https://github.com/AelasticS/Synthesis/tree/main/examples/eer-to-sql/rel-to-sql-ddl)**
@@ -383,7 +383,7 @@ rows arrive with their values.
 The history table is identified like a weak entity: its primary key
 is the base key plus a temporal discriminator. Choosing HistoryTable
 opens the `HistoryDiscriminator` sub-issue, the design space's first
-composite option: `ValidFromTimestamp` (the default) adds
+opening option: `ValidFromTimestamp` (the default) adds
 `valid_from TIMESTAMP`, `VersionCounter` adds `version INTEGER`. But
 unlike a weak entity the history table is deliberately NOT
 existence-dependent. It carries no foreign keys at all, because
@@ -404,7 +404,7 @@ dialect maintains a history table declaratively. A configuration
 stays a flat list of choices: the sub-issue nesting is design-space
 structure only, and an entity that keeps `NoHistory` never consults
 the discriminator (see the
-[composite options section](../guides/variability.md#composite-options-an-option-that-opens-sub-issues)
+[opening options section](../guides/variability.md#opening-options-an-option-that-opens-sub-issues)
 of the variability guide).
 
 ## The higher-order templates

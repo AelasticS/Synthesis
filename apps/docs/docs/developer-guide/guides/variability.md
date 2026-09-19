@@ -305,7 +305,7 @@ for the three
 shipped presets and the docs page "A full-featured EER to SQL
 transformation" for the design space they close.
 
-## Composite options: an option that opens sub-issues
+## Opening options: an option that opens sub-issues
 
 A design space is not always flat: some questions only exist once a
 particular option is chosen. The decision metamodel states this with
@@ -320,33 +320,29 @@ question of what distinguishes row versions:
 
 ```tsx
 <ElementIssue name="RowHistory" description="Whether this table keeps row history">
-  <Option name="NoHistory" description="Current rows only" isDefault={true}
-          optionType={<SimpleOption name="NoHistoryOption" />} />
-  <Option name="HistoryTable" description="A separate history table records row versions"
-          optionType={
-            <CompositeOption name="HistoryTableOption">
-              <ElementSubIssue name="HistoryDiscriminator" description="What distinguishes row versions">
-                <Option name="ValidFromTimestamp" description="A validity timestamp" isDefault={true}
-                        optionType={<SimpleOption name="ValidFromOption" />} />
-                <Option name="VersionCounter" description="A monotonic version number"
-                        optionType={<SimpleOption name="VersionCounterOption" />} />
-              </ElementSubIssue>
-            </CompositeOption>
-          } />
+  <Option name="NoHistory" description="Current rows only" isDefault={true} />
+  <OpeningOption name="HistoryTable" description="A separate history table records row versions"
+                 isDefault={false}>
+    <ElementSubIssue name="HistoryDiscriminator" description="What distinguishes row versions">
+      <Option name="ValidFromTimestamp" description="A validity timestamp" isDefault={true} />
+      <Option name="VersionCounter" description="A monotonic version number" isDefault={false} />
+    </ElementSubIssue>
+  </OpeningOption>
 </ElementIssue>
 ```
 
 The nesting is a fact about the design space, not about execution. A
-configuration remains a flat list of choices, each naming its issue
-and option, and the engine resolves a sub-issue exactly like a
-top-level one. The conditionality polices itself at run time: a
-variation point inside the composite option's code path is only
-consulted when that option was chosen, so an unconsulted sub-issue
-needs no choice, and a consulted one without a choice falls back to
-its declared default, recorded in the trace as a default resolution.
-`config init` follows the same path the defaults take: when a
-generated choice selects a composite option, the sub-issues it opens
-are answered too, recursively, in the same decision context, while
+configuration remains a flat list of choices, each naming the option it
+selects — the issue follows from that option's own parent issue — and
+the engine resolves a sub-issue exactly like a top-level one. The
+conditionality polices itself at run time: a variation point inside the
+opening option's code path is only consulted when that option was
+chosen, so an unconsulted sub-issue needs no choice, and a consulted one
+without a choice falls back to its declared default, recorded in the
+trace as a default resolution. `config init` follows the same path the
+defaults take: when a generated choice selects an opening option, the
+sub-issues it opens are answered too, recursively, in the same decision
+context, while
 sub-issues behind unchosen options stay out of the generated
 configuration (choosing such an option later means adding its
 sub-issue choices by hand, or trusting the run-time default).
