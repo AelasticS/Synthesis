@@ -40,20 +40,20 @@ export const Choice = t.subtype(
     ConfigurationModel_TypeSchema,
 )
 
-export const ElementChoice = t.subtype(
+export const ElementLevelChoice = t.subtype(
     Choice,
     {
         element: ModelElement,
 
     },
-    "ElementChoice",
+    "ElementLevelChoice",
     ConfigurationModel_TypeSchema,
 )
 
-export const GlobalChoice = t.subtype(
+export const ModelLevelChoice = t.subtype(
     Choice,
     {},
-    "GlobalChoice",
+    "ModelLevelChoice",
     ConfigurationModel_TypeSchema,
 )
 
@@ -70,7 +70,7 @@ export const ConfigurationModel = t.subtype(
 
 export type IConfigurationModel = t.TypeOf<typeof ConfigurationModel>;
 export type IChoice = t.TypeOf<typeof Choice>;
-export type IElementChoice = t.TypeOf<typeof ElementChoice>;
-export type IGlobalChoice = t.TypeOf<typeof GlobalChoice>;
+export type IElementLevelChoice = t.TypeOf<typeof ElementLevelChoice>;
+export type IModelLevelChoice = t.TypeOf<typeof ModelLevelChoice>;
 
 

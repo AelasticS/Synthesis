@@ -15,7 +15,7 @@ import { Process, Sequence, Task, Parallel } from "../test/bpm-metamodel"
 import * as b from "../test/bpm-metamodel/BPM.meta.model.type"
 
 class DispatchTx extends abstractM2M<b.IProcess, b.IProcess> {
-  template(m: b.IProcess): ExprNode<b.IProcess> {
+  main(m: b.IProcess): ExprNode<b.IProcess> {
     return <Process name="unused" store={this.context.store} />
   }
 

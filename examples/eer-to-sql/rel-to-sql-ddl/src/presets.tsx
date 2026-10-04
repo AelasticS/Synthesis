@@ -11,13 +11,13 @@ import { createExprNode, Model } from '@aelastics/synthesis/jsx'
 import type { ExprNode } from '@aelastics/synthesis/jsx'
 import type { ModelStore } from '@aelastics/synthesis/store'
 import { BindingModel } from '@aelastics/synthesis/metamodels/binding'
-import { ConfigurationModel, GlobalChoice } from '@aelastics/synthesis/metamodels/configuration'
+import { ConfigurationModel, ModelLevelChoice } from '@aelastics/synthesis/metamodels/configuration'
 import { Option } from '@aelastics/synthesis/metamodels/decision'
 
 const DESIGN = '//www.aelastics.org/DdlGenerationDesign'
 
 export const globalChoice = (issue: string, option: string) => (
-  <GlobalChoice
+  <ModelLevelChoice
     name={`gc_${issue}`}
     selectedOption={<Option $refByName={`${DESIGN}/${option}`} />}
   />

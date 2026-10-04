@@ -5,25 +5,30 @@
 // to it. We re-export them via namespace aliases to avoid the collision.
 
 export {
-  TraceModel_TypeSchema,
-  TraceEntry as TraceEntryType,
-  TraceModel as TraceModelType,
-  ReadRecord as ReadRecordType,
+    TraceModel_TypeSchema,
+    Invocation as InvocationType,
+    RuleInvocation as RuleInvocationType,
+    Resolution as ResolutionType,
+    TraceModel as TraceModelType,
+    ReadRecord as ReadRecordType,
 } from "./trace-meta.model"
 
 export type {
-  ITraceEntry,
-  ITraceModel,
-  IReadRecord,
+    ITraceModel,
+    IRuleInvocation,
+    IInvocation,
+    IResolution,
+    IReadRecord,
 } from "./trace-meta.model"
 
 export {
-  TraceEntry,
-  TraceModel,
-  TargetElement,
-  ReadRecord,
-} from "./trace-model-meta.model-components"
+    RuleInvocation,
+    TraceModel,
+    TargetElement,
+    ReadRecord,
+    Invocation,
+} from "./trace-meta.model-components"
 
 export type {
-  ITraceModelProps,
-} from "./trace-model-meta.model-components"
+    ITraceModelProps,
+} from "./trace-meta.model-components"

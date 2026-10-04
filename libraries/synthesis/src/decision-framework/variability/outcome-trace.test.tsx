@@ -30,8 +30,8 @@ import {BindingModel} from "../decisions/2.binding-model/binding-meta.model-comp
 import * as bmT from "../decisions/2.binding-model/binding-meta.model"
 import {
     ConfigurationModel,
-    ElementChoice,
-    GlobalChoice,
+    ElementLevelChoice,
+    ModelLevelChoice,
     Choice,
 } from "../decisions/3.configuration-model/configuration-meta.model-components"
 import * as cmT from "../decisions/3.configuration-model/configuration-meta.model"
@@ -41,7 +41,7 @@ class Tx extends DecisionAwareM2M<b.IProcess, b.IProcess, {}, cmT.IConfiguration
         super(store, {}, configModel)
     }
 
-    template(m: b.IProcess) {
+    main(m: b.IProcess) {
         const tasks = ((m.elements ?? []) as b.INode[]).filter((e) =>
             this.context.store.isTypeOf(e, b.Task),
         ) as b.ITask[]
@@ -154,12 +154,12 @@ describe("per-element decision resolution and the outcome trace", () => {
     const cfg = (
         <ConfigurationModel name="TestCfg" description="the run's choices"
                             sourceModel={proc} bindingModel={bm} store={store}>
-            <ElementChoice name="ec_t1" description="for t1" element={t1}
-                           selectedOption={optionOf(styleIssue, "Fancy")}/>
-            <ElementChoice name="ec_t2" description="for t2" element={t2}
-                           selectedOption={optionOf(markIssue, "Marked")}/>
-            <GlobalChoice name="gc_naming" description="upper everywhere"
-                          selectedOption={optionOf(namingIssue, "Upper")}/>
+            <ElementLevelChoice name="ec_t1" description="for t1" element={t1}
+                                selectedOption={optionOf(styleIssue, "Fancy")}/>
+            <ElementLevelChoice name="ec_t2" description="for t2" element={t2}
+                                selectedOption={optionOf(markIssue, "Marked")}/>
+            <ModelLevelChoice name="gc_naming" description="upper everywhere"
+                              selectedOption={optionOf(namingIssue, "Upper")}/>
         </ConfigurationModel>
     ).render(new Context()) as cmT.IConfigurationModel
 

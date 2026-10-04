@@ -38,7 +38,7 @@ export class RelToSqlStructuredTransformation extends abstractM2M<rmT.IRelSchema
     super(store)
   }
 
-  template(s: rmT.IRelSchema) {
+  main(s: rmT.IRelSchema) {
     // Read the model once, up front: the tables to create, and every
     // foreign key that has to be added after they all exist.
     const tables = this.tablesOf(s)

@@ -20,8 +20,8 @@ import { Context } from '@aelastics/synthesis/jsx'
 import { SourceModelToDefaultConfigurationModel } from '@aelastics/synthesis/variability'
 import {
   Choice as ChoiceTemplate,
-  ElementChoice as ElementChoiceTemplate,
-  GlobalChoice as GlobalChoiceTemplate
+  ElementLevelChoice as ElementChoiceTemplate,
+  ModelLevelChoice as GlobalChoiceTemplate
 } from '@aelastics/synthesis/metamodels/configuration'
 
 import { parseSynthHeader, serializeSynthHeader } from '../models/header.js'

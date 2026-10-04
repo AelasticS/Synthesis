@@ -20,7 +20,7 @@ export class SourceModelToDefaultConfigurationModel extends abstractM2M<IModel, 
     super(store, extra)
   }
 
-  template(s: IModel) {
+  main(s: IModel) {
     return (
       <cmC.ConfigurationModel
         name={s.name + " Default Configuration Model"}
@@ -109,7 +109,7 @@ export class SourceModelToDefaultConfigurationModel extends abstractM2M<IModel, 
     const scopedName = this.scopedNameOf(sourceModelElement)
 
     return (
-      <cmC.ElementChoice
+      <cmC.ElementLevelChoice
         name={`ec_${scopedName}_${issue.name}`}
         description={`Selected option for ${issue.name} on ${scopedName} is ${defaultOption.name}`}
         element={sourceModelElement}
@@ -141,7 +141,7 @@ export class SourceModelToDefaultConfigurationModel extends abstractM2M<IModel, 
     }
 
     return (
-      <cmC.GlobalChoice
+      <cmC.ModelLevelChoice
         name={`gc_${issue.name}`}
         description={`Selected option for ${issue.name} is ${defaultOption.name}`}
         selectedOption={defaultOption}

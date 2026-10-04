@@ -22,7 +22,7 @@ export class WorkflowToBpmnTransformation extends abstractM2M<wm.IWorkflowModel,
     super(store)
   }
 
-  template(m: wm.IWorkflowModel): ExprNode<wm.IWorkflowModel, bm.IProcess> {
+  main(m: wm.IWorkflowModel): ExprNode<wm.IWorkflowModel, bm.IProcess> {
     const entry = this.entryProcessOf(m)
     const steps = this.stepsOf(entry)
     return (

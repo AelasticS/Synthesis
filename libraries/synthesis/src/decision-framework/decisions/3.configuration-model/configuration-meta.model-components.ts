@@ -33,11 +33,11 @@ export const Choice: Template<dm.IChoice> = (props) => {
     return new ExprNode(dm.Choice, props, undefined);
 }
 
-export const ElementChoice: Template<dm.IElementChoice> = (props) => {
-    return new ExprNode(dm.ElementChoice, props, 'choices');
+export const ElementLevelChoice: Template<dm.IElementLevelChoice> = (props) => {
+    return new ExprNode(dm.ElementLevelChoice, props, 'choices');
 }
 
-export const GlobalChoice: Template<dm.IGlobalChoice> = (props)=>{
-    return new ExprNode(dm.GlobalChoice, props, 'choices');
+export const ModelLevelChoice: Template<dm.IModelLevelChoice> = (props)=>{
+    return new ExprNode(dm.ModelLevelChoice, props, 'choices');
 }
 

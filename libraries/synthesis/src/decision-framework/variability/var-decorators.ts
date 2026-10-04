@@ -84,10 +84,10 @@ const resolveConfiguredChoices = (
 
   return choices.filter(
     (c: tcM.IChoice) =>
-      !currentContext.store.isTypeOf(c, tcM.ElementChoice)
+      !currentContext.store.isTypeOf(c, tcM.ElementLevelChoice)
       || (
-        currentContext.store.isTypeOf(c, tcM.ElementChoice)
-        && isSameElement((c as unknown as tcM.IElementChoice).element, element)
+        currentContext.store.isTypeOf(c, tcM.ElementLevelChoice)
+        && isSameElement((c as unknown as tcM.IElementLevelChoice).element, element)
       ),
   )
 }

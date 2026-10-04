@@ -66,7 +66,7 @@ export class WorkflowToMermaidTransformation extends abstractM2M<wm.IWorkflowMod
     super(store)
   }
 
-  template(m: wm.IWorkflowModel): ExprNode<wm.IWorkflowModel, M2T_Model> {
+  main(m: wm.IWorkflowModel): ExprNode<wm.IWorkflowModel, M2T_Model> {
     const entry = this.entryProcessOf(m)
     const body = this.bodyWiring(this.stepsOf(entry))
     const lines = [

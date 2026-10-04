@@ -15,9 +15,9 @@ import {
 import * as tm from "./transformation.model.type"
 import { ModelStore } from "./../index"
 import * as tmT from "./trace/trace-meta.model"
-import * as tmC from "./trace/trace-model-meta.model-components"
+import * as tmC from "./trace/trace-meta.model-components"
 import { Element as CModelElement, Model } from "../../jsx-runtime"
-import { TargetElement } from "./trace/trace-model-meta.model-components"
+import { TargetElement } from "./trace/trace-meta.model-components"
 
 type IODescr = { type?: t.Any; instance?: IModel; jsx?: string }
 type TransformationDescr = {
@@ -240,7 +240,7 @@ export interface IM2M<
   context: M2MContext<P>
   extra?: EM
 
-  template(props: S): ExprNode<S, D>
+  main(props: S): ExprNode<S, D>
 
   transform(source: S): D
 }
@@ -260,11 +260,11 @@ export abstract class abstractM2M<
     this.extra = extra
   }
 
-  abstract template(props: S): ExprNode<S, D>
+  abstract main(props: S): ExprNode<S, D>
 
   public transform(source: S, param?: P): D {
     this.context.param = param
-    const targetJSXTree = this.template(source)
+    const targetJSXTree = this.main(source)
     const targetModel = targetJSXTree.render<D>(this.context)
 
     this.context.input.instance = source

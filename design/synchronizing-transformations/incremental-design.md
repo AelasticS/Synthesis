@@ -35,7 +35,7 @@ Source stays mutable because that is how users edit it and how the EventLog capt
 
 ## 2. Trace Extension
 
-Today's `TraceEntry` ([trace-meta.model.ts](../../libraries/engine/src/transformations/trace/trace-meta.model.ts)):
+Today's `Invocation` ([trace-meta.model.ts](../../libraries/engine/src/transformations/trace/trace-meta.model.ts)):
 
 ```ts
 type TraceEntry = {
@@ -61,7 +61,7 @@ type TraceEntry = {
 }
 ```
 
-**`parentRule`** captures JSX containment. When the template nests `<Column>` inside `<Table>`, the column's trace entry has the table's entry as parent. Recording this is cheap: the JSX render walker already knows the enclosing entry. When a parent rule is re-run, all child invocations are conceptually re-attached under the new parent target.
+**`parentInvocation`** captures JSX containment. When the template nests `<Column>` inside `<Table>`, the column's trace entry has the table's entry as parent. Recording this is cheap: the JSX render walker already knows the enclosing entry. When a parent rule is re-run, all child invocations are conceptually re-attached under the new parent target.
 
 **`reads`** captures lateral data dependencies. Whenever a rule body calls `context.resolveTarget(otherSource, otherRule)`, the engine appends the resolved entry's id to the calling entry's `reads`. This is the edge MobX would record automatically by intercepting observable reads; for us it is recorded at the single chokepoint of `resolveTarget`.
 
@@ -175,7 +175,7 @@ function renderFindOrCreate(exprNode, prevContext, priorEntry):
 
 Target: prove the design on `EER2RelTransformation`.
 
-1. **Trace extension** — add `parentRule` and `reads` to `TraceEntry`; record them in `M2MContext`.
+1. **Trace extension** — add `parentInvocation` and `reads` to `Invocation`; record them in `M2MContext`.
 2. **Delta builder** — `deltaFromEventLog` helper in `aelastics-store` or `engine`.
 3. **Scheduler** — pure-function `computeDirtySet(prev, delta)` and `topoSort`. Unit-testable in isolation.
 4. **Immutable target layer (minimal)** — Immer-based wrapper around the existing target metamodel. Accept the cross-reference limitation for the slice; document the workaround.

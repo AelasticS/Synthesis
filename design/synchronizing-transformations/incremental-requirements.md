@@ -13,7 +13,7 @@
 1. **Re-run only affected rules.** Given a delta of source changes, identify the minimal set of rule invocations that must be re-executed using the trace as the dependency map.
 2. **Produce a new target version**, not a mutated one. Old and new versions must coexist so consumers can diff them.
 3. **Preserve semantic equivalence with batch.** For every source state `S` and delta `Δ`, the result of `transformIncremental(prev, Δ)` must equal `transform(applyDelta(prev.source, Δ))` modulo non-deterministic rule output.
-4. **Reuse the existing trace abstraction.** Extend, do not replace, `TraceEntry` and `M2MContext`.
+4. **Reuse the existing trace abstraction.** Extend, do not replace, `Invocation` and `M2MContext`.
 5. **Leverage existing change detection.** Build the delta from the `EventLog` that `aelastics-store` already attaches to observable source models — no new instrumentation on user code.
 
 ## Non-Goals (Phase 1)
@@ -63,7 +63,7 @@ type TransformResult<D> = {
 Given `delta`, the runtime must identify:
 
 - **Directly dirty invocations** — rule invocations whose source element appears in the delta (looked up via `M2MContext.sourceIndex`)
-- **Transitively dirty invocations** — rule invocations that read (via `parentRule` or `reads` edges, see design doc) a target produced by a directly dirty invocation, recursively to fixpoint
+- **Transitively dirty invocations** — rule invocations that read (via `parentInvocation` or `reads` edges, see design doc) a target produced by a directly dirty invocation, recursively to fixpoint
 - **New invocations** — rules that should run for newly created source elements (determined by re-invoking the template's element-selection logic, scoped to the delta)
 - **Orphaned invocations** — invocations whose source element was deleted; their targets must be removed
 

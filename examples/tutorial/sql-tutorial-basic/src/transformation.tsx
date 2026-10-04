@@ -29,7 +29,7 @@ export class RelToSqlBasicTransformation extends abstractM2M<rmT.IRelSchema, m2t
 
   // One <Doc> means one file. Its name is the file name the CLI writes,
   // so the schema name carries straight through to Library_rel.sql.
-  template(s: rmT.IRelSchema) {
+  main(s: rmT.IRelSchema) {
     return (
       <M2T name={`${s.name}_sql`}>
         <Doc name={`${s.name}.sql`}>
