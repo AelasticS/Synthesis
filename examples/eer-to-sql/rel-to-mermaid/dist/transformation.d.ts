@@ -6,7 +6,7 @@ import type { ModelStore } from '@aelastics/synthesis/store';
 import * as rmT from 'relational-metamodel/model';
 export declare class RelToMermaid extends abstractM2M<rmT.IRelSchema, M2T_Model> {
     constructor(store: ModelStore);
-    template(s: rmT.IRelSchema): ExprNode<rmT.IRelSchema, M2T_Model>;
+    main(s: rmT.IRelSchema): ExprNode<rmT.IRelSchema, M2T_Model>;
     /** One attribute line per column; key-ness IS membership in the
      * PrimaryKey element and foreign-key-ness IS appearing as an
      * fkColumn pair, read from those elements, never stored twice. */

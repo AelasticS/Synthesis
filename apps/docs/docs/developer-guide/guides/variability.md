@@ -47,19 +47,21 @@ A default configuration can be generated automatically from the source model. Ev
 
 ### Execution Trace
 
-Every run records a **trace model**: one entry per executed rule,
-carrying the source element, the produced target elements (as full
-element paths), and the rule that actually ran. Dispatch machinery is
-not traced; when a specialization or variability point routed the call,
-the entry simply names the executed option method, which is the record.
+Every run records a **trace model** shaped as a call tree. Each
+executed `@E2E` rule is a `RuleInvocation`, carrying the source element,
+the produced target elements (as full element paths), and the method
+that actually ran in `function`. An option method (`@VarOption`,
+`@SpecOption`) executed outside any `@E2E` rule is a plain `Invocation`.
+Every invocation has an optional `parent`: the invocation that was
+executing when it began. Dispatch machinery is not traced; when a
+specialization or variability point routed the call, the invocation
+simply names the executed option method, which is the record.
 
-Every resolved configuration option is recorded, always. A choice that
-selects a rule sits on that rule's entry; a choice consulted inside
-another rule is attached to the entry of the element it was decided
-for; a global choice is recorded once on the trace model itself. Each
-resolution carries the issue and option names in decision-model
-language, a reference to the explicit `Choice` in the configuration, or
-a `byDefault` marker when the issue's default applied.
+Every `@VarPoint` consultation is recorded, always, as a `Resolution` on
+the invocation that carried it. It lists the `choices` in the
+configuration for that issue, including those whose condition was not
+satisfied, and `byDefault` is true when no condition was met and the
+`@Default` option ran.
 
 Trace detail follows rule granularity: behavior factored into rules is
 recorded per rule, behavior inlined into a template is not, so the

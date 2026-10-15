@@ -4,14 +4,13 @@
  */
 
 import { abstractM2M, IM2M } from "./abstractM2M"
-import { IModel } from "../../metamodel-core"
+import { IModel, IModelElement, ModelElement } from "../../metamodel-core"
 import { ExprNode, ResolveElement } from "../../jsx-runtime"
 import {
   __isVarPoint,
   __isSpecPoint,
   guardE2E,
-  findPointRegistration,
-  consumePointResolutions,
+  isPointMethod,
   appendDecoratorHistory,
 } from "./decorator-guards"
 
@@ -54,38 +53,56 @@ export const E2E = function() {
     guardE2E(original, propertyKey)
 
     // Detect at decoration time whether a point decorator (@VarPoint, @SpecPoint, …)
-    // is present. Uses the registry — no hardcoded sentinel references.
-    const pointReg = findPointRegistration(original)
+    // is present, from the decorator history.
+    const isPoint = isPointMethod(original)
 
     const wrapped = function(this: abstractM2M<any, any, any, any>, ...args: any[]) {
-        let sourceModelElement = args[0]
+        const sourceModelElement = args[0]
+        const context = this.context
 
-        let result = original.apply(this, args) as ExprNode<any> | ExprNode<any>[] | null
-        if (!result) return null
+        // The rule's input must be a model element: it is the source of
+        // the trace record and the key for resolving its targets.
+        if (
+          sourceModelElement === null ||
+          typeof sourceModelElement !== "object" ||
+          !context.store.isTypeOf(sourceModelElement, ModelElement)
+        ) {
+          const got = sourceModelElement === null ? "null" : typeof sourceModelElement
+          throw new Error(
+            `@E2E "${propertyKey}": the first argument must be a ModelElement, got ${got}.`,
+          )
+        }
+
+        // The invocation begins before the rule runs, so every call made
+        // inside it records this rule as its parent. For a point, the
+        // first option method entered is this rule's executed method.
+        const invocation = context.beginInvocation(propertyKey, "rule", sourceModelElement as IModelElement)
+        if (isPoint) context.pendingRule = invocation
+
+        let result: ExprNode<any> | ExprNode<any>[] | null | undefined
+        try {
+          result = original.apply(this, args)
+        } finally {
+          context.pendingRule = undefined
+          context.endInvocation()
+        }
+
+        if (!result) {
+          context.discardInvocation(invocation)
+          return null
+        }
 
         // Normalize result to array
         const jsxElements: ExprNode<any>[] = Array.isArray(result) ? result : [result]
-        if (jsxElements.length === 0) return null
 
         // Filter out ResolveElements — they should not be traced
         const traceableElements = jsxElements.filter(el => !(el instanceof ResolveElement))
-        if (traceableElements.length === 0) return result
+        if (traceableElements.length === 0) {
+          context.discardInvocation(invocation)
+          return jsxElements.length === 0 ? null : result
+        }
 
-        // Consume the point resolutions left on the context by directly
-        // wrapped point decorators. Resolution FACTS (which option answered
-        // which issue) are recorded independently by the points themselves;
-        // here the resolution only names the executed option method, which
-        // becomes the entry's rule name: the trace records the outcome, not
-        // how dispatch selected it.
-        const resolution = pointReg
-          ? consumePointResolutions(this.context, pointReg)
-          : undefined
-        const executedRule =
-          resolution && typeof resolution.optionName === "string"
-            ? resolution.optionName
-            : propertyKey
-
-        this.context.makeTrace(sourceModelElement, traceableElements, executedRule)
+        context.makeTrace(invocation, traceableElements)
 
         return result
       }

@@ -8,9 +8,7 @@ import {
   __isSpecPoint,
   guardSpecPoint,
   guardSpecOption,
-  registerPointDecorator,
   appendDecoratorHistory,
-  recordDecorator,
 } from "./decorator-guards";
 
 // https://stackoverflow.com/questions/55179461/reflection-in-javascript-how-to-intercept-an-object-for-function-enhancement-d
@@ -62,16 +60,17 @@ export const SpecPoint = () => {
         throw new Error(`No specialized method found`);
       }
 
+      // The enclosing @E2E rule's pending slot belongs to the option this
+      // point dispatches to, not to anything the base skeleton happens to
+      // call first: hold it back while the skeleton runs.
+      const rule = this.context.pendingRule;
+      this.context.pendingRule = undefined;
+
       // get result from original method (the base skeleton, if any)
       let orgResult = original.apply(this, args);
+      this.context.pendingRule = rule;
       // get result from specialized method
       let specResult = (this as any)[option.specMethod](...args);
-
-      // Signal to @E2E (outer) that specialization occurred — analogous to VarPoint's lastVarResolution
-      this.context.lastSpecResolution = {
-        optionName: option.specMethod,
-        sourceTypeName: aType.name,
-      };
 
       // A point whose base returns nothing is a pure dispatcher: the
       // option's result is returned as is (one expression, an array of
@@ -122,7 +121,9 @@ export const SpecOption = (methodName: string, type: Any) => {
     propertyKey: string,
     descriptor: PropertyDescriptor
   ) {
-    // @SpecOption must not be placed above @E2E — would cause duplicate trace entries.
+    // @SpecOption must be the only decorator on the method: it traces the
+    // option itself (below), so @E2E, a point or another option decorator
+    // would duplicate or conflict with that.
     guardSpecOption(descriptor.value, propertyKey)
 
     const method: Function = target[__SpecPoint][methodName];
@@ -135,18 +136,21 @@ export const SpecOption = (methodName: string, type: Any) => {
       // @ts-ignore
       method.push(o);
     }
-    recordDecorator(descriptor.value, "SpecOption", { specPointMethod: methodName })
+
+    // The option is a traced function call: absorbed into the enclosing
+    // @E2E rule's invocation when it is that rule's executed method,
+    // otherwise an Invocation of its own. Registration above uses the
+    // method name, so wrapping does not affect dispatch.
+    const original = descriptor.value;
+    descriptor.value = function (this: abstractM2M<any, any>, ...args: any[]) {
+      const entry = this.context.enterOption(propertyKey, args[0]);
+      try {
+        return original.apply(this, args);
+      } finally {
+        this.context.exitOption(entry);
+      }
+    };
+    appendDecoratorHistory(original, descriptor.value, "SpecOption", { specPointMethod: methodName });
     return descriptor;
   };
 };
-
-// ─── Self-registration ────────────────────────────────────────────────────────
-// @SpecPoint registers as a point decorator so @E2E can trace it without
-// hardcoded sentinel references.
-registerPointDecorator({
-  sentinel: __isSpecPoint,
-  getResolution: (ctx: { lastSpecResolution: any; }) => ctx.lastSpecResolution,
-  clearResolution: (ctx: { lastSpecResolution: undefined; }) => { ctx.lastSpecResolution = undefined },
-})
-
-

@@ -25,31 +25,43 @@ type TransformationDescr = {
   instance?: tm.IM2M_Trace
 }
 
-export interface ISpecResolution {
-  optionName: string
-  sourceTypeName: string
+// One consultation of a variability point: which option executed, whether
+// it ran as the @Default fallback, and the configuration choices
+// considered (including those whose condition was not satisfied).
+export interface ResolutionData {
+  issue: string
+  option: string
+  byDefault: boolean
+  choices: IModelElement[]
 }
 
-// Lightweight runtime record for resolve lookups (sourceIndex, jsxIndex).
-// The full trace info (source, ruleType, timestamps)
-// lives in rawTraceEntries and is rendered into a persistent TraceModel lazily.
-export interface TraceEntryRecord {
-  rule: string // for lookup by ruleName
-  targets: IModelElement[] // populated by resolveTargetForJSX during render
-  _jsxElements: ExprNode<IModelElement>[] // for resolveJSXElement / resolveAllJSXElements
-}
-
-// Raw data stored during template() execution; converted to trace JSX
-// in createTraceModel() when output.instance is available. `ruleName`
-// is the EXECUTED concrete method (a dispatched option method when a
-// point decorator routed the call). `record` links the runtime lookup
-// record whose `targets` the renderer fills with the actual created
-// elements, so trace references can carry their real full paths.
-export interface RawTraceEntryData {
-  sourceModelElement: IModelElement
+// One executed function call. "rule" is an @E2E method; "plain" is an
+// option method executed outside any @E2E rule. `function` is the
+// EXECUTED concrete method (a dispatched option method when a point
+// decorator routed the call). `parent` is the invocation on top of the
+// call stack when this one began.
+//
+// A rule is also the runtime lookup record for resolve calls
+// (sourceIndex, jsxIndex): `jsxElements` is its result, and `targets`
+// is filled by resolveTargetForJSX during render with the actual created
+// elements, so trace references can carry their real full paths. A rule
+// is traced once makeTrace() has set its result.
+export interface InvocationRecord {
+  function: string
+  kind: "rule" | "plain"
+  parent?: InvocationRecord
+  source?: IModelElement
   jsxElements: ExprNode<IModelElement>[]
-  ruleName: string
-  record: TraceEntryRecord
+  targets: IModelElement[]
+  resolutions: ResolutionData[]
+  discarded?: boolean
+}
+
+// Handle returned by enterOption(): `owned` is false when the option was
+// absorbed into the enclosing @E2E rule's invocation.
+export interface OptionEntry {
+  invocation: InvocationRecord
+  owned: boolean
 }
 
 export const _privatePop = Symbol("privatePop")
@@ -91,20 +103,29 @@ export class M2MContext<P = undefined> extends Context implements IM2MContext {
   public traceJsx?: string
 
   // Fast O(1) lookup by source element
-  public readonly sourceIndex: Map<IModelElement, TraceEntryRecord[]> = new Map()
+  public readonly sourceIndex: Map<IModelElement, InvocationRecord[]> = new Map()
 
   // Fast O(1) lookup by JSX element — private, used only by resolveTargetForJSX().
   // One JSX node may belong to several entries (a rule's result embedded
   // in an enclosing rule's result registers with both), and every one of
   // them must receive the resolved target.
-  private readonly jsxIndex: Map<ExprNode<IModelElement>, TraceEntryRecord[]> = new Map()
+  private readonly jsxIndex: Map<ExprNode<IModelElement>, InvocationRecord[]> = new Map()
 
-  // Raw trace data collected during template(); converted to JSX lazily in createTraceModel()
-  public readonly rawTraceEntries: RawTraceEntryData[] = []
 
-  // Last SpecResolution — set by SpecPoint wrapper, read and cleared by E2E.
-  // SpecPoint lives in engine; its resolution is consumed here.
-  public lastSpecResolution?: ISpecResolution
+  // Call stack of traced invocations: the top is the parent of the next
+  // invocation that begins. `invocations` keeps them in start order, so a
+  // parent always precedes its children.
+  public readonly invocationStack: Stack<InvocationRecord> = new Stack()
+  public readonly invocations: InvocationRecord[] = []
+
+  // Set by @E2E when its method is a point: the first option method
+  // entered is the executed rule, so it is absorbed into this invocation
+  // instead of starting an invocation of its own.
+  public pendingRule?: InvocationRecord
+
+  // Set by @VarPoint just before it calls the chosen option; taken by the
+  // option wrapper and attached to the invocation that executes it.
+  public pendingResolution?: ResolutionData
 
   // param is used to keep additional information during transformation
   // passed from transform() method of abstractM2M
@@ -114,41 +135,91 @@ export class M2MContext<P = undefined> extends Context implements IM2MContext {
     super()
   }
 
-  public makeTrace(
-    sourceModelElement: IModelElement,
-    jsxElements: ExprNode<IModelElement>[],
-    ruleName: string,
-  ) {
-    const entry: TraceEntryRecord = {
-      rule: ruleName,
+  public beginInvocation(
+    functionName: string,
+    kind: "rule" | "plain",
+    source?: IModelElement,
+  ): InvocationRecord {
+    const invocation: InvocationRecord = {
+      function: functionName,
+      kind,
+      parent: this.invocationStack.peek(),
+      source,
+      jsxElements: [],
       targets: [],
-      _jsxElements: jsxElements,
+      resolutions: [],
     }
+    this.invocations.push(invocation)
+    this.invocationStack[_privatePush](invocation)
+    return invocation
+  }
 
-    // Store raw data — JSX entries will be created lazily in createTraceModel()
-    // when output.instance is available and entry.targets are resolved.
-    this.rawTraceEntries.push({
-      sourceModelElement,
-      jsxElements,
-      ruleName,
-      record: entry,
-    })
+  public endInvocation(): void {
+    this.invocationStack[_privatePop]()
+  }
+
+  // An @E2E call that produced nothing traceable leaves no record; its
+  // children are re-attached to its own parent.
+  public discardInvocation(invocation: InvocationRecord): void {
+    invocation.discarded = true
+    for (const other of this.invocations) {
+      if (other.parent === invocation) other.parent = invocation.parent
+    }
+  }
+
+  /**
+   * Called by option wrappers (@VarOption, @SpecOption) on entry. When the
+   * option is the direct target of an @E2E point, it is absorbed into
+   * that rule's invocation (the rule's `function` becomes the executed
+   * option method); otherwise it begins an invocation of its own.
+   */
+  public enterOption(functionName: string, source?: unknown): OptionEntry {
+    const resolution = this.pendingResolution
+    this.pendingResolution = undefined
+
+    const rule = this.pendingRule
+    this.pendingRule = undefined
+
+    let entry: OptionEntry
+    if (rule) {
+      rule.function = functionName
+      entry = { invocation: rule, owned: false }
+    } else {
+      const el = source as { name?: unknown } | undefined
+      const named = el && typeof el === "object" && typeof el.name === "string"
+      entry = {
+        invocation: this.beginInvocation(functionName, "plain", named ? (source as IModelElement) : undefined),
+        owned: true,
+      }
+    }
+    if (resolution) entry.invocation.resolutions.push(resolution)
+    return entry
+  }
+
+  public exitOption(entry: OptionEntry): void {
+    if (entry.owned) this.endInvocation()
+  }
+
+  // Records the result of an @E2E rule and registers it for resolve
+  // lookups. Its targets are filled in during render.
+  public makeTrace(invocation: InvocationRecord, jsxElements: ExprNode<IModelElement>[]) {
+    invocation.jsxElements = jsxElements
 
     // sourceIndex
-    const existing = this.sourceIndex.get(sourceModelElement)
+    const existing = this.sourceIndex.get(invocation.source!)
     if (existing) {
-      existing.push(entry)
+      existing.push(invocation)
     } else {
-      this.sourceIndex.set(sourceModelElement, [entry])
+      this.sourceIndex.set(invocation.source!, [invocation])
     }
 
     // jsxIndex — register each JSX element from the array
     for (const jsx of jsxElements) {
       const entries = this.jsxIndex.get(jsx)
       if (entries) {
-        entries.push(entry)
+        entries.push(invocation)
       } else {
-        this.jsxIndex.set(jsx, [entry])
+        this.jsxIndex.set(jsx, [invocation])
       }
     }
   }
@@ -166,7 +237,7 @@ export class M2MContext<P = undefined> extends Context implements IM2MContext {
     const entries = this.sourceIndex.get(source)
     if (!entries) return undefined
 
-    const entry = ruleName ? entries.find((e) => e.rule === ruleName) : entries[0]
+    const entry = ruleName ? entries.find((e) => e.function === ruleName) : entries[0]
     if (!entry) return undefined
 
     if (targetType) {
@@ -180,7 +251,7 @@ export class M2MContext<P = undefined> extends Context implements IM2MContext {
     const entries = this.sourceIndex.get(source)
     if (!entries) return []
 
-    const entry = ruleName ? entries.find((e) => e.rule === ruleName) : entries[0]
+    const entry = ruleName ? entries.find((e) => e.function === ruleName) : entries[0]
     if (!entry) return []
 
     if (targetType) {
@@ -194,9 +265,9 @@ export class M2MContext<P = undefined> extends Context implements IM2MContext {
     const entries = this.sourceIndex.get(input)
     if (!entries) throw new Error(`Target JSXElement for ${input} source model element does not exist!`)
 
-    const entry = ruleName ? entries.find((e) => e.rule === ruleName) : entries[0]
+    const entry = ruleName ? entries.find((e) => e.function === ruleName) : entries[0]
 
-    if (!entry || entry._jsxElements.length === 0) {
+    if (!entry || entry.jsxElements.length === 0) {
       throw new Error(`Target JSXElement for ${input} source model element does not exist!`)
     }
 
@@ -207,27 +278,27 @@ export class M2MContext<P = undefined> extends Context implements IM2MContext {
           `Target JSXElement of type ${targetType.name} for ${input} source model element does not exist!`
         )
       }
-      return entry._jsxElements[idx]
+      return entry.jsxElements[idx]
     }
 
-    return entry._jsxElements[0]
+    return entry.jsxElements[0]
   }
 
   public resolveAllJSXElements(input: IModelElement, ruleName?: string, targetType?: t.Any): ExprNode<IModelElement>[] {
     const entries = this.sourceIndex.get(input)
     if (!entries) throw new Error(`Target JSXElements for ${input} source model element do not exist!`)
 
-    const entry = ruleName ? entries.find((e) => e.rule === ruleName) : entries[0]
+    const entry = ruleName ? entries.find((e) => e.function === ruleName) : entries[0]
 
-    if (!entry || entry._jsxElements.length === 0) {
+    if (!entry || entry.jsxElements.length === 0) {
       throw new Error(`Target JSXElements for ${input} source model element do not exist!`)
     }
 
     if (targetType) {
-      return entry._jsxElements.filter((_, idx) => this.store.isTypeOf(entry.targets[idx], targetType))
+      return entry.jsxElements.filter((_, idx) => this.store.isTypeOf(entry.targets[idx], targetType))
     }
 
-    return entry._jsxElements
+    return entry.jsxElements
   }
 }
 
@@ -413,73 +484,120 @@ export abstract class abstractM2M<
   }
 
   /**
-   * Assembles the per-entry data shared by all trace model builders:
-   * a deterministic entry name (rule and source, disambiguated per
-   * repeated execution of the same pair) and the target references.
+   * Assembles the per-invocation data shared by all trace model
+   * builders, in start order (a parent precedes its children, so a
+   * parent reference always resolves to an already created element):
+   * a deterministic name (function and source, disambiguated per repeated
+   * execution), the parent's name and, for rules, the target references.
    * Targets come from the actual created elements recorded during
    * render, so their references carry real full paths (correct under
    * nested namespaces); rules that produced only references (grafts)
    * fall back to the reference names on their result expressions.
    */
-  protected traceEntryData(): Array<{
-    raw: RawTraceEntryData
-    entryName: string
+  protected invocationData(): Array<{
+    invocation: InvocationRecord
+    name: string
+    parentName?: string
     targetRefs: any[]
   }> {
     const targetElementNamespace = this.context.output.instance
       ? `${this.context.output.instance.path}/${this.context.output.instance.name}`
       : ""
     const nameCounts = new Map<string, number>()
+    const names = new Map<InvocationRecord, string>()
 
-    return this.context.rawTraceEntries.map((raw) => {
-      const base = `${raw.ruleName}_${raw.sourceModelElement.name}`
+    const result: ReturnType<abstractM2M<S, D, EM, P>["invocationData"]> = []
+    for (const invocation of this.context.invocations) {
+      // a rule without a recorded outcome, or a discarded call, leaves no trace
+      if (invocation.discarded || (invocation.kind === "rule" && invocation.jsxElements.length === 0)) continue
+
+      const sourceName = invocation.source?.name
+      const base = sourceName ? `${invocation.function}_${sourceName}` : invocation.function
       const n = (nameCounts.get(base) ?? 0) + 1
       nameCounts.set(base, n)
-      const entryName = n === 1 ? base : `${base}_${n}`
+      const name = n === 1 ? base : `${base}_${n}`
+      names.set(invocation, name)
 
-      let targetRefs: any[]
-      if (raw.record.targets.length > 0) {
-        targetRefs = raw.record.targets.map((el) => (
-          <TargetElement $refByName={this.fullElementRef(el)} />
-        ))
-      } else {
-        targetRefs = raw.jsxElements.flatMap((jsx) => {
-          // For abstract elements (from @SpecPoint), the rendered element
-          // is the subElement; the abstract element itself is never created.
-          let resolved = jsx
-          while (resolved.isAbstract && resolved.subElement) {
-            resolved = resolved.subElement
-          }
-          const props = resolved.props as { name?: string; $refByName?: string }
-          const name = props.name ?? props.$refByName
-          if (name === undefined) {
-            return []
-          }
-          const ref = String(name).startsWith("//") ? String(name) : `${targetElementNamespace}/${name}`
-          return [<TargetElement $refByName={ref} />]
-        })
+      let targetRefs: any[] = []
+      if (invocation.kind === "rule") {
+        if (invocation.targets.length > 0) {
+          targetRefs = invocation.targets.map((el) => (
+            <TargetElement $refByName={this.fullElementRef(el)} />
+          ))
+        } else {
+          targetRefs = invocation.jsxElements.flatMap((jsx) => {
+            // For abstract elements (from @SpecPoint), the rendered element
+            // is the subElement; the abstract element itself is never created.
+            let resolved = jsx
+            while (resolved.isAbstract && resolved.subElement) {
+              resolved = resolved.subElement
+            }
+            const props = resolved.props as { name?: string; $refByName?: string }
+            const targetName = props.name ?? props.$refByName
+            if (targetName === undefined) {
+              return []
+            }
+            const ref = String(targetName).startsWith("//") ? String(targetName) : `${targetElementNamespace}/${targetName}`
+            return [<TargetElement $refByName={ref} />]
+          })
+        }
       }
 
-      return { raw, entryName, targetRefs }
-    })
+      result.push({
+        invocation,
+        name,
+        parentName: invocation.parent ? names.get(invocation.parent) : undefined,
+        targetRefs,
+      })
+    }
+    return result
+  }
+
+  /** Extra props for the trace model element; decision-aware subclasses add the configuration. */
+  protected traceModelProps(): Record<string, unknown> {
+    return {}
   }
 
   /**
-   * Builds the trace JSX tree for the current transformation: the
-   * outcome record. One entry per executed rule, named for its
-   * (rule, source) identity; the rule field carries the executed
-   * concrete method. Decision-aware subclasses override this to attach
-   * configuration resolutions.
+   * Builds the trace JSX tree for the current transformation: one
+   * RuleInvocation per executed @E2E rule (its `function` is the
+   * executed concrete method) and one Invocation per option method
+   * executed outside any rule, linked through `parent`. Each carries the
+   * Resolutions of the variability points it executed.
    */
   protected createTraceModel(): ExprNode<tmT.ITraceModel> {
-    const traceJSXEntries = this.traceEntryData().map(({ raw, entryName, targetRefs }) => (
-      <tmC.TraceEntry
-        name={entryName}
-        rule={raw.ruleName}
-        source={<CModelElement $refByName={this.fullElementRef(raw.sourceModelElement)} />}
-        targets={targetRefs}
-      />
-    ))
+    // Resolution names live in the trace model's flat name scope; a
+    // running counter keeps them unique and deterministic.
+    let resolutionCounter = 0
+    const traceJSXEntries = this.invocationData().map(({ invocation, name, parentName, targetRefs }) => {
+      const resolutions = invocation.resolutions.map((r) => {
+        resolutionCounter += 1
+        return (
+          <tmC.Resolution
+            name={`r${resolutionCounter}_${r.option}`}
+            byDefault={r.byDefault}
+            choices={r.choices.map((c) => <CModelElement $refByName={this.fullElementRef(c)} />)}
+          />
+        )
+      })
+      const parent = parentName ? <tmC.Invocation $refByName={parentName} /> : undefined
+
+      return invocation.kind === "rule" ? (
+        <tmC.RuleInvocation
+          name={name}
+          function={invocation.function}
+          parent={parent}
+          source={<CModelElement $refByName={this.fullElementRef(invocation.source!)} />}
+          targets={targetRefs}
+        >
+          {resolutions}
+        </tmC.RuleInvocation>
+      ) : (
+        <tmC.Invocation name={name} function={invocation.function} parent={parent}>
+          {resolutions}
+        </tmC.Invocation>
+      )
+    })
 
     return (
       <tmC.TraceModel
@@ -489,6 +607,7 @@ export abstract class abstractM2M<
         transformation={this.transformationName()}
         source={<Model $refByName={this.fullElementRef(this.context.input.instance!)} />}
         targets={[<Model $refByName={this.fullElementRef(this.context.output.instance!)} />]}
+        {...this.traceModelProps()}
       >
         {traceJSXEntries}
       </tmC.TraceModel>

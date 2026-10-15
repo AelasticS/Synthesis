@@ -15,7 +15,7 @@ export class EER2RelBasicTransformation extends abstractM2M {
     constructor(store) {
         super(store);
     }
-    template(s) {
+    main(s) {
         return (createExprNode(RelSchema, { name: `${s.name}_rel`, store: this.context.store },
             s.elements
                 .filter((el) => this.context.store.isTypeOf(el, em.Entity))

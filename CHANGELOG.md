@@ -131,7 +131,7 @@ overall version history.
   (`t.inverseProps`), so the renderer wires it automatically instead
   of authors setting it. The configuration model sheds the parallel
   `Decision` container: `BaseChoice` is renamed `Choice`, and its two
-  concrete subtypes `ElementChoice`/`GlobalChoice` (previously
+  concrete subtypes `ElementLevelChoice`/`ModelLevelChoice` (previously
   `ElementDecision` and the base `Decision`) are themselves single
   choices rather than containers holding a nested `choices` array;
   `ConfigurationModel`'s `decisions` is renamed `choices`, now one
@@ -139,9 +139,38 @@ overall version history.
   is recovered from `selectedOption.parentIssue`. Every decision-model
   author (eer-to-relational, rel-to-sql-ddl, both tutorial
   configuration-based companions) drops the `optionType={<SimpleOption
-  .../>}` boilerplate, and presets build a `GlobalChoice` with
+  .../>}` boilerplate, and presets build a `ModelLevelChoice` with
   `selectedOption` set directly instead of nesting a nameless `Choice`
   inside it.
+
+- **The trace is a call tree.** The trace model's `ElementMapping`/
+  `TraceEntry` list is replaced by `Invocation` (one executed call) and
+  its subtype `RuleInvocation` (an `@E2E` rule: `source` and `targets`),
+  and `TraceModel.elementMappings` is renamed `invocations`. Each
+  invocation's `parent` is the invocation that was executing when it
+  began, tracked through the call stack; `function` names the concrete
+  method that ran (for a rule with a variability or specialization
+  point, the executed option method, still one RuleInvocation). A
+  `@VarOption`/`@SpecOption` executed outside any `@E2E` rule is a
+  plain `Invocation`. `Resolution` records one `@VarPoint`
+  consultation on the invocation that carried it: `byDefault` is true
+  when the `@Default` option ran because no condition was met, and
+  `choices` lists the configuration choices for that issue in scope,
+  always, including those whose condition was not satisfied. The
+  per-model `NonRuleResolution`/`ElementResolution` records and the
+  `trace-extensions` package are removed. `ReadRecord.entry` now links
+  an `Invocation`. `@E2E` now validates its input: calling an `@E2E`
+  method whose first argument is not a `ModelElement` throws an Error.
+
+- **The CLI follows the new decision and configuration metamodel.**
+  Decision and configuration handling (`transformation run`,
+  default-configuration generation, validation) reads `issue.options`,
+  `OpeningOption.subIssues` and the flat `ConfigurationModel.choices`,
+  and writes `ModelLevelChoice`/`ElementLevelChoice` directly. Existing
+  configuration files using `GlobalChoice`/`ElementChoice` (nested
+  `choices`, `issue=`) must be rewritten to the new names; there is no
+  backward compatibility. `--trace` output now contains
+  `RuleInvocation`, `Invocation` and `Resolution` elements.
 
 - **Docs pages link their sources.** Example, tutorial, and guide
   pages link the repository folders holding their packages and
@@ -173,7 +202,7 @@ overall version history.
   `SpecializationPointTraceEntry` entry kinds and the `ruleType` field
   are retired; trace references are full element paths. For future
   incremental transformation (design/synchronizing-transformations/),
-  entries reserve a `reads` containment and an optional `parentRule`
+  entries reserve a `reads` containment and an optional `parentInvocation`
   link, and the trace model gains transformation and source version
   slots. `transformation run --trace <ref>` persists the trace as a
   workspace model (single step, m2m and m2t); when the run used

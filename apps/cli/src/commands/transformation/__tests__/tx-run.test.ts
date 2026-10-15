@@ -457,12 +457,15 @@ describe('tx run --config with deleted choices (default materialization)', () =>
   // the default choice to the configuration model it hands over.
   const matCfgPath = () => join(modelsDir, 'com', 'example', 'mat-cfg.tsx')
 
-  /** Remove the whole GlobalChoice/ElementChoice block containing `marker`. */
-  const removeDecisionBlock = (text: string, marker: string): string => {
+  /** Closing line of a serialized choice block (its attributes are one per line). */
+  const BLOCK_END = '\n    />'
+
+  /** Remove the whole ModelLevelChoice/ElementLevelChoice block containing `marker`. */
+  const removeChoiceBlock = (text: string, marker: string): string => {
     const markerIdx = text.indexOf(marker)
     expect(markerIdx).toBeGreaterThan(-1)
     const open = text.lastIndexOf('\n    <', markerIdx)
-    const close = text.indexOf('/>', text.indexOf(']}', markerIdx)) + '/>'.length
+    const close = text.indexOf(BLOCK_END, markerIdx) + BLOCK_END.length
     return text.slice(0, open) + text.slice(close)
   }
 
@@ -474,7 +477,7 @@ describe('tx run --config with deleted choices (default materialization)', () =>
   })
 
   it('applies and announces the default when the global NamingConvention choice was deleted', async () => {
-    const edited = removeDecisionBlock(readFileSync(matCfgPath(), 'utf-8'), 'gc_NamingConvention')
+    const edited = removeChoiceBlock(readFileSync(matCfgPath(), 'utf-8'), 'gc_NamingConvention')
     writeFileSync(join(modelsDir, 'com', 'example', 'mat-cfg-no-nc.tsx'), edited)
 
     const { stdout, error } = await run([
@@ -492,7 +495,7 @@ describe('tx run --config with deleted choices (default materialization)', () =>
   it('applies and announces the per-element default when one element choice was deleted', async () => {
     // element choices carry scope-qualified names since entities became
     // name scopes (ec_<Entity>_<attribute>)
-    const edited = removeDecisionBlock(readFileSync(matCfgPath(), 'utf-8'), 'ec_Person_personId')
+    const edited = removeChoiceBlock(readFileSync(matCfgPath(), 'utf-8'), 'ec_Person_personId')
     expect(edited).not.toContain('ec_Person_personId')
     writeFileSync(join(modelsDir, 'com', 'example', 'mat-cfg-no-pid.tsx'), edited)
 
@@ -511,8 +514,8 @@ describe('tx run --config with deleted choices (default materialization)', () =>
 
   it('rejects duplicate choices for one issue, naming the issue and both options (exit 2)', async () => {
     const text = readFileSync(matCfgPath(), 'utf-8')
-    const start = text.indexOf('    <GlobalChoice')
-    const end = text.indexOf('/>', text.indexOf(']}', start)) + '/>'.length
+    const start = text.indexOf('    <ModelLevelChoice')
+    const end = text.indexOf(BLOCK_END, start) + BLOCK_END.length
     const block = text.slice(start, end)
     const duplicate = block
       .replaceAll('gc_NamingConvention', 'gc_NamingConvention2')
@@ -538,7 +541,7 @@ describe('tx run --config with deleted choices (default materialization)', () =>
       '/** @jsx createExprNode */',
       '',
       "import { createExprNode } from '@aelastics/synthesis/jsx'",
-      "import { DecisionModel, ModelIssue, Option, SimpleOption } from '@aelastics/synthesis/metamodels/decision'",
+      "import { DecisionModel, ModelIssue, Option } from '@aelastics/synthesis/metamodels/decision'",
       '',
       'export const $synth = {',
       "  kind: 'decision-model',",
@@ -549,7 +552,7 @@ describe('tx run --config with deleted choices (default materialization)', () =>
       'export default (store) => (',
       '  <DecisionModel name="HelperIssues" description="Helper decision model" store={store}>',
       '    <ModelIssue name="NamingConvention" description="Copy of the naming issue">',
-      '      <Option name="SnakeCaseCopy" isDefault={true} optionType={<SimpleOption name="SnakeCaseCopyOption" />} />',
+      '      <Option name="SnakeCase" isDefault={true} />',
       '    </ModelIssue>',
       '  </DecisionModel>',
       ')',
@@ -557,17 +560,24 @@ describe('tx run --config with deleted choices (default materialization)', () =>
     ].join('\n')
     writeFileSync(join(modelsDir, 'com', 'example', 'helper-issues.tsx'), helper)
 
-    const edited = readFileSync(matCfgPath(), 'utf-8')
+    // An option is referenced as <namespace>/<DecisionModel name>/<Option name>
+    // (the issue is not part of the path); the namespace is www.aelastics.org.
+    const originalChoice = 'selectedOption={<Option $refByName="//www.aelastics.org/RelationSchemaDesign/SnakeCase" />}'
+    const helperChoice = 'selectedOption={<Option $refByName="//www.aelastics.org/HelperIssues/SnakeCase" />}'
+
+    const original = readFileSync(matCfgPath(), 'utf-8')
+    expect(original).toContain(originalChoice)
+
+    const edited = original
       .replace(
         "references: {\n    sourceModel: 'com.example/persons'\n  },",
         "references: {\n    sourceModel: 'com.example/persons',\n    helperIssues: 'com.example/helper-issues'\n  },"
       )
-      .replace(
-        'issue={<GlobalIssue $refByName="//www.aelastics.org/RelationSchemaDesign/NamingConvention" />}',
-        'issue={<GlobalIssue $refByName="//www.aelastics.org/HelperIssues/NamingConvention" />}'
-      )
+      // the naming choice now selects the helper model's copy of the option
+      .replace(originalChoice, helperChoice)
     expect(edited).toContain('helperIssues')
-    expect(edited).toContain('HelperIssues/NamingConvention')
+    expect(edited).toContain(helperChoice)
+    expect(edited).not.toContain(originalChoice)
     writeFileSync(join(modelsDir, 'com', 'example', 'mat-cfg-helper.tsx'), edited)
 
     const validate = await run(['model', 'validate', 'com.example/mat-cfg-helper', '--tx', 'eer-to-relational'])
@@ -684,13 +694,18 @@ describe('tx run --trace', () => {
     const tracePath = join(modelsDir, 'com', 'example', 'persons-trace.tsx')
     expect(existsSync(tracePath)).toBe(true)
     const trace = readFileSync(tracePath, 'utf-8')
-    // The outcome shape: one entry kind, resolutions in decision language.
-    expect(trace).toContain('<DecisionAwareTraceModel')
-    expect(trace).toContain('<DecisionTraceEntry')
+    // The call tree: an @E2E rule is a RuleInvocation, the option methods it
+    // runs are Invocations linked to their caller through `parent`.
+    expect(trace).toContain('<TraceModel')
+    expect(trace).toContain('<RuleInvocation name="Attribute2Column_personId"')
+    expect(trace).toContain(
+      '<Invocation name="useAutoIncrement_personId" function="useAutoIncrement" parent={<Invocation $refByName="Attribute2Column_personId" />}>'
+    )
     // A nested consultation (primaryKeyStrategy fires inside the column
-    // rule) is recorded on the consulting element's entry.
-    expect(trace).toContain('issue="PrimaryKeyStrategy"')
-    expect(trace).toContain('byDefault={true}')
+    // rule) is a Resolution on the invocation of the option it executed,
+    // carrying the configuration choice for that element.
+    expect(trace).toContain('<Resolution name="r3_UseAutoIncrement" byDefault={false}')
+    expect(trace).toContain('ec_Person_personId_PrimaryKeyStrategy')
     // The trace names its run's models so its references can resolve.
     expect(trace).toContain("sourceModel: 'com.example/persons'")
     expect(trace).toContain("targetModel: 'com.example/persons-rel-traced'")
@@ -709,7 +724,7 @@ describe('tx run --trace', () => {
     expect(code).toBe(0)
     expect(stdout).toContain('Wrote com.example/ddl-trace')
     const trace = readFileSync(join(modelsDir, 'com', 'example', 'ddl-trace.tsx'), 'utf-8')
-    expect(trace).toContain('<DecisionAwareTraceModel')
+    expect(trace).toContain('<TraceModel')
     expect(trace).toContain("sourceModel: 'com.example/persons-rel'")
     expect(trace).not.toContain('targetModel:')
   })

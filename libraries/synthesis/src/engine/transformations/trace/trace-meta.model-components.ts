@@ -9,15 +9,15 @@ export const TraceModel: CpxTemplate<ITraceModelProps, tm.ITraceModel> = (props)
 }
 
 // The outcome record of an executed @E2E rule (source and targets):
-// rides into TraceModel.elementMappings.
+// rides into TraceModel.invocations.
 export const RuleInvocation: Template<tm.IRuleInvocation> = (props) => {
-    return new ExprNode(tm.RuleInvocation, props, "elementMappings")
+    return new ExprNode(tm.RuleInvocation, props, "invocations")
 }
 
 // An executed function/method without an @E2E decorator (no source or
-// targets of its own): rides into TraceModel.elementMappings.
+// targets of its own): rides into TraceModel.invocations.
 export const Invocation: Template<tm.IInvocation> = (props) => {
-    return new ExprNode(tm.Invocation, props, "elementMappings")
+    return new ExprNode(tm.Invocation, props, "invocations")
 }
 
 // A target reference inside a RuleInvocation. The explicit tag name makes

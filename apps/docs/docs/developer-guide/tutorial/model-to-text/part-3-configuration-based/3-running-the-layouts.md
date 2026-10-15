@@ -202,11 +202,11 @@ export default (store) => (
     bindingModel={<BindingModel $refByName="//www.aelastics.org/RelTutorialSqlBindings" />}
     store={store}
   >
-    <GlobalChoice
+    <ModelLevelChoice
       name="gc_OutputLayout"
       selectedOption={<Option $refByName="//www.aelastics.org/SqlGenerationDesign/TablesAndConstraints" />}
     />
-    <GlobalChoice
+    <ModelLevelChoice
       name="gc_IdentifierQuoting"
       selectedOption={<Option $refByName="//www.aelastics.org/SqlGenerationDesign/Unquoted" />}
     />
@@ -215,9 +215,9 @@ export default (store) => (
 ```
 
 This is the whole file, and it is worth pausing on how short it is. The
-model-to-model tutorial's configuration held an `<ElementChoice>` per
+model-to-model tutorial's configuration held an `<ElementLevelChoice>` per
 source element that raised its issue, so it grew with the model. This
-one holds a `<GlobalChoice>` per issue, so it has two of them for
+one holds a `<ModelLevelChoice>` per issue, so it has two of them for
 `Library_rel` and would have two of them for a schema of four hundred
 tables. That is the practical payoff of a global issue: the whole design
 space of this generator fits on a screen, and a reviewer can see every
@@ -251,7 +251,7 @@ Decisions:
 
 ## Switching an option
 
-Changing a layout is a one-line edit to the `<GlobalChoice
+Changing a layout is a one-line edit to the `<ModelLevelChoice
 name="gc_OutputLayout">` block, and `synth config edit demo/schema-cfg`
 opens the file in `$EDITOR` if you prefer:
 
@@ -368,7 +368,7 @@ schema's own casing.
 ## `DoubleQuoted`, and two issues composing
 
 Back to the default layout, and this time edit the other
-`<GlobalChoice>`, the one named `gc_IdentifierQuoting`:
+`<ModelLevelChoice>`, the one named `gc_IdentifierQuoting`:
 
 ```text
 Running sql-tutorial-configuration-based@0.1.0 (m2t) on demo/schema
@@ -430,7 +430,7 @@ touches the thing it is about.
 
 ## Configurations do not have to be complete
 
-Delete the whole `<GlobalChoice name="gc_IdentifierQuoting">` block from
+Delete the whole `<ModelLevelChoice name="gc_IdentifierQuoting">` block from
 the configuration, leaving only the layout choice, and the run still
 works:
 

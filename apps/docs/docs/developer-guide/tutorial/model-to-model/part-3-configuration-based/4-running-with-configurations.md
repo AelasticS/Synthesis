@@ -199,7 +199,7 @@ export default (store) => (
     bindingModel={<BindingModel $refByName="//www.aelastics.org/EERTutorialBindings" />}
     store={store}
   >
-    <ElementChoice
+    <ElementLevelChoice
       name="ec_publishedBy"
       element={<Element $refByName="//www.aelastics.org/Library/publishedBy" />}
       selectedOption={<Option $refByName="//www.aelastics.org/RelationshipDesign/ForeignKey" />}
@@ -219,12 +219,12 @@ never named here, because it is recovered from the option's own parent
 issue. The three models are all present at once, which is what makes
 this file readable on its own.
 
-Note the shape now. An `<ElementChoice>` is a single choice: one source
+Note the shape now. An `<ElementLevelChoice>` is a single choice: one source
 element, deciding one issue, closed on one `selectedOption`. There is
 no separate `issue=` to set. `publishedBy` raises exactly one issue,
-`OneToManyStrategy`, so one `<ElementChoice>` is all this configuration
+`OneToManyStrategy`, so one `<ElementLevelChoice>` is all this configuration
 needs; an element that raised two issues would need two sibling
-`<ElementChoice>` elements, one per issue, both naming the same
+`<ElementLevelChoice>` elements, one per issue, both naming the same
 `element=`.
 
 `config show` prints the same content as decisions:

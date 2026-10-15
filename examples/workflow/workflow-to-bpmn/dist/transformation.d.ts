@@ -10,7 +10,7 @@ export declare class WorkflowToBpmnTransformation extends abstractM2M<wm.IWorkfl
     private baseCounts;
     private baseNames;
     constructor(store: ModelStore);
-    template(m: wm.IWorkflowModel): ExprNode<wm.IWorkflowModel, bm.IProcess>;
+    main(m: wm.IWorkflowModel): ExprNode<wm.IWorkflowModel, bm.IProcess>;
     stepToGraph(s: wm.IStep, prefix: string): GraphPart | GraphPart[];
     taskToGraph(t: wm.ITask, prefix: string): ExprNode<bm.ITask>;
     processToGraph(p: wm.IProcess, prefix: string): ExprNode<bm.ISubProcess>;

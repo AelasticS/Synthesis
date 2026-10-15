@@ -9,7 +9,7 @@ export declare class EerToRelational extends DecisionAwareM2M<em.IEERSchema, rmT
     constructor(store: ModelStore, {}: {}, configModel?: cm.IConfigurationModel);
     private emittedFks;
     private keyPlans;
-    template(s: em.IEERSchema): any;
+    main(s: em.IEERSchema): any;
     /** A user-defined EER domain becomes a relational domain: the base
      * type resolved through the one primitive mapping, check and default
      * carried over. Primitive domains stay what they always were: names

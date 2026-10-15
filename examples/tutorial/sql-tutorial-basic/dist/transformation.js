@@ -23,7 +23,7 @@ export class RelToSqlBasicTransformation extends abstractM2M {
     }
     // One <Doc> means one file. Its name is the file name the CLI writes,
     // so the schema name carries straight through to Library_rel.sql.
-    template(s) {
+    main(s) {
         return (createExprNode(M2T, { name: `${s.name}_sql` },
             createExprNode(Doc, { name: `${s.name}.sql` },
                 createExprNode(Sec, { name: "header" },

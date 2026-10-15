@@ -28,7 +28,7 @@ export const ConfigurationModel: CpxTemplate<IModelProps, dm.IConfigurationModel
 // Reference-only: points at an existing Choice (e.g. via $refByName) so
 // serialized traces can tag a choice reference distinctly from a plain
 // element reference. Not used to construct new choices as children of
-// ConfigurationModel — ElementChoice/GlobalChoice do that.
+// ConfigurationModel — ElementLevelChoice/ModelLevelChoice do that.
 export const Choice: Template<dm.IChoice> = (props) => {
     return new ExprNode(dm.Choice, props, undefined);
 }

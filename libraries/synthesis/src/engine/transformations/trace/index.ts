@@ -1,8 +1,10 @@
 // Pure trace metamodel + JSX templates.
 //
-// Both files export symbols named "TraceEntry" and "TraceModel" — the former
-// is the metamodel (t.subtype), the latter is the JSX template that renders
-// to it. We re-export them via namespace aliases to avoid the collision.
+// The metamodel and the JSX templates export symbols with the same names
+// (Invocation, RuleInvocation, Resolution, TraceModel, ReadRecord): the
+// former are the types (t.subtype), the latter the JSX templates that
+// render to them. The types are re-exported under a "Type" suffix to avoid
+// the collision.
 
 export {
     TraceModel_TypeSchema,
@@ -27,6 +29,7 @@ export {
     TargetElement,
     ReadRecord,
     Invocation,
+    Resolution,
 } from "./trace-meta.model-components"
 
 export type {

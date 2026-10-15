@@ -27,7 +27,7 @@ export class MyTransformation extends abstractM2M<rmT.IRelSchema, rmT.IRelSchema
     super(store)
   }
 
-  template(s: rmT.IRelSchema): ExprNode<rmT.IRelSchema, rmT.IRelSchema> {
+  main(s: rmT.IRelSchema): ExprNode<rmT.IRelSchema, rmT.IRelSchema> {
     return (
       <RelSchema name={`${s.name}_out`} store={this.context.store}>
         {s.elements

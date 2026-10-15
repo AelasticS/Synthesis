@@ -71,7 +71,7 @@ includes, at near-zero cost:
 - a RESERVED, empty-by-default `readSet` containment on the entry
   (elements, properties, entry references, consulted issues), so
   dependency data lands later without a metamodel migration;
-- `parentInvocation` (the render walker knows the enclosing entry).
+- `parent` (the render walker knows the enclosing entry).
 
 Full read-set capture is future work.
 

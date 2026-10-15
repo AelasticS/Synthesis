@@ -9,6 +9,6 @@ import * as decision_1 from "@aelastics/synthesis/metamodels/decision";
  */
 const DdlGenerationIssues = (store) => ((0, jsx_1.createExprNode)(decision_1.DecisionModel, { name: "DdlGenerationDesign", description: "Design space for SQL DDL generation", store: store },
     (0, jsx_1.createExprNode)(decision_1.GlobalIssue, { name: "IdentifierQuoting", description: "How to emit SQL identifiers in the generated DDL" },
-        (0, jsx_1.createExprNode)(decision_1.Option, { name: "Unquoted", description: "Emit identifiers verbatim", isDefault: true, optionType: (0, jsx_1.createExprNode)(decision_1.Option, { name: "UnquotedOption" }) }),
-        (0, jsx_1.createExprNode)(decision_1.Option, { name: "DoubleQuoted", description: "Wrap identifiers in double quotes", isDefault: false, optionType: (0, jsx_1.createExprNode)(decision_1.Option, { name: "DoubleQuotedOption" }) }))));
+        (0, jsx_1.createExprNode)(decision_1.Option, { name: "Unquoted", description: "Emit identifiers verbatim", isDefault: true }),
+        (0, jsx_1.createExprNode)(decision_1.Option, { name: "DoubleQuoted", description: "Wrap identifiers in double quotes", isDefault: false }))));
 export { DdlGenerationIssues };

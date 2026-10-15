@@ -21,7 +21,7 @@ export class BpmnToMermaidTransformation extends abstractM2M {
     constructor(store) {
         super(store);
     }
-    template(p) {
+    main(p) {
         this.countDegrees((p.flows ?? []));
         return (createExprNode(M2T, { name: `${p.name}_mermaid` },
             createExprNode(Doc, { name: `${p.name}.mmd` },

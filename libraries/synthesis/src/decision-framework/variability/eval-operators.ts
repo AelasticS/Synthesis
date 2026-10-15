@@ -21,8 +21,8 @@ type ConditionContext = {
 
 type ContextStore = NonNullable<ConditionContext["context"]>["store"]
 
-const isElementChoice = (store: ContextStore, choice: unknown): boolean => {
-  return !!store?.isTypeOf?.(choice, (tcM as any).ElementChoice)
+const isElementLevelChoice = (store: ContextStore, choice: unknown): boolean => {
+  return !!store?.isTypeOf?.(choice, tcM.ElementLevelChoice)
 }
 
 const isElementScopedChoice = (choice: unknown, element: any): boolean => {
@@ -47,7 +47,7 @@ const resolveConfigChoices = (self: ConditionContext | undefined, element: any, 
 
   return choices.filter(
     (c: unknown) =>
-      !isElementChoice(store, c) || (isElementChoice(store, c) && isElementScopedChoice(c, element))
+      !isElementLevelChoice(store, c) || (isElementLevelChoice(store, c) && isElementScopedChoice(c, element))
   )
 }
 

@@ -107,7 +107,7 @@ Entity2Table(e: et.IEntity): ExprNode<rt.ITable> {
 The `@E2E` decorator does two things:
 
 1. **Registers the rule** so the framework knows which method handles which source type.
-2. **Creates trace records** automatically. Every time the rule executes, a trace entry maps the source element to the target JSX element.
+2. **Creates trace records** automatically. Every time the rule executes, a `RuleInvocation` in the trace maps the source element to its target elements. The first argument must be a `ModelElement`; otherwise the call throws an Error.
 
 ### Return Type
 
@@ -169,12 +169,12 @@ This pattern groups source elements by type and routes each group to the appropr
 
 ## Tracing
 
-The framework automatically records which source elements produced which target elements. Every `@E2E` rule invocation creates a trace entry.
+The framework automatically records which source elements produced which target elements. Every `@E2E` rule invocation creates a `RuleInvocation`; the trace is a call tree, each invocation pointing to the `parent` invocation that was executing when it began.
 
 The trace is available through `this.context`:
 
-- `this.context.traceMap` maps source elements to their trace records.
-- `this.context.resolveMap` maps JSX elements to the rendered model instances.
+- `this.context.invocations` lists the recorded invocations in execution order.
+- `this.context.resolveTarget(source)` and `resolveJSXElement(source)` look up what a source element was transformed into.
 
 ### Resolving Transformed Elements
 
@@ -210,7 +210,7 @@ Here is what happens during rendering:
 
 1. `Resolve` receives `rel.sourceEntity` (a source model element, e.g., the "Person" entity).
 2. It looks up the trace map via `resolveJSXElement()` to find the JSX Element that was produced by the `"Entity2Table"` rule for that source element.
-3. It then looks up the `resolveMap` to find the actual rendered target model element (e.g., the "Person" table).
+3. It then resolves it to the actual rendered target model element (e.g., the "Person" table).
 4. It calls the child function with that target model element.
 5. The returned JSX expression is rendered and connected to the parent as a normal child.
 
@@ -223,9 +223,7 @@ Every transformation has access to `this.context`, an `M2MContext` instance.
 | Property/Method | Purpose |
 |---|---|
 | `this.context.store` | The `ModelStore` containing all models |
-| `this.context.traceMap` | Maps source elements to trace records |
-| `this.context.resolveMap` | Maps JSX elements to rendered instances |
-| `this.context.makeTrace(source, target)` | Manually record a trace entry |
+| `this.context.invocations` | The recorded invocations, in execution order |
 | `this.context.resolveJSXElement(source, ruleName?)` | Look up the target element for a source |
 | `this.extra` | Extra models passed to the constructor |
 | `this.configModel` | Configuration model for variability |

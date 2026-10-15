@@ -21,7 +21,7 @@ export class EerToMermaidEr extends abstractM2M {
     constructor(store) {
         super(store);
     }
-    template(s) {
+    main(s) {
         const store = this.context.store;
         const els = (s.elements ?? []);
         // Specialization is a Mapping, not an Entity, so the Entity filter

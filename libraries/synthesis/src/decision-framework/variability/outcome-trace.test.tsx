@@ -196,61 +196,74 @@ describe("per-element decision resolution and the outcome trace", () => {
         return found
     }
     const children = flatten(trace)
-    const entries = children.filter((c) => c.type.name === "DecisionTraceEntry")
-    const modelResolutions = children.filter((c) => c.type.name === "Resolution")
-    const entryByName = (name: string) => entries.find((e) => (e.props as any).name === name)
-    const resolutionsOf = (entry: ExprNode<any>) =>
-        flatten(entry).filter((c) => c.type.name === "Resolution")
+    const ruleInvocations = children.filter((c) => c.type.name === "RuleInvocation")
+    const plainInvocations = children.filter((c) => c.type.name === "Invocation")
+    const invocationByName = (name: string) =>
+        children.find((c) => (c.props as any).name === name)
+    const resolutionsOf = (invocation: ExprNode<any>) =>
+        flatten(invocation).filter((c) => c.type.name === "Resolution").map((r) => r.props as any)
+    const choiceNames = (r: any) =>
+        ((r.choices ?? []) as ExprNode<any>[]).map((c) => (c.props as any).$refByName.split("/").pop())
+    const parentOf = (name: string) => (invocationByName(name)!.props as any).parent?.props.$refByName
 
-    it("records one entry per executed rule, named for its rule and source", () => {
-        const names = entries.map((e) => (e.props as any).name)
-        expect(names).toContain("fancyTask_t1")
-        expect(names).toContain("plainTask_t2")
+    it("records one RuleInvocation per executed @E2E rule, named for its function and source", () => {
+        expect(ruleInvocations.map((e) => (e.props as any).name)).toEqual(["fancyTask_t1", "plainTask_t2"])
     })
 
-    it("names the entry's rule after the executed option method, not the point", () => {
-        expect((entryByName("fancyTask_t1")!.props as any).rule).toBe("fancyTask")
-        expect((entryByName("plainTask_t2")!.props as any).rule).toBe("plainTask")
+    it("names the rule's function after the executed option method, not the point", () => {
+        expect((invocationByName("fancyTask_t1")!.props as any).function).toBe("fancyTask")
+        expect((invocationByName("plainTask_t2")!.props as any).function).toBe("plainTask")
     })
 
     it("records targets as full-path references to the actual created elements", () => {
-        const targets = (entryByName("fancyTask_t1")!.props as any).targets as ExprNode<any>[]
+        const targets = (invocationByName("fancyTask_t1")!.props as any).targets as ExprNode<any>[]
         expect(targets.length).toBe(1)
         expect((targets[0].props as any).$refByName).toMatch(/^\/\/.*PROC2\/t1_f$/)
     })
 
-    it("attaches resolutions to the entry of the element they decide, explicit and by default", () => {
-        const t1Res = resolutionsOf(entryByName("fancyTask_t1")!).map((r) => r.props as any)
-        // The stacked choice: explicit, with a choice reference, no element
-        // reference (the entry's source is implied).
-        const style = t1Res.find((r) => r.issue === "TaskStyle")!
-        expect(style.option).toBe("Fancy")
-        expect(style.byDefault).toBeUndefined()
-        expect(style.choice).toBeDefined()
-        expect(style.element).toBeUndefined()
-        // The nested consultation: recorded on the same element's entry,
-        // resolved by default (no choice for t1 on TaskMark).
-        const mark = t1Res.find((r) => r.issue === "TaskMark")!
-        expect(mark.option).toBe("Unmarked")
-        expect(mark.byDefault).toBe(true)
-        expect(mark.choice).toBeUndefined()
-
-        const t2Res = resolutionsOf(entryByName("plainTask_t2")!).map((r) => r.props as any)
-        const style2 = t2Res.find((r) => r.issue === "TaskStyle")!
-        expect(style2.option).toBe("Plain")
-        expect(style2.byDefault).toBe(true)
-        const mark2 = t2Res.find((r) => r.issue === "TaskMark")!
-        expect(mark2.option).toBe("Marked")
-        expect(mark2.byDefault).toBeUndefined()
-        expect(mark2.choice).toBeDefined()
+    it("records option methods executed outside a rule as plain Invocations, linked to their caller", () => {
+        expect(plainInvocations.map((e) => (e.props as any).name)).toEqual([
+            "upperName",
+            "unmarkedOf_t1",
+            "markedOf_t2",
+        ])
+        // called from main(), outside any rule: no parent
+        expect(parentOf("upperName")).toBeUndefined()
+        // called inside the rule's executed option method: the rule is the parent
+        expect(parentOf("unmarkedOf_t1")).toBe("fancyTask_t1")
+        expect(parentOf("markedOf_t2")).toBe("plainTask_t2")
+        // rules are top-level here
+        expect(parentOf("fancyTask_t1")).toBeUndefined()
     })
 
-    it("records global resolutions once, at model level", () => {
-        const naming = modelResolutions.map((r) => r.props as any).filter((r) => r.issue === "Naming")
+    it("attaches the point's resolution to the invocation that executed the option", () => {
+        // explicit choice: not by default, the issue's choice for t1 is recorded
+        const style = resolutionsOf(invocationByName("fancyTask_t1")!)
+        expect(style.length).toBe(1)
+        expect(style[0].byDefault).toBe(false)
+        expect(choiceNames(style[0])).toEqual(["ec_t1"])
+
+        // no TaskMark choice for t1: the @Default option ran
+        const mark = resolutionsOf(invocationByName("unmarkedOf_t1")!)
+        expect(mark.length).toBe(1)
+        expect(mark[0].byDefault).toBe(true)
+        expect(choiceNames(mark[0])).toEqual([])
+
+        // no TaskStyle choice for t2: the @Default option ran
+        const style2 = resolutionsOf(invocationByName("plainTask_t2")!)
+        expect(style2.length).toBe(1)
+        expect(style2[0].byDefault).toBe(true)
+
+        const mark2 = resolutionsOf(invocationByName("markedOf_t2")!)
+        expect(mark2[0].byDefault).toBe(false)
+        expect(choiceNames(mark2[0])).toEqual(["ec_t2"])
+    })
+
+    it("records a global resolution once, on the invocation of the option executed from main()", () => {
+        const naming = resolutionsOf(invocationByName("upperName")!)
         expect(naming.length).toBe(1)
-        expect(naming[0].option).toBe("Upper")
-        expect(naming[0].byDefault).toBeUndefined()
-        expect(naming[0].element).toBeUndefined()
+        expect(naming[0].byDefault).toBe(false)
+        expect(choiceNames(naming[0])).toEqual(["gc_naming"])
     })
 
     it("references the configuration and the transformation on the trace model", () => {
@@ -258,5 +271,13 @@ describe("per-element decision resolution and the outcome trace", () => {
         expect(props.transformation).toBe("Tx")
         expect(props.config).toBeDefined()
         expect((props.config.props as any).$refByName).toMatch(/TestCfg$/)
+    })
+
+    it("rejects an @E2E rule called with something that is not a ModelElement", () => {
+        const fresh = new Tx(store, cfg)
+        expect(() => fresh.taskRule("not an element" as any)).toThrow(
+            /@E2E "taskRule": the first argument must be a ModelElement, got string/,
+        )
+        expect(() => fresh.taskRule(undefined as any)).toThrow(/must be a ModelElement/)
     })
 })

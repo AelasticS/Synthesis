@@ -43,7 +43,7 @@ let EerToRelational = class EerToRelational extends DecisionAwareM2M {
     // Key column plans, memoized per entity (single source of truth for
     // emission and referencing).
     keyPlans = new Map();
-    template(s) {
+    main(s) {
         const store = this.context.store;
         const els = (s.elements ?? []);
         const hierarchies = els.filter((el) => store.isTypeOf(el, em.Specialization));

@@ -6,7 +6,7 @@ import type { ModelStore } from '@aelastics/synthesis/store';
 import * as em from 'eer-metamodel/model';
 export declare class EerToMermaidEr extends abstractM2M<em.IEERSchema, M2T_Model> {
     constructor(store: ModelStore);
-    template(s: em.IEERSchema): ExprNode<em.IEERSchema, M2T_Model>;
+    main(s: em.IEERSchema): ExprNode<em.IEERSchema, M2T_Model>;
     private entityBlock;
     /** A composite parent flattens one level to parent_component lines
      * carrying the component's own facts; a leaf contributes its line. */

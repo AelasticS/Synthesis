@@ -6,7 +6,6 @@ import {
   guardVarPoint,
   guardVarOption,
   guardDefault,
-  registerPointDecorator,
   appendDecoratorHistory,
   recordDecorator,
 } from "../../engine"
@@ -137,7 +136,7 @@ const invokeVarOption = (self: any, varOption: IVarOption, args: any[]) => {
  *   @VarPoint("issue")    ← inner (applied first)  — handles variability
  *   method(e: IEntity) { ... }
  *
- * @E2E must be outermost so it sees the VarPoint's result and reads lastVarResolution.
+ * @E2E must be outermost so it sees the VarPoint's result.
  * Placing @VarPoint above @E2E will throw an error at decoration time.
  */
 export const VarPoint = (_issue: string) => {
@@ -177,50 +176,29 @@ export const VarPoint = (_issue: string) => {
           throw new Error(`No option condition evaluated to true and no default option provided`)
         }
 
-        // Record the resolution FACT: which option answered which issue,
-        // for which element, explicitly chosen or by default. The trace
-        // attaches these facts to entries (or the model) at assembly
-        // time; recording here is what guarantees that every resolved
-        // option is recorded, nested consultations included.
-        // Choice no longer carries its own issue field; the issue is
-        // recovered from the option's parentIssue backlink (auto-wired by
-        // the renderer, declared as Issue.options' inverse).
-        const declaredOption = chosenVarOption.optionName
-        const explicitChoice = configChoices.find(
-          (c: any) =>
-            c?.selectedOption?.parentIssue?.name === _issue
-            && (declaredOption === undefined || c?.selectedOption?.name === declaredOption),
-        )
-        if (typeof (currentContext as any).recordResolution === "function") {
-          ;(currentContext as any).recordResolution({
-            issue: _issue,
-            option: declaredOption ?? chosenVarOption.methodName,
-            optionMethod: chosenVarOption.methodName,
-            element:
-              element && typeof element === "object"
-              && typeof element.name === "string" && typeof element.path === "string"
-                ? element
-                : undefined,
-            choice: explicitChoice,
-            byDefault: !explicitChoice,
-          })
+        // The resolution of this consultation, handed to the option
+        // wrapper through the context: it attaches to the invocation that
+        // executes the chosen option (the enclosing @E2E rule's own, or an
+        // Invocation of the option's). `choices` are the configuration
+        // choices for this issue in scope, including those whose option
+        // did not run; `byDefault` is true when no condition was met and
+        // the @Default option ran. The issue is recovered from the
+        // option's parentIssue backlink (auto-wired by the renderer,
+        // declared as Issue.options' inverse).
+        currentContext.pendingResolution = {
+          issue: _issue,
+          option: chosenVarOption.optionName ?? chosenVarOption.methodName,
+          byDefault: !!chosenVarOption.isDefault,
+          choices: configChoices.filter(
+            (c: any) => c?.selectedOption?.parentIssue?.name === _issue,
+          ),
         }
-
-        // PUSH onto varResolutionStack BEFORE invocation
-        currentContext.varResolutionStack[_privatePush]({
-          optionName: chosenVarOption.methodName,
-          choices: configChoices,
-        })
 
         return invokeVarOption(this, chosenVarOption, args)
       } finally {
+        // never leaks past the call, even if no option wrapper took it
+        currentContext.pendingResolution = undefined
         currentContext.currentElementDecision[_privatePop]()
-        // POP from stack and save to lastVarResolution
-        // E2E (outer) will read lastVarResolution after original.apply()
-        const popped = currentContext.varResolutionStack[_privatePop]()
-        if (popped) {
-          currentContext.lastVarResolution = popped
-        }
       }
     }
 
@@ -245,6 +223,21 @@ export const VarOption = (
     // @VarOption must not be placed above @E2E — would cause duplicate trace entries.
     guardVarOption(descriptor.value, propertyKey)
 
+    // The option is a traced function call: absorbed into the enclosing
+    // @E2E rule's invocation when it is that rule's executed method,
+    // otherwise an Invocation of its own. It also takes the resolution
+    // left by its @VarPoint. Registration uses the method name, so
+    // wrapping does not affect dispatch.
+    const original = descriptor.value
+    descriptor.value = function(this: any, ...args: any[]) {
+      const entry = (this as DecisionAwareM2M<any, any, any, any>).context.enterOption(propertyKey, args[0])
+      try {
+        return original.apply(this, args)
+      } finally {
+        (this as DecisionAwareM2M<any, any, any, any>).context.exitOption(entry)
+      }
+    }
+
     // Use registry lookup — independent of what's currently in target[methodName],
     // so @E2E or any other decorator wrapping the VarPoint method doesn't break registration.
     if (isVarPoint(target, methodName)) {
@@ -261,7 +254,7 @@ export const VarOption = (
       // Čuvaj referencu na VarPoint metodu na ovoj metodi (potrebno za @Default)
       setVarOptionReference(descriptor.value as DecoratedMethod, methodName)
     }
-    recordDecorator(descriptor.value, "VarOption", { varPointMethod: methodName })
+    appendDecoratorHistory(original, descriptor.value, "VarOption", { varPointMethod: methodName })
     return descriptor
   }
 }
@@ -289,14 +282,3 @@ export const Default = () => {
     return descriptor
   }
 }
-
-// ─── Self-registration ────────────────────────────────────────────────────────
-// @VarPoint registers as a point decorator so @E2E can trace it without
-// hardcoded sentinel references.
-registerPointDecorator({
-  sentinel: __isVarPoint,
-  getResolution: (ctx) => ctx.lastVarResolution,
-  clearResolution: (ctx) => { ctx.lastVarResolution = undefined },
-})
-
-
