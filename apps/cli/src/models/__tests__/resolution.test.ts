@@ -1,4 +1,4 @@
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 
@@ -15,7 +15,9 @@ describe('bare specifier resolution', () => {
   const tempDirs: string[] = []
 
   function makeRootWithPackage(pkgName: string, marker: string): string {
-    const root = mkdtempSync(join(tmpdir(), 'synth-res-root-'))
+    // require.resolve returns real paths; normalize so symlinked temp dirs
+    // (macOS /var -> /private/var, Windows 8.3 names) compare equal.
+    const root = realpathSync.native(mkdtempSync(join(tmpdir(), 'synth-res-root-')))
     tempDirs.push(root)
     const pkgDir = join(root, 'node_modules', pkgName)
     mkdirSync(pkgDir, { recursive: true })
@@ -56,7 +58,7 @@ describe('bare specifier resolution', () => {
     const root = makeRootWithPackage('synth-test-model-dep', 'model-dep')
     registerModuleResolutionRoots([root])
 
-    const modelDir = mkdtempSync(join(tmpdir(), 'synth-res-model-'))
+    const modelDir = realpathSync.native(mkdtempSync(join(tmpdir(), 'synth-res-model-')))
     tempDirs.push(modelDir)
     const modelPath = join(modelDir, 'model.tsx')
     writeFileSync(
