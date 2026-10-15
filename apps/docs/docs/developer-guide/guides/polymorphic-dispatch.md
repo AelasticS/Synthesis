@@ -122,7 +122,7 @@ class EER2RelTransformation extends abstractM2M<et.IEERSchema, rt.IRelSchema> {
     super(store)
   }
 
-  template(source: et.IEERSchema) {
+  topRule(source: et.IEERSchema) {
     return (
       <r.RelSchema name={`${source.name} Relational Schema`}>
         {source.elements

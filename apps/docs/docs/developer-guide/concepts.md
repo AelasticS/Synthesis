@@ -60,10 +60,14 @@ Every model expression is composed from exactly four kinds of operators:
 
 | Operator | In JSX | What evaluation does |
 |---|---|---|
-| **Model creation** | the root model tag: `<WorkflowModel …>`, `<EERSchema …>` | creates a **model**: a typed container with its own namespace and type schema, into which child elements are placed |
-| **Element creation** | element tags: `<Task>`, `<Kernel>`, `<Column>` | creates a typed **element** with its properties and connects it to its parent |
+| **Model creation** | the root model tag: `<WorkflowModel …>` | creates a **model**: a typed container with its own namespace and type schema, into which child elements are placed |
+| **Element creation** | element tags: `<Task>`, `<Process>`, `<Document>` | creates a typed **element** with its properties and connects it to its parent |
 | **Reference** | `$refByName`, `$ref`, `$refByID` | **retrieves** an existing element instead of creating one |
 | **Computation** | TypeScript in `{ … }`: `map`, conditionals, function calls | **computes** sub-expressions dynamically |
+
+The tags are not built in: each metamodel contributes its own (an EER
+metamodel brings `<EERSchema>`, `<Entity>`, `<Attribute>`), and the
+four operators are the same in every domain.
 
 The first two build structure. The third is what makes models true
 *graphs* rather than trees: nesting alone can only express containment,
@@ -91,8 +95,8 @@ point at the same node, three edges into one element. A reference must
 resolve to an element that exists when it is evaluated; an
 unresolvable name is a construction error, not a silent null. When the metamodel declares name scopes,
 resolution is scope-aware: a bare name is probed from the nearest
-enclosing scope outward, and a path such as `Author/id` reaches into a
-sibling scope. See
+enclosing scope outward, and a path such as `ManagerSignoff/Sign`
+reaches into a sibling scope. See
 [References](./guides/building-models.md#references) for the three
 reference forms and
 [Name scopes](./guides/building-models.md#name-scopes) for scoped
@@ -118,7 +122,9 @@ process at the top of this page is a model literal; here is the same
 workflow as a template:
 
 ```tsx
-const Approval = ({ doc, approvers, parallel }: IApprovalConfig) => {
+type ApprovalProps = { doc: string; approvers: number; parallel: boolean }
+
+const Approval = ({ doc, approvers, parallel }: ApprovalProps) => {
   const tasks = Array.from({ length: approvers }, (_, i) =>
     <Task name={`Approve ${doc} ${i + 1}`} />)
 
@@ -194,8 +200,10 @@ the whole step template (both definitions above qualify as
 inline process alike):
 
 ```tsx
+type ApprovalProps = { doc: string; approvers: number }
+
 const Approval = (WriteStep: Template<IStep>) =>
-  ({ doc, approvers }: { doc: string; approvers: number }) => (
+  ({ doc, approvers }: ApprovalProps) => (
     <Process name={`${doc} Approval`}>
       <WriteStep />
       <Parallel>
@@ -245,57 +253,89 @@ it and shows how to run it.
 ## Transformations are templates over a source model
 
 A model-to-model transformation is a template whose parameter is a
-**source model**. It is written as a class: its `template` method is the
-top-level rule, receiving the whole source model and iterating over its
-elements with the computation operator, and every further *rule* is a
-typed method from one source element to a target model expression:
+whole **source model**: it receives one model and derives another
+from it. The templates earlier on this page took values and other
+templates as parameters; a transformation is the same idea, with a
+model as the parameter.
+
+A transformation is an ordinary TypeScript class extending the
+library's abstract transformation class. The base class carries the
+engine; the subclass declares the *rules*: `topRule` receives the
+source model and iterates over its elements with the computation
+operator, and every further rule is a typed method from one source
+element to a target expression, written with the target metamodel's
+tags. Because a rule body is plain TypeScript, the whole language is
+available inside it: types, generics, helper functions and methods,
+closures. Here is a small one, deriving an approval workflow from an
+organizational model:
 
 ```tsx
-export class Eer2Rel extends abstractM2M<em.IEERSchema, rmT.IRelSchema> {
-  template(s: em.IEERSchema) {
+export class OrgToApproval extends abstractM2M<ot.IOrganization, wt.IWorkflowModel> {
+  topRule(org: ot.IOrganization) {
     return (
-      <RelSchema name={`${s.name}_rel`} store={this.context.store}>
-        {s.elements
-          .filter((el) => this.context.store.isTypeOf(el, em.Entity))
-          .map((el) => this.entityToTable(el as em.IEntity))}
-        ...
-      </RelSchema>
+      <WorkflowModel name={`${org.name} Approval`} store={this.context.store}>
+        <Process name={`${org.name} Approval`}>
+          <Task name="WriteDocument" />
+          {org.elements
+            .filter((el) => this.context.store.isTypeOf(el, ot.Department))
+            .map((el) => this.departmentToApproval(el as ot.IDepartment))}
+        </Process>
+      </WorkflowModel>
     )
   }
 
+  // A department's approval is one task, its manager's.
   @E2E()
-  entityToTable(e: em.IEntity): ExprNode<rmT.ITable> {
-    return (
-      <Table name={e.name}>
-        {e.attributes.map((a) => this.attributeToColumn(a))}
-      </Table>
-    )
+  departmentToApproval(dept: ot.IDepartment): ExprNode<wt.ITask> {
+    return <Task name={`ApproveBy${dept.manager.name}`} performer={dept.manager.name} />
   }
-
-  ...
 }
 ```
 
-The three dots elide the rest of a real transformation: inside
-`template`, the sibling iterations (relationships, in this example),
-and below `entityToTable`, the further rules and helpers they invoke
-(`attributeToColumn`, the relationship rules, type mapping). The
-[model-to-model tutorial](./tutorial/model-to-model/part-1-basic/index.md)
-builds this exact class in full.
+The source side is an organizational metamodel, a hierarchy of units
+with managers and members; the target side is the workflow language
+used throughout this page, so an approval process like the one at the
+top of the page can also be derived from an organization. `topRule`
+selects the departments of the source model and maps each through
+`departmentToApproval`, and the whole target is the value of one
+expression.
 
-Each rule is a template like any other, with the computation operator
-iterating over the source element's properties and invoking further
-rules. Executing the transformation evaluates `template`'s expression in
-a fresh target model; every rule invocation is recorded in a **trace**
+For an organization with two departments, Sales run by Ana and
+Finance run by Max:
+
+```mermaid
+flowchart TB
+    O[AcmeOrg] --> S["Sales<br/>manager: Ana"]
+    O --> F["Finance<br/>manager: Max"]
+```
+
+the transformation derives this workflow model, drawn as the page
+draws workflows:
+
+```mermaid
+flowchart LR
+    St([Start]) --> W[WriteDocument] --> A1[ApproveByAna] --> A2[ApproveByMax] --> E([End])
+```
+
+Executing the transformation evaluates `topRule`'s expression in a
+fresh target model; every rule invocation is recorded in a **trace**
 linking each target element back to the source elements it came from,
 giving bidirectional traceability for free.
 
-Rule selection can be made *subtype-aware*: a rule marked as a
-specialization point dispatches on the runtime type of its source
-element, so each subtype gets its own rule instead of a branch inside a
-single rule. This is the mechanism behind
-[Polymorphic Rule Dispatch](./guides/polymorphic-dispatch.md). The full
-authoring workflow is in
+The abstract class is also where a transformation grows beyond this
+shape, without changing what it is. A transformation can take a run
+parameter (the workflow suite's full version of this one selects
+whose document needs approval and how many hierarchy levels approve
+it). Rules can be made subtype-aware, so each source subtype gets its
+own rule instead of a branch inside one rule; see
+[Polymorphic Rule Dispatch](./guides/polymorphic-dispatch.md). And
+rules can leave design decisions open to a configuration, the subject
+of the last subsection below.
+None of that changes the concept: a transformation stays a template
+over a source model. The
+[model-to-model tutorial](./tutorial/model-to-model/part-1-basic/index.md)
+builds a complete transformation start to finish, in the EER domain;
+the full authoring workflow is in
 [Writing Transformations](./guides/writing-transformations.md).
 
 ### Model to model, and model to text
@@ -304,16 +344,17 @@ A transformation's target can be another model or it can be text, and
 Synthesis treats those as the same kind of thing.
 
 A **model-to-model** transformation (`m2m`) produces a model of the
-target metamodel: an EER schema becomes a relational schema, whose
-elements are ordinary model elements you can query, transform again, or
-store in the workspace.
+target metamodel: an organizational model becomes an approval
+workflow, whose elements are ordinary model elements you can query,
+transform again, or store in the workspace.
 
-A **model-to-text** transformation (`m2t`) produces text, and it does so
-by targeting the engine's text-document metamodel, whose concepts are
-documents, sections, and paragraphs. Generating SQL means building a
-document expression whose paragraphs happen to contain SQL. Nothing
-about the rules changes: they are the same typed functions returning JSX
-over a target metamodel's components.
+A **model-to-text** transformation (`m2t`) produces text, and it does
+so by targeting the engine's text-document metamodel, whose concepts
+are documents, sections, and paragraphs. Drawing a workflow as a
+Mermaid flowchart means building a document expression whose
+paragraphs happen to contain Mermaid text. Nothing about the rules
+changes: they are the same typed functions returning JSX over a
+target metamodel's components.
 
 The difference is what happens to the result. An m2m result is written
 back into the workspace as a model, with a provenance header recording
@@ -327,10 +368,13 @@ produces.
 
 ### Configuration-based transformations
 
-Some transformations contain genuinely open design choices: whether a
-1:N relationship becomes a foreign key or a join table, how identifiers
-are quoted, how generated output is laid out across files. Synthesis
-makes such a choice a first-class model rather than a hidden flag. A
+Some transformations contain genuinely open design choices: whether
+the approvals of a process run in parallel or one after another, who
+performs a step, how generated output is laid out across files. The
+template section handled the first of these as the `parallel`
+parameter, a choice made in code at the call site; Synthesis can
+instead make such a choice a first-class model rather than a hidden
+flag. A
 **decision model** declares the design space: its *issues* and the
 *options* each issue offers, globally or per source element. A
 **configuration model** records the choices made for one specific
@@ -367,18 +411,6 @@ is in [Defining Metamodels](./guides/defining-metamodels.md), and the
 components that give a metamodel its JSX tags are covered in
 [JSX Components](./guides/jsx-components.md).
 
-Two guarantees are worth knowing by name:
-
-- **Type preservation**: evaluating a well-typed model expression yields
-  a model conforming to its type schema.
-- **Type-safe execution**: if the source model conforms to the source
-  schema and every rule produces well-typed target expressions, the
-  transformation result conforms to the target schema.
-
-Together they mean conformance is preserved *compositionally*: you get a
-valid target model because every step preserves validity, not because a
-final check happened to pass.
-
 ## Models all the way down
 
 A model is itself a model element. Two useful consequences follow, with
@@ -387,21 +419,40 @@ no extra machinery:
 - Models can contain other models: a model of models (a *megamodel*),
   used to organize collections of interrelated models.
 - An element's property can store a qualified name that designates an
-  element in *another* model, like a foreign key. Models built from such
+  element in *another* model. Models built from such
   references (*weaving models*) capture typed correspondences between
   independent models; transformation traces and cross-model links are
   built on this.
 
 ## Formal background
 
-The algebra sketched here is developed rigorously, with full definitions,
-the type constructor system, conformance, evaluation semantics, and
-proofs of the properties named above, in the companion paper:
+The conformance behavior described on this page has a formal basis.
+The algebra is developed rigorously in the companion paper, with full
+definitions, the type constructor system, conformance, and evaluation
+semantics, and with proofs of two properties worth knowing by name:
+
+- **Type preservation**: evaluating a well-typed model expression yields
+  a model conforming to its type schema.
+- **Type-safe execution**: if the source model conforms to the source
+  schema and every rule produces well-typed target expressions, the
+  transformation result conforms to the target schema.
+
+Together they mean conformance is preserved *compositionally*: every
+step preserves validity, so a valid target model needs no final check.
 
 > S. Nešković and D. Stojimirović, *Models as Values in a Model
 > Expression Algebra: A Functional Approach to Model Driven Engineering*.
 
-The paper is the formal foundation of the approach; this documentation
-describes the current implementation, which has continued to evolve since
-the paper was written. Where tooling details differ, the documentation is
-authoritative for practical use.
+Configuration-based transformations have their own formal framework
+in a second companion paper: definitions and theorems for variability
+points and options and for the decision, binding, configuration, and
+trace models, with proofs of determinism, completeness, and the
+guaranteed validity of generated default configurations.
+
+> D. Stojimirović and S. Nešković, *Supporting Design Decisions in
+> Rule-Based Model Transformations*.
+
+The papers are the formal foundation of the approach; this
+documentation describes the current implementation, which has
+continued to evolve since they were written. Where tooling details
+differ, the documentation is authoritative for practical use.

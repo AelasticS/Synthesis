@@ -12,113 +12,75 @@ overall version history.
 
 ### Added
 
-- **An invocation carries its own performer.** The workflow
-  metamodel's `Invocation` gains an optional `performer` overriding
-  the called definition's default, as in BPMN, where a call activity
-  carries its own resource assignment; the flowchart view labels each
-  occurrence box with the effective performer. A new declared
-  constraint requires an invocation to call a model-level definition,
-  never an inline step.
+- **An invocation carries its own performer.** An optional override
+  of the called definition's default, as BPMN call activities do; the
+  flowchart view shows the effective performer. A new declared
+  constraint requires invoking model-level definitions only.
 
-- **The $synth header is typed.** The library's new
-  `@aelastics/synthesis/envelope` subpath publishes the header's shared
-  TypeScript types: `SynthHeaderInput` is the authored form (only `kind`
-  and `metamodel` required), `SynthHeader` the normalized form the CLI
-  maintains. Models are authored as `as const satisfies SynthHeaderInput`
-  with a type-only import; the CLI reuses the same types, and stamping
-  keeps the clause. Docs and every sample model teach the typed form.
+- **The $synth header is typed.** `@aelastics/synthesis/envelope`
+  publishes `SynthHeaderInput` (the authored form, only `kind` and
+  `metamodel` required) and `SynthHeader` (the normalized form).
+  Headers are authored `as const satisfies SynthHeaderInput`; the CLI
+  shares the same types.
 
-- **The workflow suite v2: definitions and invocations, control flow,
-  documents, and the organizational example.** The workflow metamodel
-  is reshaped around one distinction: a definition is not an
-  occurrence. `WorkflowModel` roots `Document` vocabulary and activity
-  definitions (`Task` and `Process`, each with an optional performer
-  and a document interface); `Invocation` steps call definitions
-  under occurrence names and bind `DataObject`s, each naming its
-  document, through reads/writes; an inline task or process is
-  single-use sugar; and
-  `Sequence`, `Parallel`, `Choice` with an optional guardless else,
-  and one `Loop` concept complete the control flow of the
-  block-structured workflow model (a process tree). Conformance is
-  declared constraints at the validation point. `workflow-to-bpmn`
-  flattens the entry process with gateway pairs and
-  occurrence-prefixed embedded sub-processes; `workflow-to-mermaid`
-  draws it as a classic flowchart; `bpmn-to-mermaid` labels gateways
-  with derived split and join roles. The organizational example joins
-  the suite: `org-to-approval` derives an approval process from an
-  `org-metamodel` hierarchy, parameterized by worker and sensitivity
-  through the engine's parameter channel, which the new
-  `transformation run --param <json>` carries and records verbatim as
-  `generatedBy.param` on everything the run writes. The suite docs
-  page is rewritten around the new metamodel.
+- **The workflow suite v2.** The metamodel splits definition from
+  occurrence: `WorkflowModel` roots `Document` vocabulary and
+  `Task`/`Process` definitions; `Invocation` steps call them and bind
+  `DataObject`s through reads/writes; inline activities are
+  single-use sugar; `Sequence`, `Parallel`, `Choice`, and `Loop`
+  complete the control flow of the block-structured workflow model (a
+  process tree); conformance is declared constraints. The three views
+  follow, `org-to-approval` joins as the generative example, and the
+  new `transformation run --param <json>` feeds the engine's
+  parameter channel with verbatim `generatedBy.param` provenance.
 
-- **The eer-to-sql suite draws its design space.** `rel-to-mermaid`,
-  the suite's fourth member, renders the OUTPUT of the
-  configuration-based eer-to-relational mapping as Mermaid erDiagram
-  text (`PK` and `FK` marks, `"nullable"` comments, identifying lines
-  exactly when the foreign key's columns sit inside the owner's
-  primary key, dashed historyOf links), so different configurations
-  of one source become visibly different diagrams. Fixed logic, run
-  without configuration flags. The suite docs page closes with the
-  three configurations drawn side by side.
+- **The eer-to-sql suite draws its design space.** `rel-to-mermaid`
+  renders the configuration-based mapping's output as a Mermaid
+  erDiagram, so different configurations of one source become visibly
+  different diagrams; the suite page shows three side by side.
 
 - **The eer-to-sql suite gains its diagram view.** `eer-to-mermaid-er`
-  renders the suite's EER source as Mermaid erDiagram text: an
-  attribute block for every entity kind with domain names as type
-  words, dashed ordinary relationships with per-role glyphs, solid
-  identifying lines, and one is-a line per subtype. Fixed logic, run
-  without configuration flags.
+  renders the EER source as a Mermaid erDiagram. Fixed logic, no
+  configuration flags.
 
 - **The EER metamodel says what the language means.** A weak mapping
-  nests inside its weak entity, and a Specialization IS a mapping
-  nested inside its root entity, its inherited bounds carrying the
-  two classical constraints: lowerBound is completeness, upperBound
-  is disjointness. Subtypes are first-class top-level entities with
-  scope-qualified supertype references. Declared rules cover every
-  semantically mandatory link JSX cannot force, and the SingleTable
-  strategy honors the bounds: a discriminator only when disjoint,
-  NOT NULL exactly when total.
+  nests in its weak entity; a Specialization IS a mapping whose
+  bounds carry completeness and disjointness; subtypes are top-level
+  entities; declared rules cover the links JSX cannot force;
+  SingleTable honors the bounds.
 
-- **Row history as a composite design option.** The eer-to-sql
-  suite's per-entity RowHistory issue wraps an entity's table step
-  with the higher-order `withHistoryTable` table-set template,
-  deriving a `<table>_history` table keyed by the base key plus a
-  temporal discriminator, deliberately without foreign keys since
-  history outlives deletion. Its HistoryTable option is the first
-  live CompositeOption, opening the HistoryDiscriminator sub-issue;
-  late grafts are mirrored into versioned tables' histories; the
-  relational Table carries the `historyOf` link; and the DDL
-  generator emits a capture trigger stub per history table.
+- **Row history as a composite design option.** The per-entity
+  RowHistory issue derives a `<table>_history` table (base key plus
+  temporal discriminator, no foreign keys) through the higher-order
+  `withHistoryTable` template; HistoryTable is the first live
+  CompositeOption, opening the HistoryDiscriminator sub-issue; the
+  DDL generator emits capture trigger stubs.
 
 - **Default configurations traverse chosen composite options.**
-  `config init` and `--default-configs` now answer, recursively, the
-  sub-issues a chosen option opens; sub-issues behind unchosen
-  options stay out.
+  `config init` and `--default-configs` answer, recursively, the
+  sub-issues a chosen option opens.
 
 - **The eer-to-sql suite maps full EER semantics (v2).** Aggregations
-  with the cardinality key rule, relationships strictly binary by
-  doctrine, connect/disconnect integrity rules translated into
-  referential actions and trigger stubs, user-defined domains,
-  attribute optionality driving nullability, flattened composite
-  attributes, a first-class ordered PrimaryKey element replacing the
-  isKey mark, the SingleTable discriminator named `type`, entity name
-  scopes with naturally named samples, and the simplified
-  withAuditColumns form.
+  with the cardinality key rule, binary-only relationships, integrity
+  rules as referential actions and trigger stubs, user-defined
+  domains, composite attributes, an ordered PrimaryKey element,
+  entity name scopes, and the simplified withAuditColumns form.
 
-- **Dialects are configurations: the DDL design space grew.**
-  ReferentialActions, DomainHandling, SqlDialect, and the per-table
-  Clustering issue join IdentifierQuoting; three dialect presets ship
-  as configuration models authored by extension; and
-  `transformation run --config` accepts source-agnostic
-  configurations, the preset form.
+- **Dialects are configurations.** ReferentialActions,
+  DomainHandling, SqlDialect, and Clustering join IdentifierQuoting;
+  three presets ship as configuration models built by extension;
+  `--config` accepts source-agnostic configurations.
 
 - **Declared constraints with a validation point.** Metamodels
-  declare semantic rules on their types with addValidator;
-  `synth model validate` runs the traversal after the gate render and
-  reports each violation, while `model import` is unchanged. The
-  types meta-metamodel records namespace classifications as data.
+  declare semantic rules with addValidator; `synth model validate`
+  runs them after the gate render.
 
 ### Changed
+
+- **The transformation entry rule is `main`.** Renamed from
+  `template`: all rules are templates, and the entry rule's
+  distinction is its position. Breaking for transformations authored
+  against cli-v0.2.0.
 
 - **The decision framework drops its option and choice unions for
   concrete subtypes.** `Option`'s `optionType` tagged union

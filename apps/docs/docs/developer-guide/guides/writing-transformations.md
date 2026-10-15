@@ -27,7 +27,7 @@ class EER2RelTransformation extends abstractM2M<et.IEERSchema, rt.IRelSchema> {
     super(store)
   }
 
-  template(source: et.IEERSchema) {
+  topRule(source: et.IEERSchema) {
     return (
       <r.RelSchema name={`${source.name} Relational Schema`}>
         {source.elements
@@ -59,7 +59,7 @@ class EER2RelTransformation extends abstractM2M<et.IEERSchema, rt.IRelSchema> {
 ### `@M2M` Decorator
 
 Applied to the class. It takes no arguments; the source and target
-model types come from the class's type parameters and the `template()`
+model types come from the class's type parameters and the `topRule()`
 signature.
 
 ```typescript
@@ -69,12 +69,12 @@ class EER2RelTransformation extends abstractM2M<et.IEERSchema, rt.IRelSchema> {
 
 The decorator registers the transformation with the framework and sets up the execution context.
 
-### `template()` Method
+### `topRule()` Method
 
 The entry point of every transformation. It receives the source model and returns a JSX expression that constructs the target model.
 
 ```typescript
-template(source: et.IEERSchema) {
+topRule(source: et.IEERSchema) {
   return (
     <r.RelSchema name={`${source.name} Relational Schema`}>
       {source.elements
@@ -86,7 +86,7 @@ template(source: et.IEERSchema) {
 }
 ```
 
-The `template()` method typically:
+The `topRule()` method typically:
 1. Creates the root target model element.
 2. Filters source elements by type.
 3. Maps each source element to the appropriate transformation rule.
@@ -140,16 +140,16 @@ console.log(result.name)  // "Persons Relational Schema"
 ```
 
 The `transform()` method:
-1. Calls `template(source)` to get the target JSX expression tree.
+1. Calls `topRule(source)` to get the target JSX expression tree.
 2. Renders the tree in a `M2MContext`, which extends the normal `Context` with tracing support.
 3. Returns the typed target model.
 
 ## Filtering Source Elements
 
-The `template()` method often needs to filter source elements by type. Use the store's `isTypeOf()` method.
+The `topRule()` method often needs to filter source elements by type. Use the store's `isTypeOf()` method.
 
 ```typescript
-template(source: et.IEERSchema) {
+topRule(source: et.IEERSchema) {
   return (
     <r.RelSchema name={`${source.name} Relational Schema`}>
       {source.elements

@@ -182,7 +182,7 @@ instead of a clause in this one.
 ## The complete template
 
 The previous page showed the first document and this page showed the
-second, both as fragments. Here is the finished `template()`, embedded
+second, both as fragments. Here is the finished `topRule()`, embedded
 from the companion package itself rather than copied, so it cannot
 drift from the code that actually runs:
 

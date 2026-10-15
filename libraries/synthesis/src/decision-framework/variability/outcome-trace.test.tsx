@@ -5,7 +5,7 @@
  * The scenario: a Process with two tasks and three issues. TaskStyle
  * (per element, stacked @E2E @VarPoint rule), TaskMark (per element,
  * consulted through a nested helper VarPoint), Naming (global,
- * consulted from template() outside any rule). The configuration
+ * consulted from main() outside any rule). The configuration
  * chooses Fancy for t1 only, Marked for t2 only, Upper globally.
  *
  * Correct per-element resolution: a decision recorded for one element

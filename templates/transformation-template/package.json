@@ -2,7 +2,7 @@
   "name": "transformation-template",
   "version": "0.1.0",
   "private": true,
-  "description": "Starter for a Synthesis transformation package. Rename, replace the metamodels, implement template().",
+  "description": "Starter for a Synthesis transformation package. Rename, replace the metamodels, implement topRule().",
   "author": "Your Name",
   "license": "Apache-2.0",
   "type": "module",

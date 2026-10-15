@@ -58,12 +58,12 @@ wondered whether text generation in Synthesis is a special execution
 mode, this is the answer: it is the ordinary one, pointed at a
 different target.
 
-## `template()`: one document is one file
+## `topRule()`: one document is one file
 
 ```tsx
   // One <Doc> means one file. Its name is the file name the CLI writes,
   // so the schema name carries straight through to Library_rel.sql.
-  template(s: rmT.IRelSchema) {
+  topRule(s: rmT.IRelSchema) {
     return (
       <M2T name={`${s.name}_sql`}>
         <Doc name={`${s.name}.sql`}>
