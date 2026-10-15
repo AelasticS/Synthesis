@@ -64,7 +64,7 @@ appear in the same file.
 
 ## A top rule that decides nothing
 
-In Parts 1 and 2, `topRule` was the whole transformation: it built the
+In Parts 1 and 2, `main` was the whole transformation: it built the
 `<M2T>` model, declared the documents, and either emitted sections in
 place or placed them by name. Here it does one thing:
 
@@ -72,7 +72,7 @@ place or placed them by name. Here it does one thing:
   // The template does nothing but hand over to the variation point. The
   // decision is the first thing the transformation makes, because
   // everything else depends on it.
-  topRule(s: rmT.IRelSchema): ExprNode<rmT.IRelSchema, m2tmm.M2T_Model> {
+  main(s: rmT.IRelSchema): ExprNode<rmT.IRelSchema, m2tmm.M2T_Model> {
     return this.documentLayout(s)
   }
 ```

@@ -37,7 +37,7 @@ the Synthesis repository and register your package in `rush.json`; the
 2. In `synth.json`: point `source.metamodel` and `target.metamodel` at
    your metamodels, and set `exportName` to your class name. For m2m,
    keep `target.components` in sync with the target metamodel.
-3. In `src/index.tsx`: rename the class and implement `template()`.
+3. In `src/index.tsx`: rename the class and implement `main()`.
 4. Replace `sample/example-model.tsx` with a model of your source
    metamodel, so the smoke test exercises the real thing.
 

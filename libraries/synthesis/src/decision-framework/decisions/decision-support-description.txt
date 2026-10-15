@@ -62,7 +62,7 @@ TargetSchema }) to register its source and target metamodels.
 
 Transformation rules are methods that accept source model elements and
 return JSX expressions constructing target elements. The top-level rule
-is topRule(source), which receives the root source model and returns
+is main(source), which receives the root source model and returns
 the root target model expression. Rules compose: a rule may call other
 rules within its JSX, building the target model tree from nested rule
 invocations.

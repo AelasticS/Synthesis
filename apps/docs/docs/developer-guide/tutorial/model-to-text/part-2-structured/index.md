@@ -39,7 +39,7 @@ Everything else. The source metamodel is the same relational schema,
 the sample model is the same file, the manifest differs only in
 `exportName`, and the build, install, run loop is the one Part 1
 finished with. The transformation still extends `abstractM2M`, still
-returns JSX from `topRule()`, and still assembles the content of each
+returns JSX from `main()`, and still assembles the content of each
 line as an ordinary string.
 
 The `columnLine` helper loses exactly one branch, the one that emitted

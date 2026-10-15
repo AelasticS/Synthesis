@@ -138,6 +138,12 @@ overall version history.
   pages link the repository folders holding their packages and
   metamodels.
 
+- **Docs follow the `main` entry rule and the run flags.** The
+  developer guide, both tutorials, the design notes, the starter
+  template, and the decision-support description name the entry rule
+  `main`; the command reference lists `transformation run --param` and
+  `--trace`.
+
 ## [cli-v0.2.0] - 2026-09-05
 
 ### Added

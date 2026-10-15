@@ -224,7 +224,7 @@ class EER2RelWithConfig
     super(store, extra, configModel)
   }
 
-  topRule(source: et.IEERSchema) {
+  main(source: et.IEERSchema) {
     return (
       <r.RelSchema name={`${source.name} Relational Schema`}>
         {source.elements

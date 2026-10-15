@@ -51,10 +51,10 @@ The constructor takes the `ModelStore` and passes it up. The store is
 then reachable as `this.context.store`, which the code uses in two
 places: to pass to the output root, and to test source element types.
 
-## `topRule()`: the whole target in one expression
+## `main()`: the whole target in one expression
 
 ```tsx
-  topRule(s: em.IEERSchema): ExprNode<em.IEERSchema, rmT.IRelSchema> {
+  main(s: em.IEERSchema): ExprNode<em.IEERSchema, rmT.IRelSchema> {
     return (
       <RelSchema name={`${s.name}_rel`} store={this.context.store}>
         {s.elements
@@ -68,7 +68,7 @@ places: to pass to the output root, and to test source element types.
   }
 ```
 
-`topRule()` receives the rendered source model and returns the target
+`main()` receives the rendered source model and returns the target
 model as a single JSX expression, written with the target metamodel's
 tags. This is the shape of every Synthesis transformation: the target
 is described declaratively, and the source is traversed inside curly
