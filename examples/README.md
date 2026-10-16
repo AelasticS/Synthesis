@@ -21,7 +21,7 @@ folder's README lists its members.
 examples/
   tutorial/            the tutorial suite: metamodels/ plus the
                        eer-tutorial-* and sql-tutorial-* companions
-  eer-to-sql/          the full-example suite: metamodels/ plus a
+  advanced-eer-to-sql/ the full-example suite: metamodels/ plus a
                        configuration-based chain and its diagram views
   workflow/            the workflow suite: metamodels/ plus a chain,
                        its flowchart view, and the organizational example
@@ -48,14 +48,14 @@ the finished state of that part. See [the suite README](./tutorial/).
 ### The full-example suite
 
 Larger packages that stand on their own rather than teaching one
-concept at a time. See [the suite README](./eer-to-sql/).
+concept at a time. See [the suite README](./advanced-eer-to-sql/).
 
 | Example | Kind | What it shows |
 | --- | --- | --- |
-| [eer-to-relational](./eer-to-sql/eer-to-relational/) | m2m | The full-featured EER to relational mapping: full EER semantics, every template kind, nine design issues, a rich relational target, verified outputs and traces. |
-| [rel-to-sql-ddl](./eer-to-sql/rel-to-sql-ddl/) | m2t | DDL from the rich content: named keys and constraints with referential actions, domains, trigger stubs, and dialects as preset configurations. |
-| [eer-to-mermaid-er](./eer-to-sql/eer-to-mermaid-er/) | m2t | The ER diagram view of the same EER source as Mermaid `erDiagram` text; fixed logic. |
-| [rel-to-mermaid](./eer-to-sql/rel-to-mermaid/) | m2t | The diagram of the mapping's output, chained after `eer-to-relational` so different configurations become visibly different diagrams; fixed logic. |
+| [eer-to-relational](./advanced-eer-to-sql/eer-to-relational/) | m2m | The full-featured EER to relational mapping: full EER semantics, every template kind, nine design issues, a rich relational target, verified outputs and traces. |
+| [rel-to-sql-ddl](./advanced-eer-to-sql/rel-to-sql-ddl/) | m2t | DDL from the rich content: named keys and constraints with referential actions, domains, trigger stubs, and dialects as preset configurations. |
+| [eer-to-mermaid-er](./advanced-eer-to-sql/eer-to-mermaid-er/) | m2t | The ER diagram view of the same EER source as Mermaid `erDiagram` text; fixed logic. |
+| [rel-to-mermaid](./advanced-eer-to-sql/rel-to-mermaid/) | m2t | The diagram of the mapping's output, chained after `eer-to-relational` so different configurations become visibly different diagrams; fixed logic. |
 
 ### The workflow suite
 

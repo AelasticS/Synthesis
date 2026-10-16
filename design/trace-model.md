@@ -1,7 +1,7 @@
 # The outcome trace model
 
 Agreed 2026-09-03/04 and delivered with the trace groundwork stage of
-the eer-to-sql work (engine, trace metamodel, and CLI persistence, all
+the advanced-eer-to-sql work (engine, trace metamodel, and CLI persistence, all
 on main). Extracted 2026-09-08 from the retired flagship record when
 that record was deleted; this document is the standing record of the
 trace design and its rationale.

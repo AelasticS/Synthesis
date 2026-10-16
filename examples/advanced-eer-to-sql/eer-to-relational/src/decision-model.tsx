@@ -30,7 +30,6 @@ export const RelationSchemaDesignIssues = (store: ModelStore): ExprNode<t.IDecis
         <ElementIssue name="OneToManyStrategy" description="How to implement 1:N relationships">
             <Option name="ForeignKey" description="Use a foreign key on the many side table" isDefault={false}/>
             <Option name="JoinTable" description="Use a separate join table" isDefault={true}
-
             />
         </ElementIssue>
         <ElementIssue name="PrimaryKeyStrategy" description="How to implement primary keys">

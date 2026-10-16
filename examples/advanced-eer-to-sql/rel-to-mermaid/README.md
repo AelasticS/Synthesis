@@ -32,4 +32,4 @@ the chain under three configurations and asserts each generated text.
 
 The diagram conventions, with the three configurations drawn side by
 side, are explained on the suite page
-[A full-featured EER to SQL transformation](https://AelasticS.github.io/aelastics/developer-guide/examples/eer-to-sql#one-source-three-configurations).
+[A full-featured EER to SQL transformation](https://AelasticS.github.io/aelastics/developer-guide/examples/advanced-eer-to-sql#one-source-three-configurations).

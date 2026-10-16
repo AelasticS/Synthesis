@@ -15,7 +15,7 @@ the Quick Start, `synth transformation install` takes a local directory
 containing a built transformation package; the two used here,
 `eer-to-relational` (model-to-model) and `rel-to-sql-ddl`
 (model-to-text), ship in the repository under
-[`examples/eer-to-sql/`](https://github.com/AelasticS/Synthesis/tree/main/examples/eer-to-sql).
+[`examples/advanced-eer-to-sql/`](https://github.com/AelasticS/Synthesis/tree/main/examples/advanced-eer-to-sql).
 
 ## 1. Create the workspace
 

@@ -34,12 +34,12 @@ overall version history.
   new `transformation run --param <json>` feeds the engine's
   parameter channel with verbatim `generatedBy.param` provenance.
 
-- **The eer-to-sql suite draws its design space.** `rel-to-mermaid`
+- **The advanced-eer-to-sql suite draws its design space.** `rel-to-mermaid`
   renders the configuration-based mapping's output as a Mermaid
   erDiagram, so different configurations of one source become visibly
   different diagrams; the suite page shows three side by side.
 
-- **The eer-to-sql suite gains its diagram view.** `eer-to-mermaid-er`
+- **The advanced-eer-to-sql suite gains its diagram view.** `eer-to-mermaid-er`
   renders the EER source as a Mermaid erDiagram. Fixed logic, no
   configuration flags.
 
@@ -60,7 +60,7 @@ overall version history.
   `config init` and `--default-configs` answer, recursively, the
   sub-issues a chosen option opens.
 
-- **The eer-to-sql suite maps full EER semantics (v2).** Aggregations
+- **The advanced-eer-to-sql suite maps full EER semantics (v2).** Aggregations
   with the cardinality key rule, binary-only relationships, integrity
   rules as referential actions and trigger stubs, user-defined
   domains, composite attributes, an ordered PrimaryKey element,
@@ -137,6 +137,14 @@ overall version history.
 - **Docs pages link their sources.** Example, tutorial, and guide
   pages link the repository folders holding their packages and
   metamodels.
+
+- **The full-example suite moves to `examples/advanced-eer-to-sql`.**
+  Renamed from `examples/eer-to-sql` to make room for a simple
+  counterpart. Packages, names, and the documentation page keep their
+  names; the Rush project folders, the lockfile links, and the links
+  in the docs, READMEs, and design notes follow the new path. The
+  simple suite's EER metamodel package is `simple-eer-metamodel`, so
+  the two never share a package name.
 
 - **Docs follow the `main` entry rule and the run flags.** The
   developer guide, both tutorials, the design notes, the starter

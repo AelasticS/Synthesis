@@ -57,7 +57,7 @@ From the [model-to-text tutorial](../tutorial/model-to-text/index.md):
 ## The full-example suite
 
 Larger packages under
-[`examples/eer-to-sql/`](https://github.com/AelasticS/Synthesis/tree/main/examples/eer-to-sql)
+[`examples/advanced-eer-to-sql/`](https://github.com/AelasticS/Synthesis/tree/main/examples/advanced-eer-to-sql)
 that stand on their own
 rather than teaching one concept at a time. Two form a chain:
 `eer-to-relational` produces exactly what `rel-to-sql-ddl` consumes.
@@ -65,18 +65,18 @@ Two diagram views bracket it: `eer-to-mermaid-er` is a sibling view
 over the same EER source, and `rel-to-mermaid` draws the produced
 relational schema.
 The suite's `metamodels/` folder holds
-[`eer-metamodel`](https://github.com/AelasticS/Synthesis/tree/main/examples/eer-to-sql/metamodels/eer)
+[`eer-metamodel`](https://github.com/AelasticS/Synthesis/tree/main/examples/advanced-eer-to-sql/metamodels/eer)
 (the full EER
 metamodel) and
-[`relational-metamodel`](https://github.com/AelasticS/Synthesis/tree/main/examples/eer-to-sql/metamodels/relational)
+[`relational-metamodel`](https://github.com/AelasticS/Synthesis/tree/main/examples/advanced-eer-to-sql/metamodels/relational)
 (the full relational one).
 
 | Example | Kind | What it shows |
 | --- | --- | --- |
-| [`examples/eer-to-sql/eer-to-relational`](https://github.com/AelasticS/Synthesis/tree/main/examples/eer-to-sql/eer-to-relational) | m2m | The full-featured EER to relational mapping: full EER semantics (aggregations with the cardinality key rule, integrity rules, user-defined domains, composite attributes, row history as a composite design option), every template kind, nine design issues, verified outputs and traces. See [the suite page](./eer-to-sql.md). |
-| [`examples/eer-to-sql/rel-to-sql-ddl`](https://github.com/AelasticS/Synthesis/tree/main/examples/eer-to-sql/rel-to-sql-ddl) | m2t | DDL from the rich content: named keys and constraints with referential actions, domains, trigger stubs, physical clustering, and dialects as extension-authored preset configurations. |
-| [`examples/eer-to-sql/eer-to-mermaid-er`](https://github.com/AelasticS/Synthesis/tree/main/examples/eer-to-sql/eer-to-mermaid-er) | m2t | The ER diagram view of the same source metamodel: Mermaid `erDiagram` text with attribute blocks for every entity kind and the identifying/non-identifying line conventions; fixed logic, run without configuration flags. |
-| [`examples/eer-to-sql/rel-to-mermaid`](https://github.com/AelasticS/Synthesis/tree/main/examples/eer-to-sql/rel-to-mermaid) | m2t | The diagram of the mapping's output: Mermaid `erDiagram` text over the produced relational schema, chained after `eer-to-relational` so different configurations of the same source become [visibly different diagrams](./eer-to-sql.md#one-source-three-configurations); fixed logic, run without configuration flags. |
+| [`examples/advanced-eer-to-sql/eer-to-relational`](https://github.com/AelasticS/Synthesis/tree/main/examples/advanced-eer-to-sql/eer-to-relational) | m2m | The full-featured EER to relational mapping: full EER semantics (aggregations with the cardinality key rule, integrity rules, user-defined domains, composite attributes, row history as a composite design option), every template kind, nine design issues, verified outputs and traces. See [the suite page](./advanced-eer-to-sql.md). |
+| [`examples/advanced-eer-to-sql/rel-to-sql-ddl`](https://github.com/AelasticS/Synthesis/tree/main/examples/advanced-eer-to-sql/rel-to-sql-ddl) | m2t | DDL from the rich content: named keys and constraints with referential actions, domains, trigger stubs, physical clustering, and dialects as extension-authored preset configurations. |
+| [`examples/advanced-eer-to-sql/eer-to-mermaid-er`](https://github.com/AelasticS/Synthesis/tree/main/examples/advanced-eer-to-sql/eer-to-mermaid-er) | m2t | The ER diagram view of the same source metamodel: Mermaid `erDiagram` text with attribute blocks for every entity kind and the identifying/non-identifying line conventions; fixed logic, run without configuration flags. |
+| [`examples/advanced-eer-to-sql/rel-to-mermaid`](https://github.com/AelasticS/Synthesis/tree/main/examples/advanced-eer-to-sql/rel-to-mermaid) | m2t | The diagram of the mapping's output: Mermaid `erDiagram` text over the produced relational schema, chained after `eer-to-relational` so different configurations of the same source become [visibly different diagrams](./advanced-eer-to-sql.md#one-source-three-configurations); fixed logic, run without configuration flags. |
 
 ## The workflow suite
 

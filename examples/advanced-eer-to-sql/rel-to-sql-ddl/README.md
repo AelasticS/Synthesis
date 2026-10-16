@@ -35,4 +35,4 @@ end-to-end proof over the chain from `eer-to-relational`.
 
 The DDL conventions and the dialect mechanism are explained on the
 suite page
-[A full-featured EER to SQL transformation](https://AelasticS.github.io/aelastics/developer-guide/examples/eer-to-sql#dialects-are-configurations-not-code).
+[A full-featured EER to SQL transformation](https://AelasticS.github.io/aelastics/developer-guide/examples/advanced-eer-to-sql#dialects-are-configurations-not-code).

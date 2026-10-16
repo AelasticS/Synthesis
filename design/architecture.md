@@ -20,7 +20,7 @@ domain-shaped lives with the examples.
 | apps/cli | `@aelastics/synthesis-cli` | the `synth` CLI |
 | apps/docs | `@synthesis/docs` | Docusaurus site, not in the build graph |
 | examples/tutorial | seven tutorial companions plus `metamodels/` | the tutorial suite |
-| examples/eer-to-sql | two full examples plus `metamodels/` | the full-example suite |
+| examples/advanced-eer-to-sql | two full examples plus `metamodels/` | the full-example suite |
 | templates/transformation-template | `transformation-template` | starter package |
 
 Dependency direction is strictly downward in this list: the aelastics
@@ -66,7 +66,7 @@ by the suite whose examples share it:
   the tutorial's pivot, target of the three m2m parts and source of the
   three m2t parts.
 - `eer-metamodel` and `relational-metamodel` under
-  examples/eer-to-sql/metamodels: the full-example suite's own metamodels;
+  examples/advanced-eer-to-sql/metamodels: the full-example suite's own metamodels;
   the two full examples are a chain pair over them.
 
 Every metamodel package owns all its facets under one uniform convention:

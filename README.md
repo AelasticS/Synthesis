@@ -49,7 +49,7 @@ Synthesis/
 │   └── docs/                  # Docusaurus documentation site
 ├── examples/
 │   ├── tutorial/              # tutorial companion suite + its metamodel packages
-│   ├── eer-to-sql/            # full-featured EER to SQL suite + its metamodel packages
+│   ├── advanced-eer-to-sql/   # full-featured EER to SQL suite + its metamodel packages
 │   └── workflow/              # workflow suite + its metamodel packages
 ├── templates/
 │   └── transformation-template/  # starter transformation package
