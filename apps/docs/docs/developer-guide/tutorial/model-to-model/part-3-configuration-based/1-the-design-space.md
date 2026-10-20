@@ -24,7 +24,7 @@ export const RelationshipDesignIssues = (store: ModelStore): ExprNode<t.IDecisio
     description="Design space for implementing EER relationships in a relational schema"
     store={store}
   >
-    <ElementIssue
+    <ElementLevelIssue
       name="OneToManyStrategy"
       description="How to implement a 1:N relationship"
     >
@@ -38,7 +38,7 @@ export const RelationshipDesignIssues = (store: ModelStore): ExprNode<t.IDecisio
         description="Give the relationship a table of its own"
         isDefault={false}
       />
-    </ElementIssue>
+    </ElementLevelIssue>
   </DecisionModel>
 )
 ```
@@ -49,7 +49,7 @@ than from a domain metamodel package:
 ```tsx
 import {
   DecisionModel,
-  ElementIssue,
+  ElementLevelIssue,
   Option,
 } from '@aelastics/synthesis/metamodels/decision'
 ```
@@ -118,18 +118,18 @@ answered:
 
 | Tag | Answered | Use it when |
 | --- | --- | --- |
-| `ElementIssue` | Once per matching source element | Each element can legitimately be treated differently |
-| `ModelIssue` | Once for the model being transformed | The answer is a property of this schema as a whole |
-| `GlobalIssue` | Once for the run, independently of the source model | The answer is a property of the target, not the input |
+| `ElementLevelIssue` | Once per matching source element | Each element can legitimately be treated differently |
+| `ModelLevelIssue` | Once for the model being transformed | The answer is a property of this schema as a whole |
+| `ModelLevelIssue` | Once for the run, independently of the source model | The answer is a property of the target, not the input |
 
-`ModelIssue` and `GlobalIssue` produce the same underlying element
+`ModelLevelIssue` and `ModelLevelIssue` produce the same underlying element
 type; the two spellings differ in what they say about intent, and
-`GlobalIssue` is the one to reach for when the question has nothing to
+`ModelLevelIssue` is the one to reach for when the question has nothing to
 do with the model at all. A naming convention for generated
 identifiers is the standard example: it is settled once, and no
 individual entity or relationship gets a say.
 
-This package uses `ElementIssue`, and the choice is not cosmetic.
+This package uses `ElementLevelIssue`, and the choice is not cosmetic.
 Consider a schema with two 1:N relationships, one linking books to
 their publisher and one linking books to their acquisition batch. The
 first is queried on every page of the application and wants a foreign

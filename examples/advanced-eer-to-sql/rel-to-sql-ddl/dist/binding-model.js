@@ -2,7 +2,7 @@
 import { createExprNode } from "@aelastics/synthesis/jsx";
 import { BindingModel, Binding } from "@aelastics/synthesis/metamodels/binding";
 import { Model, Element as ModelElement } from "@aelastics/synthesis/jsx";
-import { DecisionModel, ElementIssue } from "@aelastics/synthesis/metamodels/decision";
+import { DecisionModel, ElementLevelIssue } from "@aelastics/synthesis/metamodels/decision";
 /**
  * Binding of the relational metamodel to the DDL generation design
  * space. The global issues need no bindings; the per-table Clustering
@@ -11,6 +11,6 @@ import { DecisionModel, ElementIssue } from "@aelastics/synthesis/metamodels/dec
  */
 export const Rel_Bindings = (store) => (createExprNode(BindingModel, { name: "Rel_Bindings", description: "Binding relational schema concepts to DDL generation issues", sourceModel: createExprNode(Model, { "$refByName": "//www.aelastics.org/RELMetamodel" }), decisionModel: createExprNode(DecisionModel, { "$refByName": "//www.aelastics.org/DdlGenerationDesign" }), store: store },
     createExprNode(Binding, { name: "ClusteringBinding", description: "Binding the per-table Clustering issue to Table", element: createExprNode(ModelElement, { "$refByName": "//www.aelastics.org/RELMetamodel/Table" }), issues: [
-            createExprNode(ElementIssue, { "$refByName": "//www.aelastics.org/DdlGenerationDesign/Clustering" }),
+            createExprNode(ElementLevelIssue, { "$refByName": "//www.aelastics.org/DdlGenerationDesign/Clustering" }),
         ] })));
 //# sourceMappingURL=binding-model.js.map

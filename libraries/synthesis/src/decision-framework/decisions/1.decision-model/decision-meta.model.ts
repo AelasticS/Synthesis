@@ -14,17 +14,17 @@ export const Issue = t.subtype(
     Decision_TypeSchema,
 )
 
-export const ElementIssue = t.subtype(
+export const ElementLevelIssue = t.subtype(
     Issue,
     {},
-    "ElementIssue",
+    "ElementLevelIssue",
     Decision_TypeSchema,
 )
 
-export const ModelIssue = t.subtype(
+export const ModelLevelIssue = t.subtype(
     Issue,
     {},
-    "ModelIssue",
+    "ModelLevelIssue",
     Decision_TypeSchema,
 )
 
@@ -73,8 +73,8 @@ export const Constraint = t.subtype(
 )
 
 export type IDecisionModel = t.TypeOf<typeof DecisionModel>;
-export type IElementIssue = t.TypeOf<typeof ElementIssue>;
-export type IModelIssue = t.TypeOf<typeof ModelIssue>;
+export type IElementLevelIssue = t.TypeOf<typeof ElementLevelIssue>;
+export type IModelLevelIssue = t.TypeOf<typeof ModelLevelIssue>;
 export type IOption = t.TypeOf<typeof Option>;
 export type IDependency = t.TypeOf<typeof Constraint>;
 export type IConstraintType = t.TypeOf<typeof ConstraintType>;

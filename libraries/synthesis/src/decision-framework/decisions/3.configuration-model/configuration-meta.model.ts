@@ -5,24 +5,6 @@ import {BindingModel} from "../2.binding-model/binding-meta.model"
 
 export const ConfigurationModel_TypeSchema = t.schema("ConfigurationModel_TypeSchema")
 
-// export const Option = t.subtype(
-//     ModelElement,
-//     {
-//         //TODO: Type of defaultValue should be determined based on the option type
-//         // defaultValue: t.optional(getOptionType(option)),
-//         defaultValue: t.string, // defaultValue is a string for simplicity
-//     },
-//     "SimpleOption",
-//     ConfigurationModel_TypeSchema)
-//
-// export const OpeningOption = t.subtype(
-//     Option,
-//     {
-//         choices: t.arrayOf(t.link(ConfigurationModel_TypeSchema, "Choice")),
-//     },
-//     "CompositeOption",
-// )
-
 const getOptionType = (option: gdm.IOption): t.Any => {
     return t.string
 }

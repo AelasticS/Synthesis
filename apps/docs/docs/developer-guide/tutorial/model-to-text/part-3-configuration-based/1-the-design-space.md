@@ -24,7 +24,7 @@ export const SqlGenerationIssues = (store: ModelStore): ExprNode<t.IDecisionMode
     {/* How many files the schema becomes, and what goes in each. The
         three options are the three shapes a deployable script can take,
         and no property of the schema decides between them. */}
-    <GlobalIssue name="OutputLayout" description="How the generated DDL is laid out over files">
+    <ModelLevelIssue name="OutputLayout" description="How the generated DDL is laid out over files">
       <Option
         name="SingleFile"
         description="One file with every CREATE TABLE and inline REFERENCES clauses"
@@ -40,11 +40,11 @@ export const SqlGenerationIssues = (store: ModelStore): ExprNode<t.IDecisionMode
         description="One file per table, plus one file of ALTER TABLE foreign keys"
         isDefault={false}
       />
-    </GlobalIssue>
+    </ModelLevelIssue>
 
     {/* The same issue rel-to-sql-ddl carries: quoting is a house style,
         not something the schema can answer. */}
-    <GlobalIssue name="IdentifierQuoting" description="How to emit SQL identifiers in the generated DDL">
+    <ModelLevelIssue name="IdentifierQuoting" description="How to emit SQL identifiers in the generated DDL">
       <Option
         name="Unquoted"
         description="Emit identifiers verbatim"
@@ -55,7 +55,7 @@ export const SqlGenerationIssues = (store: ModelStore): ExprNode<t.IDecisionMode
         description="Wrap identifiers in double quotes"
         isDefault={false}
       />
-    </GlobalIssue>
+    </ModelLevelIssue>
   </DecisionModel>
 )
 ```
@@ -66,7 +66,7 @@ than from a domain metamodel package:
 ```tsx
 import {
   DecisionModel,
-  GlobalIssue,
+  ModelLevelIssue,
   Option,
 } from '@aelastics/synthesis/metamodels/decision'
 ```
@@ -146,14 +146,14 @@ questions of its own.
 
 ## Answered once, not once per element
 
-`GlobalIssue` is the whole difference between this design space and the
+`ModelLevelIssue` is the whole difference between this design space and the
 one in the model-to-model tutorial, and it is worth being concrete about
-what it changes. That tutorial used `ElementIssue`, so
+what it changes. That tutorial used `ElementLevelIssue`, so
 `OneToManyStrategy` was asked once for every 1:N relationship in the
 source model, and a schema with three of them got three independent
 answers. Both issues here are asked once for the run.
 
-| | `ElementIssue` (the model-to-model tutorial) | `GlobalIssue` (this package) |
+| | `ElementLevelIssue` (the model-to-model tutorial) | `ModelLevelIssue` (this package) |
 | --- | --- | --- |
 | Asked | Once per matching source element | Once per run |
 | Needs a binding | Yes, naming the concept it attaches to | No, there is no element to attach to |
@@ -169,8 +169,8 @@ documents there are, so it has to be settled before the first one is
 created, which is exactly what page 2's template does by handing over
 to the variation point as its first and only act.
 
-`ModelIssue` is the third tag, and it produces the same underlying
-element type as `GlobalIssue`. The spellings differ in what they claim:
+`ModelLevelIssue` is the third tag, and it produces the same underlying
+element type as `ModelLevelIssue`. The spellings differ in what they claim:
 a model issue is a property of this particular schema, a global issue is
 a property of the target and has nothing to do with the input at all.
 Neither of the two questions here would change its answer if the schema

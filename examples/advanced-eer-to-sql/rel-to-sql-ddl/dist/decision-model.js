@@ -1,6 +1,6 @@
 /** @jsx createExprNode */
 import { createExprNode } from "@aelastics/synthesis/jsx";
-import { DecisionModel, ElementIssue, GlobalIssue, Option, } from "@aelastics/synthesis/metamodels/decision";
+import { DecisionModel, ElementLevelIssue, ModelLevelIssue, Option, } from "@aelastics/synthesis/metamodels/decision";
 /**
  * Design space of the Rel to DDL text generation. Global issues: how
  * SQL identifiers are emitted, how referential rules reach the DDL
@@ -12,20 +12,20 @@ import { DecisionModel, ElementIssue, GlobalIssue, Option, } from "@aelastics/sy
  * configuration models closing these issues (see presets/).
  */
 export const DdlGenerationIssues = (store) => (createExprNode(DecisionModel, { name: "DdlGenerationDesign", description: "Design space for SQL DDL generation", store: store },
-    createExprNode(GlobalIssue, { name: "IdentifierQuoting", description: "How to emit SQL identifiers in the generated DDL" },
+    createExprNode(ModelLevelIssue, { name: "IdentifierQuoting", description: "How to emit SQL identifiers in the generated DDL" },
         createExprNode(Option, { name: "Unquoted", description: "Emit identifiers verbatim", isDefault: true }),
         createExprNode(Option, { name: "DoubleQuoted", description: "Wrap identifiers in double quotes", isDefault: false })),
-    createExprNode(GlobalIssue, { name: "ReferentialActions", description: "How integrity rules reach the DDL" },
+    createExprNode(ModelLevelIssue, { name: "ReferentialActions", description: "How integrity rules reach the DDL" },
         createExprNode(Option, { name: "NativeDdl", description: "Disconnect rules as ON DELETE and ON UPDATE clauses; connect rules other than Restrict as triggers", isDefault: true }),
         createExprNode(Option, { name: "TriggerEmulation", description: "Every non-Restrict rule as a trigger, for dialects without declarative actions", isDefault: false })),
-    createExprNode(GlobalIssue, { name: "DomainHandling", description: "How wired domains are rendered" },
+    createExprNode(ModelLevelIssue, { name: "DomainHandling", description: "How wired domains are rendered" },
         createExprNode(Option, { name: "InlineTypes", description: "Base types inline, with per-column DEFAULT and CHECK", isDefault: true }),
         createExprNode(Option, { name: "EmitDomains", description: "CREATE DOMAIN statements; columns reference the domain by name", isDefault: false })),
-    createExprNode(GlobalIssue, { name: "SqlDialect", description: "The dialect flavoring the physical emissions" },
+    createExprNode(ModelLevelIssue, { name: "SqlDialect", description: "The dialect flavoring the physical emissions" },
         createExprNode(Option, { name: "StandardSql", description: "Portable SQL, no dialect-specific physical statements", isDefault: true }),
         createExprNode(Option, { name: "PostgreSql", description: "PostgreSQL: one-time CLUSTER statements for clustered tables", isDefault: false }),
         createExprNode(Option, { name: "Oracle", description: "Oracle: index-organized tables for clustered tables", isDefault: false })),
-    createExprNode(ElementIssue, { name: "Clustering", description: "Whether this table is physically clustered by its primary key" },
+    createExprNode(ElementLevelIssue, { name: "Clustering", description: "Whether this table is physically clustered by its primary key" },
         createExprNode(Option, { name: "None", description: "No physical clustering", isDefault: true }),
         createExprNode(Option, { name: "ClusterPrimaryKey", description: "Cluster the table by its primary key (dialect decides the emission)", isDefault: false }))));
 //# sourceMappingURL=decision-model.js.map

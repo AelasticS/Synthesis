@@ -3,170 +3,193 @@
  * Copyright (c) AelasticS 2022.
  */
 
-import { createExprNode, ExprNode, Resolve } from "@aelastics/synthesis/jsx"
-import { VarPoint, VarOption, Option, DecisionAwareM2M } from "@aelastics/synthesis/variability"
-import { M2M, SpecPoint, SpecOption } from "@aelastics/synthesis/m2m"
+import { createExprNode, ExprNode } from "@aelastics/synthesis/jsx"
+import { VarPoint, VarOption, Default, Option, DecisionAwareM2M } from "@aelastics/synthesis/variability"
+import { E2E, M2M } from "@aelastics/synthesis/m2m"
 import { ModelStore } from "@aelastics/synthesis/store"
-import * as cmT from "@aelastics/synthesis/metamodels/configuration/model"
-import * as et from "simple-eer-metamodel/model"
-import * as rt from "simple-relational-metamodel/model"
-import * as r from "simple-relational-metamodel"
+import * as cm from "@aelastics/synthesis/metamodels/configuration/model"
+import {
+  IEntity,
+  IEERSchema,
+  IAttribute,
+  IRelationship,
+  IOrdinaryMapping,
+  Relationship,
+  Entity,
+  IDomain,
+} from "simple-eer-metamodel/model"
+import * as rmT from "simple-relational-metamodel/model"
+import { RelSchema, Table, Column } from "simple-relational-metamodel"
 
 @M2M()
-export class EerToRelational extends DecisionAwareM2M<et.IEERSchema, rt.IRelSchema, {}, cmT.IConfigurationModel> {
-  constructor(store: ModelStore, { }, decisionModel?: cmT.IConfigurationModel) {
-    super(store, {}, decisionModel);
+export class SimpleEerToRelational extends DecisionAwareM2M<
+    IEERSchema,
+    rmT.IRelSchema,
+    {},
+    cm.IConfigurationModel
+> {
+  constructor(store: ModelStore, {}, configModel?: cm.IConfigurationModel) {
+    super(store, {}, configModel)
   }
 
-  main(s: et.IEERSchema) {
+  main(s: IEERSchema) {
     return (
-      <r.RelSchema
-        name={`${s.name}_Relational_Schema_with_Decision_Model`}
-      >
-        {s.elements
-          .filter((el) => this.context.store.isTypeOf(el, et.Entity))
-          .map((el) => this.Entity2Table(el as et.IEntity))}
+        <RelSchema name={`${s.name}_Relational_Schema_with_Decision_Model`} store={this.context.store}>
+          {s.elements
+              .filter((el) => this.context.store.isTypeOf(el, Entity))
+              .map((el) => this.Entity2Table(el as IEntity))}
 
-        {s.elements
-          .filter((el) => this.context.store.isTypeOf(el, et.WeakMapping))
-          .map((el) => this.WeekMappingToFK(el as et.IWeakMapping))}
-
-        {s.elements
-          .filter((el) => this.context.store.isTypeOf(el, et.Relationship))
-          .map((el) => this.RelationshipToElement(el as et.IRelationship))}
-      </r.RelSchema>
-    );
+          {s.elements
+              .filter((el) => this.context.store.isTypeOf(el, Relationship))
+              .map((r) => this.RelationshipMapping(r as IRelationship))}
+        </RelSchema>
+    )
   }
 
-  // @E2E({
-  //   input: et.Entity,
-  //   output: rt.Table,
-  //   ruleName: "Entity2Table"
-  // })
-  @SpecPoint()
-  Entity2Table(e: et.IEntity): ExprNode<rt.ITable> {
-    return (
-      <r.Table name={e.name}>
-        {e.attributes.map((a) => this.Attribute2Column(a))}
-      </r.Table>
-    );
+  @E2E()
+  Entity2Table(e: IEntity): ExprNode<rmT.ITable> {
+    return <Table name={this.applyNaming(e.name)}>{e.attributes.map((a) => this.Attribute2Column(a))}</Table>
   }
 
-  // @E2E({ input: et.Kernel, output: rt.Table })
-  @SpecOption("Entity2Table", et.Kernel)
-  Kernel2Table(k: et.IKernel): ExprNode<rt.ITable> {
-    // inherit table name and column from super rule
-    return <r.Table name={`k_${k.name}`}></r.Table>;
+  @E2E()
+  Attribute2Column(a: IAttribute): ExprNode<rmT.IColumn> {
+    return <Column name={this.applyNaming(a.name)} isKey={a.isKey} isAutoincrement={this.primaryKeyStrategy(a)} type={this.getColumnType(a.attrDomain)}></Column>
   }
 
-  // @E2E({ input: et.Weak, output: rt.Table })
-  @SpecOption("Entity2Table", et.Weak)
-  Week2Table(w: et.IWeak): ExprNode<rt.ITable> {
-    // TODO Formiraj slozeni kljuc od kljuca jakog objekta i svog kljuca. Ovo vazi pod uslov da se prvo obidju svi kerneli, pa onda slabi.
-    // Ovo sve vazi pod ogranicenjem da weak moze zavisiti samo od kernela, a nema podtipova i agregacija u modelu
-    return (
-      <r.Table name={`w_${w.name}`}>
-        {/* TODO poziv weekmappinga ne može da se radi u ovom trenutku, jer table još uvek nije napravljen  */}
-        {/* {this.WeekMappingToFK(w.weakMap)} */}
-      </r.Table >
-    );
+  // @E2E is outermost: wraps the VarPoint dispatcher, so tracing happens after VarPoint selects
+  // and calls the matching VarOption method. @VarPoint must be inner (applied first) so it
+  // registers its options bucket in the registry before @VarOption decorators run on later methods.
+  @E2E()
+  @VarPoint("OneToManyStrategy")
+  RelationshipMapping(rel: IRelationship): ExprNode<rmT.IColumn> | ExprNode<rmT.ITable> {
+    throw new Error("Not implemented VarOptions for VarPoint RelationshipMapping")
+    // return null as unknown as ExprNode<IForeignKey> | ExprNode<ITable>;
   }
 
-  // @E2E({ input: et.WeakMapping, output: rt.ForeignKey })
-  WeekMappingToFK(wm: et.IWeakMapping) {
-
-    // override table name from super rule
-    const parentKeyAttributes: Array<et.IAttribute> =
-      wm.domain?.attributes?.filter(
-        (attr: et.IAttribute) => attr.isKey == true
-      );
-
-    // let a = this.context.resolveJSXElement(wm.domain);
-
-    return <Resolve name="res1" input={wm.domain} ruleName="Entity2Table">
-      {(refTable: rt.ITable) => (
-        <Resolve name="res2" input={wm.codomain} ruleName="Entity2Table">
-          {(ownerTable: rt.ITable) => (
-            <r.ForeignKey name={`for_key_ref_${refTable.name}`}
-              referencedTable={<r.Table $refByName={refTable.name}></r.Table>}
-              ownerTable={<r.Table $refByName={ownerTable.name}></r.Table>}
-            >
-              {parentKeyAttributes.map((attribute) => (
-                this.Attribute2PKColumn(attribute, ownerTable)
-              ))}
-
-              {parentKeyAttributes.map((attribute) => (
-                this.Attribute2FKColumn(attribute)
-              ))}
-
-            </r.ForeignKey>
-          )}
-        </Resolve>)}
-    </Resolve>
-
-
-    {/* // TODO Resolve should have trasformation (rule) name, in case when some ModelElement can be transformed by multiple rules. 
-    In this case, attribute from kernel will be transformed by Attribute2Column rule, and by Week2Table(Entity2Table rule)
-
-    How to find a target JSX element (fk column) in case when one table has FK in more than one table? FK is a result of transformation of Association, and one FK can be
-    target of one association 
-    */}
-  }
-
-  // @E2E({ input: et.Attribute, output: rt.Column })
-  Attribute2Column(a: et.IAttribute): ExprNode<rt.IColumn> {
-    return <r.Column name={a.name} isKey={a.isKey}></r.Column>;
-  }
-
-  // @E2E({ input: et.Attribute, output: rt.Column })
-  Attribute2PKColumn(a: et.IAttribute, ownerTable: rt.ITable): ExprNode<rt.IColumn> {
-    return <r.Column name={`fk_${a.name}`} isKey={true} ownerTable={<r.Table $refByName={ownerTable.name}></r.Table>}></r.Column >;
-  }
-
-  // @E2E({ input: et.Attribute, output: rt.ForeignKeyColumn })
-  Attribute2FKColumn(a: et.IAttribute): ExprNode<rt.IForeignKeyColumn> {
-
-    return <Resolve input={a} ruleName="Attribute2Column">
-      {(refColumn: rt.IColumn) => (
-        <Resolve input={a} ruleName="Attribute2PKColumn">
-          {(fkColumn: rt.IColumn) => (
-            <r.ForeignKeyColumn name={`fk_col_${a.name}`}
-              fkColumn={<r.Column $refByName={fkColumn.name}></r.Column>}
-              refColumn={<r.Column $refByName={refColumn.name}></r.Column>}
-            >
-            </r.ForeignKeyColumn >
-          )}
-        </Resolve>
-      )}
-    </Resolve>;
-  }
-
-  @VarPoint('Neki Issue')
-  RelationshipToElement(
-    rel: et.IRelationship
-  ): ExprNode<rt.IForeignKey> | ExprNode<rt.ITable> {
-    throw new Error("Not implemented VarOptions for VarPoint FKorTable");
-    // return null as unknown as ExprNode<rt.IForeignKey> | ExprNode<rt.ITable>;
-  }
-
-  // TODO Input for this rule expression should be DecisionForElement OR array of SelectedOption
-  @VarOption("RelationshipToElement", Option('nekiOption'))
-  RelatioshipToFK(rel: et.IRelationship): ExprNode<rt.IForeignKey> {
-    // const aaa = this.context.resolve(rel.ordinaryMapping[0]);
+  @Default()
+  @VarOption("RelationshipMapping", Option("ForeignKey"))
+  relationshipAsForeignKey(rel: IRelationship): ExprNode<rmT.IColumn> {
+    const fkSide = this.getFKSide(rel)
+    const pkSide = this.getPKSide(rel)
 
     return (
-      <r.ForeignKey >
-        <r.Table $refByName=""></r.Table>
-      </r.ForeignKey >
-    );
+        <Table $refByName={this.applyNaming(pkSide.domain.name)}>
+          <Column
+              name={this.applyNaming(fkSide.domain.name + "Id_FK")}
+              type={this.getColumnType(fkSide.domain)}
+              isForeignKey={true}
+              isKey={false}
+              references={fkSide.domain.name}
+              isNullable={fkSide.lb === "0"}
+          />
+        </Table>
+    )
   }
 
-  // TODO Type of decision should be defined by type of element (e.g. Relationship, Entity, etc.) or by specific element (e.g. RelationshipWorksIn, etc.)
-  @VarOption("RelationshipToElement", Option('nekiOption'))
-  RelatioshipToTable(rel: et.IRelationship): ExprNode<rt.ITable> {
-    const codomain = et.getCodomain(rel.roles[0]);
-    const domain = et.getInverse(rel.roles[0]);
+  @VarOption("RelationshipMapping", Option("JoinTable"))
+  relationshipAsJoinTable(rel: IRelationship): ExprNode<rmT.ITable> {
+    const role1 = rel.roles[0]
+    const role2 = rel.roles[1]
 
-    return <r.Table name="RelationshipToElement table"></r.Table >;
+    return (
+        <Table name={this.applyNaming(rel.name)}>
+          <Column
+              name={this.applyNaming(role1.domain.name + "Id_FK")}
+              type={this.getColumnType(role1.domain)}
+              isForeignKey={true}
+              references={role1.domain.name}
+              isNullable={role1.lb !== "1" && role1.ub !== "1"}
+              isKey={role1.ub === "1"}
+          />
+          <Column
+              name={this.applyNaming(role2.domain.name + "Id_FK")}
+              type={this.getColumnType(role2.domain)}
+              isForeignKey={true}
+              references={role2.domain.name}
+              isNullable={role2.lb !== "1"}
+              isKey={role2.ub === "1"}
+          />
+        </Table>
+    )
+  }
+
+  // ######### START PrimaryKeyStrategy variations #############
+
+  @VarPoint("PrimaryKeyStrategy")
+  primaryKeyStrategy(a: IAttribute): boolean {
+    throw new Error("Not implemented VarOptions for VarPoint PrimaryKeyStrategy")
+  }
+
+  @VarOption("primaryKeyStrategy", Option("UseAutoIncrement"))
+  useAutoIncrement(a: IAttribute): boolean {
+    return a.isKey
+  }
+
+  @VarOption("primaryKeyStrategy", Option("UseManualIncrement"))
+  useManualIncrement(a: IAttribute): boolean {
+    return false
+  }
+  // ######### END PrimaryKeyStrategy variations #############
+
+  // ######### START NamingConvention variations #############
+  @VarPoint("NamingConvention")
+  applyNaming(name: string): string {
+    throw new Error("Not implemented VarOptions for VarPoint NamingConvention")
+  }
+
+  @VarOption("applyNaming", Option("CamelCase"))
+  applyCamelCaseNaming(name: string): string {
+    return name.replace(/_/g, "")
+  }
+
+  @VarOption("applyNaming", Option("SnakeCase"))
+  applySnakeCaseNaming(name: string): string {
+    return name
+        .replace(/([a-z])([A-Z])/g, "$1_$2")
+        .replace(/([A-Z]+)([A-Z][a-z])/g, "$1_$2")
+        .toLowerCase()
+  }
+
+  // ######### END NamingConvention variations #############
+
+  private getFKSide(rel: IRelationship): IOrdinaryMapping {
+    // Return the side with upperBound = 1 (many-to-one side becomes FK side)
+    return rel.roles.find((m) => m.ub === "1") || rel.roles[0]
+  }
+
+  private getPKSide(rel: IRelationship): IOrdinaryMapping {
+    // Return the side with upperBound = N (one-to-many side becomes PK side)
+    return rel.roles.find((m) => m.ub !== "1") || rel.roles[1]
+  }
+
+  private getColumnType(domain: IDomain | undefined): string {
+    // Map EER domain types to relational column types
+    const domainName = (domain?.name ?? "").toLowerCase()
+
+    switch (domainName) {
+      case "string":
+        return "VARCHAR(255)"
+      case "number":
+      case "integer":
+      case "int":
+        return "INTEGER"
+      case "float":
+      case "double":
+        return "DOUBLE"
+      case "boolean":
+      case "bool":
+        return "BOOLEAN"
+      case "date":
+        return "DATE"
+      case "datetime":
+      case "timestamp":
+        return "TIMESTAMP"
+      case "text":
+        return "TEXT"
+      case "bigint":
+        return "BIGINT"
+      default:
+        return "VARCHAR(255)" // Default fallback
+    }
   }
 }

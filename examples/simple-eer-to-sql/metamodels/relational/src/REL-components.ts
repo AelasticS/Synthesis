@@ -1,5 +1,5 @@
-import * as r from './REL.meta.model.type.js'
-import { CpxTemplate, ExprNode, IStore, Template, WithRefProps } from '@aelastics/synthesis/jsx'
+import * as r from "./REL.meta.model.type.js"
+import { CpxTemplate, ExprNode, IStore, Template, WithRefProps } from "@aelastics/synthesis/jsx"
 
 export type IModelProps = WithRefProps<r.IRelSchema> & { store?: IStore }
 
@@ -8,24 +8,11 @@ export const RelSchema: CpxTemplate<IModelProps, r.IRelSchema> = (props) => {
 }
 
 export const Domain: Template<r.IDomain> = (props) => {
-  return new ExprNode(r.Domain, props, 'domain')
+  return new ExprNode(r.Domain, props, "domain")
 }
 
 export const Column: Template<r.IColumn> = (props) => {
-  return new ExprNode(r.Column, props, 'columns')
-}
-
-export const ForeignKeyColumn: Template<r.IForeignKeyColumn> = (props) => {
-  return new ExprNode(r.ForeignKeyColumn, props, 'fkColumns')
-}
-
-
-export const Index: Template<r.IIndex> = (props) => {
-  return new ExprNode(r.Index, props, 'indexes')
-}
-
-export const ForeignKey: Template<r.IForeignKey> = (props) => {
-  return new ExprNode(r.ForeignKey, props, 'foreignKeys')
+  return new ExprNode(r.Column, props, "columns")
 }
 
 export const Table: Template<r.ITable> = (props) => {

@@ -24,6 +24,9 @@
     "typedoc-plugin-markdown": "~4.4.1"
   },
   "devDependencies": {
+    "@aelastics/result": "workspace:*",
+    "@aelastics/store": "workspace:*",
+    "@aelastics/types": "workspace:*",
     "@docusaurus/types": "~3.7.0",
     "typescript": "~5.9.3"
   }

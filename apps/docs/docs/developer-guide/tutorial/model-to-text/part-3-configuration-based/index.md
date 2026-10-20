@@ -47,7 +47,7 @@ raised **once per run**:
 "Put `Book` in its own file but keep `Author` in the shared one" is not
 a layout, it is a mess, and "quote this table's name but not that one"
 is not a house style. Both questions have exactly one answer per run,
-so both are declared as `GlobalIssue` rather than `ElementIssue`, and
+so both are declared as `ModelLevelIssue` rather than `ElementLevelIssue`, and
 four things follow from that single word:
 
 - The binding model has **no bindings in it**. There is no element to

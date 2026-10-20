@@ -163,7 +163,7 @@ for physical design is a set of issues on the DDL generator, closed
 by dialect presets or by a project-specific configuration.
 
 V2 demonstrates the pattern with one per-table issue, decision 12:
-`Clustering`, an ElementIssue on Table with options `None` (default)
+`Clustering`, an ElementLevelIssue on Table with options `None` (default)
 and `ClusterPrimaryKey`. Under the postgres preset the chosen tables
 get `CLUSTER <table> USING <primary key index>` emitted into a
 physical section of the DDL, with the documented caveat that
@@ -478,7 +478,7 @@ Delivered per the dialect and physical sections: the DDL generator
 grew three global issues (ReferentialActions with NativeDdl default
 and TriggerEmulation; DomainHandling with InlineTypes default and
 EmitDomains; SqlDialect with StandardSql, PostgreSql, Oracle) and the
-per-table Clustering ElementIssue bound to Table. Native emission
+per-table Clustering ElementLevelIssue bound to Table. Native emission
 appends ON DELETE and ON UPDATE clauses; connect rules always become
 BEFORE INSERT OR UPDATE trigger stubs in a separate
 <schema>-triggers.sql document, and under TriggerEmulation the

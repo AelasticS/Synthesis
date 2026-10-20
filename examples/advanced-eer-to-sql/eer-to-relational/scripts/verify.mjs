@@ -109,7 +109,7 @@ try {
     (m, indent) => m
       + `${indent}<Choice\n`
       + `${indent}  name="ec_Book_VersionCounter"\n`
-      + `${indent}  issue={<ElementIssue $refByName="//www.aelastics.org/RelationSchemaDesign/HistoryDiscriminator" />}\n`
+      + `${indent}  issue={<ElementLevelIssue $refByName="//www.aelastics.org/RelationSchemaDesign/HistoryDiscriminator" />}\n`
       + `${indent}  selectedOption={<Option $refByName="//www.aelastics.org/RelationSchemaDesign/VersionCounter" />}\n`
       + `${indent}/>,\n`
   )

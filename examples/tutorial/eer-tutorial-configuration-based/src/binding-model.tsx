@@ -20,7 +20,7 @@ import type { ModelStore } from '@aelastics/synthesis/store'
 import { Model, Element as ModelElement } from '@aelastics/synthesis/jsx'
 import { BindingModel, Binding } from '@aelastics/synthesis/metamodels/binding'
 import type * as t from '@aelastics/synthesis/metamodels/binding/model'
-import { DecisionModel, ElementIssue } from '@aelastics/synthesis/metamodels/decision'
+import { DecisionModel, ElementLevelIssue } from '@aelastics/synthesis/metamodels/decision'
 
 export const EERTutorialBindings = (store: ModelStore): ExprNode<t.IBindingModel> => (
   <BindingModel
@@ -35,7 +35,7 @@ export const EERTutorialBindings = (store: ModelStore): ExprNode<t.IBindingModel
       description="OneToManyStrategy applies to 1:N relationships only"
       element={<ModelElement $refByName="//www.aelastics.org/EERTutorialMetamodel/Relationship" />}
       issues={[
-        <ElementIssue $refByName="//www.aelastics.org/RelationshipDesign/OneToManyStrategy" />,
+        <ElementLevelIssue $refByName="//www.aelastics.org/RelationshipDesign/OneToManyStrategy" />,
       ]}
       condition='return (e) => {
                 if (!e.roles || e.roles.length !== 2) return false;

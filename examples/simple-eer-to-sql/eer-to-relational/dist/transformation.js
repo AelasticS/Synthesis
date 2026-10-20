@@ -8,111 +8,150 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-import { createExprNode, Resolve } from "@aelastics/synthesis/jsx";
-import { VarPoint, VarOption, Option, DecisionAwareM2M } from "@aelastics/synthesis/variability";
-import { M2M, SpecPoint, SpecOption } from "@aelastics/synthesis/m2m";
-import * as et from "simple-eer-metamodel/model";
-import * as r from "simple-relational-metamodel";
-let EerToRelational = class EerToRelational extends DecisionAwareM2M {
-    constructor(store, {}, decisionModel) {
-        super(store, {}, decisionModel);
+import { createExprNode } from "@aelastics/synthesis/jsx";
+import { VarPoint, VarOption, Default, Option, DecisionAwareM2M } from "@aelastics/synthesis/variability";
+import { E2E, M2M } from "@aelastics/synthesis/m2m";
+import { Relationship, Entity, } from "simple-eer-metamodel/model";
+import { RelSchema, Table, Column } from "simple-relational-metamodel";
+let SimpleEerToRelational = class SimpleEerToRelational extends DecisionAwareM2M {
+    constructor(store, {}, configModel) {
+        super(store, {}, configModel);
     }
     main(s) {
-        return (createExprNode(r.RelSchema, { name: `${s.name}_Relational_Schema_with_Decision_Model` },
+        return (createExprNode(RelSchema, { name: `${s.name}_Relational_Schema_with_Decision_Model`, store: this.context.store },
             s.elements
-                .filter((el) => this.context.store.isTypeOf(el, et.Entity))
+                .filter((el) => this.context.store.isTypeOf(el, Entity))
                 .map((el) => this.Entity2Table(el)),
             s.elements
-                .filter((el) => this.context.store.isTypeOf(el, et.WeakMapping))
-                .map((el) => this.WeekMappingToFK(el)),
-            s.elements
-                .filter((el) => this.context.store.isTypeOf(el, et.Relationship))
-                .map((el) => this.RelationshipToElement(el))));
+                .filter((el) => this.context.store.isTypeOf(el, Relationship))
+                .map((r) => this.RelationshipMapping(r))));
     }
-    // @E2E({
-    //   input: et.Entity,
-    //   output: rt.Table,
-    //   ruleName: "Entity2Table"
-    // })
     Entity2Table(e) {
-        return (createExprNode(r.Table, { name: e.name }, e.attributes.map((a) => this.Attribute2Column(a))));
+        return createExprNode(Table, { name: this.applyNaming(e.name) }, e.attributes.map((a) => this.Attribute2Column(a)));
     }
-    // @E2E({ input: et.Kernel, output: rt.Table })
-    Kernel2Table(k) {
-        // inherit table name and column from super rule
-        return createExprNode(r.Table, { name: `k_${k.name}` });
-    }
-    // @E2E({ input: et.Weak, output: rt.Table })
-    Week2Table(w) {
-        // TODO Formiraj slozeni kljuc od kljuca jakog objekta i svog kljuca. Ovo vazi pod uslov da se prvo obidju svi kerneli, pa onda slabi.
-        // Ovo sve vazi pod ogranicenjem da weak moze zavisiti samo od kernela, a nema podtipova i agregacija u modelu
-        return (createExprNode(r.Table, { name: `w_${w.name}` }));
-    }
-    // @E2E({ input: et.WeakMapping, output: rt.ForeignKey })
-    WeekMappingToFK(wm) {
-        // override table name from super rule
-        const parentKeyAttributes = wm.domain?.attributes?.filter((attr) => attr.isKey == true);
-        // let a = this.context.resolveJSXElement(wm.domain);
-        return createExprNode(Resolve, { name: "res1", input: wm.domain, ruleName: "Entity2Table" }, (refTable) => (createExprNode(Resolve, { name: "res2", input: wm.codomain, ruleName: "Entity2Table" }, (ownerTable) => (createExprNode(r.ForeignKey, { name: `for_key_ref_${refTable.name}`, referencedTable: createExprNode(r.Table, { "$refByName": refTable.name }), ownerTable: createExprNode(r.Table, { "$refByName": ownerTable.name }) },
-            parentKeyAttributes.map((attribute) => (this.Attribute2PKColumn(attribute, ownerTable))),
-            parentKeyAttributes.map((attribute) => (this.Attribute2FKColumn(attribute))))))));
-        { /* // TODO Resolve should have trasformation (rule) name, in case when some ModelElement can be transformed by multiple rules.
-        In this case, attribute from kernel will be transformed by Attribute2Column rule, and by Week2Table(Entity2Table rule)
-    
-        How to find a target JSX element (fk column) in case when one table has FK in more than one table? FK is a result of transformation of Association, and one FK can be
-        target of one association
-        */
-        }
-    }
-    // @E2E({ input: et.Attribute, output: rt.Column })
     Attribute2Column(a) {
-        return createExprNode(r.Column, { name: a.name, isKey: a.isKey });
+        return createExprNode(Column, { name: this.applyNaming(a.name), isKey: a.isKey, isAutoincrement: this.primaryKeyStrategy(a), type: this.getColumnType(a.attrDomain) });
     }
-    // @E2E({ input: et.Attribute, output: rt.Column })
-    Attribute2PKColumn(a, ownerTable) {
-        return createExprNode(r.Column, { name: `fk_${a.name}`, isKey: true, ownerTable: createExprNode(r.Table, { "$refByName": ownerTable.name }) });
+    // @E2E is outermost: wraps the VarPoint dispatcher, so tracing happens after VarPoint selects
+    // and calls the matching VarOption method. @VarPoint must be inner (applied first) so it
+    // registers its options bucket in the registry before @VarOption decorators run on later methods.
+    RelationshipMapping(rel) {
+        throw new Error("Not implemented VarOptions for VarPoint RelationshipMapping");
+        // return null as unknown as ExprNode<IForeignKey> | ExprNode<ITable>;
     }
-    // @E2E({ input: et.Attribute, output: rt.ForeignKeyColumn })
-    Attribute2FKColumn(a) {
-        return createExprNode(Resolve, { input: a, ruleName: "Attribute2Column" }, (refColumn) => (createExprNode(Resolve, { input: a, ruleName: "Attribute2PKColumn" }, (fkColumn) => (createExprNode(r.ForeignKeyColumn, { name: `fk_col_${a.name}`, fkColumn: createExprNode(r.Column, { "$refByName": fkColumn.name }), refColumn: createExprNode(r.Column, { "$refByName": refColumn.name }) })))));
+    relationshipAsForeignKey(rel) {
+        const fkSide = this.getFKSide(rel);
+        const pkSide = this.getPKSide(rel);
+        return (createExprNode(Table, { "$refByName": this.applyNaming(pkSide.domain.name) },
+            createExprNode(Column, { name: this.applyNaming(fkSide.domain.name + "Id_FK"), type: this.getColumnType(fkSide.domain), isForeignKey: true, isKey: false, references: fkSide.domain.name, isNullable: fkSide.lb === "0" })));
     }
-    RelationshipToElement(rel) {
-        throw new Error("Not implemented VarOptions for VarPoint FKorTable");
-        // return null as unknown as ExprNode<rt.IForeignKey> | ExprNode<rt.ITable>;
+    relationshipAsJoinTable(rel) {
+        const role1 = rel.roles[0];
+        const role2 = rel.roles[1];
+        return (createExprNode(Table, { name: this.applyNaming(rel.name) },
+            createExprNode(Column, { name: this.applyNaming(role1.domain.name + "Id_FK"), type: this.getColumnType(role1.domain), isForeignKey: true, references: role1.domain.name, isNullable: role1.lb !== "1" && role1.ub !== "1", isKey: role1.ub === "1" }),
+            createExprNode(Column, { name: this.applyNaming(role2.domain.name + "Id_FK"), type: this.getColumnType(role2.domain), isForeignKey: true, references: role2.domain.name, isNullable: role2.lb !== "1", isKey: role2.ub === "1" })));
     }
-    // TODO Input for this rule expression should be DecisionForElement OR array of SelectedOption
-    RelatioshipToFK(rel) {
-        // const aaa = this.context.resolve(rel.ordinaryMapping[0]);
-        return (createExprNode(r.ForeignKey, null,
-            createExprNode(r.Table, { "$refByName": "" })));
+    // ######### START PrimaryKeyStrategy variations #############
+    primaryKeyStrategy(a) {
+        throw new Error("Not implemented VarOptions for VarPoint PrimaryKeyStrategy");
     }
-    // TODO Type of decision should be defined by type of element (e.g. Relationship, Entity, etc.) or by specific element (e.g. RelationshipWorksIn, etc.)
-    RelatioshipToTable(rel) {
-        const codomain = et.getCodomain(rel.roles[0]);
-        const domain = et.getInverse(rel.roles[0]);
-        return createExprNode(r.Table, { name: "RelationshipToElement table" });
+    useAutoIncrement(a) {
+        return a.isKey;
+    }
+    useManualIncrement(a) {
+        return false;
+    }
+    // ######### END PrimaryKeyStrategy variations #############
+    // ######### START NamingConvention variations #############
+    applyNaming(name) {
+        throw new Error("Not implemented VarOptions for VarPoint NamingConvention");
+    }
+    applyCamelCaseNaming(name) {
+        return name.replace(/_/g, "");
+    }
+    applySnakeCaseNaming(name) {
+        return name
+            .replace(/([a-z])([A-Z])/g, "$1_$2")
+            .replace(/([A-Z]+)([A-Z][a-z])/g, "$1_$2")
+            .toLowerCase();
+    }
+    // ######### END NamingConvention variations #############
+    getFKSide(rel) {
+        // Return the side with upperBound = 1 (many-to-one side becomes FK side)
+        return rel.roles.find((m) => m.ub === "1") || rel.roles[0];
+    }
+    getPKSide(rel) {
+        // Return the side with upperBound = N (one-to-many side becomes PK side)
+        return rel.roles.find((m) => m.ub !== "1") || rel.roles[1];
+    }
+    getColumnType(domain) {
+        // Map EER domain types to relational column types
+        const domainName = (domain?.name ?? "").toLowerCase();
+        switch (domainName) {
+            case "string":
+                return "VARCHAR(255)";
+            case "number":
+            case "integer":
+            case "int":
+                return "INTEGER";
+            case "float":
+            case "double":
+                return "DOUBLE";
+            case "boolean":
+            case "bool":
+                return "BOOLEAN";
+            case "date":
+                return "DATE";
+            case "datetime":
+            case "timestamp":
+                return "TIMESTAMP";
+            case "text":
+                return "TEXT";
+            case "bigint":
+                return "BIGINT";
+            default:
+                return "VARCHAR(255)"; // Default fallback
+        }
     }
 };
 __decorate([
-    SpecPoint()
-], EerToRelational.prototype, "Entity2Table", null);
+    E2E()
+], SimpleEerToRelational.prototype, "Entity2Table", null);
 __decorate([
-    SpecOption("Entity2Table", et.Kernel)
-], EerToRelational.prototype, "Kernel2Table", null);
+    E2E()
+], SimpleEerToRelational.prototype, "Attribute2Column", null);
 __decorate([
-    SpecOption("Entity2Table", et.Weak)
-], EerToRelational.prototype, "Week2Table", null);
+    E2E(),
+    VarPoint("OneToManyStrategy")
+], SimpleEerToRelational.prototype, "RelationshipMapping", null);
 __decorate([
-    VarPoint('Neki Issue')
-], EerToRelational.prototype, "RelationshipToElement", null);
+    Default(),
+    VarOption("RelationshipMapping", Option("ForeignKey"))
+], SimpleEerToRelational.prototype, "relationshipAsForeignKey", null);
 __decorate([
-    VarOption("RelationshipToElement", Option('nekiOption'))
-], EerToRelational.prototype, "RelatioshipToFK", null);
+    VarOption("RelationshipMapping", Option("JoinTable"))
+], SimpleEerToRelational.prototype, "relationshipAsJoinTable", null);
 __decorate([
-    VarOption("RelationshipToElement", Option('nekiOption'))
-], EerToRelational.prototype, "RelatioshipToTable", null);
-EerToRelational = __decorate([
+    VarPoint("PrimaryKeyStrategy")
+], SimpleEerToRelational.prototype, "primaryKeyStrategy", null);
+__decorate([
+    VarOption("primaryKeyStrategy", Option("UseAutoIncrement"))
+], SimpleEerToRelational.prototype, "useAutoIncrement", null);
+__decorate([
+    VarOption("primaryKeyStrategy", Option("UseManualIncrement"))
+], SimpleEerToRelational.prototype, "useManualIncrement", null);
+__decorate([
+    VarPoint("NamingConvention")
+], SimpleEerToRelational.prototype, "applyNaming", null);
+__decorate([
+    VarOption("applyNaming", Option("CamelCase"))
+], SimpleEerToRelational.prototype, "applyCamelCaseNaming", null);
+__decorate([
+    VarOption("applyNaming", Option("SnakeCase"))
+], SimpleEerToRelational.prototype, "applySnakeCaseNaming", null);
+SimpleEerToRelational = __decorate([
     M2M()
-], EerToRelational);
-export { EerToRelational };
+], SimpleEerToRelational);
+export { SimpleEerToRelational };
 //# sourceMappingURL=transformation.js.map

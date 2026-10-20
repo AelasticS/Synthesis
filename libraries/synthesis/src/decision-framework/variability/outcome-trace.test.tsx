@@ -21,8 +21,8 @@ import {Option} from "./eval-operators"
 import {DecisionAwareM2M} from "../decisions/decision-aware-m2m/decision-aware-m2m"
 import {
     DecisionModel,
-    ElementIssue,
-    ModelIssue,
+    ElementLevelIssue,
+    ModelLevelIssue,
     Option as OptionDecl,
 } from "../decisions/1.decision-model/decision-meta.model-components"
 import * as dmT from "../decisions/1.decision-model/decision-meta.model"
@@ -122,18 +122,18 @@ describe("per-element decision resolution and the outcome trace", () => {
 
     const dm = (
         <DecisionModel name="TestDesign" description="test design space" store={store}>
-            <ElementIssue name="TaskStyle" description="how a task renders">
+            <ElementLevelIssue name="TaskStyle" description="how a task renders">
                 <OptionDecl name="Fancy" description="fancy" isDefault={false}/>
                 <OptionDecl name="Plain" description="plain" isDefault={true}/>
-            </ElementIssue>
-            <ElementIssue name="TaskMark" description="whether a task is marked">
+            </ElementLevelIssue>
+            <ElementLevelIssue name="TaskMark" description="whether a task is marked">
                 <OptionDecl name="Marked" description="marked" isDefault={false}/>
                 <OptionDecl name="Unmarked" description="unmarked" isDefault={true}/>
-            </ElementIssue>
-            <ModelIssue name="Naming" description="how names are written">
+            </ElementLevelIssue>
+            <ModelLevelIssue name="Naming" description="how names are written">
                 <OptionDecl name="Upper" description="upper case" isDefault={false}/>
                 <OptionDecl name="Lower" description="lower case" isDefault={true}/>
-            </ModelIssue>
+            </ModelLevelIssue>
         </DecisionModel>
     ).render(new Context()) as dmT.IDecisionModel
 

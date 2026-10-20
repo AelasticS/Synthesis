@@ -125,6 +125,15 @@ importers:
         specifier: ~4.4.1
         version: 4.4.2(typedoc@0.27.9(typescript@5.9.3))
     devDependencies:
+      '@aelastics/result':
+        specifier: workspace:*
+        version: link:../../libraries/aelastics-result
+      '@aelastics/store':
+        specifier: workspace:*
+        version: link:../../libraries/aelastics-store
+      '@aelastics/types':
+        specifier: workspace:*
+        version: link:../../libraries/aelastics-types
       '@docusaurus/types':
         specifier: ~3.7.0
         version: 3.7.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)

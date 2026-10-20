@@ -27,6 +27,8 @@ export {
     RuleInvocation,
     TraceModel,
     TargetElement,
+    SourceElement,
+    ChoiceRef,
     ReadRecord,
     Invocation,
     Resolution,

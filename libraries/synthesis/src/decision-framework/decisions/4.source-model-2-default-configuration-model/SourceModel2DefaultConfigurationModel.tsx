@@ -30,7 +30,7 @@ export class SourceModelToDefaultConfigurationModel extends abstractM2M<IModel, 
       >
 
         {this.extra?.bindingModel.decisionModel.issues.filter((issue: dmT.IIssue) => {
-          return this.context.store.isTypeOf(issue, dmT.ModelIssue)
+          return this.context.store.isTypeOf(issue, dmT.ModelLevelIssue)
         })
           .flatMap((issue) => this.issueWithChosenSubIssues(issue))
           .map((issue) => {

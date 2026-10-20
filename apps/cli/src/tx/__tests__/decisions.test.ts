@@ -37,13 +37,13 @@ const el = (type: string, name: string, extra: Record<string, unknown> = {}): Fa
 
 // Decision model: elements[] in document order, each Issue followed by its
 // Options (the rendered graph does not materialize the containment).
-const namingIssue = el('ModelIssue', 'NamingConvention')
+const namingIssue = el('ModelLevelIssue', 'NamingConvention')
 const camelCase = el('Option', 'CamelCase', { isDefault: false })
 const snakeCase = el('Option', 'SnakeCase', { isDefault: true })
-const pkIssue = el('ElementIssue', 'PrimaryKeyStrategy')
+const pkIssue = el('ElementLevelIssue', 'PrimaryKeyStrategy')
 const autoInc = el('Option', 'UseAutoIncrement', { isDefault: true })
 const manualInc = el('Option', 'UseManualIncrement', { isDefault: false })
-const noDefaultIssue = el('ElementIssue', 'CollationStrategy')
+const noDefaultIssue = el('ElementLevelIssue', 'CollationStrategy')
 const collationA = el('Option', 'CollationA', { isDefault: false })
 const collationB = el('Option', 'CollationB', { isDefault: false })
 
@@ -100,8 +100,8 @@ describe('indexDecisionModel', () => {
   })
 
   it('warns when two issues declare an option with the same name', () => {
-    const issueA = el('ModelIssue', 'IssueA')
-    const issueB = el('ModelIssue', 'IssueB')
+    const issueA = el('ModelLevelIssue', 'IssueA')
+    const issueB = el('ModelLevelIssue', 'IssueB')
     const shared1 = el('Option', 'Shared', { isDefault: true })
     const shared2 = el('Option', 'Shared', { isDefault: true })
     const index = indexDecisionModel(fakeStore, { name: 'DM', elements: [issueA, shared1, issueB, shared2] })
@@ -117,9 +117,9 @@ describe('indexDecisionModel', () => {
     // The rendered graph puts an opening option's subtree BEFORE the
     // option itself (props render first), so document order would
     // attribute HistoryTable to its own sub-issue; containment must win.
-    const rowHistory = el('ElementIssue', 'RowHistory')
+    const rowHistory = el('ElementLevelIssue', 'RowHistory')
     const noHistory = el('Option', 'NoHistory', { isDefault: true })
-    const discriminator = el('ElementIssue', 'HistoryDiscriminator')
+    const discriminator = el('ElementLevelIssue', 'HistoryDiscriminator')
     const validFrom = el('Option', 'ValidFromTimestamp', { isDefault: true })
     const counter = el('Option', 'VersionCounter', { isDefault: false })
     discriminator.options = [validFrom, counter]
@@ -138,7 +138,7 @@ describe('indexDecisionModel', () => {
     expect(index.optionIssues.get('HistoryTable')?.name).toBe('RowHistory')
     expect(index.optionIssues.get('NoHistory')?.name).toBe('RowHistory')
     expect(index.optionIssues.get('ValidFromTimestamp')?.name).toBe('HistoryDiscriminator')
-    expect(index.issues.get('HistoryDiscriminator')?.typeName).toBe('ElementIssue')
+    expect(index.issues.get('HistoryDiscriminator')?.typeName).toBe('ElementLevelIssue')
     expect(index.issues.get('HistoryDiscriminator')?.options.map((o) => o.name)).toEqual([
       'ValidFromTimestamp',
       'VersionCounter'

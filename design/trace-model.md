@@ -37,9 +37,9 @@ fine-grained rules, being the detail showcase.
   element other than the entry's source.
 - Attribution: a resolution (issue, element) rides the entry whose
   source is that element when one exists; otherwise it sits at model
-  level with an explicit element reference. Global (ModelIssue)
+  level with an explicit element reference. Global (ModelLevelIssue)
   resolutions are recorded once, at model level. Design guidance: bind
-  each ElementIssue to an element some rule transforms and the trace
+  each ElementLevelIssue to an element some rule transforms and the trace
   stays fully regular.
 - The two-tier guarantee: every resolved option is recorded, always.
   Tier one, rule-shaped choices carry their resolution on their own

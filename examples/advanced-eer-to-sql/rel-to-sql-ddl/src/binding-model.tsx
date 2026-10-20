@@ -7,7 +7,7 @@ import { ModelStore } from "@aelastics/synthesis/store"
 import { BindingModel, Binding } from "@aelastics/synthesis/metamodels/binding"
 import * as t from "@aelastics/synthesis/metamodels/binding/model"
 import { Model, Element as ModelElement } from "@aelastics/synthesis/jsx"
-import { DecisionModel, ElementIssue } from "@aelastics/synthesis/metamodels/decision"
+import { DecisionModel, ElementLevelIssue } from "@aelastics/synthesis/metamodels/decision"
 
 /**
  * Binding of the relational metamodel to the DDL generation design
@@ -28,7 +28,7 @@ export const Rel_Bindings = (store: ModelStore): ExprNode<t.IBindingModel> => (
       description="Binding the per-table Clustering issue to Table"
       element={<ModelElement $refByName="//www.aelastics.org/RELMetamodel/Table" />}
       issues={[
-        <ElementIssue $refByName="//www.aelastics.org/DdlGenerationDesign/Clustering" />,
+        <ElementLevelIssue $refByName="//www.aelastics.org/DdlGenerationDesign/Clustering" />,
       ]}
     />
   </BindingModel>

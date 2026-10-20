@@ -8,7 +8,7 @@ export const BindingElement = t.subtype(
     ModelElement,
     {
         element: ModelElement,
-        issues: t.arrayOf(ddM.ElementIssue),
+        issues: t.arrayOf(ddM.ElementLevelIssue),
         condition: t.optional(t.string)
     },
     "BindingElement",

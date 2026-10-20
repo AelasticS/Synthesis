@@ -16,7 +16,7 @@ import type {ExprNode} from '@aelastics/synthesis/jsx'
 import type {ModelStore} from '@aelastics/synthesis/store'
 import {
     DecisionModel,
-    GlobalIssue,
+    ModelLevelIssue,
     Option
 } from '@aelastics/synthesis/metamodels/decision'
 import type * as t from '@aelastics/synthesis/metamodels/decision/model'
@@ -30,7 +30,7 @@ export const SqlGenerationIssues = (store: ModelStore): ExprNode<t.IDecisionMode
         {/* How many files the schema becomes, and what goes in each. The
         three options are the three shapes a deployable script can take,
         and no property of the schema decides between them. */}
-        <GlobalIssue name="OutputLayout" description="How the generated DDL is laid out over files">
+        <ModelLevelIssue name="OutputLayout" description="How the generated DDL is laid out over files">
             <Option
                 name="SingleFile"
                 description="One file with every CREATE TABLE and inline REFERENCES clauses"
@@ -43,11 +43,11 @@ export const SqlGenerationIssues = (store: ModelStore): ExprNode<t.IDecisionMode
                 name="FilePerTable"
                 description="One file per table, plus one file of ALTER TABLE foreign keys"
                 isDefault={false}/>
-        </GlobalIssue>
+        </ModelLevelIssue>
 
         {/* The same issue rel-to-sql-ddl carries: quoting is a house style,
         not something the schema can answer. */}
-        <GlobalIssue name="IdentifierQuoting" description="How to emit SQL identifiers in the generated DDL">
+        <ModelLevelIssue name="IdentifierQuoting" description="How to emit SQL identifiers in the generated DDL">
             <Option
                 name="Unquoted"
                 description="Emit identifiers verbatim"
@@ -56,6 +56,6 @@ export const SqlGenerationIssues = (store: ModelStore): ExprNode<t.IDecisionMode
                 name="DoubleQuoted"
                 description="Wrap identifiers in double quotes"
                 isDefault={false}/>
-        </GlobalIssue>
+        </ModelLevelIssue>
     </DecisionModel>
 )

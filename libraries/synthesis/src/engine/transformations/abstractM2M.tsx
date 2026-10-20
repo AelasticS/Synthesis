@@ -11,13 +11,12 @@ import {
   ExprNode,
   ResolveElement,
   IM2MContext,
+  Model
 } from "../../jsx-runtime"
 import * as tm from "./transformation.model.type"
 import { ModelStore } from "./../index"
 import * as tmT from "./trace/trace-meta.model"
 import * as tmC from "./trace/trace-meta.model-components"
-import { Element as CModelElement, Model } from "../../jsx-runtime"
-import { TargetElement } from "./trace/trace-meta.model-components"
 
 type IODescr = { type?: t.Any; instance?: IModel; jsx?: string }
 type TransformationDescr = {
@@ -522,7 +521,7 @@ export abstract class abstractM2M<
       if (invocation.kind === "rule") {
         if (invocation.targets.length > 0) {
           targetRefs = invocation.targets.map((el) => (
-            <TargetElement $refByName={this.fullElementRef(el)} />
+            <tmC.TargetElement $refByName={this.fullElementRef(el)} />
           ))
         } else {
           targetRefs = invocation.jsxElements.flatMap((jsx) => {
@@ -538,7 +537,7 @@ export abstract class abstractM2M<
               return []
             }
             const ref = String(targetName).startsWith("//") ? String(targetName) : `${targetElementNamespace}/${targetName}`
-            return [<TargetElement $refByName={ref} />]
+            return [<tmC.TargetElement $refByName={ref} />]
           })
         }
       }
@@ -576,7 +575,7 @@ export abstract class abstractM2M<
           <tmC.Resolution
             name={`r${resolutionCounter}_${r.option}`}
             byDefault={r.byDefault}
-            choices={r.choices.map((c) => <CModelElement $refByName={this.fullElementRef(c)} />)}
+            choices={r.choices.map((c) => <tmC.ChoiceRef $refByName={this.fullElementRef(c)} />)}
           />
         )
       })
@@ -587,7 +586,7 @@ export abstract class abstractM2M<
           name={name}
           function={invocation.function}
           parent={parent}
-          source={<CModelElement $refByName={this.fullElementRef(invocation.source!)} />}
+          source={<tmC.SourceElement $refByName={this.fullElementRef(invocation.source!)} />}
           targets={targetRefs}
         >
           {resolutions}

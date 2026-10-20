@@ -120,7 +120,7 @@ export const EERTutorialBindings = (store: ModelStore): ExprNode<t.IBindingModel
       description="OneToManyStrategy applies to 1:N relationships only"
       element={<ModelElement $refByName="//www.aelastics.org/EERTutorialMetamodel/Relationship" />}
       issues={[
-        <ElementIssue $refByName="//www.aelastics.org/RelationshipDesign/OneToManyStrategy" />,
+        <ElementLevelIssue $refByName="//www.aelastics.org/RelationshipDesign/OneToManyStrategy" />,
       ]}
       condition='return (e) => {
                 if (!e.roles || e.roles.length !== 2) return false;
@@ -190,7 +190,7 @@ one relationship out of the sample's two.
 ## When a binding is not needed
 
 An issue only needs a binding when it is raised per element, which is
-why `Binding` carries element issues. A `GlobalIssue` is answered once
+why `Binding` carries element issues. A `ModelLevelIssue` is answered once
 for the run and has no element to attach to, so a package whose only
 issue is global still ships a binding model, but an empty one, naming
 its two ends and containing no bindings at all. The decision model and

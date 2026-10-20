@@ -2,7 +2,7 @@
 /**
  * The decision model: the design space of the transformation, declared
  * as data. This package leaves exactly one question open, so there is
- * exactly one issue. It is an ElementIssue, which means it is answered
+ * exactly one issue. It is an ElementLevelIssue, which means it is answered
  * once per source element rather than once per model: two 1:N
  * relationships in the same schema may be implemented differently.
  *
@@ -12,9 +12,9 @@
  * @Default() decorator in transformation.tsx.
  */
 import { createExprNode } from '@aelastics/synthesis/jsx';
-import { DecisionModel, ElementIssue, Option } from '@aelastics/synthesis/metamodels/decision';
+import { DecisionModel, ElementLevelIssue, Option } from '@aelastics/synthesis/metamodels/decision';
 export const RelationshipDesignIssues = (store) => (createExprNode(DecisionModel, { name: "RelationshipDesign", description: "Design space for implementing EER relationships in a relational schema", store: store },
-    createExprNode(ElementIssue, { name: "OneToManyStrategy", description: "How to implement a 1:N relationship" },
+    createExprNode(ElementLevelIssue, { name: "OneToManyStrategy", description: "How to implement a 1:N relationship" },
         createExprNode(Option, { name: "ForeignKey", description: "Put a foreign key column on the N side table", isDefault: true }),
         createExprNode(Option, { name: "JoinTable", description: "Give the relationship a table of its own", isDefault: false }))));
 //# sourceMappingURL=decision-model.js.map

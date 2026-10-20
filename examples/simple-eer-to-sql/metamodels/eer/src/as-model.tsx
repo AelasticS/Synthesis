@@ -141,8 +141,8 @@ export const EERModel = (store: ModelStore): ExprNode<t.ITypeModel> => (
       <Property name="relationship"
                 domain={
                   <TypeSubtype name="Relationship" superType={<TypeObject $refByName="ERConcept" />}>
-                    <Property name="ordinaryMappings"
-                              domain={<TypeArray name="ArrayOfOrdinaryMappings"
+                    <Property name="roles"
+                              domain={<TypeArray name="ArrayOfRoles"
                                                  elementType={<TypeSubtype $refByName="OrdinaryMapping" />} />} />
                   </TypeSubtype>
                 } />
@@ -157,7 +157,7 @@ export const EERModel = (store: ModelStore): ExprNode<t.ITypeModel> => (
 
     <InverseProperty
       firstType={<TypeSubtype $refByName="Relationship" />}
-      firstProperty="ordinaryMapping"
+      firstProperty="roles"
       secondType={<TypeSubtype $refByName="OrdinaryMapping" />}
       secondProperty="relationship"
     />

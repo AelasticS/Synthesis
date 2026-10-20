@@ -30,7 +30,7 @@ wrapped step, so a versioned audited table's history captures
 createdBy and createdAt like any other column.
 
 **A composite option opening a sub-issue.** The design space is a
-RowHistory ElementIssue: NoHistory (default) or HistoryTable, where
+RowHistory ElementLevelIssue: NoHistory (default) or HistoryTable, where
 HistoryTable is a CompositeOption opening the HistoryDiscriminator
 sub-issue (ValidFromTimestamp default, or VersionCounter). The
 nesting is design-space structure ONLY: configurations stay flat

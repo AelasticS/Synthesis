@@ -145,10 +145,10 @@ is a model conforming to the Decision_TypeSchema and contains:
   Issue (abstract)
     possibleOptions: Option[]
 
-  ElementIssue extends Issue
+  ElementLevelIssue extends Issue
     -- an issue scoped to individual source model elements
 
-  ModelIssue extends Issue
+  ModelLevelIssue extends Issue
     -- an issue that applies globally to the entire source model
 
   Option
@@ -180,24 +180,24 @@ Like all models in Synthesis, the Decision Model is constructed as a
 JSX model expression:
 
   <DecisionModel name="RelationSchemaDesign" store={store}>
-    <ElementIssue name="OneToManyStrategy">
+    <ElementLevelIssue name="OneToManyStrategy">
       <Option name="ForeignKey" isDefault={false}
               optionType={<SimpleOption name="FK" />} />
       <Option name="JoinTable"  isDefault={true}
               optionType={<SimpleOption name="JoinTableOption" />} />
-    </ElementIssue>
-    <ElementIssue name="PrimaryKeyStrategy">
+    </ElementLevelIssue>
+    <ElementLevelIssue name="PrimaryKeyStrategy">
       <Option name="UseAutoIncrement" isDefault={true}
               optionType={<SimpleOption name="PK_AutoInc" />} />
       <Option name="UseManualIncrement"
               optionType={<SimpleOption name="PK_ManInc" />} />
-    </ElementIssue>
-    <ModelIssue name="NamingConvention">
+    </ElementLevelIssue>
+    <ModelLevelIssue name="NamingConvention">
       <Option name="CamelCase" isDefault={true}
               optionType={<SimpleOption name="CamelCaseOption" />} />
       <Option name="SnakeCase"
               optionType={<SimpleOption name="SnakeCaseOption" />} />
-    </ModelIssue>
+    </ModelLevelIssue>
   </DecisionModel>
 
 
@@ -216,7 +216,7 @@ BindingModel_TypeSchema and contains:
 
   BindingElement
     element: ModelElement   -- a source metamodel type (e.g., Relationship)
-    issues: ElementIssue[]  -- which issues apply to elements of this type
+    issues: ElementLevelIssue[]  -- which issues apply to elements of this type
     condition: string (opt) -- an optional predicate further filtering
                                which source elements this binding applies to
 
@@ -234,12 +234,12 @@ Example (JSX):
     <Binding name="PKStrategyBinding"
       element={<ModelElement $refByName="ERMetamodel/Attribute" />}
       issues={[
-        <ElementIssue $refByName="RelationSchemaDesign/PrimaryKeyStrategy" />
+        <ElementLevelIssue $refByName="RelationSchemaDesign/PrimaryKeyStrategy" />
       ]} />
     <Binding name="OneToManyBinding"
       element={<ModelElement $refByName="ERMetamodel/Relationship" />}
       issues={[
-        <ElementIssue $refByName="RelationSchemaDesign/OneToManyStrategy" />
+        <ElementLevelIssue $refByName="RelationSchemaDesign/OneToManyStrategy" />
       ]}
       condition='return (e) => {
         if (!e.roles || e.roles.length !== 2) return false;
@@ -295,14 +295,14 @@ Example (JSX):
     <GlobalChoice name="CamelCaseNaming"
       choices={[
         <Choice name="UseCamelCase"
-          issue={<GlobalIssue $refByName="RelationSchemaDesign/NamingConvention" />}
+          issue={<ModelLevelIssue $refByName="RelationSchemaDesign/NamingConvention" />}
           selectedOption={<Option $refByName="RelationSchemaDesign/CamelCase" />} />
       ]} />
     <ElementChoice name="EmploymentJoinTableMapping"
       element={<Element $refByName="CompanySchema/Employment" />}
       choices={[
         <Choice name="UseJoinTable"
-          issue={<ElementIssue $refByName="RelationSchemaDesign/OneToManyStrategy" />}
+          issue={<ElementLevelIssue $refByName="RelationSchemaDesign/OneToManyStrategy" />}
           selectedOption={<Option $refByName="RelationSchemaDesign/JoinTable" />}
           assumptions="Join table avoids nulls"
           justification="Handles optional relationships cleanly"

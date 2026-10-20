@@ -14,10 +14,10 @@ import {Process, Sequence, Task} from "../../../engine/test/bpm-metamodel"
 import * as b from "../../../engine/test/bpm-metamodel/BPM.meta.model.type"
 import {
     DecisionModel,
-    ElementIssue,
-    ModelIssue,
-    ElementSubIssue,
-    ModelSubIssue,
+    ElementLevelIssue,
+    ModelLevelIssue,
+    ElementLevelSubIssue,
+    ModelLevelSubIssue,
     Option,
     OpeningOption,
 } from "../1.decision-model/decision-meta.model-components"
@@ -56,37 +56,37 @@ describe("default configurations traverse chosen composite options", () => {
     // unchosen NoRetention hides PurgeSchedule entirely.
     const dm = (
         <DecisionModel name="CompositeDesign" description="composite defaults" store={store}>
-            <ElementIssue name="Retention" description="whether history is kept">
+            <ElementLevelIssue name="Retention" description="whether history is kept">
                 <OpeningOption name="NoRetention" description="none" isDefault={false}>
-                    <ElementSubIssue name="PurgeSchedule" description="behind the unchosen option">
+                    <ElementLevelSubIssue name="PurgeSchedule" description="behind the unchosen option">
                         <Option name="Daily" description="daily" isDefault={true}/>
-                    </ElementSubIssue>
+                    </ElementLevelSubIssue>
                 </OpeningOption>
                 <OpeningOption name="KeepHistory" description="kept" isDefault={true}>
-                    <ElementSubIssue name="HistoryKind" description="what marks a version">
+                    <ElementLevelSubIssue name="HistoryKind" description="what marks a version">
                         <Option name="Counted" description="a counter" isDefault={false}/>
                         <OpeningOption name="Timestamped" description="a timestamp" isDefault={true}>
-                            <ElementSubIssue name="TimestampPrecision" description="how precise">
+                            <ElementLevelSubIssue name="TimestampPrecision" description="how precise">
                                 <Option name="Seconds" description="seconds" isDefault={true}/>
                                 <Option name="Millis" description="milliseconds" isDefault={false}/>
-                            </ElementSubIssue>
+                            </ElementLevelSubIssue>
                         </OpeningOption>
-                    </ElementSubIssue>
+                    </ElementLevelSubIssue>
                 </OpeningOption>
-            </ElementIssue>
-            <ElementIssue name="Style" description="a flat control issue">
+            </ElementLevelIssue>
+            <ElementLevelIssue name="Style" description="a flat control issue">
                 <Option name="Plain" description="plain" isDefault={true}/>
                 <Option name="Fancy" description="fancy" isDefault={false}/>
-            </ElementIssue>
-            <ModelIssue name="GlobalMode" description="a global composite">
+            </ElementLevelIssue>
+            <ModelLevelIssue name="GlobalMode" description="a global composite">
                 <Option name="Unmanaged" description="unmanaged" isDefault={false}/>
                 <OpeningOption name="Managed" description="managed" isDefault={true}>
-                    <ModelSubIssue name="ManagedDetail" description="opened by Managed">
+                    <ModelLevelSubIssue name="ManagedDetail" description="opened by Managed">
                         <Option name="DetailA" description="A" isDefault={true}/>
                         <Option name="DetailB" description="B" isDefault={false}/>
-                    </ModelSubIssue>
+                    </ModelLevelSubIssue>
                 </OpeningOption>
-            </ModelIssue>
+            </ModelLevelIssue>
         </DecisionModel>
     ).render(new Context()) as dmT.IDecisionModel
 

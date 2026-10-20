@@ -28,7 +28,7 @@ export interface IssueInfo {
   name: string
   /** Rendered decision-model element (carries path/name for refs). */
   element: unknown
-  /** Metamodel type name: 'ModelIssue' or 'ElementIssue'. */
+  /** Metamodel type name: 'ModelLevelIssue' or 'ElementLevelIssue'. */
   typeName: string
   /** Options in document order. */
   options: OptionInfo[]
@@ -300,7 +300,7 @@ function computeElementSlots(
       for (const rawIssue of binding.issues ?? []) {
         const issueName = rawIssue?.name
         const issue = typeof issueName === 'string' ? index.issues.get(issueName) : undefined
-        if (issue === undefined || issue.typeName !== 'ElementIssue') {
+        if (issue === undefined || issue.typeName !== 'ElementLevelIssue') {
           continue
         }
         const key = `${issue.name} ${elementKeyOf(element)}`
@@ -467,7 +467,7 @@ export function validateConfigStructure(
   for (const issue of index.issues.values()) {
     // Element-scoped issues are covered per element (below); everything
     // else takes one model-wide choice.
-    if (issue.typeName === 'ElementIssue') {
+    if (issue.typeName === 'ElementLevelIssue') {
       continue
     }
     if (!globalCovers.has(issue.name)) {

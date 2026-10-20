@@ -313,7 +313,7 @@ A design space is not always flat: some questions only exist once a
 particular option is chosen. The decision metamodel states this with
 `OpeningOption`, an option carrying sub-issues, the issues that
 become meaningful exactly when that option is selected (authored with
-the `ElementSubIssue` tag). A row-versioning policy is the canonical
+the `ElementLevelSubIssue` tag). A row-versioning policy is the canonical
 shape, and it is exactly the advanced-eer-to-sql suite's `RowHistory` issue
 ([`examples/advanced-eer-to-sql/eer-to-relational`](https://github.com/AelasticS/Synthesis/tree/main/examples/advanced-eer-to-sql/eer-to-relational)):
 whether a table keeps
@@ -321,16 +321,16 @@ history is one issue, and only the history-keeping option opens the
 question of what distinguishes row versions:
 
 ```tsx
-<ElementIssue name="RowHistory" description="Whether this table keeps row history">
+<ElementLevelIssue name="RowHistory" description="Whether this table keeps row history">
   <Option name="NoHistory" description="Current rows only" isDefault={true} />
   <OpeningOption name="HistoryTable" description="A separate history table records row versions"
                  isDefault={false}>
-    <ElementSubIssue name="HistoryDiscriminator" description="What distinguishes row versions">
+    <ElementLevelSubIssue name="HistoryDiscriminator" description="What distinguishes row versions">
       <Option name="ValidFromTimestamp" description="A validity timestamp" isDefault={true} />
       <Option name="VersionCounter" description="A monotonic version number" isDefault={false} />
-    </ElementSubIssue>
+    </ElementLevelSubIssue>
   </OpeningOption>
-</ElementIssue>
+</ElementLevelIssue>
 ```
 
 The nesting is a fact about the design space, not about execution. A

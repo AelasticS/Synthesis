@@ -3,7 +3,7 @@
 /**
  * The decision model: the design space of the transformation, declared
  * as data. This package leaves exactly one question open, so there is
- * exactly one issue. It is an ElementIssue, which means it is answered
+ * exactly one issue. It is an ElementLevelIssue, which means it is answered
  * once per source element rather than once per model: two 1:N
  * relationships in the same schema may be implemented differently.
  *
@@ -17,7 +17,7 @@ import type {ExprNode} from '@aelastics/synthesis/jsx'
 import type {ModelStore} from '@aelastics/synthesis/store'
 import {
     DecisionModel,
-    ElementIssue,
+    ElementLevelIssue,
     Option
 } from '@aelastics/synthesis/metamodels/decision'
 import type * as t from '@aelastics/synthesis/metamodels/decision/model'
@@ -28,7 +28,7 @@ export const RelationshipDesignIssues = (store: ModelStore): ExprNode<t.IDecisio
         description="Design space for implementing EER relationships in a relational schema"
         store={store}
     >
-        <ElementIssue
+        <ElementLevelIssue
             name="OneToManyStrategy"
             description="How to implement a 1:N relationship"
         >
@@ -40,6 +40,6 @@ export const RelationshipDesignIssues = (store: ModelStore): ExprNode<t.IDecisio
                 name="JoinTable"
                 description="Give the relationship a table of its own"
                 isDefault={false}/>
-        </ElementIssue>
+        </ElementLevelIssue>
     </DecisionModel>
 )

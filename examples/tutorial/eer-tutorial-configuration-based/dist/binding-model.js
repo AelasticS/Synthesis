@@ -16,9 +16,9 @@
 import { createExprNode } from '@aelastics/synthesis/jsx';
 import { Model, Element as ModelElement } from '@aelastics/synthesis/jsx';
 import { BindingModel, Binding } from '@aelastics/synthesis/metamodels/binding';
-import { DecisionModel, ElementIssue } from '@aelastics/synthesis/metamodels/decision';
+import { DecisionModel, ElementLevelIssue } from '@aelastics/synthesis/metamodels/decision';
 export const EERTutorialBindings = (store) => (createExprNode(BindingModel, { name: "EERTutorialBindings", description: "Binding the tutorial EER concepts to relational design issues", sourceModel: createExprNode(Model, { "$refByName": "//www.aelastics.org/EERTutorialMetamodel" }), decisionModel: createExprNode(DecisionModel, { "$refByName": "//www.aelastics.org/RelationshipDesign" }), store: store },
     createExprNode(Binding, { name: "OneToManyBinding", description: "OneToManyStrategy applies to 1:N relationships only", element: createExprNode(ModelElement, { "$refByName": "//www.aelastics.org/EERTutorialMetamodel/Relationship" }), issues: [
-            createExprNode(ElementIssue, { "$refByName": "//www.aelastics.org/RelationshipDesign/OneToManyStrategy" }),
+            createExprNode(ElementLevelIssue, { "$refByName": "//www.aelastics.org/RelationshipDesign/OneToManyStrategy" }),
         ], condition: 'return (e) => {\n                if (!e.roles || e.roles.length !== 2) return false;\n                const r1 = e.roles[0];\n                const r2 = e.roles[1];\n                return (r1.ub === "1" && r2.ub === "M") ||\n                       (r1.ub === "M" && r2.ub === "1");\n            }' })));
 //# sourceMappingURL=binding-model.js.map
