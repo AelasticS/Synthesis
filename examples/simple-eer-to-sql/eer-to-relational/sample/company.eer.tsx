@@ -41,8 +41,8 @@ export default (store: ModelStore): ExprNode<t.IEERSchema> => (
     </Entity>
 
     <Relationship name="Employment">
-      <Role name="WorksIn" lb="0" ub="1" cnMapp="R" dcnMapp="R" domain={<Entity $refByName="Company" />} />
-      <Role name="Hires" lb="0" ub="M" cnMapp="R" dcnMapp="R" domain={<Entity $refByName="Person" />} />
+      <Role name="WorksIn" lb="0" ub="1" cnMapp="R" dcnMapp="R" domain={<Entity $refByName="Person" />} />
+      <Role name="Hires" lb="0" ub="M" cnMapp="R" dcnMapp="R" domain={<Entity $refByName="Company" />} />
     </Relationship>
   </EERSchema>
 )
