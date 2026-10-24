@@ -30,7 +30,7 @@ let SimpleEerToRelational = class SimpleEerToRelational extends DecisionAwareM2M
         return createExprNode(Table, { name: this.applyNaming(e.name) }, e.attributes.map((a) => this.Attribute2Column(a)));
     }
     Attribute2Column(a) {
-        return createExprNode(Column, { name: this.applyNaming(a.name), isKey: a.isKey, isAutoincrement: this.primaryKeyStrategy(a), type: this.getColumnType(a.attrDomain) });
+        return createExprNode(Column, { name: this.applyNaming(a.name), isKey: a.isKey, isAutoincrement: a.isKey ? this.primaryKeyStrategy(a) : false, type: this.getColumnType(a.attrDomain) });
     }
     // @E2E is outermost: wraps the VarPoint dispatcher, so tracing happens after VarPoint selects
     // and calls the matching VarOption method. @VarPoint must be inner (applied first) so it

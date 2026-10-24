@@ -200,7 +200,7 @@ configuration model there are no choices, no predicate can hold, and
 Without a default, a point that finds no match fails the run:
 
 ```text
-No option condition evaluated to true and no default option provided
+No option condition evaluated to true and no default option provided for issue "<issue>" at VarPoint <Class>.<method> (options: <names>; element: <element>)
 ```
 
 Options are reachable only through their point. Nothing in the class

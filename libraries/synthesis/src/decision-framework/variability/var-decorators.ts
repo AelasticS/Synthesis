@@ -173,7 +173,13 @@ export const VarPoint = (_issue: string) => {
         })
 
         if (!chosenVarOption) {
-          throw new Error(`No option condition evaluated to true and no default option provided`)
+          const optionNames = varOptions.map((o) => o.optionName ?? o.methodName).join(", ")
+          const elementLabel = element?.name ?? element?.id ?? element?.constructor?.name ?? String(element)
+          throw new Error(
+            `No option condition evaluated to true and no default option provided ` +
+              `for issue "${_issue}" at VarPoint ${target?.constructor?.name}.${propertyKey} ` +
+              `(options: ${optionNames || "none"}; element: ${elementLabel})`,
+          )
         }
 
         // The resolution of this consultation, handed to the option

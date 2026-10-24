@@ -53,7 +53,7 @@ export class SimpleEerToRelational extends DecisionAwareM2M<
 
   @E2E()
   Attribute2Column(a: IAttribute): ExprNode<rmT.IColumn> {
-    return <Column name={this.applyNaming(a.name)} isKey={a.isKey} isAutoincrement={this.primaryKeyStrategy(a)} type={this.getColumnType(a.attrDomain)}></Column>
+    return <Column name={this.applyNaming(a.name)} isKey={a.isKey} isAutoincrement={a.isKey ? this.primaryKeyStrategy(a) : false} type={this.getColumnType(a.attrDomain)}></Column>
   }
 
   // @E2E is outermost: wraps the VarPoint dispatcher, so tracing happens after VarPoint selects
