@@ -34,6 +34,7 @@ export const ER_Bindings = (store: ModelStore): ExprNode<t.IBindingModel> => (
             issues={[
                 <ElementLevelIssue $refByName="//www.aelastics.org/RelationSchemaDesign/PrimaryKeyStrategy"/>,
             ]}
+            condition={'return (a) => a.isKey'}
         />
 
         <Binding

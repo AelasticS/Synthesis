@@ -5,10 +5,6 @@ import {BindingModel} from "../2.binding-model/binding-meta.model"
 
 export const ConfigurationModel_TypeSchema = t.schema("ConfigurationModel_TypeSchema")
 
-const getOptionType = (option: gdm.IOption): t.Any => {
-    return t.string
-}
-
 export const Choice = t.subtype(
     ModelElement,
     {

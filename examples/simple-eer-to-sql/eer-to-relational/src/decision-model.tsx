@@ -28,8 +28,8 @@ export const RelationSchemaDesignIssues = (store: ModelStore): ExprNode<t.IDecis
         store={store}
     >
         <ElementLevelIssue name="OneToManyStrategy" description="How to implement 1:N relationships">
-            <Option name="ForeignKey" description="Use a foreign key on the many side table" isDefault={false}/>
-            <Option name="JoinTable" description="Use a separate join table" isDefault={true}
+            <Option name="ForeignKey" description="Use a foreign key on the many side table" isDefault={true}/>
+            <Option name="JoinTable" description="Use a separate join table" isDefault={false}
             />
         </ElementLevelIssue>
         <ElementLevelIssue name="PrimaryKeyStrategy" description="How to implement primary keys">
@@ -37,8 +37,8 @@ export const RelationSchemaDesignIssues = (store: ModelStore): ExprNode<t.IDecis
             <Option name="UseManualIncrement" description="Use manual increment" isDefault={false}/>
         </ElementLevelIssue>
         <ModelLevelIssue name="NamingConvention" description="How to name the database tables">
-            <Option name="CamelCase" description="Use camelCase for table names" isDefault={false}/>
-            <Option name="SnakeCase" description="Use snake_case for table names" isDefault={true}/>
+            <Option name="CamelCase" description="Use camelCase for table names" isDefault={true}/>
+            <Option name="SnakeCase" description="Use snake_case for table names" isDefault={false}/>
         </ModelLevelIssue>
     </DecisionModel>
 )
