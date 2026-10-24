@@ -219,7 +219,7 @@ model-to-model tutorial's configuration held an `<ElementLevelChoice>` per
 source element that raised its issue, so it grew with the model. This
 one holds a `<ModelLevelChoice>` per issue, so it has two of them for
 `Library_rel` and would have two of them for a schema of four hundred
-tables. That is the practical payoff of a global issue: the whole design
+tables. That is the practical payoff of a model-level issue: the whole design
 space of this generator fits on a screen, and a reviewer can see every
 decision it took at once.
 

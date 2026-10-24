@@ -21,7 +21,7 @@ Issues and options are defined independently of any source modeling language. Fo
 | Concept | Description |
 |---|---|
 | **Issue** | A design decision with at least two alternatives (e.g., "how to map a 0..1:M relationship") |
-| **Option** | One possible resolution of an issue (e.g., "ForeignKey" or "JoinTable") |
+| **Option** | One possible resolution of an issue (e.g., "ForeignKey" or "JoinTable"). Each option knows its issue through `parentIssue` |
 | **Default** | The option selected when no explicit choice is made |
 | **Scope: model** | The decision applies globally to the entire transformation (e.g., naming conventions) |
 | **Scope: element** | The decision is resolved independently for each applicable source element |
@@ -295,7 +295,7 @@ its emission issues at once, so choosing a dialect means passing one
   is the dialect's definition. (Workspace models must be
   self-contained at run time, so the shared vocabulary is a package
   export, never a relative import.)
-- **Source-agnostic configurations.** A preset closes global issues
+- **Source-agnostic configurations.** A preset closes model-level issues
   and declares no source-model reference in its header;
   `transformation run --config` accepts such a configuration for any
   input. A configuration that DOES declare a source still fails on a
@@ -337,7 +337,7 @@ The nesting is a fact about the design space, not about execution. A
 configuration remains a flat list of choices, each naming the option it
 selects — the issue follows from that option's own parent issue — and
 the engine resolves a sub-issue exactly like a top-level one. The
-conditionality polices itself at run time: a variation point inside the
+conditionality polices itself at run time: a variability point inside the
 opening option's code path is only consulted when that option was
 chosen, so an unconsulted sub-issue needs no choice, and a consulted one
 without a choice falls back to its declared default, recorded in the

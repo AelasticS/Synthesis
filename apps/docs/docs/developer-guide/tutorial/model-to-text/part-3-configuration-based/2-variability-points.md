@@ -2,11 +2,11 @@
 sidebar_position: 2
 ---
 
-# 2. Variation points
+# 2. Variability points
 
 The design space is declared. This page is the half that reads it: a
 template that decides nothing, three options that each build a complete
-output model, a second variation point three lines long, and the
+output model, a second variability point three lines long, and the
 manifest entry that ties the package together.
 
 Every listing is from [`examples/tutorial/sql-tutorial-configuration-based`](https://github.com/AelasticS/Synthesis/tree/main/examples/tutorial/sql-tutorial-configuration-based).
@@ -27,7 +27,7 @@ export class RelToSqlConfigurableTransformation extends DecisionAwareM2M<
 > {
   // A configuration-based transformation takes the run's configuration
   // model as a third argument. It is optional: without one, every
-  // variation point falls back to its @Default option.
+  // variability point falls back to its @Default option.
   constructor(store: ModelStore, extra?: {}, configModel?: cm.IConfigurationModel) {
     super(store, extra ?? {}, configModel)
   }
@@ -69,7 +69,7 @@ In Parts 1 and 2, `main` was the whole transformation: it built the
 place or placed them by name. Here it does one thing:
 
 ```tsx
-  // The template does nothing but hand over to the variation point. The
+  // The template does nothing but hand over to the variability point. The
   // decision is the first thing the transformation makes, because
   // everything else depends on it.
   main(s: rmT.IRelSchema): ExprNode<rmT.IRelSchema, m2tmm.M2T_Model> {
@@ -77,7 +77,7 @@ place or placed them by name. Here it does one thing:
   }
 ```
 
-That single line is where the global issue's timing shows up in the
+That single line is where the model-level issue's timing shows up in the
 code. Page 1 argued that `OutputLayout` cannot be an element issue
 because it decides how many documents exist, and this is the shape that
 argument takes: the layout is resolved before any document is created,
@@ -86,7 +86,7 @@ because resolving it *is* creating them.
 ## The layout point and its three options
 
 ```tsx
-  // The variation point. Its body never runs: the dispatcher looks up
+  // The variability point. Its body never runs: the dispatcher looks up
   // the option selected for the OutputLayout issue in the run's
   // configuration model and calls that method instead.
   @VarPoint('OutputLayout')
@@ -153,7 +153,7 @@ because resolving it *is* creating them.
 ```
 
 The decorators are the ones the model-to-model tutorial's
-[page on variation points](../../model-to-model/part-3-configuration-based/3-variation-points.md)
+[page on variability points](../../model-to-model/part-3-configuration-based/3-variability-points.md)
 explains: `@VarPoint(issue)` names the issue this rule resolves,
 `@VarOption(pointMethod, predicate)` registers a method as one answer at
 that point, and `@Default()` sits directly above a `@VarOption()` to
@@ -285,7 +285,7 @@ size:
 
 Three things are worth noticing.
 
-**It takes a string and returns a string.** A variation point is a
+**It takes a string and returns a string.** A variability point is a
 method, and nothing requires a method to take a model element or return
 an `ExprNode`. `quoteIdentifier` is called with `tab.name` and with
 column names, and what it returns goes into a template literal.
@@ -293,7 +293,7 @@ column names, and what it returns goes into a template literal.
 **It is called from inside the other point's options.** The call chain
 for a `CREATE TABLE` line is `documentLayout`, dispatched to one of the
 three layout options, which calls `tableToCreate`, which calls
-`quoteIdentifier`, which is dispatched again. Two variation points
+`quoteIdentifier`, which is dispatched again. Two variability points
 compose without either knowing the other exists, because each one only
 knows its own issue name and the configuration answers both.
 
@@ -308,7 +308,7 @@ because a file name is not a SQL identifier and never passes through
 
 ## No `@E2E` here
 
-The model-to-model tutorial's variation point carried `@E2E()` above
+The model-to-model tutorial's variability point carried `@E2E()` above
 `@VarPoint()`, and stated the rule that the two can only be stacked in
 that order. Neither point in this class carries it.
 

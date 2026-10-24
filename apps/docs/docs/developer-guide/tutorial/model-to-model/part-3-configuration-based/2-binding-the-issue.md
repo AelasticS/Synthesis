@@ -201,4 +201,4 @@ the binding model has anything inside it.
 
 The design space is declared and attached. What is still missing is the
 rule that actually leaves the question open:
-[variation points](./3-variation-points.md).
+[variability points](./3-variability-points.md).

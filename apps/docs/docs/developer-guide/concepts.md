@@ -380,7 +380,7 @@ flag. A
 **configuration model** records the choices made for one specific
 source model. A **configuration-based transformation** is then a
 template over two parameters, the source model and a configuration
-model: a rule with variants is written as a *variation point*, and the
+model: a rule with variants is written as a *variability point*, and the
 recorded choice selects which variant runs.
 
 Because configurations are models, everything already said about models

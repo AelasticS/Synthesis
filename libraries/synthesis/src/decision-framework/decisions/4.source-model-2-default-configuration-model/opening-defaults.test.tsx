@@ -1,7 +1,7 @@
 /** @jsx createExprNode */
 /*
- * Default-configuration generation over composite options: when the
- * chosen (default) option of an issue is a CompositeOption, the
+ * Default-configuration generation over opening options: when the
+ * chosen (default) option of an issue is an OpeningOption, the
  * generator also answers the sub-issues that option opens, recursively
  * and in the same decision context (the element's decision, or a
  * global choice). Sub-issues behind options the defaults do NOT choose
@@ -27,7 +27,7 @@ import * as bmT from "../2.binding-model/binding-meta.model"
 import * as cmT from "../3.configuration-model/configuration-meta.model"
 import {SourceModelToDefaultConfigurationModel} from "./SourceModel2DefaultConfigurationModel"
 
-describe("default configurations traverse chosen composite options", () => {
+describe("default configurations traverse chosen opening options", () => {
     const store = new ModelStore()
 
     const proc = (

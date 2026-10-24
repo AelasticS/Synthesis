@@ -2,7 +2,7 @@
 
 /**
  * Tutorial Part 3: the Part 2 transformation with its relationship
- * mapping opened up as a variation point. The entity rule is unchanged,
+ * mapping opened up as a variability point. The entity rule is unchanged,
  * still a specialization point dispatching on Kernel and Weak. What
  * changes is the relationship side: an M:N relationship has no choice,
  * a join table is the only structure that can hold it, so that branch
@@ -31,7 +31,7 @@ export class EER2RelConfigurableTransformation extends DecisionAwareM2M<
 > {
   // A configuration-based transformation takes the run's configuration
   // model as a third argument. It is optional: without one, every
-  // variation point falls back to its @Default option.
+  // variability point falls back to its @Default option.
   constructor(store: ModelStore, {}, configModel?: cm.IConfigurationModel) {
     super(store, {}, configModel)
   }
@@ -114,7 +114,7 @@ export class EER2RelConfigurableTransformation extends DecisionAwareM2M<
     return this.oneToManyMapping(rel)
   }
 
-  // The variation point. Its body is never executed: the engine looks up
+  // The variability point. Its body is never executed: the engine looks up
   // the option selected for this relationship in the run's configuration
   // model and calls that method instead. @E2E is outermost so the trace
   // records which option was taken; @VarPoint must be inner so it
@@ -122,7 +122,7 @@ export class EER2RelConfigurableTransformation extends DecisionAwareM2M<
   @E2E()
   @VarPoint('OneToManyStrategy')
   oneToManyMapping(rel: em.IRelationship): ExprNode<rmT.ITable> {
-    throw new Error('No option selected for the OneToManyStrategy variation point')
+    throw new Error('No option selected for the OneToManyStrategy variability point')
   }
 
   // The default option, matching isDefault on ForeignKey in the decision

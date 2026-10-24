@@ -86,7 +86,7 @@ export class SourceModelToDefaultConfigurationModel extends abstractM2M<IModel, 
   }
 
   /** The issue followed, transitively, by the sub-issues its chosen
-   * option opens: a CompositeOption's sub-issues are part of the path
+   * option opens: an OpeningOption's sub-issues are part of the path
    * the defaults actually take, so the generated configuration answers
    * them in the same decision context. Sub-issues behind unchosen
    * options stay quiet; if a later edit takes that path, the run-time

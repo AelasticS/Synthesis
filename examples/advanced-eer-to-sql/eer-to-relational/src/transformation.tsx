@@ -232,7 +232,7 @@ export class EerToRelational extends DecisionAwareM2M<
    * emitted alone or wrapped by withHistoryTable (history.tsx), the
    * table-set step that derives <table>_history from the base table's
    * own node. The HistoryDiscriminator sub-issue is consulted only on
-   * the HistoryTable path: the composite option's conditionality
+   * the HistoryTable path: the opening option's conditionality
    * polices itself at run time (an unconsulted sub-issue needs no
    * choice, a consulted one without a choice falls back to its
    * default).

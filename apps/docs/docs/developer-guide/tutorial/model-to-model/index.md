@@ -68,7 +68,7 @@ cardinality decisions. Part 3 turns them into a declared design space.
 A decision model states the issues and their admissible options, a
 binding model attaches each issue to the metamodel concepts it
 concerns, and a configuration model closes the decisions for one
-concrete run. The transformation declares variation points
+concrete run. The transformation declares variability points
 (`@VarPoint`) and their options (`@VarOption`), and the engine
 dispatches on the configuration rather than on an `if` statement. The
 same source model and the same transformation then produce different

@@ -44,7 +44,7 @@ default jsxFactory all expect bare identifiers in scope:
 | `./m2t` | `M2T`, `Doc`, `Sec`, `P`, `SecParent`, text-document model types, `generate` |
 | `./variability` | `DecisionAwareM2M`, `VarPoint`, `VarOption`, `Default`, `Option`, the default-configuration generator |
 | `./metamodels/decision`, `./binding`, `./configuration` | internal metamodels, JSX components flat, type schemas under `/model` |
-| `./metamodels/trace`, `./metamodels/trace-extensions` | the trace metamodel and its decision-aware extensions |
+| `./metamodels/trace` | the trace metamodel |
 | `./metamodels/types/...` | the aelastics-types-aware type metamodel (framework infrastructure: the decision metamodel builds on it) |
 
 The `./metamodel` subpath exists because the schema `Model` and the JSX

@@ -108,7 +108,7 @@ differently in one of the two places and the option simply never
 matches.
 
 Note that `OutputLayout` has three options rather than two. Nothing in
-the mechanism prefers two; page 2's variation point gains one more
+the mechanism prefers two; page 2's variability point gains one more
 method per option and changes in no other way. Three is simply how many
 shapes of deployable DDL this tutorial has a use for.
 
@@ -129,7 +129,7 @@ agree:
 The two declarations are read at different moments. `isDefault` is what
 `config init` and `--default-configs` read when they generate a
 configuration; `@Default()` is what the engine falls back to when it
-dispatches a variation point and no option's predicate matched. Page 3
+dispatches a variability point and no option's predicate matched. Page 3
 shows both paths arriving at `TablesAndConstraints`.
 
 The defaults were not chosen arbitrarily. `TablesAndConstraints` is the
@@ -167,19 +167,16 @@ engine reaches that element, and by then the documents that element's
 output goes into already exist. `OutputLayout` decides how many
 documents there are, so it has to be settled before the first one is
 created, which is exactly what page 2's template does by handing over
-to the variation point as its first and only act.
+to the variability point as its first and only act.
 
-`ModelLevelIssue` is the third tag, and it produces the same underlying
-element type as `ModelLevelIssue`. The spellings differ in what they claim:
-a model issue is a property of this particular schema, a global issue is
-a property of the target and has nothing to do with the input at all.
-Neither of the two questions here would change its answer if the schema
-were replaced, so both are global.
+A `ModelLevelIssue` is a property of the run as a whole, not of any
+element of the input. Neither of the two questions here would change its
+answer if the schema were replaced, so both are model-level.
 
 ## A binding model with nothing in it
 
 A binding model answers one question: for which source elements does
-this issue arise? With both issues global, the honest answer is "that
+this issue arise? With both issues model-level, the honest answer is "that
 question does not apply", and `src/binding-model.tsx` says so by having
 an empty body:
 
@@ -310,4 +307,4 @@ the constraints between options that this tutorial does not use.
 ## Next
 
 The design space is declared. Nothing reads it yet, which is the subject
-of [variation points](./2-variation-points.md).
+of [variability points](./2-variability-points.md).

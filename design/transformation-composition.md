@@ -412,7 +412,7 @@ four phases:
    fires on a source element, the decorator intercepts the returned
    JSX, filters out `Resolve` placeholders, determines the executed
    rule name (the dispatched option's name, if a specialization or
-   variation point dispatched), and calls
+   variability point dispatched), and calls
    `context.makeTrace(sourceElement, jsxNodes, ruleName)`, which
    appends a raw record indexed by source element and by JSX node.
 2. **During target render.** The renderer calls `resolveTargetForJSX`
@@ -420,7 +420,7 @@ four phases:
    real created elements, so trace references carry real full paths.
 3. **After render.** `createTraceModel()` builds a second JSX tree: a
    `TraceModel` header (transformation, timestamp, source model
-   reference, target model references) with one `TraceEntry` per
+   reference, target model references) with one `RuleInvocation` per
    record. The decision-aware subclass attaches configuration
    resolutions here.
 4. **Second render.** The tree is serialized (`traceJsx`) and rendered

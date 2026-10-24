@@ -29,15 +29,15 @@ demonstrated for real: the audit columns are appended inside the
 wrapped step, so a versioned audited table's history captures
 createdBy and createdAt like any other column.
 
-**A composite option opening a sub-issue.** The design space is a
+**An opening option opening a sub-issue.** The design space is a
 RowHistory ElementLevelIssue: NoHistory (default) or HistoryTable, where
-HistoryTable is a CompositeOption opening the HistoryDiscriminator
+HistoryTable is an OpeningOption opening the HistoryDiscriminator
 sub-issue (ValidFromTimestamp default, or VersionCounter). The
 nesting is design-space structure ONLY: configurations stay flat
 choice lists, dispatch resolves the sub-issue like any issue, and the
 conditionality polices itself at run time. This is exactly the shape
 the variability guide already documents; the engine fact that makes
-it sound is verified: a consulted variation point without a matching
+it sound is verified: a consulted variability point without a matching
 choice falls back to its @Default option
 (var-decorators.ts selectVarOption), and an unconsulted one is simply
 never asked.
@@ -150,12 +150,12 @@ rules.
 ## The generator improvement
 
 `SourceModelToDefaultConfigurationModel` learns to traverse into
-chosen composite options: whenever a generated choice selects an
+chosen opening options: whenever a generated choice selects an
 option whose optionType is composite, choices for that option's
 sub-issues are generated in the same decision context, recursively.
 With NoHistory as the default nothing changes for the flagship's
 generated configurations; the improvement matters the moment a
-composite option is anyone's default, and it is tested in the
+opening option is anyone's default, and it is tested in the
 library with a purpose-built decision model whose default IS
 composite. The variability guide's tooling note ("config init
 enumerates the model's top-level issues") is rewritten to describe
@@ -222,7 +222,7 @@ All five stages delivered as planned; three facts surfaced by the
 build are recorded here.
 
 **The CLI's decision-model index is containment-first now.** The
-rendered graph creates a composite option's whole subtree BEFORE the
+rendered graph creates an opening option's whole subtree BEFORE the
 option itself (props render first), so the CLI's document-order
 attribution would have filed HistoryTable under its own sub-issue,
 corrupting announcements, serialized issue references, and coverage

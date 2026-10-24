@@ -245,4 +245,4 @@ abstractM2M<Source, Destination, ExtraModels, ConfigModel>
 
 Extra models and configuration models are covered in [Design Decisions in Transformations](./variability.md).
 
-Once your transformation is written, see [Packaging Transformations](./packaging-transformations.md) for how to build, package, and publish it so others can install it with `synth tx install`.
+Once your transformation is written, see [Packaging Transformations](./packaging-transformations.md) for how to build, package, and publish it so others can install it with `synth transformation install`.

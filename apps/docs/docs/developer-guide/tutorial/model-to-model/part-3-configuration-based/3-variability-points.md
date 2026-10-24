@@ -2,7 +2,7 @@
 sidebar_position: 3
 ---
 
-# 3. Variation points
+# 3. Variability points
 
 The design space is declared and bound. This page is the other half:
 the rule that stops answering the question, and the manifest entry that
@@ -25,7 +25,7 @@ export class EER2RelConfigurableTransformation extends DecisionAwareM2M<
 > {
   // A configuration-based transformation takes the run's configuration
   // model as a third argument. It is optional: without one, every
-  // variation point falls back to its @Default option.
+  // variability point falls back to its @Default option.
   constructor(store: ModelStore, {}, configModel?: cm.IConfigurationModel) {
     super(store, {}, configModel)
   }
@@ -114,7 +114,7 @@ The same logic, with the open half handed over:
     return this.oneToManyMapping(rel)
   }
 
-  // The variation point. Its body is never executed: the engine looks up
+  // The variability point. Its body is never executed: the engine looks up
   // the option selected for this relationship in the run's configuration
   // model and calls that method instead. @E2E is outermost so the trace
   // records which option was taken; @VarPoint must be inner so it
@@ -122,7 +122,7 @@ The same logic, with the open half handed over:
   @E2E()
   @VarPoint('OneToManyStrategy')
   oneToManyMapping(rel: em.IRelationship): ExprNode<rmT.ITable> {
-    throw new Error('No option selected for the OneToManyStrategy variation point')
+    throw new Error('No option selected for the OneToManyStrategy variability point')
   }
 
   // The default option, matching isDefault on ForeignKey in the decision
@@ -175,7 +175,7 @@ you would see is the one you wrote.
 
 ## The three decorators
 
-**`@VarPoint(issue)`** marks a rule as a variation point and names the
+**`@VarPoint(issue)`** marks a rule as a variability point and names the
 issue from the decision model that it resolves. When the rule is
 called, the engine collects the choices recorded for the current source
 element, picks an option, and calls that option's method with the same
@@ -278,7 +278,7 @@ it. Inverted, it would trace a rule that only ever throws.
 
 ## Both mechanisms, one class
 
-This class now has a specialization point and a variation point in it,
+This class now has a specialization point and a variability point in it,
 and they coexist without interacting:
 
 | | `@SpecPoint` / `@SpecOption` | `@VarPoint` / `@VarOption` |
@@ -298,7 +298,7 @@ Valid: @SpecPoint alone, or @E2E above @SpecPoint.
 ```
 
 If a rule genuinely needs both, the answer is to compose them: let the
-specialization option call a variation point, or the other way round,
+specialization option call a variability point, or the other way round,
 so each decorator stays on the method whose question it answers.
 
 ## The manifest

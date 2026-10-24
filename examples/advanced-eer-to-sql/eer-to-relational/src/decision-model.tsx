@@ -42,7 +42,7 @@ export const RelationSchemaDesignIssues = (store: ModelStore): ExprNode<t.IDecis
         </ElementLevelIssue>
         <ElementLevelIssue name="RowHistory" description="Whether this table keeps row history">
             <Option name="NoHistory" description="Current rows only" isDefault={true}/>
-            {/* the composite option: choosing it opens the sub-issue below;
+            {/* the opening option: choosing it opens the sub-issue below;
           the nesting is design-space structure only, configurations
           stay flat choice lists (see the variability guide) */}
             <OpeningOption name="HistoryTable" description="A separate history table records row versions"

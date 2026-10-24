@@ -21,7 +21,7 @@ covers the `synth` CLI from installation to pipelines.
 - **Model instances** assembled declaratively with JSX. Nesting captures associations. Embedded TypeScript expressions (map, conditionals, function calls) generate structure dynamically.
 - **Parameterized templates** that produce families of structurally different models from a single definition.
 - **Model-to-model transformations** that map source models to target models with typed rules and automatic tracing.
-- **Configurable transformations** with variation points that select different strategies at runtime based on a decision model.
+- **Configurable transformations** with variability points that select different strategies at runtime based on a decision model.
 
 ## How the Pieces Fit
 

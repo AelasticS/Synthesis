@@ -29,7 +29,7 @@
 - Source models created via `Repository.create()` are MobX-observable and have an `EventLog` attached. Change types available: `objectCreated`, `objectDeleted`, `propertyValueSet`, `objectInserted`, `objectRemoved`.
 - Rule methods decorated with `@E2E()` are pure with respect to side effects outside the engine: they read source state and (optionally) call `context.resolveTarget(...)`, and they return a JSX `ExprNode` tree. They do not mutate source, do not mutate target directly, and do not perform I/O.
 - Target elements are produced by exactly one rule invocation (already enforced by JSX template structure).
-- A rule invocation can produce one *or more* target elements (already supported in `TraceEntry.targets: ModelElement[]`).
+- A rule invocation can produce one *or more* target elements (already supported in `RuleInvocation.targets: ModelElement[]`).
 
 ## Functional Requirements
 

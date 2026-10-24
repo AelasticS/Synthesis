@@ -542,7 +542,7 @@ history outlives deletion, so no cascading foreign key; a table-set
 step transformer, the higher-order pattern one granularity above the
 column-step audit transformer, maintained by the stage 4 trigger
 machinery; the design space is a RowHistory issue whose HistoryTable
-option is a CompositeOption opening the HistoryDiscriminator
+option is an OpeningOption opening the HistoryDiscriminator
 sub-issue, ValidFromTimestamp default or VersionCounter; agreed: the
 nesting is design-space structure only, configurations stay flat and
 dispatch is unchanged, with config init's sub-issue traversal a
