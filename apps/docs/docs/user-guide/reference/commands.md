@@ -121,6 +121,17 @@ Everything enters the workspace through `model import <file> --as <ref>`:
 4. The file is copied into the namespace tree. `--force` overwrites an
    existing target.
 
+A configuration model renders only with its transformation's context, so
+importing one needs `--tx <name>`. `--dependency <ref>[,<ref>...]` names
+the installed models to load first (a configuration model's source
+model); it is recorded in the header's `references` and auto-detected
+when exactly one installed model defines the referenced schema:
+
+```bash
+synth model import ./persons-cfg.tsx --as com.example/persons-cfg \
+  --tx eer-to-relational --dependency com.example/persons
+```
+
 The invariant this buys: **everything in the workspace was loadable when it
 entered**. That is why run time is strict: `--in` accepts workspace refs,
 never file paths.

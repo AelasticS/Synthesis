@@ -12,7 +12,8 @@
     "synth.json"
   ],
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "test": "node ../../smoke.mjs && node scripts/verify.mjs"
   },
   "dependencies": {
     "@aelastics/synthesis": "workspace:*",
@@ -20,6 +21,7 @@
     "simple-relational-metamodel": "workspace:*"
   },
   "devDependencies": {
-    "typescript": "~5.9.3"
+    "typescript": "~5.9.3",
+    "@aelastics/synthesis-cli": "workspace:*"
   }
 }

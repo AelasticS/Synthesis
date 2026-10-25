@@ -12,6 +12,26 @@ overall version history.
 
 ### Added
 
+- **The simple-eer-to-sql suite.** A compact counterpart to the
+  advanced suite: two small metamodels (`simple-eer-metamodel`,
+  `simple-relational-metamodel`) and `simple-eer-to-relational`, a
+  configuration-based transformation with three design issues
+  (`OneToManyStrategy`, `PrimaryKeyStrategy`, `NamingConvention`). Its
+  README maps the paper's listings to files and walks the loop: build,
+  install, generate the default configuration with `config init`, edit
+  it, run with it, and export the result and the trace. `npm test`
+  runs the CLI smoke and `scripts/verify.mjs`, which asserts both
+  runs' tables and the trace resolutions behind them.
+
+- **Declared constraints on the decision-framework metamodels.**
+  `BindingElement` must reference only issues of its binding model's
+  decision model (sub-issues of opening options included), and
+  `ConfigurationModel` must select options only from that decision
+  model, hold at most one `ElementLevelChoice` per element and issue
+  and one `ModelLevelChoice` per issue. `ElementLevelChoice` and
+  `ModelLevelChoice` accept only options of an element-level and a
+  model-level issue respectively. All run under `synth model validate`.
+
 - **An invocation carries its own performer.** An optional override
   of the called definition's default, as BPMN call activities do; the
   flowchart view shows the effective performer. A new declared
@@ -76,6 +96,17 @@ overall version history.
   runs them after the gate render.
 
 ### Changed
+
+- **Terminology follows the metamodel.** The decision framework's
+  `ElementIssue` is `ElementLevelIssue`, "variation points" are
+  "variability points" (the tutorial pages `3-variation-points` and
+  `2-variation-points` are renamed accordingly), and "composite"
+  options are "opening" options throughout the docs and design notes.
+
+- **`model import` takes `--tx` and `--dependency`.** A configuration
+  model needs its transformation's render context (`--tx`) and names
+  its source model (`--dependency`, auto-detected when exactly one
+  installed model defines the referenced schema).
 
 - **The transformation entry rule is `main`.** Renamed from
   `template`: all rules are templates, and the entry rule's
@@ -543,7 +574,7 @@ overall version history.
   workflow builds the CLI, packs platform tarballs (Linux x64/arm64,
   macOS x64/arm64, Windows x64), and attaches them to a GitHub Release
   on `cli-v*` tag push or manual `workflow_dispatch`. See
-  [Installation](https://AelasticS.github.io/aelastics/docs/cli/installation)
+  [Installation](https://AelasticS.github.io/aelastics/user-guide/getting-started/installation)
   for download instructions and [CONTRIBUTING.md](CONTRIBUTING.md) for the
   release workflow.
 - **CLI test workspace isolation convention.** All `apps/cli/` tests now

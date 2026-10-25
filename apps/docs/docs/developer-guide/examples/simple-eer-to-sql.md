@@ -58,9 +58,9 @@ issues:
 
 | Issue | Tag | Options (default marked) |
 | --- | --- | --- |
-| `OneToManyStrategy` | `ElementLevelIssue` | `ForeignKey`, `JoinTable` (default) |
+| `OneToManyStrategy` | `ElementLevelIssue` | `ForeignKey` (default), `JoinTable` |
 | `PrimaryKeyStrategy` | `ElementLevelIssue` | `UseAutoIncrement` (default), `UseManualIncrement` |
-| `NamingConvention` | `ModelLevelIssue` | `CamelCase`, `SnakeCase` (default) |
+| `NamingConvention` | `ModelLevelIssue` | `CamelCase` (default), `SnakeCase` |
 
 All options are plain `<Option>` elements; none opens sub-issues. The
 element-level issues are asked once per matching source element, and
@@ -169,6 +169,13 @@ synth config edit com.example/company-cfg
 synth transformation run simple-eer-to-relational --in com.example/company \
   --config com.example/company-cfg --out com.example/company-rel
 ```
+
+The package README walks the same loop with the paper's listings: the
+default configuration from `config init`, an edited copy kept in
+[`config/company.edited-cm.tsx`](https://github.com/AelasticS/Synthesis/tree/main/examples/simple-eer-to-sql/eer-to-relational/config/company.edited-cm.tsx),
+and the run with it. `npm test` runs the CLI smoke plus
+`scripts/verify.mjs`, which asserts the exact tables of both runs and
+the trace resolutions behind them.
 
 Add `--trace <ref>` to a single-step run to persist the trace model.
 Each `RelationshipMapping` shows up as a `RuleInvocation` carrying a

@@ -51,7 +51,9 @@ try {
     throw new Error('no sample model found in sample/')
   }
   const refs = samples.map((file) => {
-    const ref = `demo/${file.replace(/\.tsx$/, '')}`
+    // a ref's model name allows letters, digits, hyphen and underscore, so
+    // company.eer.tsx is imported as demo/company-eer
+    const ref = `demo/${file.replace(/\.tsx$/, '').replace(/[^A-Za-z0-9_-]/g, '-')}`
     cli(['model', 'import', join(pkgDir, 'sample', file), '--as', ref])
     return ref
   })
