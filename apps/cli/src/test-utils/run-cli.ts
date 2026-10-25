@@ -1,9 +1,9 @@
-import { exec } from 'node:child_process'
+import { execFile } from 'node:child_process'
 import { promisify } from 'node:util'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-const execAsync = promisify(exec)
+const execFileAsync = promisify(execFile)
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const binPath = resolve(__dirname, '../..', 'bin/run.js')
@@ -28,23 +28,24 @@ export interface RunOptions {
 /**
  * Run the CLI as a subprocess and capture output.
  * Use this instead of @oclif/test's runCommand to avoid Jest ESM issues.
+ * No shell is involved: each element of `args` reaches the CLI as one
+ * argument, verbatim, on every platform.
  */
 export async function runCli(args: string[], options?: RunOptions): Promise<RunResult> {
   // Never inherit color forcing from the parent run (rushx sets FORCE_COLOR on
   // a TTY): ANSI codes around oclif's '›' wrap prefix defeat the tests' flatten().
   const env: NodeJS.ProcessEnv = { ...process.env, FORCE_COLOR: '0', NO_COLOR: '1', ...options?.env }
   if (options?.home) {
+    // os.homedir() reads USERPROFILE on Windows and HOME elsewhere
     env.HOME = options.home
+    env.USERPROFILE = options.home
   }
 
   try {
-    const { stdout, stderr } = await execAsync(
-      `node ${binPath} ${args.join(' ')}`,
-      {
-        env,
-        cwd: options?.cwd
-      }
-    )
+    const { stdout, stderr } = await execFileAsync(process.execPath, [binPath, ...args], {
+      env,
+      cwd: options?.cwd
+    })
     return { stdout, stderr, code: 0 }
   } catch (err: unknown) {
     // Under jest's vm modules the exec error comes from another realm, so

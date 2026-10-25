@@ -115,7 +115,7 @@ describe('tx install', () => {
     const { error, stderr } = await runCli(['tx', 'install', invalidDir], { home: testHome })
     expect(error).toBeDefined()
     // oclif wraps stderr at terminal width; flatten before asserting
-    expect(stderr.replace(/·?\s*\n\s*›?\s*/g, ' ')).toContain(`field 'entry'`)
+    expect(stderr.replace(/·?\s*\n\s*[›»]?\s*/g, ' ')).toContain(`field 'entry'`)
   })
 
   it('rejects a manifest name that would escape the transformations directory', async () => {
@@ -135,7 +135,7 @@ describe('tx install', () => {
       const { error, stderr } = await runCli(['tx', 'install', dir], { home: testHome })
       expect(error).toBeDefined()
       // oclif wraps stderr at terminal width; flatten before asserting
-      const flat = stderr.replace(/·?\s*\n\s*›?\s*/g, ' ')
+      const flat = stderr.replace(/·?\s*\n\s*[›»]?\s*/g, ' ')
       expect(flat).toContain('is not usable as an install directory name')
       expect(flat).toContain(reason)
     }

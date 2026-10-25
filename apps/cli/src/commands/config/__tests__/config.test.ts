@@ -21,9 +21,10 @@ let modelsDir: string
 
 const run = (args: string[]) => runCli(args, { home: testHome })
 
-// oclif wraps stderr at terminal width, inserting '·\n ›' inside messages;
-// flatten the wrapping so substring assertions can span line breaks.
-const flatten = (text: string): string => text.replace(/·?\s*\n\s*›?\s*/g, ' ')
+// oclif wraps stderr at terminal width, inserting '·\n ›' inside messages
+// ('»' on Windows); flatten the wrapping so substring assertions can span
+// line breaks.
+const flatten = (text: string): string => text.replace(/·?\s*\n\s*[›»]?\s*/g, ' ')
 
 const configPath = (name: string) => join(modelsDir, 'com', 'example', `${name}.tsx`)
 

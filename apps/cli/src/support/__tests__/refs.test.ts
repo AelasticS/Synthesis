@@ -56,11 +56,11 @@ describe('parseRef', () => {
 
 describe('refToModelPath', () => {
   it('maps a ref to a nested .tsx path', () => {
-    expect(refToModelPath('/ws/models', 'com.example/persons')).toBe('/ws/models/com/example/persons.tsx')
+    expect(refToModelPath('/ws/models', 'com.example/persons')).toBe(join('/ws/models', 'com', 'example', 'persons.tsx'))
   })
 
   it('maps a single-segment namespace', () => {
-    expect(refToModelPath('/ws/models', 'demo/cars')).toBe('/ws/models/demo/cars.tsx')
+    expect(refToModelPath('/ws/models', 'demo/cars')).toBe(join('/ws/models', 'demo', 'cars.tsx'))
   })
 })
 
@@ -88,11 +88,11 @@ describe('modelPathToRef', () => {
 
 describe('namespaceToDir', () => {
   it('maps dots to nested directories', () => {
-    expect(namespaceToDir('/ws/models', 'com.example')).toBe('/ws/models/com/example')
+    expect(namespaceToDir('/ws/models', 'com.example')).toBe(join('/ws/models', 'com', 'example'))
   })
 
   it('maps a single segment to one directory', () => {
-    expect(namespaceToDir('/ws/models', 'demo')).toBe('/ws/models/demo')
+    expect(namespaceToDir('/ws/models', 'demo')).toBe(join('/ws/models', 'demo'))
   })
 
   it('rejects invalid namespaces', () => {
