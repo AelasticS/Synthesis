@@ -1,7 +1,7 @@
 import { existsSync } from 'node:fs'
 import { mkdtemp, readFile, rename, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
-import { basename, dirname, join, resolve } from 'node:path'
+import { basename, dirname, isAbsolute, join, resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
 
 import { build } from 'esbuild'
@@ -34,13 +34,19 @@ export interface RenderedModel {
 // type/schema identity -- with the CLI process and with every other
 // importer in this run; bundling copies of metamodel packages would break
 // that identity. Relative imports inside the model file are bundled as
-// usual.
+// usual. A Windows absolute path (C:\...) also passes the filter, so it is
+// excluded explicitly: it is a file, not a package name.
 const externalizeBareImports: Plugin = {
   name: 'externalize-bare-imports',
   setup(pluginBuild) {
     pluginBuild.onResolve({ filter: /^[^./]/ }, (args) => {
+      if (isAbsolute(args.path)) {
+        return undefined
+      }
       try {
-        return { path: resolveBareSpecifier(args.path), external: true }
+        // A file URL, not a plain path: on Windows the ESM loader rejects
+        // C:\... specifiers.
+        return { path: pathToFileURL(resolveBareSpecifier(args.path)).href, external: true }
       } catch (err) {
         return {
           errors: [
