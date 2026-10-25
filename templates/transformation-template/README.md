@@ -53,10 +53,10 @@ synth transformation run <your-name> --in <ref> --out <ref>
 
 ## Where to learn
 
-The [developer-guide tutorial](https://AelasticS.github.io/aelastics/developer-guide/tutorial)
+The [developer-guide tutorial](https://AelasticS.github.io/Synthesis/developer-guide/tutorial)
 walks through exactly this package shape, first without variability
 and then with decision, binding, and configuration models;
-[packaging transformations](https://AelasticS.github.io/aelastics/developer-guide/guides/packaging-transformations)
+[packaging transformations](https://AelasticS.github.io/Synthesis/developer-guide/guides/packaging-transformations)
 documents the manifest. The [examples catalog](../../examples/) holds
 finished packages, from the tutorial companions to the
 configuration-based `eer-to-relational`; make yours look like those.

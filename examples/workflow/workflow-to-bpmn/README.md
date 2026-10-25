@@ -32,4 +32,4 @@ choices, loops, and a twice-invoked shared definition
 isolated workspace.
 
 The flattening rules are explained on the suite page
-[The workflow suite](https://AelasticS.github.io/aelastics/developer-guide/examples/workflow#flattening-the-tree-into-a-graph).
+[The workflow suite](https://AelasticS.github.io/Synthesis/developer-guide/examples/workflow#flattening-the-tree-into-a-graph).

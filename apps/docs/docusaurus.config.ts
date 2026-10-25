@@ -35,7 +35,7 @@ const darkCodeTheme: typeof prismThemes.dracula = {
 
 const GITHUB_ORG = 'AelasticS';
 const SOURCE_REPO = 'Synthesis';
-const PAGES_REPO = 'aelastics';
+const PAGES_REPO = 'Synthesis';
 
 const config: Config = {
   title: 'Synthesis',

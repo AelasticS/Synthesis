@@ -28,4 +28,4 @@ cat generated/Release.mmd
 three of the suite's samples and asserts every drawing convention.
 
 The drawing conventions are explained on the suite page
-[The workflow suite](https://AelasticS.github.io/aelastics/developer-guide/examples/workflow#the-flowchart-view-the-workflow-model-to-mermaid).
+[The workflow suite](https://AelasticS.github.io/Synthesis/developer-guide/examples/workflow#the-flowchart-view-the-workflow-model-to-mermaid).

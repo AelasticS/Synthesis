@@ -20,5 +20,5 @@ generating its input from an organizational model, and
 `workflow-to-mermaid` is a sibling view drawing the source instead.
 
 The suite is explained on the docs page
-[The workflow suite](https://AelasticS.github.io/aelastics/developer-guide/examples/workflow);
+[The workflow suite](https://AelasticS.github.io/Synthesis/developer-guide/examples/workflow);
 each package's README holds its usage loop.

@@ -42,8 +42,10 @@ try {
   expect('auto increment is on for the keys',
     def.includes('name="personId" isKey={true} isAutoincrement={true}')
     && def.includes('name="companyId" isKey={true} isAutoincrement={true}'))
-  expect('the ForeignKey default adds a foreign key column, not a join table',
-    def.includes('isForeignKey={true}') && !def.includes('<Table name="Employment"'))
+  expect('the ForeignKey default adds no join table',
+    !def.includes('<Table name="Employment"'))
+  expect('the foreign key column lands in the Person table (a person works in at most one company), nullable, referencing Company',
+    /<Table \$refByName="Person">\s*<Column name="CompanyIdFK"[^>]*isForeignKey=\{true\}[^>]*references="Company"[^>]*isNullable=\{true\}/.test(def))
   expect('the default trace records the three choices by default',
     read('demo/tr-default').includes('byDefault={true}'))
 

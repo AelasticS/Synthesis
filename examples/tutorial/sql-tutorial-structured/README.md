@@ -30,5 +30,5 @@ cat generated/Library_rel-constraints.sql
 isolated workspace.
 
 This package is the finished state of
-[Part 2 of the model-to-text tutorial](https://AelasticS.github.io/aelastics/developer-guide/tutorial/model-to-text/part-2-structured),
+[Part 2 of the model-to-text tutorial](https://AelasticS.github.io/Synthesis/developer-guide/tutorial/model-to-text/part-2-structured),
 which explains the sections and the two-file split.

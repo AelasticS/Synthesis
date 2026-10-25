@@ -2,7 +2,7 @@
 
 > Internal architecture documentation for contributors to Synthesis itself.
 > User and developer documentation lives on the
-> [documentation site](https://AelasticS.github.io/aelastics/).
+> [documentation site](https://AelasticS.github.io/Synthesis/).
 
 Synthesis is organized as a Rush monorepo with a deliberately small number
 of packages. The three aelastics libraries are standalone; the whole

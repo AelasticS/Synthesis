@@ -14,4 +14,4 @@ metamodel-as-model factory (`RelTutorialMetamodel`); the scoped stage
 follows the same convention behind `rel-tutorial-metamodel/name-scopes`.
 
 The metamodel is introduced in the
-[developer-guide tutorial](https://AelasticS.github.io/aelastics/developer-guide/tutorial).
+[developer-guide tutorial](https://AelasticS.github.io/Synthesis/developer-guide/tutorial).

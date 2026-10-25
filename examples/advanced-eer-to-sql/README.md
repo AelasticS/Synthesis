@@ -19,5 +19,5 @@ produced relational schema, so different configurations of the same
 source become visibly different diagrams.
 
 The suite is explained on the docs page
-[A full-featured EER to SQL transformation](https://AelasticS.github.io/aelastics/developer-guide/examples/advanced-eer-to-sql);
+[A full-featured EER to SQL transformation](https://AelasticS.github.io/Synthesis/developer-guide/examples/advanced-eer-to-sql);
 each package's README holds its usage loop.

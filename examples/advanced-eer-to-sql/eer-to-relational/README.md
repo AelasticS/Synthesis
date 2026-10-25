@@ -41,4 +41,4 @@ exact tables, keys, indexes, audit columns, and trace resolutions.
 
 The mapping rules, the design space, and the configurations drawn
 side by side are explained on the suite page
-[A full-featured EER to SQL transformation](https://AelasticS.github.io/aelastics/developer-guide/examples/advanced-eer-to-sql).
+[A full-featured EER to SQL transformation](https://AelasticS.github.io/Synthesis/developer-guide/examples/advanced-eer-to-sql).

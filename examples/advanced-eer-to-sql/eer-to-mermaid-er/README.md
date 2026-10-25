@@ -27,4 +27,4 @@ cat generated/Shop.mmd
 the suite's Library sample and asserts every line convention.
 
 The diagram conventions are explained on the suite page
-[A full-featured EER to SQL transformation](https://AelasticS.github.io/aelastics/developer-guide/examples/advanced-eer-to-sql#the-diagram-view-eer-to-mermaid).
+[A full-featured EER to SQL transformation](https://AelasticS.github.io/Synthesis/developer-guide/examples/advanced-eer-to-sql#the-diagram-view-eer-to-mermaid).

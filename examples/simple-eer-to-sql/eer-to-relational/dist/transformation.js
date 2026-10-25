@@ -42,8 +42,8 @@ let SimpleEerToRelational = class SimpleEerToRelational extends DecisionAwareM2M
     relationshipAsForeignKey(rel) {
         const fkSide = this.getFKSide(rel);
         const pkSide = this.getPKSide(rel);
-        return (createExprNode(Table, { "$refByName": this.applyNaming(pkSide.domain.name) },
-            createExprNode(Column, { name: this.applyNaming(fkSide.domain.name + "Id_FK"), type: this.getColumnType(fkSide.domain), isForeignKey: true, isKey: false, references: fkSide.domain.name, isNullable: fkSide.lb === "0" })));
+        return (createExprNode(Table, { "$refByName": this.applyNaming(fkSide.domain.name) },
+            createExprNode(Column, { name: this.applyNaming(pkSide.domain.name + "Id_FK"), type: this.getColumnType(pkSide.domain), isForeignKey: true, isKey: false, references: pkSide.domain.name, isNullable: fkSide.lb === "0" })));
     }
     relationshipAsJoinTable(rel) {
         const role1 = rel.roles[0];

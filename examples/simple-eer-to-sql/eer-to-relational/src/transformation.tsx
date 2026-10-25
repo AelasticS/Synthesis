@@ -73,13 +73,13 @@ export class SimpleEerToRelational extends DecisionAwareM2M<
     const pkSide = this.getPKSide(rel)
 
     return (
-        <Table $refByName={this.applyNaming(pkSide.domain.name)}>
+        <Table $refByName={this.applyNaming(fkSide.domain.name)}>
           <Column
-              name={this.applyNaming(fkSide.domain.name + "Id_FK")}
-              type={this.getColumnType(fkSide.domain)}
+              name={this.applyNaming(pkSide.domain.name + "Id_FK")}
+              type={this.getColumnType(pkSide.domain)}
               isForeignKey={true}
               isKey={false}
-              references={fkSide.domain.name}
+              references={pkSide.domain.name}
               isNullable={fkSide.lb === "0"}
           />
         </Table>

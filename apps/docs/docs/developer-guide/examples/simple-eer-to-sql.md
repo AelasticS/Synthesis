@@ -120,8 +120,10 @@ relationshipAsJoinTable(rel: IRelationship) { /* a Table with two foreign key co
 The first argument of `@VarOption` is the name of the *method* it
 belongs to (`RelationshipMapping`), and `Option("ForeignKey")` matches
 the name of an option in the decision model. The foreign key option
-returns a `<Table $refByName=…>` wrapping a `Column`: it refers to the
-table of the other side by name and contributes the foreign key column to it.
+returns a `<Table $refByName=…>` wrapping a `Column`: it refers by name
+to the table of the foreign key side (the entity whose role has upper
+bound 1, here `Person`) and contributes the foreign key column to it,
+named after and referencing the other entity (`CompanyIdFK`).
 
 **An attribute-level and a model-level point.** `primaryKeyStrategy`
 (`@VarPoint("PrimaryKeyStrategy")`) returns `a.isKey` under

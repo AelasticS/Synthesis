@@ -14,4 +14,4 @@ suffix the type schemas, and `/advanced/as-model` the
 metamodel-as-model factory (`EERTutorialMetamodel`).
 
 The metamodel is built step by step in the
-[model-to-model tutorial](https://AelasticS.github.io/aelastics/developer-guide/tutorial/model-to-model).
+[model-to-model tutorial](https://AelasticS.github.io/Synthesis/developer-guide/tutorial/model-to-model).

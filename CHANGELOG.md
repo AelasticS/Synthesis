@@ -183,6 +183,16 @@ overall version history.
   `main`; the command reference lists `transformation run --param` and
   `--trace`.
 
+### Fixed
+
+- **The simple suite's foreign key option puts the column on the right
+  table.** For a 1:N relationship the `ForeignKey` option now adds the
+  nullable foreign key column to the table of the entity whose role has
+  upper bound 1 (`Person`), named after and referencing the other
+  entity (`CompanyIdFK` referencing `Company`). It previously added a
+  column named after the first entity to the other entity's table. The
+  suite's `verify.mjs` asserts the placement.
+
 ## [cli-v0.2.0] - 2026-09-05
 
 ### Added
@@ -574,7 +584,7 @@ overall version history.
   workflow builds the CLI, packs platform tarballs (Linux x64/arm64,
   macOS x64/arm64, Windows x64), and attaches them to a GitHub Release
   on `cli-v*` tag push or manual `workflow_dispatch`. See
-  [Installation](https://AelasticS.github.io/aelastics/user-guide/getting-started/installation)
+  [Installation](https://AelasticS.github.io/Synthesis/user-guide/getting-started/installation)
   for download instructions and [CONTRIBUTING.md](CONTRIBUTING.md) for the
   release workflow.
 - **CLI test workspace isolation convention.** All `apps/cli/` tests now

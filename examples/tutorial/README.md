@@ -19,5 +19,5 @@ leaves off: its sample model is what `eer-tutorial-basic` generates,
 and all seven companions pivot on `rel-tutorial-metamodel`.
 
 The tutorials themselves live on the docs site:
-[the tutorial index](https://AelasticS.github.io/aelastics/developer-guide/tutorial);
+[the tutorial index](https://AelasticS.github.io/Synthesis/developer-guide/tutorial);
 each package's README holds its usage loop.

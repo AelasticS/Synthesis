@@ -35,4 +35,4 @@ harness cannot supply the required parameter), covering both
 sensitivities, the provenance, the error paths, and the onward chain.
 
 The derivation is explained on the suite page
-[The workflow suite](https://AelasticS.github.io/aelastics/developer-guide/examples/workflow#the-organizational-example-a-model-generates-a-process).
+[The workflow suite](https://AelasticS.github.io/Synthesis/developer-guide/examples/workflow#the-organizational-example-a-model-generates-a-process).

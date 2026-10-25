@@ -7,5 +7,5 @@ transforming typed object graphs. It is the foundation the Synthesis
 metamodel core builds on.
 
 Documented in the
-[types section](https://AelasticS.github.io/aelastics/types/intro) of
+[types section](https://AelasticS.github.io/Synthesis/types/intro) of
 the docs site.

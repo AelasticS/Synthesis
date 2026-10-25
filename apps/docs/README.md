@@ -1,7 +1,7 @@
 # @synthesis/docs
 
 The Docusaurus documentation site, published at
-[AelasticS.github.io/aelastics](https://AelasticS.github.io/aelastics/).
+[AelasticS.github.io/Synthesis](https://AelasticS.github.io/Synthesis/).
 
 The content lives under `docs/` (user guide, developer guide, and the
 types, store, and result sections), the navigation in `sidebars.ts`,

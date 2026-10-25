@@ -26,5 +26,5 @@ synth model show demo/library-rel
 isolated workspace.
 
 This package is the finished state of
-[Part 1 of the model-to-model tutorial](https://AelasticS.github.io/aelastics/developer-guide/tutorial/model-to-model/part-1-basic),
+[Part 1 of the model-to-model tutorial](https://AelasticS.github.io/Synthesis/developer-guide/tutorial/model-to-model/part-1-basic),
 which builds it step by step.

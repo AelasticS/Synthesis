@@ -14,4 +14,4 @@ components, `eer-metamodel/model` the type schemas, and
 that the transformation's binding model references.
 
 The metamodel is explained on the suite page
-[A full-featured EER to SQL transformation](https://AelasticS.github.io/aelastics/developer-guide/examples/advanced-eer-to-sql#the-metamodels).
+[A full-featured EER to SQL transformation](https://AelasticS.github.io/Synthesis/developer-guide/examples/advanced-eer-to-sql#the-metamodels).

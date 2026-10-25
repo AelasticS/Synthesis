@@ -41,8 +41,8 @@ export const Option = t.subtype(
     ModelElement,
     {
         parentIssue: Issue,
-        Pros: t.string,
-        Cons: t.string,
+        Pros: t.optional(t.string),
+        Cons: t.optional(t.string),
         isDefault: t.optional(t.boolean), // if is not optional, default value is true  // TODO: set default value for boolean to false
         valueType: t.optional(Type),
     },

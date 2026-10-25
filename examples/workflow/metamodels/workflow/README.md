@@ -15,4 +15,4 @@ components (`<Invoke>` is the general invocation tag, `<SubProcess>`
 its process-call sugar); `workflow-metamodel/model` the type schemas.
 
 The metamodel is explained on the suite page
-[The workflow suite](https://AelasticS.github.io/aelastics/developer-guide/examples/workflow#the-metamodels).
+[The workflow suite](https://AelasticS.github.io/Synthesis/developer-guide/examples/workflow#the-metamodels).
