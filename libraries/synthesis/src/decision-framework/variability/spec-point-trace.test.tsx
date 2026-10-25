@@ -77,6 +77,61 @@ class SpecTx extends DecisionAwareM2M<b.IProcess, b.IProcess, {}, cmT.IConfigura
     }
 }
 
+// The only option is declared for the supertype Node; a Task reaches it.
+class SuperOptionTx extends DecisionAwareM2M<b.IProcess, b.IProcess, {}, cmT.IConfigurationModel> {
+    constructor(store: ModelStore) {
+        super(store, {})
+    }
+
+    main(m: b.IProcess) {
+        const tasks = ((m.elements ?? []) as b.INode[]).filter((e) =>
+            this.context.store.isTypeOf(e, b.Task),
+        )
+        return (
+            <Process name="Proc2" store={this.context.store}>
+                <Sequence name="seq2">
+                    {tasks.map((t) => this.nodeRule(t))}
+                </Sequence>
+            </Process>
+        )
+    }
+
+    @E2E()
+    @SpecPoint()
+    nodeRule(a: b.INode): ExprNode<b.ITask> {
+        return <Task name={`${a.name}_out`} activity="base"/>
+    }
+
+    @SpecOption("nodeRule", b.Node)
+    nodeRuleNode(n: b.INode): ExprNode<b.ITask> {
+        return <Task activity="opt"/>
+    }
+}
+
+describe("tracing an @E2E @SpecPoint dispatching to an option declared for a supertype", () => {
+    const store = new ModelStore()
+    const proc = (
+        <Process name="P" store={store}>
+            <Sequence name="s1">
+                <Task name="t1" activity="a"/>
+            </Sequence>
+        </Process>
+    ).render(new Context()) as b.IProcess
+
+    const tx = new SuperOptionTx(store)
+    tx.transform(proc)
+    const trace = tx.context.traceModel as ExprNode<any>
+    const children = (trace.childArray as any[])
+        .flat()
+        .filter((c) => c instanceof ExprNode) as ExprNode<any>[]
+
+    it("records one rule invocation named after the supertype option", () => {
+        const rules = children.filter((c) => c.type.name === "RuleInvocation")
+        expect(rules.length).toBe(1)
+        expect((rules[0].props as any).function).toBe("nodeRuleNode")
+    })
+})
+
 describe("tracing an @E2E @SpecPoint whose base skeleton consults a @VarPoint", () => {
     const store = new ModelStore()
 
