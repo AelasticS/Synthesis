@@ -28,5 +28,5 @@ synth model show demo/library-rel
 isolated workspace.
 
 This package is the finished state of
-[Part 4 of the model-to-model tutorial](https://AelasticS.github.io/aelastics/developer-guide/tutorial/model-to-model/part-4-name-scopes),
+[Part 4 of the model-to-model tutorial](https://AelasticS.github.io/Synthesis/developer-guide/tutorial/model-to-model/part-4-name-scopes),
 which explains the scoped stages and compares the output with Part 1's.

@@ -71,10 +71,6 @@
       "types": "./lib/metamodels/trace/index.d.ts",
       "default": "./lib/metamodels/trace/index.js"
     },
-    "./metamodels/trace-extensions": {
-      "types": "./lib/metamodels/trace-extensions/index.d.ts",
-      "default": "./lib/metamodels/trace-extensions/index.js"
-    },
     "./metamodels/types/model": {
       "types": "./lib/metamodels/types/types-meta.model.d.ts",
       "default": "./lib/metamodels/types/types-meta.model.js"
@@ -108,7 +104,6 @@
       "metamodels/configuration": ["lib/metamodels/configuration/index.d.ts"],
       "metamodels/configuration/model": ["lib/metamodels/configuration/model.d.ts"],
       "metamodels/trace": ["lib/metamodels/trace/index.d.ts"],
-      "metamodels/trace-extensions": ["lib/metamodels/trace-extensions/index.d.ts"],
       "metamodels/types/model": ["lib/metamodels/types/types-meta.model.d.ts"],
       "metamodels/types/components": ["lib/metamodels/types/types-components.d.ts"],
       "metamodels/types/predefined-model": ["lib/metamodels/types/predefined-model.d.ts"],

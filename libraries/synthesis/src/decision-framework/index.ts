@@ -10,10 +10,6 @@
 // this barrel can transitively reach engine symbols.
 export * from "../engine"
 
-// Decision-aware trace extensions (the barrel resolves the model/components
-// name collision; see trace-extensions/index.ts).
-export * from "./decisions/trace-extensions"
-
 // Decision-aware M2M
 export * from "./decisions/decision-aware-m2m/decision-aware-m2m"
 

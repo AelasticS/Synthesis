@@ -21,7 +21,7 @@ export class EER2RelBasicTransformation extends abstractM2M<em.IEERSchema, rmT.I
     super(store)
   }
 
-  topRule(s: em.IEERSchema): ExprNode<em.IEERSchema, rmT.IRelSchema> {
+  main(s: em.IEERSchema): ExprNode<em.IEERSchema, rmT.IRelSchema> {
     return (
       <RelSchema name={`${s.name}_rel`} store={this.context.store}>
         {s.elements

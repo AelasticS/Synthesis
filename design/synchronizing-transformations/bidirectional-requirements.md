@@ -19,7 +19,7 @@ A purely forward engine handles none of these without ad-hoc, error-prone revers
 
 1. **Target-to-source change propagation.** Given a target-side delta, the engine routes it through the trace to the producing rule's inverse, computes a source-side delta, and applies it.
 2. **Opt-in per rule.** Rules without a declared inverse remain forward-only. Editing a target element they produced throws an explicit error rather than silently doing the wrong thing.
-3. **Reuse phase 1 infrastructure.** Trace (with `parentRule` and `reads` edges), `SourceDelta`, immutable target store with structural sharing, and `transformIncremental` carry over. Bidirectional adds a backward routing pass, not a new engine.
+3. **Reuse phase 1 infrastructure.** Trace (with `parentInvocation` and `reads` edges), `SourceDelta`, immutable target store with structural sharing, and `transformIncremental` carry over. Bidirectional adds a backward routing pass, not a new engine.
 4. **Lens laws as correctness oracle.** Well-behaved rules satisfy GetPut, PutGet, and (where applicable) PutPut. The test harness checks these per rule with property-based testing.
 5. **Re-stabilization is automatic.** After applying the inverted source delta, the engine runs `transformIncremental` to bring the target back to a consistent state. The roundtrip should be a no-op for well-behaved rules.
 
@@ -34,7 +34,7 @@ A purely forward engine handles none of these without ad-hoc, error-prone revers
 ## Assumptions
 
 - Phase 1 is implemented and stable. In particular:
-  - Trace entries carry `parentRule` and `reads` edges.
+  - Trace entries carry `parentInvocation` and `reads` edges.
   - `SourceDelta` and `transformIncremental` exist.
   - The target store is immutable with structural sharing.
 - The target store can emit a `TargetDelta` analogous to how `aelastics-store` + `EventLog` emit source-side changes. If the target store does not yet have an event log (likely the case, since it is new in phase 1), one must be added — small scope.

@@ -14,7 +14,7 @@ type ForeignKey = {
 };
 export declare class RelToSqlConfigurableTransformation extends DecisionAwareM2M<rmT.IRelSchema, m2tmm.M2T_Model, {}, cm.IConfigurationModel> {
     constructor(store: ModelStore, extra?: {}, configModel?: cm.IConfigurationModel);
-    topRule(s: rmT.IRelSchema): ExprNode<rmT.IRelSchema, m2tmm.M2T_Model>;
+    main(s: rmT.IRelSchema): ExprNode<rmT.IRelSchema, m2tmm.M2T_Model>;
     documentLayout(s: rmT.IRelSchema): ExprNode<rmT.IRelSchema, m2tmm.M2T_Model>;
     singleFileLayout(s: rmT.IRelSchema): ExprNode<rmT.IRelSchema, m2tmm.M2T_Model>;
     tablesAndConstraintsLayout(s: rmT.IRelSchema): ExprNode<rmT.IRelSchema, m2tmm.M2T_Model>;

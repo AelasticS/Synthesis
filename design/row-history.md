@@ -29,15 +29,15 @@ demonstrated for real: the audit columns are appended inside the
 wrapped step, so a versioned audited table's history captures
 createdBy and createdAt like any other column.
 
-**A composite option opening a sub-issue.** The design space is a
-RowHistory ElementIssue: NoHistory (default) or HistoryTable, where
-HistoryTable is a CompositeOption opening the HistoryDiscriminator
+**An opening option opening a sub-issue.** The design space is a
+RowHistory ElementLevelIssue: NoHistory (default) or HistoryTable, where
+HistoryTable is an OpeningOption opening the HistoryDiscriminator
 sub-issue (ValidFromTimestamp default, or VersionCounter). The
 nesting is design-space structure ONLY: configurations stay flat
 choice lists, dispatch resolves the sub-issue like any issue, and the
 conditionality polices itself at run time. This is exactly the shape
 the variability guide already documents; the engine fact that makes
-it sound is verified: a consulted variation point without a matching
+it sound is verified: a consulted variability point without a matching
 choice falls back to its @Default option
 (var-decorators.ts selectVarOption), and an unconsulted one is simply
 never asked.
@@ -138,7 +138,7 @@ quoting, and clustering apply to it like to any table.
 ## Decision model, binding model
 
 The decision model gains the RowHistory issue exactly as the
-variability guide's composite-options section sketches it (same
+variability guide's opening-options section sketches it (same
 option and tag names, ValidFromTimestamp marked default). The binding
 model binds RowHistory to Kernel, Weak, and Aggregation (the
 TableAuditing precedent, plus the aggregation the entities pass also
@@ -150,14 +150,14 @@ rules.
 ## The generator improvement
 
 `SourceModelToDefaultConfigurationModel` learns to traverse into
-chosen composite options: whenever a generated choice selects an
-option whose optionType is composite, choices for that option's
+chosen opening options: whenever a generated choice selects an
+opening option, choices for that option's
 sub-issues are generated in the same decision context, recursively.
 With NoHistory as the default nothing changes for the flagship's
 generated configurations; the improvement matters the moment a
-composite option is anyone's default, and it is tested in the
+opening option is anyone's default, and it is tested in the
 library with a purpose-built decision model whose default IS
-composite. The variability guide's tooling note ("config init
+an opening option. The variability guide's tooling note ("config init
 enumerates the model's top-level issues") is rewritten to describe
 the new behavior.
 
@@ -185,7 +185,7 @@ history table.
 The mapping-rules page gains a row-history rule family section (the
 identification-without-existence-dependency rationale, the capture
 triggers, the two design-space rows added to the issue table). The
-variability guide's composite-options section now points at the
+variability guide's opening-options section now points at the
 flagship as the live example and its tooling note describes the
 traversal. Suite READMEs get one line each; CHANGELOG carries the
 entries; the stale `withHistoryColumns` mention in audit.tsx's
@@ -222,12 +222,12 @@ All five stages delivered as planned; three facts surfaced by the
 build are recorded here.
 
 **The CLI's decision-model index is containment-first now.** The
-rendered graph creates a composite option's whole subtree BEFORE the
+rendered graph creates an opening option's whole subtree BEFORE the
 option itself (props render first), so the CLI's document-order
 attribution would have filed HistoryTable under its own sub-issue,
 corrupting announcements, serialized issue references, and coverage
 checks. The index now walks the materialized containment
-(decisionModel.issues, possibleOptions, subIssues), indexing
+(decisionModel.issues, options, subIssues), indexing
 sub-issues like issues; the document-order walk remains as the
 fallback for models without containment. The old claim that the
 rendered graph does not materialize the containment was stale: the

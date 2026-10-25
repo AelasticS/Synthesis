@@ -11,39 +11,31 @@ export const DecisionModel: CpxTemplate<IDecisionModelProps, ddm.IDecisionModel>
 };
 
 export const Option: Template<ddm.IOption> = (props) => {
-    return new ExprNode(ddm.Option, props, 'possibleOptions');
+    return new ExprNode(ddm.Option, props, 'options');
 }
 
-export const ElementIssue: Template<ddm.IElementIssue> = (props) => {
-    return new ExprNode(ddm.ElementIssue, props, 'issues');
+export const ElementLevelIssue: Template<ddm.IElementLevelIssue> = (props) => {
+    return new ExprNode(ddm.ElementLevelIssue, props, 'issues');
 }
 
-export const ModelIssue: Template<ddm.IModelIssue> = (props) => {
-    return new ExprNode(ddm.ModelIssue, props, 'issues');
+export const ModelLevelIssue: Template<ddm.IModelLevelIssue> = (props) => {
+    return new ExprNode(ddm.ModelLevelIssue, props, 'issues');
 }
 
-export const GlobalIssue: Template<ddm.IModelIssue> = (props) => {
-    return new ExprNode(ddm.ModelIssue, props, 'issues');
+export const ElementLevelSubIssue: Template<ddm.IElementLevelIssue> = (props) => {
+    return new ExprNode(ddm.ElementLevelIssue, props, 'subIssues');
 }
 
-export const ElementSubIssue: Template<ddm.IElementIssue> = (props) => {
-    return new ExprNode(ddm.ElementIssue, props, 'subIssues');
-}
-
-export const ModelSubIssue: Template<ddm.IModelIssue> = (props) => {
-    return new ExprNode(ddm.ModelIssue, props, 'subIssues');
+export const ModelLevelSubIssue: Template<ddm.IModelLevelIssue> = (props) => {
+    return new ExprNode(ddm.ModelLevelIssue, props, 'subIssues');
 }
 
 export const Dependency: Template<ddm.IDependency> = (props) => {
     return new ExprNode(ddm.Constraint, props, undefined);
 }
 
-export const SimpleOption: Template<ddm.ISimpleOption> = (props) => {
-    return new ExprNode(ddm.SimpleOption, props, 'optionType');
-}
-
-export const CompositeOption: Template<ddm.ICompositeOption> = (props) => {
-    return new ExprNode(ddm.CompositeOption, props, 'optionType');
+export const OpeningOption: Template<ddm.IOpeningOption> = (props) => {
+    return new ExprNode(ddm.OpeningOption, props, 'options');
 }
 
 

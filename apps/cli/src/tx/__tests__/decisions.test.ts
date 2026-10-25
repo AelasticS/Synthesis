@@ -37,13 +37,13 @@ const el = (type: string, name: string, extra: Record<string, unknown> = {}): Fa
 
 // Decision model: elements[] in document order, each Issue followed by its
 // Options (the rendered graph does not materialize the containment).
-const namingIssue = el('ModelIssue', 'NamingConvention')
+const namingIssue = el('ModelLevelIssue', 'NamingConvention')
 const camelCase = el('Option', 'CamelCase', { isDefault: false })
 const snakeCase = el('Option', 'SnakeCase', { isDefault: true })
-const pkIssue = el('ElementIssue', 'PrimaryKeyStrategy')
+const pkIssue = el('ElementLevelIssue', 'PrimaryKeyStrategy')
 const autoInc = el('Option', 'UseAutoIncrement', { isDefault: true })
 const manualInc = el('Option', 'UseManualIncrement', { isDefault: false })
-const noDefaultIssue = el('ElementIssue', 'CollationStrategy')
+const noDefaultIssue = el('ElementLevelIssue', 'CollationStrategy')
 const collationA = el('Option', 'CollationA', { isDefault: false })
 const collationB = el('Option', 'CollationB', { isDefault: false })
 
@@ -71,24 +71,21 @@ const bindingModel = {
   bindings: [{ element: { name: 'Attribute' }, issues: [{ name: 'PrimaryKeyStrategy' }] }]
 }
 
-const globalDecision = (name: string, option: FakeElement): FakeElement =>
-  el('Decision', name, { choices: [{ name: `${name}_choice`, selectedOption: option }] })
+const modelChoice = (name: string, option: FakeElement): FakeElement =>
+  el('ModelLevelChoice', name, { selectedOption: option })
 
-const elementDecision = (name: string, element: FakeElement, option: FakeElement): FakeElement =>
-  el('ElementDecision', name, {
-    element,
-    choices: [{ name: `${name}_choice`, selectedOption: option }]
-  })
+const elementChoice = (name: string, element: FakeElement, option: FakeElement): FakeElement =>
+  el('ElementLevelChoice', name, { element, selectedOption: option })
 
 const fullCoverage = () => [
-  globalDecision('gc_naming', snakeCase),
-  elementDecision('ec_personId', personId, autoInc),
-  elementDecision('ec_organizationId', organizationId, autoInc),
-  elementDecision('ec_nestedId', nestedId, autoInc)
+  modelChoice('gc_naming', snakeCase),
+  elementChoice('ec_personId', personId, autoInc),
+  elementChoice('ec_organizationId', organizationId, autoInc),
+  elementChoice('ec_nestedId', nestedId, autoInc)
 ]
 
-const validate = (decisions: unknown[], binding: unknown = bindingModel) =>
-  validateConfigStructure(fakeStore, { decisions }, decisionModel, binding, inputRoot)
+const validate = (choices: unknown[], binding: unknown = bindingModel) =>
+  validateConfigStructure(fakeStore, { choices }, decisionModel, binding, inputRoot)
 
 describe('indexDecisionModel', () => {
   it('indexes issues with their options and defaults in document order', () => {
@@ -103,8 +100,8 @@ describe('indexDecisionModel', () => {
   })
 
   it('warns when two issues declare an option with the same name', () => {
-    const issueA = el('ModelIssue', 'IssueA')
-    const issueB = el('ModelIssue', 'IssueB')
+    const issueA = el('ModelLevelIssue', 'IssueA')
+    const issueB = el('ModelLevelIssue', 'IssueB')
     const shared1 = el('Option', 'Shared', { isDefault: true })
     const shared2 = el('Option', 'Shared', { isDefault: true })
     const index = indexDecisionModel(fakeStore, { name: 'DM', elements: [issueA, shared1, issueB, shared2] })
@@ -116,21 +113,21 @@ describe('indexDecisionModel', () => {
     expect(index.optionIssues.get('Shared')?.name).toBe('IssueA')
   })
 
-  it('uses the materialized containment when present and indexes composite sub-issues', () => {
-    // The rendered graph puts a composite option's subtree BEFORE the
+  it('uses the materialized containment when present and indexes opening-option sub-issues', () => {
+    // The rendered graph puts an opening option's subtree BEFORE the
     // option itself (props render first), so document order would
     // attribute HistoryTable to its own sub-issue; containment must win.
-    const rowHistory = el('ElementIssue', 'RowHistory')
+    const rowHistory = el('ElementLevelIssue', 'RowHistory')
     const noHistory = el('Option', 'NoHistory', { isDefault: true })
-    const discriminator = el('ElementIssue', 'HistoryDiscriminator')
+    const discriminator = el('ElementLevelIssue', 'HistoryDiscriminator')
     const validFrom = el('Option', 'ValidFromTimestamp', { isDefault: true })
     const counter = el('Option', 'VersionCounter', { isDefault: false })
-    discriminator.possibleOptions = [validFrom, counter]
-    const historyTable = el('Option', 'HistoryTable', {
+    discriminator.options = [validFrom, counter]
+    const historyTable = el('OpeningOption', 'HistoryTable', {
       isDefault: false,
-      optionType: { subIssues: [discriminator] }
+      subIssues: [discriminator]
     })
-    rowHistory.possibleOptions = [noHistory, historyTable]
+    rowHistory.options = [noHistory, historyTable]
     const model = {
       name: 'DM',
       issues: [rowHistory],
@@ -141,7 +138,7 @@ describe('indexDecisionModel', () => {
     expect(index.optionIssues.get('HistoryTable')?.name).toBe('RowHistory')
     expect(index.optionIssues.get('NoHistory')?.name).toBe('RowHistory')
     expect(index.optionIssues.get('ValidFromTimestamp')?.name).toBe('HistoryDiscriminator')
-    expect(index.issues.get('HistoryDiscriminator')?.typeName).toBe('ElementIssue')
+    expect(index.issues.get('HistoryDiscriminator')?.typeName).toBe('ElementLevelIssue')
     expect(index.issues.get('HistoryDiscriminator')?.options.map((o) => o.name)).toEqual([
       'ValidFromTimestamp',
       'VersionCounter'
@@ -159,7 +156,7 @@ describe('validateConfigStructure coverage', () => {
   })
 
   it('falls back to the default option for an uncovered global issue', () => {
-    const result = validate(fullCoverage().filter((decision) => decision.name !== 'gc_naming'))
+    const result = validate(fullCoverage().filter((choice) => choice.name !== 'gc_naming'))
     expect(result.errors).toEqual([])
     expect(result.announcements).toContainEqual({ issue: 'NamingConvention', option: 'SnakeCase', isDefault: true })
     expect(result.uncoveredDefaults).toHaveLength(1)
@@ -171,7 +168,7 @@ describe('validateConfigStructure coverage', () => {
   it('tracks element-issue coverage per element, not per issue', () => {
     // personId stays covered; organizationId and nestedId lose their choices
     const result = validate(
-      fullCoverage().filter((decision) => decision.name !== 'ec_organizationId' && decision.name !== 'ec_nestedId')
+      fullCoverage().filter((choice) => choice.name !== 'ec_organizationId' && choice.name !== 'ec_nestedId')
     )
     expect(result.errors).toEqual([])
     const defaults = result.announcements.filter((announcement) => announcement.isDefault)
@@ -191,7 +188,7 @@ describe('validateConfigStructure coverage', () => {
   })
 
   it('treats a global choice for an element issue as covering every element', () => {
-    const result = validate([globalDecision('gc_naming', snakeCase), globalDecision('gc_pk', manualInc)])
+    const result = validate([modelChoice('gc_naming', snakeCase), modelChoice('gc_pk', manualInc)])
     expect(result.errors).toEqual([])
     expect(result.uncoveredDefaults).toEqual([])
   })
@@ -207,7 +204,7 @@ describe('validateConfigStructure coverage', () => {
         }
       ]
     }
-    const result = validate([globalDecision('gc_naming', snakeCase)], conditional)
+    const result = validate([modelChoice('gc_naming', snakeCase)], conditional)
     expect(result.errors).toEqual([])
     expect(result.uncoveredDefaults).toHaveLength(1)
     expect(result.uncoveredDefaults[0].element).toBe(personId)
@@ -217,7 +214,7 @@ describe('validateConfigStructure coverage', () => {
     const binding = {
       bindings: [{ element: { name: 'Attribute' }, issues: [{ name: 'CollationStrategy' }] }]
     }
-    const result = validate([globalDecision('gc_naming', snakeCase)], binding)
+    const result = validate([modelChoice('gc_naming', snakeCase)], binding)
     const collationErrors = result.errors.filter((error) => error.includes('CollationStrategy'))
     expect(collationErrors).toHaveLength(3) // one per attribute
     expect(collationErrors[0]).toContain(`for element 'personId'`)
@@ -230,14 +227,14 @@ describe('validateConfigStructure coverage', () => {
 })
 
 describe('validateConfigStructure containment (nested elements)', () => {
-  it('accepts an element decision targeting a nested element of the input model', () => {
+  it('accepts an element choice targeting a nested element of the input model', () => {
     const result = validate(fullCoverage())
     expect(result.errors).toEqual([])
   })
 
-  it('rejects an element decision targeting an element outside the input model', () => {
+  it('rejects an element choice targeting an element outside the input model', () => {
     const foreign = attr('foreignId', '//www.aelastics.org/Other')
-    const result = validate([...fullCoverage(), elementDecision('ec_foreign', foreign, autoInc)])
+    const result = validate([...fullCoverage(), elementChoice('ec_foreign', foreign, autoInc)])
     expect(result.errors.some((error) => error.includes('foreignId') && error.includes('not part of the input model'))).toBe(
       true
     )
@@ -245,14 +242,14 @@ describe('validateConfigStructure containment (nested elements)', () => {
 
   it('rejects a path that merely shares the input path as a prefix string', () => {
     const sneaky = attr('sneakyId', '//www.aelastics.org/InputOther')
-    const result = validate([...fullCoverage(), elementDecision('ec_sneaky', sneaky, autoInc)])
+    const result = validate([...fullCoverage(), elementChoice('ec_sneaky', sneaky, autoInc)])
     expect(result.errors.some((error) => error.includes('sneakyId'))).toBe(true)
   })
 })
 
 describe('validateConfigStructure duplicate rejection', () => {
   it('rejects two global choices for the same issue, naming both options', () => {
-    const result = validate([...fullCoverage(), globalDecision('gc_naming2', camelCase)])
+    const result = validate([...fullCoverage(), modelChoice('gc_naming2', camelCase)])
     const conflict = result.errors.find((error) => error.includes(`issue 'NamingConvention'`))
     expect(conflict).toBeDefined()
     expect(conflict).toContain(`'SnakeCase'`)
@@ -262,7 +259,7 @@ describe('validateConfigStructure duplicate rejection', () => {
   })
 
   it('rejects two element choices for the same (issue, element) slot', () => {
-    const result = validate([...fullCoverage(), elementDecision('ec_personId2', personId, manualInc)])
+    const result = validate([...fullCoverage(), elementChoice('ec_personId2', personId, manualInc)])
     const conflict = result.errors.find(
       (error) => error.includes(`issue 'PrimaryKeyStrategy'`) && error.includes(`element 'personId'`)
     )
@@ -272,7 +269,7 @@ describe('validateConfigStructure duplicate rejection', () => {
   })
 
   it('rejects a global choice conflicting with an element choice for the same issue', () => {
-    const result = validate([...fullCoverage(), globalDecision('gc_pk', manualInc)])
+    const result = validate([...fullCoverage(), modelChoice('gc_pk', manualInc)])
     const conflict = result.errors.find((error) => error.includes('covered both globally'))
     expect(conflict).toBeDefined()
     expect(conflict).toContain(`'PrimaryKeyStrategy'`)
@@ -280,7 +277,7 @@ describe('validateConfigStructure duplicate rejection', () => {
 
   it('still rejects a choice selecting an option unknown to the decision model', () => {
     const bogus = el('Option', 'NoSuchOption')
-    const result = validate([...fullCoverage(), globalDecision('gc_bogus', bogus)])
+    const result = validate([...fullCoverage(), modelChoice('gc_bogus', bogus)])
     expect(result.errors.some((error) => error.includes(`'NoSuchOption'`))).toBe(true)
   })
 })

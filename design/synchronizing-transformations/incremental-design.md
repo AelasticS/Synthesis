@@ -17,7 +17,7 @@
                            ▼
 ┌───────────────────────────────────────────────────────────┐
 │  Engine layer (extended)                                  │
-│  • Trace with parentRule + reads edges                    │
+│  • Trace with parent + reads edges                    │
 │  • Incremental scheduler (dirty-set + topo sort)          │
 │  • Find-or-create rendering of rule output                │
 └──────────────────────────┬────────────────────────────────┘
@@ -35,33 +35,22 @@ Source stays mutable because that is how users edit it and how the EventLog capt
 
 ## 2. Trace Extension
 
-Today's `TraceEntry` ([trace-meta.model.ts](../../libraries/engine/src/transformations/trace/trace-meta.model.ts)):
+Today's `RuleInvocation` ([trace-meta.model.ts](../../libraries/synthesis/src/engine/transformations/trace/trace-meta.model.ts)) already carries the rule and its source and targets:
 
 ```ts
-type TraceEntry = {
-  rule: string
-  timestamp: number
+type RuleInvocation = {
+  function: string
   source: ModelElement
   targets: ModelElement[]
-  ruleType: string
+  parent?: Invocation        // the invocation executing when this one began (call stack)
+  reads?: ReadRecord[]       // reserved, unpopulated today
+  resolutions?: Resolution[]
 }
 ```
 
-Add two fields:
+The incremental scheduler needs two of these fields, `parent` and `reads`. `parent` is populated today; `reads` is a reserved slot that stays empty until read-set capture lands (see [trace-model.md](../trace-model.md)).
 
-```ts
-type TraceEntry = {
-  rule: string
-  timestamp: number
-  source: ModelElement
-  targets: ModelElement[]
-  ruleType: string
-  parentRule: TraceEntryId | null   // containment: JSX-nesting parent
-  reads: TraceEntryId[]             // lateral: resolveTarget() calls
-}
-```
-
-**`parentRule`** captures JSX containment. When the template nests `<Column>` inside `<Table>`, the column's trace entry has the table's entry as parent. Recording this is cheap: the JSX render walker already knows the enclosing entry. When a parent rule is re-run, all child invocations are conceptually re-attached under the new parent target.
+**`parent`** captures call nesting. When the `Table` rule calls the `Column` rule while it executes, the column's invocation has the table's invocation as parent. Recording this is cheap: the engine already keeps a stack of executing invocations and takes the top of it when a new one begins. When a parent rule is re-run, all child invocations are conceptually re-attached under the new parent target.
 
 **`reads`** captures lateral data dependencies. Whenever a rule body calls `context.resolveTarget(otherSource, otherRule)`, the engine appends the resolved entry's id to the calling entry's `reads`. This is the edge MobX would record automatically by intercepting observable reads; for us it is recorded at the single chokepoint of `resolveTarget`.
 
@@ -97,7 +86,7 @@ function transformIncremental(prev, delta):
     for each updated/deleted element e in delta:
         for each entry in prev.context.sourceIndex[e]:
             dirty.add(entry)
-    propagate(dirty)   // close under parentRule and reads edges (reverse direction)
+    propagate(dirty)   // close under parent and reads edges (reverse direction)
 
     // 2. Identify new and orphaned invocations
     newSources    := delta.created
@@ -161,12 +150,12 @@ Recommendation: **prototype with Immer** for the first vertical slice, refactor 
 The current `render<D>(context)` ([abstractM2M.tsx](../../libraries/engine/src/transformations/abstractM2M.tsx)) creates target instances on the fly. For incremental, rendering must consult the previous trace:
 
 ```text
-function renderFindOrCreate(exprNode, prevContext, priorEntry):
-    if priorEntry exists and exprNode structurally matches priorEntry.targets:
-        return (priorTargets, priorEntry)              // reuse — structural share
+function renderFindOrCreate(exprNode, prevContext, priorInvocation):
+    if priorInvocation exists and exprNode structurally matches priorInvocation.targets:
+        return (priorTargets, priorInvocation)              // reuse — structural share
     else:
         newTargets := createImmutableNodes(exprNode)
-        return (newTargets, makeTraceEntry(newTargets, ...))
+        return (newTargets, makeInvocation(newTargets, ...))
 ```
 
 "Structurally matches" means: same node type, same own properties, same child JSX structure (recursively, with same find-or-create check on children). When a match succeeds at any subtree, the entire subtree is reused.
@@ -175,7 +164,7 @@ function renderFindOrCreate(exprNode, prevContext, priorEntry):
 
 Target: prove the design on `EER2RelTransformation`.
 
-1. **Trace extension** — add `parentRule` and `reads` to `TraceEntry`; record them in `M2MContext`.
+1. **Trace extension** — add `parentInvocation` and `reads` to `Invocation`; record them in `M2MContext`.
 2. **Delta builder** — `deltaFromEventLog` helper in `aelastics-store` or `engine`.
 3. **Scheduler** — pure-function `computeDirtySet(prev, delta)` and `topoSort`. Unit-testable in isolation.
 4. **Immutable target layer (minimal)** — Immer-based wrapper around the existing target metamodel. Accept the cross-reference limitation for the slice; document the workaround.
@@ -190,6 +179,6 @@ Estimated effort: ~1 week to a working slice on the EER example, plus 2–3 week
 2. **Cycle detection in the trace.** Can two rules legitimately read each other? If yes, what is the intended semantics?
 3. **Decision-framework re-execution.** When a `@VarPoint` decision changes (not a source element change), how does it map to a `SourceDelta`? Likely needs a separate `DecisionDelta` type. Out of scope for slice but should not be designed-out.
 4. **Rule purity enforcement.** The design assumes rules do not mutate source or perform I/O. Is this enforced anywhere, or only conventional? Worth either documenting in `writing-transformations.md` or runtime-asserting in dev mode.
-5. **Trace entry identity (`TraceEntryId`).** How is it generated? Stable across re-runs of the same `(source, rule)` pair? Probably yes; needed for `reads` references to remain valid.
+5. **Invocation identity (`InvocationId`).** How is it generated? Stable across re-runs of the same `(source, rule)` pair? Probably yes; needed for `reads` references to remain valid.
 6. **Version retention policy.** Who decides when an old `TransformResult` can be released? Consumer's responsibility, or engine-side LRU? Affects memory characteristics in long-running sessions.
 7. **Bidirectional readiness.** Will the abstractions chosen here (especially trace + delta + immutable target) generalize cleanly to phase 2 bidirectional, or are we baking in forward-only assumptions? Worth a pass before locking the API.

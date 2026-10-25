@@ -51,14 +51,14 @@ Source and target are now both *event-emitting* and *delta-consuming*. The engin
 
 ## 3. Trace Reverse Index
 
-Phase 1's trace is indexed by source (`sourceIndex: Map<source, TraceEntry[]>`). Phase 2 adds:
+Phase 1's trace is indexed by source (`sourceIndex: Map<source, RuleInvocation[]>`). Phase 2 adds:
 
 ```ts
 class M2MContext {
   // existing
-  sourceIndex: Map<IModelElement, TraceEntry[]>
+  sourceIndex: Map<IModelElement, RuleInvocation[]>
   // new
-  targetIndex: Map<IModelElement, TraceEntry>   // each target produced by exactly one entry
+  targetIndex: Map<IModelElement, RuleInvocation>   // each target produced by exactly one entry
 }
 ```
 
@@ -98,23 +98,23 @@ Many inverses need read access to other parts of the source (e.g., to translate 
 ```text
 function propagateBackward(prev, targetDelta):
     // 1. Group target changes by producing rule entry
-    perEntry := Map<TraceEntry, TargetDeltaForElement>()
+    perInvocation := Map<RuleInvocation, TargetDeltaForElement>()
     for each change c in targetDelta:
         entry := prev.context.targetIndex[c.elementId]
         if entry is undefined:
             throw OrphanTargetEditError(c)
-        perEntry[entry].add(c)
+        perInvocation[entry].add(c)
 
     // 2. Reverse-topo-sort the affected entries
-    work := reverseTopoSort(perEntry.keys())   // consumers before producers
+    work := reverseTopoSort(perInvocation.keys())   // consumers before producers
 
     // 3. Invoke per-rule put hooks
     sourceDelta := emptyDelta()
     for entry in work:
         rule := lookupRule(entry.rule)
         if rule.put is undefined and not isTriviallyInvertible(rule):
-            throw NonInvertibleRuleError(rule, perEntry[entry])
-        partial := rule.put(entry.source, perEntry[entry])
+            throw NonInvertibleRuleError(rule, perInvocation[entry])
+        partial := rule.put(entry.source, perInvocation[entry])
         sourceDelta := merge(sourceDelta, partial)
 
     // 4. Apply source delta + re-stabilize target

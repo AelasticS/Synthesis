@@ -36,6 +36,6 @@ synth transformation run eer-tutorial-configuration-based \
 configurations in an isolated workspace.
 
 This package is the finished state of
-[Part 3 of the model-to-model tutorial](https://AelasticS.github.io/aelastics/developer-guide/tutorial/model-to-model/part-3-configuration-based),
+[Part 3 of the model-to-model tutorial](https://AelasticS.github.io/Synthesis/developer-guide/tutorial/model-to-model/part-3-configuration-based),
 which explains the design space, the three models beside the
 transformation, and both runs' outputs.

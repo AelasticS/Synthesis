@@ -45,7 +45,7 @@ property-granular dependency tracking for incrementality (section 8).
 The facts this design builds on, from the current code:
 
 - **`abstractM2M<S, D, EM, P>`** (`libraries/synthesis/src/engine/
-  transformations/abstractM2M.tsx`). `topRule(source: S)` and
+  transformations/abstractM2M.tsx`). `main(source: S)` and
   `transform(source: S, param?: P): D` take one input model and return
   one output model. The constructor is
   `constructor(store?: ModelStore, extra?: EM)` where
@@ -58,7 +58,7 @@ The facts this design builds on, from the current code:
   as `new Transformation(store, {}, configModel)` (`apps/cli/src/tx/
   execute.ts`, around line 863).
 - **The trace is an effect, not an output.** `transform()` renders the
-  `topRule` tree into the target model, then builds a second JSX tree
+  `main` tree into the target model, then builds a second JSX tree
   for the trace (`createTraceModel()`) and renders it into the same
   store as its own model. Its header names one `source` model and a
   `targets` array holding one target model.
@@ -133,7 +133,7 @@ instead of implicit.
 
 ### 3.3 The pivot and the context inputs
 
-A rule-based transformation needs one input to drive it: `topRule`
+A rule-based transformation needs one input to drive it: `main`
 traverses one root, and the trace and resolve machinery are keyed to
 the elements met during that traversal. One input is therefore the
 **pivot**, the model the manifest's source metamodel and the chain
@@ -166,7 +166,7 @@ const single = runLibrary(singleTableConfig)
 ```
 
 The second order is **design-space exploration**: one source, many
-configurations, compared side by side. The eer-to-sql suite page's
+configurations, compared side by side. The advanced-eer-to-sql suite page's
 "One source, three configurations" section and its verification
 script do exactly this today, by hand, through the CLI. With free
 binding order it is one line per configuration, or
@@ -357,7 +357,7 @@ between outputs is simply one more named output.
 rooted, and every element rendered in it belongs to the model whose
 subtree it sits under. So instead of scattering elements of different
 models through one tree, the transformation declares one root rule per
-companion role beside `topRule` for the primary target, and
+companion role beside `main` for the primary target, and
 `transform()` renders each tree into the shared store in declared
 order. Sharing between the trees uses two existing mechanisms:
 cross-model references by full path (how trace entries already point
@@ -412,7 +412,7 @@ four phases:
    fires on a source element, the decorator intercepts the returned
    JSX, filters out `Resolve` placeholders, determines the executed
    rule name (the dispatched option's name, if a specialization or
-   variation point dispatched), and calls
+   variability point dispatched), and calls
    `context.makeTrace(sourceElement, jsxNodes, ruleName)`, which
    appends a raw record indexed by source element and by JSX node.
 2. **During target render.** The renderer calls `resolveTargetForJSX`
@@ -420,7 +420,7 @@ four phases:
    real created elements, so trace references carry real full paths.
 3. **After render.** `createTraceModel()` builds a second JSX tree: a
    `TraceModel` header (transformation, timestamp, source model
-   reference, target model references) with one `TraceEntry` per
+   reference, target model references) with one `RuleInvocation` per
    record. The decision-aware subclass attaches configuration
    resolutions here.
 4. **Second render.** The tree is serialized (`traceJsx`) and rendered
@@ -650,7 +650,7 @@ Engine API and model:
 - **Stage E (independent, can go first):** context lifecycle per run;
   `with`, `bindInputs`, `bindSource`/`partial`, `chainTx`; the
   read-only source contract; tests including a design-space
-  exploration test over the eer-to-sql Library sample and three
+  exploration test over the advanced-eer-to-sql Library sample and three
   configurations.
 - **Stage 1:** pure moves: the decision and configuration computation
   (index, structural validation, materialization, coverage judgment)

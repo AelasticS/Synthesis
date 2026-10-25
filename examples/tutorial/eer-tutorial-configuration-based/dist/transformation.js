@@ -7,7 +7,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 /**
  * Tutorial Part 3: the Part 2 transformation with its relationship
- * mapping opened up as a variation point. The entity rule is unchanged,
+ * mapping opened up as a variability point. The entity rule is unchanged,
  * still a specialization point dispatching on Kernel and Weak. What
  * changes is the relationship side: an M:N relationship has no choice,
  * a join table is the only structure that can hold it, so that branch
@@ -25,11 +25,11 @@ import { RelSchema, Table, Column } from 'rel-tutorial-metamodel';
 let EER2RelConfigurableTransformation = class EER2RelConfigurableTransformation extends DecisionAwareM2M {
     // A configuration-based transformation takes the run's configuration
     // model as a third argument. It is optional: without one, every
-    // variation point falls back to its @Default option.
+    // variability point falls back to its @Default option.
     constructor(store, {}, configModel) {
         super(store, {}, configModel);
     }
-    topRule(s) {
+    main(s) {
         return (createExprNode(RelSchema, { name: `${s.name}_rel`, store: this.context.store },
             s.elements
                 .filter((el) => this.context.store.isTypeOf(el, em.Entity))
@@ -72,13 +72,13 @@ let EER2RelConfigurableTransformation = class EER2RelConfigurableTransformation 
         }
         return this.oneToManyMapping(rel);
     }
-    // The variation point. Its body is never executed: the engine looks up
+    // The variability point. Its body is never executed: the engine looks up
     // the option selected for this relationship in the run's configuration
     // model and calls that method instead. @E2E is outermost so the trace
     // records which option was taken; @VarPoint must be inner so it
     // registers its options bucket before the @VarOption decorators run.
     oneToManyMapping(rel) {
-        throw new Error('No option selected for the OneToManyStrategy variation point');
+        throw new Error('No option selected for the OneToManyStrategy variability point');
     }
     // The default option, matching isDefault on ForeignKey in the decision
     // model: the N side gains a foreign key column pointing at the 1 side.

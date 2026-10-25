@@ -9,7 +9,7 @@
  * schema says whether its DDL should ship as one script, as tables plus
  * constraints, or as one file per table: that is a property of the
  * project the script is deployed into, not of the model. A question the
- * source model cannot answer is exactly what a variation point is for.
+ * source model cannot answer is exactly what a variability point is for.
  *
  * So the whole document structure is a @VarPoint whose options each
  * return a complete <M2T> expression, and the run's configuration model
@@ -48,21 +48,21 @@ export class RelToSqlConfigurableTransformation extends DecisionAwareM2M<
 > {
   // A configuration-based transformation takes the run's configuration
   // model as a third argument. It is optional: without one, every
-  // variation point falls back to its @Default option.
+  // variability point falls back to its @Default option.
   constructor(store: ModelStore, extra?: {}, configModel?: cm.IConfigurationModel) {
     super(store, extra ?? {}, configModel)
   }
 
-  // The template does nothing but hand over to the variation point. The
+  // The template does nothing but hand over to the variability point. The
   // decision is the first thing the transformation makes, because
   // everything else depends on it.
-  topRule(s: rmT.IRelSchema): ExprNode<rmT.IRelSchema, m2tmm.M2T_Model> {
+  main(s: rmT.IRelSchema): ExprNode<rmT.IRelSchema, m2tmm.M2T_Model> {
     return this.documentLayout(s)
   }
 
   // ######### START OutputLayout variations #############
 
-  // The variation point. Its body never runs: the dispatcher looks up
+  // The variability point. Its body never runs: the dispatcher looks up
   // the option selected for the OutputLayout issue in the run's
   // configuration model and calls that method instead.
   @VarPoint('OutputLayout')

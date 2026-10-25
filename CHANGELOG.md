@@ -12,6 +12,33 @@ overall version history.
 
 ### Added
 
+- **The simple-eer-to-sql suite.** A compact counterpart to the
+  advanced suite: two small metamodels (`simple-eer-metamodel`,
+  `simple-relational-metamodel`) and `simple-eer-to-relational`, a
+  configuration-based transformation with three design issues
+  (`OneToManyStrategy`, `PrimaryKeyStrategy`, `NamingConvention`). Its
+  README maps the paper's listings to files and walks the loop: build,
+  install, generate the default configuration with `config init`, edit
+  it, run with it, and export the result and the trace. `npm test`
+  runs the CLI smoke and `scripts/verify.mjs`, which asserts both
+  runs' tables and the trace resolutions behind them.
+
+- **Declared constraints on the decision-framework metamodels.**
+  `BindingElement` must reference only issues of its binding model's
+  decision model (sub-issues of opening options included), and
+  `ConfigurationModel` must select options only from that decision
+  model, hold at most one `ElementLevelChoice` per element and issue
+  and one `ModelLevelChoice` per issue. `ElementLevelChoice` and
+  `ModelLevelChoice` accept only options of an element-level and a
+  model-level issue respectively. All run under `synth model validate`.
+
+- **Trace reference components.** `SourceElement` and `ChoiceRef` join
+  the trace metamodel's JSX components: a `RuleInvocation` names its
+  source element with `<SourceElement $refByName=…/>`, and a `Resolution`
+  lists the configuration choices it consulted with
+  `<ChoiceRef $refByName=…/>`, so serialized traces tag each reference
+  by its role.
+
 - **An invocation carries its own performer.** An optional override
   of the called definition's default, as BPMN call activities do; the
   flowchart view shows the effective performer. A new declared
@@ -34,12 +61,12 @@ overall version history.
   new `transformation run --param <json>` feeds the engine's
   parameter channel with verbatim `generatedBy.param` provenance.
 
-- **The eer-to-sql suite draws its design space.** `rel-to-mermaid`
+- **The advanced-eer-to-sql suite draws its design space.** `rel-to-mermaid`
   renders the configuration-based mapping's output as a Mermaid
   erDiagram, so different configurations of one source become visibly
   different diagrams; the suite page shows three side by side.
 
-- **The eer-to-sql suite gains its diagram view.** `eer-to-mermaid-er`
+- **The advanced-eer-to-sql suite gains its diagram view.** `eer-to-mermaid-er`
   renders the EER source as a Mermaid erDiagram. Fixed logic, no
   configuration flags.
 
@@ -60,7 +87,7 @@ overall version history.
   `config init` and `--default-configs` answer, recursively, the
   sub-issues a chosen option opens.
 
-- **The eer-to-sql suite maps full EER semantics (v2).** Aggregations
+- **The advanced-eer-to-sql suite maps full EER semantics (v2).** Aggregations
   with the cardinality key rule, binary-only relationships, integrity
   rules as referential actions and trigger stubs, user-defined
   domains, composite attributes, an ordered PrimaryKey element,
@@ -77,14 +104,107 @@ overall version history.
 
 ### Changed
 
-- **The transformation entry rule is `topRule`.** Renamed from
+- **Terminology follows the metamodel.** The decision framework's
+  `ElementIssue` is `ElementLevelIssue`, "variation points" are
+  "variability points" (the tutorial pages `3-variation-points` and
+  `2-variation-points` are renamed accordingly), and "composite"
+  options are "opening" options throughout the docs and design notes.
+
+- **`model import` takes `--tx` and `--dependency`.** A configuration
+  model needs its transformation's render context (`--tx`) and names
+  its source model (`--dependency`, auto-detected when exactly one
+  installed model defines the referenced schema).
+
+- **The docs are published from this repository.** The site moves to
+  `https://AelasticS.github.io/Synthesis/`, built and deployed by the
+  `Deploy Docs` workflow with the official GitHub Pages actions; it no
+  longer publishes to a separate Pages repository and needs no deploy
+  token. Links in the docs and READMEs follow the new address.
+
+- **The transformation entry rule is `main`.** Renamed from
   `template`: all rules are templates, and the entry rule's
   distinction is its position. Breaking for transformations authored
   against cli-v0.2.0.
 
+- **The decision framework drops its option and choice unions for
+  concrete subtypes.** `Option`'s `optionType` tagged union
+  (`SimpleOption`/`CompositeOption`) is gone: a plain option is
+  authored as a bare `Option`, and one that opens sub-issues is
+  authored directly as `OpeningOption` (renamed from
+  `CompositeOption`), no `optionType` wrapper needed. `Issue`'s
+  `possibleOptions` is renamed `options`, and `Option`'s `ParentIssue`
+  is renamed `parentIssue` and declared as that property's inverse
+  (`t.inverseProps`), so the renderer wires it automatically instead
+  of authors setting it. The configuration model sheds the parallel
+  `Decision` container: `BaseChoice` is renamed `Choice`, and its two
+  concrete subtypes `ElementLevelChoice`/`ModelLevelChoice` (previously
+  `ElementDecision` and the base `Decision`) are themselves single
+  choices rather than containers holding a nested `choices` array;
+  `ConfigurationModel`'s `decisions` is renamed `choices`, now one
+  flat list. A `Choice` no longer carries its own `issue` field — it
+  is recovered from `selectedOption.parentIssue`. Every decision-model
+  author (eer-to-relational, rel-to-sql-ddl, both tutorial
+  configuration-based companions) drops the `optionType={<SimpleOption
+  .../>}` boilerplate, and presets build a `ModelLevelChoice` with
+  `selectedOption` set directly instead of nesting a nameless `Choice`
+  inside it.
+
+- **The trace is a call tree.** The trace model's `ElementMapping`/
+  `TraceEntry` list is replaced by `Invocation` (one executed call) and
+  its subtype `RuleInvocation` (an `@E2E` rule: `source` and `targets`),
+  and `TraceModel.elementMappings` is renamed `invocations`. Each
+  invocation's `parent` is the invocation that was executing when it
+  began, tracked through the call stack; `function` names the concrete
+  method that ran (for a rule with a variability or specialization
+  point, the executed option method, still one RuleInvocation). A
+  `@VarOption`/`@SpecOption` executed outside any `@E2E` rule is a
+  plain `Invocation`. `Resolution` records one `@VarPoint`
+  consultation on the invocation that carried it: `byDefault` is true
+  when the `@Default` option ran because no condition was met, and
+  `choices` lists the configuration choices for that issue in scope,
+  always, including those whose condition was not satisfied. The
+  per-model `NonRuleResolution`/`ElementResolution` records and the
+  `trace-extensions` package are removed. `ReadRecord.entry` now links
+  an `Invocation`. `@E2E` now validates its input: calling an `@E2E`
+  method whose first argument is not a `ModelElement` throws an Error.
+
+- **The CLI follows the new decision and configuration metamodel.**
+  Decision and configuration handling (`transformation run`,
+  default-configuration generation, validation) reads `issue.options`,
+  `OpeningOption.subIssues` and the flat `ConfigurationModel.choices`,
+  and writes `ModelLevelChoice`/`ElementLevelChoice` directly. Existing
+  configuration files using `GlobalChoice`/`ElementChoice` (nested
+  `choices`, `issue=`) must be rewritten to the new names; there is no
+  backward compatibility. `--trace` output now contains
+  `RuleInvocation`, `Invocation` and `Resolution` elements.
+
 - **Docs pages link their sources.** Example, tutorial, and guide
   pages link the repository folders holding their packages and
   metamodels.
+
+- **The full-example suite moves to `examples/advanced-eer-to-sql`.**
+  Renamed from `examples/eer-to-sql` to make room for a simple
+  counterpart. Packages, names, and the documentation page keep their
+  names; the Rush project folders, the lockfile links, and the links
+  in the docs, READMEs, and design notes follow the new path. The
+  simple suite's EER metamodel package is `simple-eer-metamodel`, so
+  the two never share a package name.
+
+- **Docs follow the `main` entry rule and the run flags.** The
+  developer guide, both tutorials, the design notes, the starter
+  template, and the decision-support description name the entry rule
+  `main`; the command reference lists `transformation run --param` and
+  `--trace`.
+
+### Fixed
+
+- **The simple suite's foreign key option puts the column on the right
+  table.** For a 1:N relationship the `ForeignKey` option now adds the
+  nullable foreign key column to the table of the entity whose role has
+  upper bound 1 (`Person`), named after and referencing the other
+  entity (`CompanyIdFK` referencing `Company`). It previously added a
+  column named after the first entity to the other entity's table. The
+  suite's `verify.mjs` asserts the placement.
 
 ## [cli-v0.2.0] - 2026-09-05
 
@@ -112,7 +232,7 @@ overall version history.
   `SpecializationPointTraceEntry` entry kinds and the `ruleType` field
   are retired; trace references are full element paths. For future
   incremental transformation (design/synchronizing-transformations/),
-  entries reserve a `reads` containment and an optional `parentRule`
+  entries reserve a `reads` containment and an optional `parentInvocation`
   link, and the trace model gains transformation and source version
   slots. `transformation run --trace <ref>` persists the trace as a
   workspace model (single step, m2m and m2t); when the run used
@@ -477,7 +597,7 @@ overall version history.
   workflow builds the CLI, packs platform tarballs (Linux x64/arm64,
   macOS x64/arm64, Windows x64), and attaches them to a GitHub Release
   on `cli-v*` tag push or manual `workflow_dispatch`. See
-  [Installation](https://AelasticS.github.io/aelastics/docs/cli/installation)
+  [Installation](https://AelasticS.github.io/Synthesis/user-guide/getting-started/installation)
   for download instructions and [CONTRIBUTING.md](CONTRIBUTING.md) for the
   release workflow.
 - **CLI test workspace isolation convention.** All `apps/cli/` tests now

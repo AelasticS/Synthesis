@@ -254,7 +254,7 @@ Wrote demo/library-rel (~/.synth/models/demo/library-rel.tsx)
 The run loads the manifest, checks that `demo/library`'s metamodel
 equals `source.metamodel`, imports the entry module, instantiates the
 exported class with a store, renders the source model into it, calls
-`topRule()`, and serializes the resulting model back into the
+`main()`, and serializes the resulting model back into the
 workspace as a new `.tsx` file.
 
 ## Inspect

@@ -289,21 +289,104 @@ describe('edited configuration steers the transformation', () => {
 })
 
 describe('model import of a configuration model', () => {
-  it('round-trips through export/import only with --tx context', async () => {
+  it('round-trips through export/import, taking the tx context from --tx or the header generatedBy', async () => {
     const exportedPath = join(tempDir, 'exported-cfg.tsx')
     const exported = await run(['model', 'export', 'com.example/persons-cfg', '--to', exportedPath])
     expect(exported.error).toBeUndefined()
 
-    const withoutTx = await run(['model', 'import', exportedPath, '--as', 'com.example/persons-cfg-back'])
-    expect(withoutTx.code).toBe(2)
-    expect(flatten(withoutTx.stderr)).toContain('Import rejected')
-    expect(flatten(withoutTx.stderr)).toContain('pass --tx')
+    // Without a generatedBy header the file names no transformation, so it
+    // cannot render and --tx is required
+    const noContextPath = join(tempDir, 'exported-cfg-no-context.tsx')
+    const exportedText = readFileSync(exportedPath, 'utf-8')
+    const stripped = exportedText.replace(/\n\s*generatedBy:\s*\{[^}]*\},?/, '')
+    expect(stripped).not.toBe(exportedText)
+    writeFileSync(noContextPath, stripped)
+    const withoutContext = await run(['model', 'import', noContextPath, '--as', 'com.example/persons-cfg-nocontext'])
+    expect(withoutContext.code).toBe(2)
+    expect(flatten(withoutContext.stderr)).toContain('Import rejected')
+    expect(flatten(withoutContext.stderr)).toContain('pass --tx')
+
+    // The header's generatedBy supplies the transformation when --tx is absent
+    const fromHeader = await run(['model', 'import', exportedPath, '--as', 'com.example/persons-cfg-back'])
+    expect(fromHeader.error).toBeUndefined()
+    expect(fromHeader.stdout).toContain('Imported com.example/persons-cfg-back')
 
     const withTx = await run([
-      'model', 'import', exportedPath, '--as', 'com.example/persons-cfg-back', '--tx', 'eer-to-relational'
+      'model', 'import', exportedPath, '--as', 'com.example/persons-cfg-back-tx', '--tx', 'eer-to-relational'
     ])
     expect(withTx.error).toBeUndefined()
-    expect(withTx.stdout).toContain('Imported com.example/persons-cfg-back')
+    expect(withTx.stdout).toContain('Imported com.example/persons-cfg-back-tx')
+  })
+
+  describe('without references in the file', () => {
+    // A hand-written configuration model: it names its source schema but, as
+    // the namespace is the importer's, no workspace ref to it
+    let bareCfgPath: string
+
+    beforeAll(async () => {
+      const exportedPath = join(tempDir, 'exported-cfg-bare-src.tsx')
+      await run(['model', 'export', 'com.example/persons-cfg', '--to', exportedPath])
+      const text = readFileSync(exportedPath, 'utf-8')
+      const bare = text.replace(/\n\s*references:\s*\{[^}]*\},?/, '').replace(/\n\s*generatedBy:\s*\{[^}]*\},?/, '')
+      expect(bare).not.toContain('references:')
+      bareCfgPath = join(tempDir, 'bare-cfg.tsx')
+      writeFileSync(bareCfgPath, bare)
+    })
+
+    const importedHeader = async (name: string) => {
+      const { stdout, error } = await run(['model', 'show', `com.example/${name}`, '--json'])
+      expect(error).toBeUndefined()
+      return JSON.parse(stdout).header
+    }
+
+    it('takes the one installed model defining the source schema and records it as sourceModel', async () => {
+      const { stdout, error } = await run([
+        'model', 'import', bareCfgPath, '--as', 'com.example/cfg-auto', '--tx', 'eer-to-relational'
+      ])
+      expect(error).toBeUndefined()
+      expect(stdout).toContain('Dependencies: com.example/persons')
+      const header = await importedHeader('cfg-auto')
+      expect(header.references.sourceModel).toBe('com.example/persons')
+      expect(header.generatedBy.tx).toBe('eer-to-relational')
+    })
+
+    it('records an explicit --dependency, picking the configured source out as sourceModel', async () => {
+      const { stdout, error } = await run([
+        'model', 'import', bareCfgPath, '--as', 'com.example/cfg-dep', '--tx', 'eer-to-relational',
+        '--dependency', 'com.example/persons'
+      ])
+      expect(error).toBeUndefined()
+      expect(stdout).toContain('Dependencies: com.example/persons')
+      expect((await importedHeader('cfg-dep')).references).toEqual({ sourceModel: 'com.example/persons' })
+    })
+
+    it('rejects a --dependency that is not in the workspace (NOT_FOUND)', async () => {
+      const { code, stderr } = await run([
+        'model', 'import', bareCfgPath, '--as', 'com.example/cfg-missing', '--tx', 'eer-to-relational',
+        '--dependency', 'com.example/persons,com.example/nope'
+      ])
+      expect(code).toBe(3)
+      expect(flatten(stderr)).toContain('Dependency not found in the workspace: com.example/nope')
+      expect(existsSync(configPath('cfg-missing'))).toBe(false)
+    })
+
+    it('lists the candidates instead of guessing when several models define the schema', async () => {
+      const twin = join(modelsDir, 'com', 'example', 'persons-twin.tsx')
+      writeFileSync(twin, readFileSync(join(modelsDir, 'com', 'example', 'persons.tsx'), 'utf-8'))
+      try {
+        const { code, stderr } = await run([
+          'model', 'import', bareCfgPath, '--as', 'com.example/cfg-ambiguous', '--tx', 'eer-to-relational'
+        ])
+        expect(code).toBe(2)
+        const message = flatten(stderr)
+        expect(message).toContain('Import rejected')
+        expect(message).toContain('Candidates: com.example/persons, com.example/persons-twin')
+        expect(message).toContain('--dependency')
+        expect(existsSync(configPath('cfg-ambiguous'))).toBe(false)
+      } finally {
+        rmSync(twin, { force: true })
+      }
+    })
   })
 })
 

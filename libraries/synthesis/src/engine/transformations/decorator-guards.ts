@@ -1,8 +1,7 @@
 /**
  * decorator-guards.ts
  *
- * Central registry for decorator history, compatibility guards, and the
- * point-decorator runtime registry used by @E2E.
+ * Central registry for decorator history and compatibility guards.
  *
  * Guard rules (enforced at decoration time via decorator history):
  *
@@ -23,9 +22,8 @@
 
 // ─── Sentinels ────────────────────────────────────────────────────────────────
 // String keys stamped onto wrapper functions.
-// Only point-decorator sentinels are needed here — findPointRegistration reads
-// them at runtime to identify which registration applies to a given wrapper.
-// Guard logic uses decorator history instead.
+// Stamped by the point decorators; guard logic and point detection use
+// decorator history instead.
 
 export const __isVarPoint = "__isVarPoint"
 export const __isSpecPoint = "__isSpecPoint"
@@ -97,59 +95,14 @@ export function appendDecoratorHistory(
   ;(wrapper as any)[__decoratorHistory] = inherited
 }
 
-// ─── Point decorator registry ─────────────────────────────────────────────────
-//
-// A "point" decorator (@VarPoint, @SpecPoint, …) registers itself here so that
-// @E2E can:
-//   1. Detect (decoration time) that a point decorator is present — isAlsoXxx.
-//   2. Read + clear the resolution it left on the context (call time).
-// The resolution's `optionName` names the executed option method; @E2E
-// records it as the entry's rule (the trace records outcomes, not how
-// dispatch selected them). Resolution FACTS for configuration issues are
-// recorded independently by @VarPoint on the decision-aware context.
-//
-// context is typed `any` to avoid a circular import with abstractM2M.
-
-export interface PointDecoratorRegistration {
-  /** Sentinel stamped onto the wrapper by the point decorator. */
-  sentinel: string
-  /** Read the resolution left on context by the point decorator. */
-  getResolution(context: any): any
-  /** Clear the resolution — must always be called to prevent leaks. */
-  clearResolution(context: any): void
-}
-
-const pointDecoratorRegistry: PointDecoratorRegistration[] = []
-
-export function registerPointDecorator(reg: PointDecoratorRegistration): void {
-  pointDecoratorRegistry.push(reg)
-}
+// ─── Point detection ──────────────────────────────────────────────────────────
 
 /**
- * Used by @E2E at *decoration* time to find a matching registration.
- * Returns the registration whose sentinel is stamped on `fn`, or undefined.
+ * Used by @E2E at *decoration* time: true when `fn` is a point method
+ * (@VarPoint, @SpecPoint), read from the decorator history.
  */
-export function findPointRegistration(fn: any): PointDecoratorRegistration | undefined {
-  return pointDecoratorRegistry.find(reg => hasSentinel(fn, reg.sentinel))
-}
-
-/**
- * Used by @E2E at *call* time.
- * Reads + clears ALL point resolutions from context (prevents leaks from
- * internally nested VarPoint / SpecPoint calls) and returns only the one
- * belonging to `reg`, or undefined if none was set.
- */
-export function consumePointResolutions(
-  context: any,
-  reg: PointDecoratorRegistration,
-): any {
-  let matched: any
-  for (const r of pointDecoratorRegistry) {
-    const value = r.getResolution(context)
-    r.clearResolution(context)
-    if (r === reg) matched = value
-  }
-  return matched
+export function isPointMethod(fn: any): boolean {
+  return hasInHistory(fn, "VarPoint") || hasInHistory(fn, "SpecPoint")
 }
 
 // ─── Guards ───────────────────────────────────────────────────────────────────

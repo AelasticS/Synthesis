@@ -210,7 +210,7 @@ the owner has to be written before the weak entity in the source file.
 `Book` above `BookCopy` in this sample is what satisfies that, and the
 same holds for a weak entity owned by another weak entity.
 
-## What stays the same in `topRule()`
+## What stays the same in `main()`
 
 One thing worth checking before you move on. Part 1's template selects
 entities like this, and Part 2 does not change the line:

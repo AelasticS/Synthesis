@@ -13,7 +13,7 @@ export class OrgToApprovalTransformation extends abstractM2M {
     constructor(store) {
         super(store);
     }
-    topRule(m) {
+    main(m) {
         const param = this.approvalParam();
         const worker = this.workerNamed(m, param.worker);
         const chain = this.unitChainOf(worker, param.sensitivity);

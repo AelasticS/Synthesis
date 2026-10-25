@@ -13,23 +13,23 @@ generation workflows.
 ## Documentation
 
 The full documentation site lives at
-**[AelasticS.github.io/aelastics](https://AelasticS.github.io/aelastics/)**.
+**[AelasticS.github.io/Synthesis](https://AelasticS.github.io/Synthesis/)**.
 
 | Section | Description |
 |---|---|
-| [User Guide](https://AelasticS.github.io/aelastics/user-guide) | Install the `synth` CLI, import models, run transformations, chains, and pipelines |
-| [Developer Guide](https://AelasticS.github.io/aelastics/developer-guide) | The Synthesis transformation language: define metamodels, build models with JSX, write transformations, configure variability with design decisions |
-| [Examples](https://AelasticS.github.io/aelastics/developer-guide/examples) | The example suites: the tutorial companions, the full-featured EER to SQL suite, and the workflow suite |
-| [@aelastics/types](https://AelasticS.github.io/aelastics/types/intro) | Runtime type system with schemas, validation, and graph transducers |
-| [@aelastics/store](https://AelasticS.github.io/aelastics/store/intro) | Reactive model store built on MobX |
-| [@aelastics/result](https://AelasticS.github.io/aelastics/result/intro) | Typed success/failure handling without exceptions |
+| [User Guide](https://AelasticS.github.io/Synthesis/user-guide) | Install the `synth` CLI, import models, run transformations, chains, and pipelines |
+| [Developer Guide](https://AelasticS.github.io/Synthesis/developer-guide) | The Synthesis transformation language: define metamodels, build models with JSX, write transformations, configure variability with design decisions |
+| [Examples](https://AelasticS.github.io/Synthesis/developer-guide/examples) | The example suites: the tutorial companions, the full-featured EER to SQL suite, and the workflow suite |
+| [@aelastics/types](https://AelasticS.github.io/Synthesis/types/intro) | Runtime type system with schemas, validation, and graph transducers |
+| [@aelastics/store](https://AelasticS.github.io/Synthesis/store/intro) | Reactive model store built on MobX |
+| [@aelastics/result](https://AelasticS.github.io/Synthesis/result/intro) | Typed success/failure handling without exceptions |
 
 ## Installing the CLI
 
 The `synth` CLI ships as platform tarballs on
 [GitHub Releases](https://github.com/AelasticS/Synthesis/releases); no Node
 runtime is required on the user's machine. See
-**[Installation](https://AelasticS.github.io/aelastics/user-guide/getting-started/installation)**
+**[Installation](https://AelasticS.github.io/Synthesis/user-guide/getting-started/installation)**
 for step-by-step instructions for Linux, macOS, Windows, and building from
 source.
 
@@ -49,7 +49,7 @@ Synthesis/
 │   └── docs/                  # Docusaurus documentation site
 ├── examples/
 │   ├── tutorial/              # tutorial companion suite + its metamodel packages
-│   ├── eer-to-sql/            # full-featured EER to SQL suite + its metamodel packages
+│   ├── advanced-eer-to-sql/   # full-featured EER to SQL suite + its metamodel packages
 │   └── workflow/              # workflow suite + its metamodel packages
 ├── templates/
 │   └── transformation-template/  # starter transformation package

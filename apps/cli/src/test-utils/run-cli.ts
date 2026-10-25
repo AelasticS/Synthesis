@@ -30,7 +30,9 @@ export interface RunOptions {
  * Use this instead of @oclif/test's runCommand to avoid Jest ESM issues.
  */
 export async function runCli(args: string[], options?: RunOptions): Promise<RunResult> {
-  const env = { ...process.env, ...options?.env }
+  // Never inherit color forcing from the parent run (rushx sets FORCE_COLOR on
+  // a TTY): ANSI codes around oclif's '›' wrap prefix defeat the tests' flatten().
+  const env: NodeJS.ProcessEnv = { ...process.env, FORCE_COLOR: '0', NO_COLOR: '1', ...options?.env }
   if (options?.home) {
     env.HOME = options.home
   }

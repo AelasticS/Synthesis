@@ -28,7 +28,7 @@ export interface IssueInfo {
   name: string
   /** Rendered decision-model element (carries path/name for refs). */
   element: unknown
-  /** Metamodel type name: 'ModelIssue' or 'ElementIssue'. */
+  /** Metamodel type name: 'ModelLevelIssue' or 'ElementLevelIssue'. */
   typeName: string
   /** Options in document order. */
   options: OptionInfo[]
@@ -46,9 +46,9 @@ export interface DecisionModelIndex {
 /**
  * Index a rendered decision model: issues, their options, and defaults.
  * The containment the rendered graph materializes (decisionModel.issues,
- * issue.possibleOptions, and a CompositeOption's subIssues) is the
- * attribution mechanism, and it is what makes composite options sound
- * here: a composite option's whole subtree renders BEFORE the option
+ * issue.options, and an OpeningOption's subIssues) is the
+ * attribution mechanism, and it is what makes opening options sound
+ * here: an opening option's whole subtree renders BEFORE the option
  * itself (props render first), so document order would attribute the
  * option to its own sub-issue. Sub-issues are indexed like top-level
  * issues; an option name used by two issues is ambiguous and reported
@@ -86,17 +86,21 @@ export function indexDecisionModel(store: ModelStore, decisionModel: unknown): D
     if (typeof name !== 'string' || name === '') {
       return
     }
+    // a sub-issue may also be listed among the model's top-level issues
+    if (issues.has(name)) {
+      return
+    }
     const info: IssueInfo = { name, element, typeName: typeNameOf(element), options: [] }
     issues.set(name, info)
-    const options = ((element as { possibleOptions?: unknown[] }).possibleOptions ?? [])
+    const options = ((element as { options?: unknown[] }).options ?? [])
     for (const option of options) {
       const optionName = (option as { name?: unknown }).name
       if (typeof optionName !== 'string' || optionName === '') {
         continue
       }
       claimOption(info, optionName, option)
-      // A composite option opens sub-issues; index them like any issue.
-      const subIssues = ((option as { optionType?: { subIssues?: unknown[] } }).optionType?.subIssues ?? [])
+      // An opening option opens sub-issues; index them like any issue.
+      const subIssues = ((option as { subIssues?: unknown[] }).subIssues ?? [])
       for (const sub of subIssues) {
         registerIssue(sub)
       }
@@ -126,7 +130,7 @@ export function indexDecisionModel(store: ModelStore, decisionModel: unknown): D
     if (typeName.endsWith('Issue')) {
       currentIssue = { name, element, typeName, options: [] }
       issues.set(name, currentIssue)
-    } else if (typeName === 'Option' && currentIssue !== undefined) {
+    } else if ((typeName === 'Option' || typeName === 'OpeningOption') && currentIssue !== undefined) {
       claimOption(currentIssue, name, element)
     }
   }
@@ -135,24 +139,30 @@ export function indexDecisionModel(store: ModelStore, decisionModel: unknown): D
 
 interface RawChoice {
   name?: string
-  selectedOption?: { name?: unknown; isDefault?: unknown } | null
-}
-
-interface RawDecision {
-  name?: string
+  /** Set on an ElementLevelChoice: the source-model element it applies to. */
   element?: { name?: unknown; path?: unknown; id?: unknown } | null
-  choices?: RawChoice[]
+  selectedOption?: { name?: unknown; isDefault?: unknown; parentIssue?: { name?: unknown } | null } | null
 }
 
-function decisionsOf(configModel: unknown): RawDecision[] {
-  return ((configModel as { decisions?: unknown[] } | undefined)?.decisions ?? []) as RawDecision[]
+function choicesOf(configModel: unknown): RawChoice[] {
+  return ((configModel as { choices?: unknown[] } | undefined)?.choices ?? []) as RawChoice[]
+}
+
+/** True for an ElementLevelChoice (model-level choices carry no element). */
+function isElementLevel(store: ModelStore, choice: RawChoice): boolean {
+  try {
+    return store.getTypeOf(choice as StoreElement).name === 'ElementLevelChoice'
+  } catch {
+    // Untyped element: decided by the element it points at
+    return choice.element !== undefined && choice.element !== null
+  }
 }
 
 /**
- * One announcement per Choice in the configuration model. Global Decisions
- * carry no element; ElementDecisions point at the source-model element the
- * choice applies to. The issue label comes from the decision model (the
- * choice's own issue reference stays unresolved in the rendered graph);
+ * One announcement per choice in the configuration model. Model-level
+ * choices carry no element; element-level choices point at the
+ * source-model element the choice applies to. The issue label comes from
+ * the decision model, falling back to the option's own parentIssue;
  * '(default)' marks options flagged as the issue's default.
  */
 export function collectDecisions(
@@ -162,20 +172,19 @@ export function collectDecisions(
 ): DecisionAnnouncement[] {
   const { optionIssues } = indexDecisionModel(store, decisionModel)
   const announcements: DecisionAnnouncement[] = []
-  for (const decision of decisionsOf(configModel)) {
-    for (const choice of decision.choices ?? []) {
-      const option = choice.selectedOption?.name
-      if (typeof option !== 'string') {
-        continue
-      }
-      const elementName = decision.element?.name
-      announcements.push({
-        issue: optionIssues.get(option)?.name ?? decision.name ?? '(unknown issue)',
-        option,
-        ...(typeof elementName === 'string' && elementName !== '' ? { element: elementName } : {}),
-        isDefault: choice.selectedOption?.isDefault === true
-      })
+  for (const choice of choicesOf(configModel)) {
+    const option = choice.selectedOption?.name
+    if (typeof option !== 'string') {
+      continue
     }
+    const parentIssue = choice.selectedOption?.parentIssue?.name
+    const elementName = choice.element?.name
+    announcements.push({
+      issue: optionIssues.get(option)?.name ?? (typeof parentIssue === 'string' ? parentIssue : '(unknown issue)'),
+      option,
+      ...(typeof elementName === 'string' && elementName !== '' ? { element: elementName } : {}),
+      isDefault: choice.selectedOption?.isDefault === true
+    })
   }
   return announcements
 }
@@ -291,7 +300,7 @@ function computeElementSlots(
       for (const rawIssue of binding.issues ?? []) {
         const issueName = rawIssue?.name
         const issue = typeof issueName === 'string' ? index.issues.get(issueName) : undefined
-        if (issue === undefined || issue.typeName !== 'ElementIssue') {
+        if (issue === undefined || issue.typeName !== 'ElementLevelIssue') {
           continue
         }
         const key = `${issue.name} ${elementKeyOf(element)}`
@@ -307,16 +316,16 @@ function computeElementSlots(
 
 interface Cover {
   option: string
-  decisionLabel: string
+  choiceLabel: string
 }
 
 const formatCovers = (covers: Cover[]): string =>
-  covers.map((cover) => `option '${cover.option}' in decision '${cover.decisionLabel}'`).join(', ')
+  covers.map((cover) => `option '${cover.option}' in choice '${cover.choiceLabel}'`).join(', ')
 
 /**
  * Structural validation of an explicit configuration model, after it has
  * rendered into the run's store: every choice's selectedOption must be an
- * option of the transformation's decision model, every ElementDecision must
+ * option of the transformation's decision model, every element-level choice must
  * point at an element of the input model (nested elements included; their
  * paths extend the model path), each (issue, element?) slot may be covered
  * at most once, and every slot no choice covers falls back to the issue's
@@ -354,63 +363,56 @@ export function validateConfigStructure(
   /** Issue name -> element key -> { covers, label }. */
   const elementCovers = new Map<string, Map<string, { covers: Cover[]; label: string }>>()
 
-  for (const decision of decisionsOf(configModel)) {
-    const decisionLabel = decision.name ?? '(unnamed decision)'
-    let typeName = ''
-    try {
-      typeName = store.getTypeOf(decision as StoreElement).name
-    } catch {
-      // Untyped element: treat as a global decision
-    }
+  for (const choice of choicesOf(configModel)) {
+    const choiceLabel = choice.name ?? '(unnamed choice)'
+    const elementLevel = isElementLevel(store, choice)
     let element: unknown
     let elementName: string | undefined
-    if (typeName === 'ElementDecision') {
-      const target = decision.element
+    if (elementLevel) {
+      const target = choice.element
       if (target === null || target === undefined || typeof target.name !== 'string') {
-        errors.push(`decision '${decisionLabel}' names no resolvable source-model element`)
+        errors.push(`choice '${choiceLabel}' names no resolvable source-model element`)
+        continue
       } else if (!isInsideInput(target.path)) {
         errors.push(
-          `decision '${decisionLabel}' targets element '${String(target.path)}/${target.name}', which is not part of the input model '${inputPath}'`
-        )
-      } else {
-        element = target
-        elementName = target.name
-      }
-    }
-    for (const choice of decision.choices ?? []) {
-      const choiceLabel = choice.name ?? '(unnamed choice)'
-      const option = choice.selectedOption?.name
-      if (typeof option !== 'string' || option === '') {
-        errors.push(`choice '${choiceLabel}' in decision '${decisionLabel}' has no resolvable selectedOption`)
-        continue
-      }
-      const issue = index.optionIssues.get(option)
-      if (issue === undefined) {
-        errors.push(
-          `choice '${choiceLabel}' in decision '${decisionLabel}' selects option '${option}', which is not an option of the transformation's decision model '${dmLabel}'`
+          `choice '${choiceLabel}' targets element '${String(target.path)}/${target.name}', which is not part of the input model '${inputPath}'`
         )
         continue
       }
-      const cover: Cover = { option, decisionLabel }
-      if (element !== undefined) {
-        const byElement = elementCovers.get(issue.name) ?? new Map<string, { covers: Cover[]; label: string }>()
-        elementCovers.set(issue.name, byElement)
-        const key = elementKeyOf(element)
-        const entry = byElement.get(key) ?? { covers: [], label: elementName as string }
-        byElement.set(key, entry)
-        entry.covers.push(cover)
-      } else if (typeName !== 'ElementDecision') {
-        const covers = globalCovers.get(issue.name) ?? []
-        globalCovers.set(issue.name, covers)
-        covers.push(cover)
-      }
-      announcements.push({
-        issue: issue.name,
-        option,
-        ...(elementName !== undefined ? { element: elementName } : {}),
-        isDefault: false
-      })
+      element = target
+      elementName = target.name
     }
+    const option = choice.selectedOption?.name
+    if (typeof option !== 'string' || option === '') {
+      errors.push(`choice '${choiceLabel}' has no resolvable selectedOption`)
+      continue
+    }
+    const issue = index.optionIssues.get(option)
+    if (issue === undefined) {
+      errors.push(
+        `choice '${choiceLabel}' selects option '${option}', which is not an option of the transformation's decision model '${dmLabel}'`
+      )
+      continue
+    }
+    const cover: Cover = { option, choiceLabel }
+    if (element !== undefined) {
+      const byElement = elementCovers.get(issue.name) ?? new Map<string, { covers: Cover[]; label: string }>()
+      elementCovers.set(issue.name, byElement)
+      const key = elementKeyOf(element)
+      const entry = byElement.get(key) ?? { covers: [], label: elementName as string }
+      byElement.set(key, entry)
+      entry.covers.push(cover)
+    } else {
+      const covers = globalCovers.get(issue.name) ?? []
+      globalCovers.set(issue.name, covers)
+      covers.push(cover)
+    }
+    announcements.push({
+      issue: issue.name,
+      option,
+      ...(elementName !== undefined ? { element: elementName } : {}),
+      isDefault: false
+    })
   }
 
   // A slot covered twice is nondeterministic in the engine (the first
@@ -465,7 +467,7 @@ export function validateConfigStructure(
   for (const issue of index.issues.values()) {
     // Element-scoped issues are covered per element (below); everything
     // else takes one model-wide choice.
-    if (issue.typeName === 'ElementIssue') {
+    if (issue.typeName === 'ElementLevelIssue') {
       continue
     }
     if (!globalCovers.has(issue.name)) {

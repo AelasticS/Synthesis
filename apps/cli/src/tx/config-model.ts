@@ -19,9 +19,8 @@ import { ModelStore } from '@aelastics/synthesis/store'
 import { Context } from '@aelastics/synthesis/jsx'
 import { SourceModelToDefaultConfigurationModel } from '@aelastics/synthesis/variability'
 import {
-  Choice as ChoiceTemplate,
-  ElementChoice as ElementChoiceTemplate,
-  GlobalChoice as GlobalChoiceTemplate
+  ElementLevelChoice as ElementLevelChoiceTemplate,
+  ModelLevelChoice as ModelLevelChoiceTemplate
 } from '@aelastics/synthesis/metamodels/configuration'
 
 import { parseSynthHeader, serializeSynthHeader } from '../models/header.js'
@@ -53,11 +52,8 @@ const JSX_MODULE = '@aelastics/synthesis/jsx'
 /** Which module exports each tag the serializer may emit. */
 const TAG_MODULES: Record<string, string> = {
   ConfigurationModel: CONFIG_COMPONENTS,
-  GlobalChoice: CONFIG_COMPONENTS,
-  ElementChoice: CONFIG_COMPONENTS,
-  Choice: CONFIG_COMPONENTS,
-  GlobalIssue: DECISION_COMPONENTS,
-  ElementIssue: DECISION_COMPONENTS,
+  ModelLevelChoice: CONFIG_COMPONENTS,
+  ElementLevelChoice: CONFIG_COMPONENTS,
   Option: DECISION_COMPONENTS,
   BindingModel: BINDING_COMPONENTS,
   Model: JSX_MODULE,
@@ -181,8 +177,9 @@ export function generateDefaultConfigModel(
 /**
  * Materialize default choices for uncovered (issue, element?) slots into a
  * rendered configuration model, exactly as the default generator would
- * have created them: a GlobalChoice/ElementChoice decision holding one
- * Choice whose selectedOption is the issue's default option. Without this
+ * have created them: a ModelLevelChoice (or, per element, an
+ * ElementLevelChoice) whose selectedOption is the issue's default option.
+ * Without this
  * the engine would apply nothing for those slots (its Option() evaluation
  * has no default fallback) while the CLI announces '(default)'.
  */
@@ -194,7 +191,7 @@ export function materializeDefaultChoices(
   if (slots.length === 0) {
     return
   }
-  const root = configModel as { name?: unknown; path?: unknown; decisions?: unknown[] }
+  const root = configModel as { name?: unknown; path?: unknown; choices?: unknown[] }
   if (typeof root.name !== 'string' || typeof root.path !== 'string') {
     throw new Error('cannot materialize default choices: the configuration model root has no name/path')
   }
@@ -214,30 +211,26 @@ export function materializeDefaultChoices(
   context.pushModel(configModel as Parameters<Context['pushModel']>[0])
   try {
     for (const slot of slots) {
-      const choiceNode = ChoiceTemplate({
-        name: uniqueName(`default_${slot.issue.name}_${slot.option.name}`),
-        description: `Default choice for issue ${slot.issue.name}`,
-        issue: slot.issue.element,
-        selectedOption: slot.option.element
-      } as unknown as Parameters<typeof ChoiceTemplate>[0])
-      const decisionNode =
+      const choiceNode =
         slot.element === undefined
-          ? GlobalChoiceTemplate({
+          ? ModelLevelChoiceTemplate({
               name: uniqueName(`default_gc_${slot.issue.name}`),
-              choices: [choiceNode]
-            } as unknown as Parameters<typeof GlobalChoiceTemplate>[0])
-          : ElementChoiceTemplate({
+              description: `Default choice for issue ${slot.issue.name}`,
+              selectedOption: slot.option.element
+            } as unknown as Parameters<typeof ModelLevelChoiceTemplate>[0])
+          : ElementLevelChoiceTemplate({
               name: uniqueName(`default_ec_${String((slot.element as { name?: unknown }).name ?? 'element')}_${slot.issue.name}`),
+              description: `Default choice for issue ${slot.issue.name}`,
               element: slot.element,
-              choices: [choiceNode]
-            } as unknown as Parameters<typeof ElementChoiceTemplate>[0])
-      const rendered = decisionNode.render(context)
-      // A standalone render creates the decision inside the model but does
-      // not connect it to the parent's `decisions` collection (that wiring
+              selectedOption: slot.option.element
+            } as unknown as Parameters<typeof ElementLevelChoiceTemplate>[0])
+      const rendered = choiceNode.render(context)
+      // A standalone render creates the choice inside the model but does
+      // not connect it to the parent's `choices` collection (that wiring
       // is the ConfigurationModel tag's connectionInfo); connect here.
-      const decisions = root.decisions
-      if (Array.isArray(decisions) && !decisions.includes(rendered)) {
-        decisions.push(rendered)
+      const choices = root.choices
+      if (Array.isArray(choices) && !choices.includes(rendered)) {
+        choices.push(rendered)
       }
     }
   } finally {
@@ -270,10 +263,10 @@ function refByName(element: unknown, what: string): string {
 
 /**
  * Serialize a rendered configuration model to the editable `$refByName`
- * JSX form. Choice names are re-derived as `<decision>_<option>` so the
- * persisted file is stable across runs (the generator appends random
- * suffixes). The decision model provides each option's owning issue; the
- * choice's own issue reference stays unresolved in the rendered graph.
+ * JSX form: one ModelLevelChoice or ElementLevelChoice per choice, each
+ * keeping its own (deterministic) name. The decision model confirms every
+ * selected option is one of its options; a choice's issue is implied by
+ * the option's owning issue and is not serialized.
  */
 export function serializeConfigModel(
   store: ModelStore,
@@ -285,7 +278,7 @@ export function serializeConfigModel(
     name?: unknown
     sourceModel?: unknown
     bindingModel?: unknown
-    decisions?: unknown[]
+    choices?: unknown[]
   }
   if (typeof root.name !== 'string' || root.name === '') {
     throw new Error('cannot serialize configuration model: the root has no name')
@@ -299,48 +292,38 @@ export function serializeConfigModel(
   lines.push('  store={store}')
   lines.push('>')
 
-  for (const rawDecision of root.decisions ?? []) {
-    const decision = rawDecision as {
+  for (const rawChoice of root.choices ?? []) {
+    const choice = rawChoice as {
       name?: unknown
       element?: unknown
-      choices?: Array<{ selectedOption?: unknown }>
+      selectedOption?: unknown
     }
-    const decisionName = typeof decision.name === 'string' && decision.name !== '' ? decision.name : undefined
-    if (decisionName === undefined) {
-      throw new Error('cannot serialize configuration model: a decision has no name')
+    const choiceName = typeof choice.name === 'string' && choice.name !== '' ? choice.name : undefined
+    if (choiceName === undefined) {
+      throw new Error('cannot serialize configuration model: a choice has no name')
     }
     let typeName = ''
     try {
-      typeName = store.getTypeOf(rawDecision as StoreElement).name
+      typeName = store.getTypeOf(rawChoice as StoreElement).name
     } catch {
-      // Untyped decisions serialize as global choices
+      // Untyped choices serialize as model-level choices
     }
-    const isElementDecision = typeName === 'ElementDecision'
-    lines.push(`  <${isElementDecision ? 'ElementChoice' : 'GlobalChoice'}`)
-    lines.push(`    name=${attrValue(decisionName, `decision name`)}`)
-    if (isElementDecision) {
-      const target = refByName(decision.element, `element of decision '${decisionName}'`)
+    const isElementChoice = typeName === 'ElementLevelChoice'
+    const option = choice.selectedOption as NamedElement | null | undefined
+    const optionName = typeof option?.name === 'string' ? option.name : undefined
+    if (optionName === undefined) {
+      throw new Error(`cannot serialize configuration model: choice '${choiceName}' has no resolved selectedOption`)
+    }
+    if (!index.optionIssues.has(optionName)) {
+      throw new Error(`cannot serialize configuration model: option '${optionName}' is not part of the decision model`)
+    }
+    lines.push(`  <${isElementChoice ? 'ElementLevelChoice' : 'ModelLevelChoice'}`)
+    lines.push(`    name=${attrValue(choiceName, 'choice name')}`)
+    if (isElementChoice) {
+      const target = refByName(choice.element, `element of choice '${choiceName}'`)
       lines.push(`    element={<Element $refByName=${attrValue(target, 'element reference')} />}`)
     }
-    lines.push('    choices={[')
-    for (const choice of decision.choices ?? []) {
-      const option = choice.selectedOption as NamedElement | null | undefined
-      const optionName = typeof option?.name === 'string' ? option.name : undefined
-      if (optionName === undefined) {
-        throw new Error(`cannot serialize configuration model: a choice in decision '${decisionName}' has no resolved selectedOption`)
-      }
-      const issue = index.optionIssues.get(optionName)
-      if (issue === undefined) {
-        throw new Error(`cannot serialize configuration model: option '${optionName}' is not part of the decision model`)
-      }
-      const issueTag = issue.typeName === 'ElementIssue' ? 'ElementIssue' : 'GlobalIssue'
-      lines.push('      <Choice')
-      lines.push(`        name=${attrValue(`${decisionName}_${optionName}`, 'choice name')}`)
-      lines.push(`        issue={<${issueTag} $refByName=${attrValue(refByName(issue.element, `issue '${issue.name}'`), 'issue reference')} />}`)
-      lines.push(`        selectedOption={<Option $refByName=${attrValue(refByName(option, `option '${optionName}'`), 'option reference')} />}`)
-      lines.push('      />,')
-    }
-    lines.push('    ]}')
+    lines.push(`    selectedOption={<Option $refByName=${attrValue(refByName(option, `option '${optionName}'`), 'option reference')} />}`)
     lines.push('  />')
   }
 

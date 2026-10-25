@@ -260,7 +260,7 @@ model as the parameter.
 
 A transformation is an ordinary TypeScript class extending the
 library's abstract transformation class. The base class carries the
-engine; the subclass declares the *rules*: `topRule` receives the
+engine; the subclass declares the *rules*: `main` receives the
 source model and iterates over its elements with the computation
 operator, and every further rule is a typed method from one source
 element to a target expression, written with the target metamodel's
@@ -271,7 +271,7 @@ organizational model:
 
 ```tsx
 export class OrgToApproval extends abstractM2M<ot.IOrganization, wt.IWorkflowModel> {
-  topRule(org: ot.IOrganization) {
+  main(org: ot.IOrganization) {
     return (
       <WorkflowModel name={`${org.name} Approval`} store={this.context.store}>
         <Process name={`${org.name} Approval`}>
@@ -295,7 +295,7 @@ export class OrgToApproval extends abstractM2M<ot.IOrganization, wt.IWorkflowMod
 The source side is an organizational metamodel, a hierarchy of units
 with managers and members; the target side is the workflow language
 used throughout this page, so an approval process like the one at the
-top of the page can also be derived from an organization. `topRule`
+top of the page can also be derived from an organization. `main`
 selects the departments of the source model and maps each through
 `departmentToApproval`, and the whole target is the value of one
 expression.
@@ -317,7 +317,7 @@ flowchart LR
     St([Start]) --> W[WriteDocument] --> A1[ApproveByAna] --> A2[ApproveByMax] --> E([End])
 ```
 
-Executing the transformation evaluates `topRule`'s expression in a
+Executing the transformation evaluates `main`'s expression in a
 fresh target model; every rule invocation is recorded in a **trace**
 linking each target element back to the source elements it came from,
 giving bidirectional traceability for free.
@@ -380,7 +380,7 @@ flag. A
 **configuration model** records the choices made for one specific
 source model. A **configuration-based transformation** is then a
 template over two parameters, the source model and a configuration
-model: a rule with variants is written as a *variation point*, and the
+model: a rule with variants is written as a *variability point*, and the
 recorded choice selects which variant runs.
 
 Because configurations are models, everything already said about models

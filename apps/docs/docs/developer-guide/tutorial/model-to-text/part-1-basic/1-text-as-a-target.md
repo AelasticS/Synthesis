@@ -165,7 +165,7 @@ The file also exports `Dir`, for writing documents into a folder, and
 
 ## What the generator does with the tree
 
-After `topRule()` returns, the CLI hands the resulting model to the
+After `main()` returns, the CLI hands the resulting model to the
 engine's text generation, and what that does is short enough to state
 completely. It walks the model's `items`. For each `Document` it
 concatenates the text of the document's element tree and writes the

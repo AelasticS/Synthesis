@@ -9,7 +9,7 @@
  * Everything the base stage deliberately excludes stays excluded here:
  * composite foreign keys (a reference is still a single column link),
  * foreign key constraints as first class elements, and indexes. Those
- * belong to the full relational metamodel of the eer-to-sql suite.
+ * belong to the full relational metamodel of the advanced-eer-to-sql suite.
  */
 import * as t from "@aelastics/types";
 import { ModelElement, Model, declareNamespace } from "@aelastics/synthesis/metamodel";

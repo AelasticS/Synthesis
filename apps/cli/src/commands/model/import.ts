@@ -7,12 +7,12 @@ import { importModelFile, ModelImportError } from '../../models/import-core.js'
 export default class ModelImport extends BaseCommand {
   static override description = `Validate a .tsx model file and copy it into the workspace.
 
-Configuration models reference their transformation's decision/binding models and the source model they configure; pass --tx <name> so the validation render pre-loads the installed transformation's parts (and the file's header references); without it such a file cannot render.`
+Configuration models reference their transformation's decision/binding models and the source model they configure; the transformation comes from --tx or the header's generatedBy, and the models it depends on (including the source model it configures) from --dependency, repeatable (or auto-detected among the installed models), so the validation render can pre-load them; without them such a file cannot render.`
 
   static override examples = [
     '<%= config.bin %> <%= command.id %> ./persons.tsx',
     '<%= config.bin %> <%= command.id %> ./persons.tsx --as com.example/persons',
-    '<%= config.bin %> <%= command.id %> ./persons-cfg.tsx --as com.example/persons-cfg --tx eer-to-relational',
+    '<%= config.bin %> <%= command.id %> ./persons-cfg.tsx --as com.example/persons-cfg --tx eer-to-relational --dependency com.example/persons,com.example/lookups',
     '<%= config.bin %> <%= command.id %> ./persons.tsx --tags eer,demo --force'
   ]
 
@@ -30,6 +30,12 @@ Configuration models reference their transformation's decision/binding models an
     tx: Flags.string({
       description:
         'Installed transformation whose parts provide the render context (required for configuration models).'
+    }),
+    dependency: Flags.string({
+      multiple: true,
+      delimiter: ',',
+      description:
+        'Installed model (namespace/name) to load before this one; repeatable. Recorded in the header references (a configuration model\'s source model as references.sourceModel). Auto-detected when exactly one installed model defines the referenced schema.'
     }),
     author: Flags.string({
       description: 'Author for the $synth header (default: existing header, then git config).'
@@ -58,13 +64,15 @@ Configuration models reference their transformation's decision/binding models an
     // its message and exit code verbatim.
     let ref: string
     let destPath: string
+    let dependencies: string[]
     try {
-      ;({ ref, destPath } = await importModelFile({
+      ;({ ref, destPath, dependencies } = await importModelFile({
         workspaceConfig: this.workspaceConfig,
         sourcePath,
         // `--as ""` falls back to the default policy, exactly as before
         ref: flags.as || undefined,
         tx: flags.tx,
+        dependencies: flags.dependency,
         author: flags.author,
         description: flags.description,
         tags: flags.tags
@@ -82,9 +90,19 @@ Configuration models reference their transformation's decision/binding models an
     }
 
     if (flags.json) {
-      this.log(JSON.stringify({ imported: ref, source: sourcePath, destination: destPath }))
+      this.log(
+        JSON.stringify({
+          imported: ref,
+          source: sourcePath,
+          destination: destPath,
+          ...(dependencies.length === 0 ? {} : { dependencies })
+        })
+      )
     } else {
       this.log(`Imported ${ref}`)
+      if (dependencies.length > 0) {
+        this.log(`Dependencies: ${dependencies.join(', ')}`)
+      }
     }
   }
 }

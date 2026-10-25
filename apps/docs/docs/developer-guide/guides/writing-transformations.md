@@ -27,7 +27,7 @@ class EER2RelTransformation extends abstractM2M<et.IEERSchema, rt.IRelSchema> {
     super(store)
   }
 
-  topRule(source: et.IEERSchema) {
+  main(source: et.IEERSchema) {
     return (
       <r.RelSchema name={`${source.name} Relational Schema`}>
         {source.elements
@@ -59,7 +59,7 @@ class EER2RelTransformation extends abstractM2M<et.IEERSchema, rt.IRelSchema> {
 ### `@M2M` Decorator
 
 Applied to the class. It takes no arguments; the source and target
-model types come from the class's type parameters and the `topRule()`
+model types come from the class's type parameters and the `main()`
 signature.
 
 ```typescript
@@ -69,12 +69,12 @@ class EER2RelTransformation extends abstractM2M<et.IEERSchema, rt.IRelSchema> {
 
 The decorator registers the transformation with the framework and sets up the execution context.
 
-### `topRule()` Method
+### `main()` Method
 
 The entry point of every transformation. It receives the source model and returns a JSX expression that constructs the target model.
 
 ```typescript
-topRule(source: et.IEERSchema) {
+main(source: et.IEERSchema) {
   return (
     <r.RelSchema name={`${source.name} Relational Schema`}>
       {source.elements
@@ -86,7 +86,7 @@ topRule(source: et.IEERSchema) {
 }
 ```
 
-The `topRule()` method typically:
+The `main()` method typically:
 1. Creates the root target model element.
 2. Filters source elements by type.
 3. Maps each source element to the appropriate transformation rule.
@@ -107,7 +107,7 @@ Entity2Table(e: et.IEntity): ExprNode<rt.ITable> {
 The `@E2E` decorator does two things:
 
 1. **Registers the rule** so the framework knows which method handles which source type.
-2. **Creates trace records** automatically. Every time the rule executes, a trace entry maps the source element to the target JSX element.
+2. **Creates trace records** automatically. Every time the rule executes, a `RuleInvocation` in the trace maps the source element to its target elements. The first argument must be a `ModelElement`; otherwise the call throws an Error.
 
 ### Return Type
 
@@ -140,16 +140,16 @@ console.log(result.name)  // "Persons Relational Schema"
 ```
 
 The `transform()` method:
-1. Calls `topRule(source)` to get the target JSX expression tree.
+1. Calls `main(source)` to get the target JSX expression tree.
 2. Renders the tree in a `M2MContext`, which extends the normal `Context` with tracing support.
 3. Returns the typed target model.
 
 ## Filtering Source Elements
 
-The `topRule()` method often needs to filter source elements by type. Use the store's `isTypeOf()` method.
+The `main()` method often needs to filter source elements by type. Use the store's `isTypeOf()` method.
 
 ```typescript
-topRule(source: et.IEERSchema) {
+main(source: et.IEERSchema) {
   return (
     <r.RelSchema name={`${source.name} Relational Schema`}>
       {source.elements
@@ -169,12 +169,12 @@ This pattern groups source elements by type and routes each group to the appropr
 
 ## Tracing
 
-The framework automatically records which source elements produced which target elements. Every `@E2E` rule invocation creates a trace entry.
+The framework automatically records which source elements produced which target elements. Every `@E2E` rule invocation creates a `RuleInvocation`; the trace is a call tree, each invocation pointing to the `parent` invocation that was executing when it began.
 
 The trace is available through `this.context`:
 
-- `this.context.traceMap` maps source elements to their trace records.
-- `this.context.resolveMap` maps JSX elements to the rendered model instances.
+- `this.context.invocations` lists the recorded invocations in execution order.
+- `this.context.resolveTarget(source)` and `resolveJSXElement(source)` look up what a source element was transformed into.
 
 ### Resolving Transformed Elements
 
@@ -210,7 +210,7 @@ Here is what happens during rendering:
 
 1. `Resolve` receives `rel.sourceEntity` (a source model element, e.g., the "Person" entity).
 2. It looks up the trace map via `resolveJSXElement()` to find the JSX Element that was produced by the `"Entity2Table"` rule for that source element.
-3. It then looks up the `resolveMap` to find the actual rendered target model element (e.g., the "Person" table).
+3. It then resolves it to the actual rendered target model element (e.g., the "Person" table).
 4. It calls the child function with that target model element.
 5. The returned JSX expression is rendered and connected to the parent as a normal child.
 
@@ -223,9 +223,7 @@ Every transformation has access to `this.context`, an `M2MContext` instance.
 | Property/Method | Purpose |
 |---|---|
 | `this.context.store` | The `ModelStore` containing all models |
-| `this.context.traceMap` | Maps source elements to trace records |
-| `this.context.resolveMap` | Maps JSX elements to rendered instances |
-| `this.context.makeTrace(source, target)` | Manually record a trace entry |
+| `this.context.invocations` | The recorded invocations, in execution order |
 | `this.context.resolveJSXElement(source, ruleName?)` | Look up the target element for a source |
 | `this.extra` | Extra models passed to the constructor |
 | `this.configModel` | Configuration model for variability |
@@ -247,4 +245,4 @@ abstractM2M<Source, Destination, ExtraModels, ConfigModel>
 
 Extra models and configuration models are covered in [Design Decisions in Transformations](./variability.md).
 
-Once your transformation is written, see [Packaging Transformations](./packaging-transformations.md) for how to build, package, and publish it so others can install it with `synth tx install`.
+Once your transformation is written, see [Packaging Transformations](./packaging-transformations.md) for how to build, package, and publish it so others can install it with `synth transformation install`.

@@ -24,7 +24,7 @@ export class OrgToApprovalTransformation extends abstractM2M<
     super(store)
   }
 
-  topRule(m: ot.IOrganization): ExprNode<ot.IOrganization, wt.IWorkflowModel> {
+  main(m: ot.IOrganization): ExprNode<ot.IOrganization, wt.IWorkflowModel> {
     const param = this.approvalParam()
     const worker = this.workerNamed(m, param.worker)
     const chain = this.unitChainOf(worker, param.sensitivity)

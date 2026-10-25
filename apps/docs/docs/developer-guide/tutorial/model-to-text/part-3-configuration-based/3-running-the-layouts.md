@@ -202,36 +202,24 @@ export default (store) => (
     bindingModel={<BindingModel $refByName="//www.aelastics.org/RelTutorialSqlBindings" />}
     store={store}
   >
-    <GlobalChoice
+    <ModelLevelChoice
       name="gc_OutputLayout"
-      choices={[
-        <Choice
-          name="gc_OutputLayout_TablesAndConstraints"
-          issue={<GlobalIssue $refByName="//www.aelastics.org/SqlGenerationDesign/OutputLayout" />}
-          selectedOption={<Option $refByName="//www.aelastics.org/SqlGenerationDesign/TablesAndConstraints" />}
-        />,
-      ]}
+      selectedOption={<Option $refByName="//www.aelastics.org/SqlGenerationDesign/TablesAndConstraints" />}
     />
-    <GlobalChoice
+    <ModelLevelChoice
       name="gc_IdentifierQuoting"
-      choices={[
-        <Choice
-          name="gc_IdentifierQuoting_Unquoted"
-          issue={<GlobalIssue $refByName="//www.aelastics.org/SqlGenerationDesign/IdentifierQuoting" />}
-          selectedOption={<Option $refByName="//www.aelastics.org/SqlGenerationDesign/Unquoted" />}
-        />,
-      ]}
+      selectedOption={<Option $refByName="//www.aelastics.org/SqlGenerationDesign/Unquoted" />}
     />
   </ConfigurationModel>
 )
 ```
 
 This is the whole file, and it is worth pausing on how short it is. The
-model-to-model tutorial's configuration held an `<ElementChoice>` per
+model-to-model tutorial's configuration held an `<ElementLevelChoice>` per
 source element that raised its issue, so it grew with the model. This
-one holds a `<GlobalChoice>` per issue, so it has two of them for
+one holds a `<ModelLevelChoice>` per issue, so it has two of them for
 `Library_rel` and would have two of them for a schema of four hundred
-tables. That is the practical payoff of a global issue: the whole design
+tables. That is the practical payoff of a model-level issue: the whole design
 space of this generator fits on a screen, and a reviewer can see every
 decision it took at once.
 
@@ -239,9 +227,10 @@ Every path in the file was introduced earlier.
 `//www.aelastics.org/Library_rel` is the source schema.
 `//www.aelastics.org/RelTutorialSqlBindings` is page 1's binding model,
 named here so that a configuration can only be used with the
-transformation it was generated for. The two
-`//www.aelastics.org/SqlGenerationDesign/...` pairs are the issue and
-the selected option from the decision model.
+transformation it was generated for. The two remaining
+`//www.aelastics.org/SqlGenerationDesign/...` paths are the two
+selected options from the decision model; each option's issue is never
+written down here, it is recovered from the option's own parent issue.
 
 `config show` prints the same content as decisions:
 
@@ -262,22 +251,20 @@ Decisions:
 
 ## Switching an option
 
-Changing a layout is a two-line edit inside one `<Choice>`, and
-`synth config edit demo/schema-cfg` opens the file in `$EDITOR` if you
-prefer:
+Changing a layout is a one-line edit to the `<ModelLevelChoice
+name="gc_OutputLayout">` block, and `synth config edit demo/schema-cfg`
+opens the file in `$EDITOR` if you prefer:
 
 ```text
-- name="gc_OutputLayout_TablesAndConstraints"
 - selectedOption={<Option $refByName="//www.aelastics.org/SqlGenerationDesign/TablesAndConstraints" />}
-+ name="gc_OutputLayout_SingleFile"
 + selectedOption={<Option $refByName="//www.aelastics.org/SqlGenerationDesign/SingleFile" />}
 ```
 
-The `selectedOption` line is the decision. The `name` line is cosmetic:
-the generator names a choice after the option it holds, and a file that
-says `TablesAndConstraints` while selecting `SingleFile` will mislead
-somebody later. The `issue={<GlobalIssue ... />}` line is never touched,
-because the question has not changed, only the answer.
+That is the whole decision. `name="gc_OutputLayout"` names the issue
+the choice answers, not the option it currently holds, so it never
+changes when the option does — and there is no `issue=` line to touch
+either: a choice's issue is never written down in the configuration at
+all, it is recovered from the selected option's own parent issue.
 
 Check that the file still renders before running it:
 
@@ -345,7 +332,7 @@ explicit choice is not a fallback even when it agrees with one.
 
 ## `FilePerTable`
 
-The same two-line edit again, pointing at `FilePerTable`:
+The same one-line edit again, pointing at `FilePerTable`:
 
 ```text
 Running sql-tutorial-configuration-based@0.1.0 (m2t) on demo/schema
@@ -380,8 +367,8 @@ schema's own casing.
 
 ## `DoubleQuoted`, and two issues composing
 
-Back to the default layout, and this time edit the other `<Choice>`, the
-one whose issue is `IdentifierQuoting`:
+Back to the default layout, and this time edit the other
+`<ModelLevelChoice>`, the one named `gc_IdentifierQuoting`:
 
 ```text
 Running sql-tutorial-configuration-based@0.1.0 (m2t) on demo/schema
@@ -443,7 +430,7 @@ touches the thing it is about.
 
 ## Configurations do not have to be complete
 
-Delete the whole `<GlobalChoice name="gc_IdentifierQuoting">` block from
+Delete the whole `<ModelLevelChoice name="gc_IdentifierQuoting">` block from
 the configuration, leaving only the layout choice, and the run still
 works:
 

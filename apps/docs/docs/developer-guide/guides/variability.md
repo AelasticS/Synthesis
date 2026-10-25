@@ -21,7 +21,7 @@ Issues and options are defined independently of any source modeling language. Fo
 | Concept | Description |
 |---|---|
 | **Issue** | A design decision with at least two alternatives (e.g., "how to map a 0..1:M relationship") |
-| **Option** | One possible resolution of an issue (e.g., "ForeignKey" or "JoinTable") |
+| **Option** | One possible resolution of an issue (e.g., "ForeignKey" or "JoinTable"). Each option knows its issue through `parentIssue` |
 | **Default** | The option selected when no explicit choice is made |
 | **Scope: model** | The decision applies globally to the entire transformation (e.g., naming conventions) |
 | **Scope: element** | The decision is resolved independently for each applicable source element |
@@ -47,19 +47,21 @@ A default configuration can be generated automatically from the source model. Ev
 
 ### Execution Trace
 
-Every run records a **trace model**: one entry per executed rule,
-carrying the source element, the produced target elements (as full
-element paths), and the rule that actually ran. Dispatch machinery is
-not traced; when a specialization or variability point routed the call,
-the entry simply names the executed option method, which is the record.
+Every run records a **trace model** shaped as a call tree. Each
+executed `@E2E` rule is a `RuleInvocation`, carrying the source element,
+the produced target elements (as full element paths), and the method
+that actually ran in `function`. An option method (`@VarOption`,
+`@SpecOption`) executed outside any `@E2E` rule is a plain `Invocation`.
+Every invocation has an optional `parent`: the invocation that was
+executing when it began. Dispatch machinery is not traced; when a
+specialization or variability point routed the call, the invocation
+simply names the executed option method, which is the record.
 
-Every resolved configuration option is recorded, always. A choice that
-selects a rule sits on that rule's entry; a choice consulted inside
-another rule is attached to the entry of the element it was decided
-for; a global choice is recorded once on the trace model itself. Each
-resolution carries the issue and option names in decision-model
-language, a reference to the explicit `Choice` in the configuration, or
-a `byDefault` marker when the issue's default applied.
+Every `@VarPoint` consultation is recorded, always, as a `Resolution` on
+the invocation that carried it. It lists the `choices` in the
+configuration for that issue, including those whose condition was not
+satisfied, and `byDefault` is true when no condition was met and the
+`@Default` option ran.
 
 Trace detail follows rule granularity: behavior factored into rules is
 recorded per rule, behavior inlined into a template is not, so the
@@ -222,7 +224,7 @@ class EER2RelWithConfig
     super(store, extra, configModel)
   }
 
-  topRule(source: et.IEERSchema) {
+  main(source: et.IEERSchema) {
     return (
       <r.RelSchema name={`${source.name} Relational Schema`}>
         {source.elements
@@ -281,7 +283,7 @@ class EER2RelWithConfig
 ## Presets: configurations authored by extension
 
 A recurring configuration deserves a name and a file. The
-eer-to-sql suite's DDL generator ships dialect PRESETS: configuration models closing all
+advanced-eer-to-sql suite's DDL generator ships dialect PRESETS: configuration models closing all
 its emission issues at once, so choosing a dialect means passing one
 `--config`. Two techniques make presets practical:
 
@@ -293,60 +295,56 @@ its emission issues at once, so choosing a dialect means passing one
   is the dialect's definition. (Workspace models must be
   self-contained at run time, so the shared vocabulary is a package
   export, never a relative import.)
-- **Source-agnostic configurations.** A preset closes global issues
+- **Source-agnostic configurations.** A preset closes model-level issues
   and declares no source-model reference in its header;
   `transformation run --config` accepts such a configuration for any
   input. A configuration that DOES declare a source still fails on a
   mismatch, exactly as before.
 
 See
-[`examples/eer-to-sql/rel-to-sql-ddl/presets/`](https://github.com/AelasticS/Synthesis/tree/main/examples/eer-to-sql/rel-to-sql-ddl/presets)
+[`examples/advanced-eer-to-sql/rel-to-sql-ddl/presets/`](https://github.com/AelasticS/Synthesis/tree/main/examples/advanced-eer-to-sql/rel-to-sql-ddl/presets)
 for the three
 shipped presets and the docs page "A full-featured EER to SQL
 transformation" for the design space they close.
 
-## Composite options: an option that opens sub-issues
+## Opening options: an option that opens sub-issues
 
 A design space is not always flat: some questions only exist once a
 particular option is chosen. The decision metamodel states this with
-`CompositeOption`, an option carrying sub-issues, the issues that
+`OpeningOption`, an option carrying sub-issues, the issues that
 become meaningful exactly when that option is selected (authored with
-the `ElementSubIssue` tag). A row-versioning policy is the canonical
-shape, and it is exactly the eer-to-sql suite's `RowHistory` issue
-([`examples/eer-to-sql/eer-to-relational`](https://github.com/AelasticS/Synthesis/tree/main/examples/eer-to-sql/eer-to-relational)):
+the `ElementLevelSubIssue` tag). A row-versioning policy is the canonical
+shape, and it is exactly the advanced-eer-to-sql suite's `RowHistory` issue
+([`examples/advanced-eer-to-sql/eer-to-relational`](https://github.com/AelasticS/Synthesis/tree/main/examples/advanced-eer-to-sql/eer-to-relational)):
 whether a table keeps
 history is one issue, and only the history-keeping option opens the
 question of what distinguishes row versions:
 
 ```tsx
-<ElementIssue name="RowHistory" description="Whether this table keeps row history">
-  <Option name="NoHistory" description="Current rows only" isDefault={true}
-          optionType={<SimpleOption name="NoHistoryOption" />} />
-  <Option name="HistoryTable" description="A separate history table records row versions"
-          optionType={
-            <CompositeOption name="HistoryTableOption">
-              <ElementSubIssue name="HistoryDiscriminator" description="What distinguishes row versions">
-                <Option name="ValidFromTimestamp" description="A validity timestamp" isDefault={true}
-                        optionType={<SimpleOption name="ValidFromOption" />} />
-                <Option name="VersionCounter" description="A monotonic version number"
-                        optionType={<SimpleOption name="VersionCounterOption" />} />
-              </ElementSubIssue>
-            </CompositeOption>
-          } />
-</ElementIssue>
+<ElementLevelIssue name="RowHistory" description="Whether this table keeps row history">
+  <Option name="NoHistory" description="Current rows only" isDefault={true} />
+  <OpeningOption name="HistoryTable" description="A separate history table records row versions"
+                 isDefault={false}>
+    <ElementLevelSubIssue name="HistoryDiscriminator" description="What distinguishes row versions">
+      <Option name="ValidFromTimestamp" description="A validity timestamp" isDefault={true} />
+      <Option name="VersionCounter" description="A monotonic version number" isDefault={false} />
+    </ElementLevelSubIssue>
+  </OpeningOption>
+</ElementLevelIssue>
 ```
 
 The nesting is a fact about the design space, not about execution. A
-configuration remains a flat list of choices, each naming its issue
-and option, and the engine resolves a sub-issue exactly like a
-top-level one. The conditionality polices itself at run time: a
-variation point inside the composite option's code path is only
-consulted when that option was chosen, so an unconsulted sub-issue
-needs no choice, and a consulted one without a choice falls back to
-its declared default, recorded in the trace as a default resolution.
-`config init` follows the same path the defaults take: when a
-generated choice selects a composite option, the sub-issues it opens
-are answered too, recursively, in the same decision context, while
+configuration remains a flat list of choices, each naming the option it
+selects — the issue follows from that option's own parent issue — and
+the engine resolves a sub-issue exactly like a top-level one. The
+conditionality polices itself at run time: a variability point inside the
+opening option's code path is only consulted when that option was
+chosen, so an unconsulted sub-issue needs no choice, and a consulted one
+without a choice falls back to its declared default, recorded in the
+trace as a default resolution. `config init` follows the same path the
+defaults take: when a generated choice selects an opening option, the
+sub-issues it opens are answered too, recursively, in the same decision
+context, while
 sub-issues behind unchosen options stay out of the generated
 configuration (choosing such an option later means adding its
 sub-issue choices by hand, or trusting the run-time default).

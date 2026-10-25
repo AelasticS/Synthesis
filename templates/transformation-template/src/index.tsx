@@ -9,7 +9,7 @@
  * 1. Rename the class, and keep synth.json's exportName in sync.
  * 2. Point synth.json's source and target at your metamodels, and
  *    replace the imports below accordingly.
- * 3. Implement topRule(): map the source model onto the target model
+ * 3. Implement main(): map the source model onto the target model
  *    in JSX notation, using the target metamodel's components as tags.
  *
  * The tutorial walks through every step, and the examples/ catalog in
@@ -27,7 +27,7 @@ export class MyTransformation extends abstractM2M<rmT.IRelSchema, rmT.IRelSchema
     super(store)
   }
 
-  topRule(s: rmT.IRelSchema): ExprNode<rmT.IRelSchema, rmT.IRelSchema> {
+  main(s: rmT.IRelSchema): ExprNode<rmT.IRelSchema, rmT.IRelSchema> {
     return (
       <RelSchema name={`${s.name}_out`} store={this.context.store}>
         {s.elements

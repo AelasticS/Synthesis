@@ -7,7 +7,7 @@ import * as em from 'eer-tutorial-metamodel/advanced/model';
 import * as rmT from 'rel-tutorial-metamodel/model';
 export declare class EER2RelConfigurableTransformation extends DecisionAwareM2M<em.IEERSchema, rmT.IRelSchema, {}, cm.IConfigurationModel> {
     constructor(store: ModelStore, {}: {}, configModel?: cm.IConfigurationModel);
-    topRule(s: em.IEERSchema): ExprNode<em.IEERSchema, rmT.IRelSchema>;
+    main(s: em.IEERSchema): ExprNode<em.IEERSchema, rmT.IRelSchema>;
     entityToTable(e: em.IEntity): ExprNode<rmT.ITable>;
     kernelToTable(k: em.IKernel): ExprNode<rmT.ITable>;
     weakToTable(w: em.IWeak): ExprNode<rmT.ITable>;

@@ -30,4 +30,4 @@ synth transformation run workflow-to-bpmn bpmn-to-mermaid --in demo/approval --o
 `npm test` runs the CLI smoke plus `scripts/verify.mjs`.
 
 The rendering rules are explained on the suite page
-[The workflow suite](https://AelasticS.github.io/aelastics/developer-guide/examples/workflow#rendering-the-graph).
+[The workflow suite](https://AelasticS.github.io/Synthesis/developer-guide/examples/workflow#rendering-the-graph).

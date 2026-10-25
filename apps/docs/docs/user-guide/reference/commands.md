@@ -121,6 +121,17 @@ Everything enters the workspace through `model import <file> --as <ref>`:
 4. The file is copied into the namespace tree. `--force` overwrites an
    existing target.
 
+A configuration model renders only with its transformation's context, so
+importing one needs `--tx <name>`. `--dependency <ref>[,<ref>...]` names
+the installed models to load first (a configuration model's source
+model); it is recorded in the header's `references` and auto-detected
+when exactly one installed model defines the referenced schema:
+
+```bash
+synth model import ./persons-cfg.tsx --as com.example/persons-cfg \
+  --tx eer-to-relational --dependency com.example/persons
+```
+
 The invariant this buys: **everything in the workspace was loadable when it
 entered**. That is why run time is strict: `--in` accepts workspace refs,
 never file paths.
@@ -179,6 +190,8 @@ manifest's `kind`, never by the command name.
 | `--config <ref>` | Configuration model for step 1 (configuration-based only). |
 | `--default-configs` | Explicitly accept generated default configurations for every configuration-based step not covered by `--config`. |
 | `--save-config <ref>` | Persist the generated default configuration as a workspace model (single step, only with `--default-configs`). |
+| `--param <json>` | JSON value handed to step 1's transformation as its parameter. It is recorded verbatim in `generatedBy.param` of everything the run writes. |
+| `--trace <ref>` | Persist the run's trace model as a workspace model (single step only). When the run used generated defaults, the effective configuration is persisted next to it at `<ref>-config`. See [Execution Trace](../../developer-guide/guides/variability.md#execution-trace). |
 | `--keep-intermediates` | Also write every intermediate chain result as a workspace model at `<namespace>/<name>-<step-tx>`. |
 | `--save-as <name>` | After a successful run, save the steps as a pipeline (see [Pipelines](../guides/pipelines.md)). |
 | `--overwrite` | Replace existing targets (final and intermediate models, `--save-config` target, `--save-as` pipeline). |

@@ -43,7 +43,7 @@ Four things, and nothing else:
 - **The transformation class.** It extends `DecisionAwareM2M` instead
   of `abstractM2M`, and takes the run's configuration model as a third
   constructor argument.
-- **The relationship rule.** The 1:N branch becomes a variation point
+- **The relationship rule.** The 1:N branch becomes a variability point
   (`@VarPoint`) with two options (`@VarOption`), one of them marked
   `@Default()`. The M:N branch is untouched.
 - **Three new modules in the package.** A decision model declaring the
@@ -103,9 +103,9 @@ the transformation third, and the run last.
    model exists at all, the metamodel shipped as a model so the binding
    has something to point at, and the condition that keeps M:N
    relationships out of the decision entirely.
-3. **[Variation points](./3-variation-points.md)**: `@VarPoint`,
+3. **[Variability points](./3-variability-points.md)**: `@VarPoint`,
    `@VarOption` and `@Default()`, Part 2's conditional beside Part 3's
-   variation point, and the manifest's `parts` block.
+   variability point, and the manifest's `parts` block.
 4. **[Running with configurations](./4-running-with-configurations.md)**:
    why a run refuses to apply defaults silently, `--default-configs`,
    `config init`, the one-line edit that flips the choice, and the two

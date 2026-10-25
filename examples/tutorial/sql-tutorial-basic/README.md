@@ -28,5 +28,5 @@ cat generated/Library_rel.sql
 isolated workspace.
 
 This package is the finished state of
-[Part 1 of the model-to-text tutorial](https://AelasticS.github.io/aelastics/developer-guide/tutorial/model-to-text/part-1-basic),
+[Part 1 of the model-to-text tutorial](https://AelasticS.github.io/Synthesis/developer-guide/tutorial/model-to-text/part-1-basic),
 which builds it step by step.

@@ -62,7 +62,7 @@ TargetSchema }) to register its source and target metamodels.
 
 Transformation rules are methods that accept source model elements and
 return JSX expressions constructing target elements. The top-level rule
-is topRule(source), which receives the root source model and returns
+is main(source), which receives the root source model and returns
 the root target model expression. Rules compose: a rule may call other
 rules within its JSX, building the target model tree from nested rule
 invocations.
@@ -143,25 +143,22 @@ is a model conforming to the Decision_TypeSchema and contains:
     issues: Issue[]
 
   Issue (abstract)
-    possibleOptions: Option[]
+    options: Option[]
 
-  ElementIssue extends Issue
+  ElementLevelIssue extends Issue
     -- an issue scoped to individual source model elements
 
-  ModelIssue extends Issue
+  ModelLevelIssue extends Issue
     -- an issue that applies globally to the entire source model
 
   Option
-    ParentIssue: Issue
+    parentIssue: Issue   -- inverse of Issue.options
     Pros: string
     Cons: string
     isDefault: boolean (optional)
-    optionType: SimpleOption | CompositeOption (tagged union)
-
-  SimpleOption
     valueType: Type (optional)
 
-  CompositeOption
+  OpeningOption extends Option
     subIssues: Issue[]   -- enables hierarchical decision trees
 
   Constraint
@@ -171,33 +168,27 @@ is a model conforming to the Decision_TypeSchema and contains:
 
 An Issue represents a design question (e.g., "How to implement 1:N
 relationships?"). Each Issue enumerates its possible Options (e.g.,
-"ForeignKey" and "JoinTable"). Options may be simple (leaf choices) or
-composite (choices that open further sub-issues, enabling hierarchical
-decision structures). Constraints between options express dependencies
+"ForeignKey" and "JoinTable"). An Option is a plain leaf choice; an
+OpeningOption is a choice that opens further sub-issues, enabling
+hierarchical decision structures. Constraints between options express dependencies
 ("Requires") or incompatibilities ("Exclude").
 
 Like all models in Synthesis, the Decision Model is constructed as a
 JSX model expression:
 
   <DecisionModel name="RelationSchemaDesign" store={store}>
-    <ElementIssue name="OneToManyStrategy">
-      <Option name="ForeignKey" isDefault={false}
-              optionType={<SimpleOption name="FK" />} />
-      <Option name="JoinTable"  isDefault={true}
-              optionType={<SimpleOption name="JoinTableOption" />} />
-    </ElementIssue>
-    <ElementIssue name="PrimaryKeyStrategy">
-      <Option name="UseAutoIncrement" isDefault={true}
-              optionType={<SimpleOption name="PK_AutoInc" />} />
-      <Option name="UseManualIncrement"
-              optionType={<SimpleOption name="PK_ManInc" />} />
-    </ElementIssue>
-    <ModelIssue name="NamingConvention">
-      <Option name="CamelCase" isDefault={true}
-              optionType={<SimpleOption name="CamelCaseOption" />} />
-      <Option name="SnakeCase"
-              optionType={<SimpleOption name="SnakeCaseOption" />} />
-    </ModelIssue>
+    <ElementLevelIssue name="OneToManyStrategy">
+      <Option name="ForeignKey" isDefault={false} />
+      <Option name="JoinTable"  isDefault={true} />
+    </ElementLevelIssue>
+    <ElementLevelIssue name="PrimaryKeyStrategy">
+      <Option name="UseAutoIncrement" isDefault={true} />
+      <Option name="UseManualIncrement" />
+    </ElementLevelIssue>
+    <ModelLevelIssue name="NamingConvention">
+      <Option name="CamelCase" isDefault={true} />
+      <Option name="SnakeCase" />
+    </ModelLevelIssue>
   </DecisionModel>
 
 
@@ -216,7 +207,7 @@ BindingModel_TypeSchema and contains:
 
   BindingElement
     element: ModelElement   -- a source metamodel type (e.g., Relationship)
-    issues: ElementIssue[]  -- which issues apply to elements of this type
+    issues: ElementLevelIssue[]  -- which issues apply to elements of this type
     condition: string (opt) -- an optional predicate further filtering
                                which source elements this binding applies to
 
@@ -234,12 +225,12 @@ Example (JSX):
     <Binding name="PKStrategyBinding"
       element={<ModelElement $refByName="ERMetamodel/Attribute" />}
       issues={[
-        <ElementIssue $refByName="RelationSchemaDesign/PrimaryKeyStrategy" />
+        <ElementLevelIssue $refByName="RelationSchemaDesign/PrimaryKeyStrategy" />
       ]} />
     <Binding name="OneToManyBinding"
       element={<ModelElement $refByName="ERMetamodel/Relationship" />}
       issues={[
-        <ElementIssue $refByName="RelationSchemaDesign/OneToManyStrategy" />
+        <ElementLevelIssue $refByName="RelationSchemaDesign/OneToManyStrategy" />
       ]}
       condition='return (e) => {
         if (!e.roles || e.roles.length !== 2) return false;
@@ -257,29 +248,28 @@ Binding Model connects it to source types, the Configuration Model
 captures specific choices. It conforms to ConfigurationModel_TypeSchema:
 
   ConfigurationModel
-    decisions: Decision[]
+    choices: Choice[]
     sourceModel: Model
     bindingModel: BindingModel
-
-  Decision
-    choices: Choice[]
-
-  ElementDecision extends Decision
-    element: ModelElement  -- the specific source element this decision
-                              applies to
 
   Choice
     assumptions: string (optional)
     justification: string (optional)
     consequences: string (optional)
-    issue: Issue
     selectedOption: Option
-    value: SimpleOption | CompositeOption (optional tagged union)
 
-A Decision groups one or more Choices. An ElementDecision is scoped to a
-specific source model element. A Choice records which Option was selected
-for which Issue, along with optional rationale (assumptions,
-justification, consequences).
+  ModelLevelChoice extends Choice
+    -- answers a ModelLevelIssue once for the whole run
+
+  ElementLevelChoice extends Choice
+    element: ModelElement  -- the specific source element this choice
+                              applies to
+
+A Choice records which Option was selected, along with optional rationale
+(assumptions, justification, consequences). The Issue it answers is not
+written down: it is recovered from selectedOption.parentIssue. A
+ModelLevelChoice answers a model-level issue; an ElementLevelChoice is
+scoped to one source model element.
 
 The framework provides an automatic default configuration generator
 (SourceModelToDefaultConfigurationModel) -- itself an M2M transformation
@@ -292,22 +282,14 @@ Example (JSX):
   <ConfigurationModel name="CompanySchemaConfig" store={store}
     sourceModel={<Model $refByName="CompanySchema" />}
     bindingModel={<BindingModel $refByName="ER_Bindings" />}>
-    <GlobalChoice name="CamelCaseNaming"
-      choices={[
-        <Choice name="UseCamelCase"
-          issue={<GlobalIssue $refByName="RelationSchemaDesign/NamingConvention" />}
-          selectedOption={<Option $refByName="RelationSchemaDesign/CamelCase" />} />
-      ]} />
-    <ElementChoice name="EmploymentJoinTableMapping"
+    <ModelLevelChoice name="CamelCaseNaming"
+      selectedOption={<Option $refByName="RelationSchemaDesign/CamelCase" />} />
+    <ElementLevelChoice name="EmploymentJoinTableMapping"
       element={<Element $refByName="CompanySchema/Employment" />}
-      choices={[
-        <Choice name="UseJoinTable"
-          issue={<ElementIssue $refByName="RelationSchemaDesign/OneToManyStrategy" />}
-          selectedOption={<Option $refByName="RelationSchemaDesign/JoinTable" />}
-          assumptions="Join table avoids nulls"
-          justification="Handles optional relationships cleanly"
-          consequences="A new join table will manage the relationship" />
-      ]} />
+      selectedOption={<Option $refByName="RelationSchemaDesign/JoinTable" />}
+      assumptions="Join table avoids nulls"
+      justification="Handles optional relationships cleanly"
+      consequences="A new join table will manage the relationship" />
   </ConfigurationModel>
 
 
@@ -533,39 +515,46 @@ The decision-aware trace model extends the basic transformation trace
 with decision information. It conforms to TraceModel_TypeSchema:
 
   TraceModel
-    transformationSpec: string
     source: Model
     targets: Model[]
-    config: ConfigurationModel
-    traceRecords: TraceEntry[]
+    invocations: Invocation[]
     timestamp: string
+    transformation: string (optional)
+    transformationVersion: string (optional)
+    sourceVersion: string (optional)
+    config: ConfigurationModel (optional)
 
-  TraceEntry
-    rule: string
-    timestamp: number
+  Invocation
+    function: string
+    reads: ReadRecord[] (optional)
+    parent: Invocation (optional)
+    resolutions: Resolution[] (optional)
+
+  RuleInvocation extends Invocation
     source: ModelElement
     targets: ModelElement[]
-    ruleType: "RegularRule" | "VariabilityPoint"
-    variabilityOption: string (optional)
-    choices: Choice[] (optional)
 
-Each TraceEntry records which rule produced a target element from a
-source element. For variability points, the entry additionally records
-the ruleType as "VariabilityPoint", the name of the selected
-variabilityOption method, and the choices that led to that selection.
-This enables full decision traceability: given any target element, one
-can determine not only which source element produced it, but also which
-design decision and chosen option influenced its structure.
+  Resolution
+    byDefault: boolean
+    choices: Choice[]
 
-Example trace entry for a decision-driven rule:
+Each Invocation records one call of a transformation function. A
+RuleInvocation (an @E2E rule) additionally records the source element and
+the target elements it produced. For variability points, the invocation
+carries a Resolution: the choices that led to the selected option, and
+whether the option was selected by default. This enables full decision
+traceability: given any target element, one can determine not only which
+source element produced it, but also which design decision and chosen
+option influenced its structure.
 
-  TraceEntry
+Example invocation for a decision-driven rule:
+
+  RuleInvocation
     source: Relationship "Employment"
     targets: [Table "employment"]
-    rule: "RelationshipMapping"
-    ruleType: "VariabilityPoint"
-    variabilityOption: "relationshipAsJoinTable"
-    choices: [Choice(issue=OneToManyStrategy, selectedOption=JoinTable)]
+    function: "RelationshipMapping"
+    resolutions: [Resolution(byDefault=false,
+                             choices=[Choice(selectedOption=JoinTable)])]
 
 
 11. End-to-End Process

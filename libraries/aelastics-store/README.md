@@ -7,5 +7,5 @@ declared schemas. It is the state layer underneath the Synthesis
 model store.
 
 Documented in the
-[store section](https://AelasticS.github.io/aelastics/store/intro) of
+[store section](https://AelasticS.github.io/Synthesis/store/intro) of
 the docs site.

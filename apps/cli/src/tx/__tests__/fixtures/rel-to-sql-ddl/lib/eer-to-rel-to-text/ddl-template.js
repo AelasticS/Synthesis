@@ -28,7 +28,7 @@ let Rel2DdlTransformation = class Rel2DdlTransformation extends variability_1.De
     constructor(store, extra, configModel) {
         super(store, extra ?? {}, configModel);
     }
-    topRule(s) {
+    main(s) {
         return ((0, jsx_1.createExprNode)(m2t_1.M2T, { name: `${s.name}_ddl` },
             (0, jsx_1.createExprNode)(m2t_1.Doc, { name: `${s.name}.sql` },
                 (0, jsx_1.createExprNode)(m2t_1.Sec, { name: "header" },

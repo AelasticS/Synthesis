@@ -12,4 +12,4 @@ Subpaths: the bare specifier `org-metamodel` exports the JSX
 components; `org-metamodel/model` exports the type schemas.
 
 The metamodel is explained on the suite page
-[The workflow suite](https://AelasticS.github.io/aelastics/developer-guide/examples/workflow#the-metamodels).
+[The workflow suite](https://AelasticS.github.io/Synthesis/developer-guide/examples/workflow#the-metamodels).

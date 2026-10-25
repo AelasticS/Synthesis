@@ -47,7 +47,7 @@ raised **once per run**:
 "Put `Book` in its own file but keep `Author` in the shared one" is not
 a layout, it is a mess, and "quote this table's name but not that one"
 is not a house style. Both questions have exactly one answer per run,
-so both are declared as `GlobalIssue` rather than `ElementIssue`, and
+so both are declared as `ModelLevelIssue` rather than `ElementLevelIssue`, and
 four things follow from that single word:
 
 - The binding model has **no bindings in it**. There is no element to
@@ -67,8 +67,8 @@ Relative to Part 2's package, four things:
   of `abstractM2M` and takes the run's configuration model as a third
   constructor argument.
 - **The template.** It stops building documents and hands straight over
-  to a variation point whose three options each return a complete
-  `<M2T>` expression. A second, three-line variation point wraps
+  to a variability point whose three options each return a complete
+  `<M2T>` expression. A second, three-line variability point wraps
   identifier emission.
 - **Three new modules in the package.** A decision model declaring the
   two issues, a binding model naming the two ends the decision
@@ -119,9 +119,9 @@ Three pages. The design space has to be declared before anything can be
 bound to it, the transformation reads it, and the run closes it.
 
 1. **[The design space](./1-the-design-space.md)**: the decision model,
-   two global issues, why a global issue needs no binding, and what the
+   two model-level issues, why a model-level issue needs no binding, and what the
    binding model and the metamodel part are still there for.
-2. **[Variation points](./2-variation-points.md)**: `DecisionAwareM2M`,
+2. **[Variability points](./2-variability-points.md)**: `DecisionAwareM2M`,
    the layout point whose options each return a whole `<M2T>` model,
    the quoting point nested inside them, and the manifest's `parts`
    block.

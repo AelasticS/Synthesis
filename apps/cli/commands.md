@@ -399,19 +399,22 @@ Validate a .tsx model file and copy it into the workspace.
 ```
 USAGE
   $ synth model import FILE [--workspace <value>] [--ns <value>] [--json] [-q] [-v] [--as <value>] [--tx <value>]
-    [--author <value>] [--description <value>] [--tags <value>] [--force]
+    [--dependency <value>...] [--author <value>] [--description <value>] [--tags <value>] [--force]
 
 ARGUMENTS
   FILE  Path to the .tsx model file to import.
 
 FLAGS
-  --as=<value>           Ref to assign to the imported model (namespace/name).
-  --author=<value>       Author for the $synth header (default: existing header, then git config).
-  --description=<value>  One-line description for the $synth header.
-  --force                Overwrite the target model if it already exists.
-  --tags=<value>         Comma-separated tags for the $synth header.
-  --tx=<value>           Installed transformation whose parts provide the render context (required for configuration
-                         models).
+  --as=<value>             Ref to assign to the imported model (namespace/name).
+  --author=<value>         Author for the $synth header (default: existing header, then git config).
+  --dependency=<value>...  Installed model (namespace/name) to load before this one; repeatable. Recorded in the header
+                           references (a configuration model's source model as references.sourceModel). Auto-detected
+                           when exactly one installed model defines the referenced schema.
+  --description=<value>    One-line description for the $synth header.
+  --force                  Overwrite the target model if it already exists.
+  --tags=<value>           Comma-separated tags for the $synth header.
+  --tx=<value>             Installed transformation whose parts provide the render context (required for configuration
+                           models).
 
 GLOBAL FLAGS
   -q, --quiet              Suppress informational output.
@@ -423,16 +426,17 @@ GLOBAL FLAGS
 DESCRIPTION
   Validate a .tsx model file and copy it into the workspace.
 
-  Configuration models reference their transformation's decision/binding models and the source model they configure;
-  pass --tx <name> so the validation render pre-loads the installed transformation's parts (and the file's header
-  references); without it such a file cannot render.
+  Configuration models reference their transformation's decision/binding models and the source model they configure; the
+  transformation comes from --tx or the header's generatedBy, and the models it depends on (including the source model
+  it configures) from --dependency, repeatable (or auto-detected among the installed models), so the validation render
+  can pre-load them; without them such a file cannot render.
 
 EXAMPLES
   $ synth model import ./persons.tsx
 
   $ synth model import ./persons.tsx --as com.example/persons
 
-  $ synth model import ./persons-cfg.tsx --as com.example/persons-cfg --tx eer-to-relational
+  $ synth model import ./persons-cfg.tsx --as com.example/persons-cfg --tx eer-to-relational --dependency com.example/persons,com.example/lookups
 
   $ synth model import ./persons.tsx --tags eer,demo --force
 ```

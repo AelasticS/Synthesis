@@ -216,7 +216,8 @@ export async function renderModelWithTxContext(
   txPackageDir: string,
   store: ModelStore = new ModelStore(),
   modelsDir?: string,
-  manifest?: TxManifest
+  manifest?: TxManifest,
+  extraReferences: Record<string, string> = {}
 ): Promise<RenderedModelWithTxContext> {
   const txManifest = manifest ?? (await loadTxManifest(txPackageDir))
   const parts = await renderTxParts(txPackageDir, txManifest, store)
@@ -228,7 +229,7 @@ export async function renderModelWithTxContext(
     const ownRef = modelPathToRef(modelsDir, filePath)
     await renderReferenceClosure(
       modelsDir,
-      parsed.header?.references ?? {},
+      { ...(parsed.header?.references ?? {}), ...extraReferences },
       store,
       filePath,
       ownRef === null ? [] : [ownRef]
@@ -259,6 +260,15 @@ export class GateRenderError extends Error {
   }
 }
 
+/** The transformation named in a file's `generatedBy` header, if any. */
+async function readGeneratedByTx(filePath: string): Promise<string | undefined> {
+  try {
+    return parseSynthHeader(await readFile(filePath, 'utf-8')).header?.generatedBy?.tx ?? undefined
+  } catch {
+    return undefined
+  }
+}
+
 /**
  * The validation render shared by `model import` and `model validate`:
  * plain renderModel without --tx, renderModelWithTxContext (installed
@@ -266,23 +276,37 @@ export class GateRenderError extends Error {
  * rethrown as GateRenderError with the configuration-model hint and the
  * dangling-ref classification already computed; a failure to resolve the
  * installed transformation propagates as TxResolveError.
+ *
+ * Without an explicit `txName` the transformation named in the file's own
+ * `generatedBy` header is used (as `config show` does). `extraReferences`
+ * extend the header's `references` for the render (e.g. a `sourceModel`
+ * chosen at import time).
  */
 export async function renderForGate(
   workspaceConfig: WorkspaceConfig,
   filePath: string,
   txName: string | undefined,
-  modelsDir: string
+  modelsDir: string,
+  extraReferences: Record<string, string> = {}
 ): Promise<Pick<RenderedModel, 'header' | 'root' | 'store'>> {
   let txPackageDir: string | undefined
   let manifest: TxManifest | undefined
-  if (txName !== undefined) {
-    ;({ packageDir: txPackageDir, manifest } = await resolveInstalledTx(workspaceConfig, txName))
+  const effectiveTx = txName ?? (await readGeneratedByTx(filePath))
+  if (effectiveTx !== undefined) {
+    ;({ packageDir: txPackageDir, manifest } = await resolveInstalledTx(workspaceConfig, effectiveTx))
   }
   try {
     const rendered =
       txPackageDir === undefined
         ? await renderModel(filePath)
-        : await renderModelWithTxContext(filePath, txPackageDir, new ModelStore(), modelsDir, manifest)
+        : await renderModelWithTxContext(
+            filePath,
+            txPackageDir,
+            new ModelStore(),
+            modelsDir,
+            manifest,
+            extraReferences
+          )
     return { header: rendered.header, root: rendered.root, store: rendered.store }
   } catch (err) {
     const message = errorMessage(err)
@@ -294,10 +318,13 @@ export async function renderForGate(
     } catch {
       kind = undefined
     }
-    const hint =
-      txPackageDir === undefined && kind === 'configuration-model'
-        ? ` Hint: configuration models render only with their transformation's context; pass --tx <name> (e.g. the transformation named in the header's generatedBy).`
-        : ''
+    let hint = ''
+    if (kind === 'configuration-model') {
+      hint =
+        txPackageDir === undefined
+          ? ` Hint: configuration models render only with their transformation's context; pass --tx <name> (e.g. the transformation named in the header's generatedBy).`
+          : ` Hint: the referenced source model is not installed or not listed in the header's references; pass --dependency <namespace>/<name> of the installed source model.`
+    }
     const dangling = DANGLING_REF_RE.exec(message)
     throw new GateRenderError(message, hint, dangling?.[1], { cause: err })
   }

@@ -139,4 +139,4 @@ and the build, install, run loop are shared by both kinds, and they are
 explained in full there rather than repeated here. Part 3 additionally
 assumes the model-to-model tutorial's
 [Part 3](../model-to-model/part-3-configuration-based/index.md), which
-introduces decision models, binding models, and variation points.
+introduces decision models, binding models, and variability points.

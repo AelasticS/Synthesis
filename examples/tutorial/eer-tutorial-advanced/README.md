@@ -29,5 +29,5 @@ synth model show demo/library-rel
 isolated workspace.
 
 This package is the finished state of
-[Part 2 of the model-to-model tutorial](https://AelasticS.github.io/aelastics/developer-guide/tutorial/model-to-model/part-2-advanced),
+[Part 2 of the model-to-model tutorial](https://AelasticS.github.io/Synthesis/developer-guide/tutorial/model-to-model/part-2-advanced),
 which explains the dispatch, the option merge, and the sample output.

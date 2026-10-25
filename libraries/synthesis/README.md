@@ -9,4 +9,4 @@ on this library.
 
 How to define metamodels, build models with JSX, and write
 transformations is documented in the
-[developer guide](https://AelasticS.github.io/aelastics/developer-guide).
+[developer guide](https://AelasticS.github.io/Synthesis/developer-guide).

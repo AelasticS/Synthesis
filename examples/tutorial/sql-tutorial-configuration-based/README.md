@@ -33,5 +33,5 @@ synth transformation run sql-tutorial-configuration-based --in demo/schema \
 configurations in an isolated workspace.
 
 This package is the finished state of
-[Part 3 of the model-to-text tutorial](https://AelasticS.github.io/aelastics/developer-guide/tutorial/model-to-text/part-3-configuration-based),
+[Part 3 of the model-to-text tutorial](https://AelasticS.github.io/Synthesis/developer-guide/tutorial/model-to-text/part-3-configuration-based),
 which explains the design space and what each layout produces.

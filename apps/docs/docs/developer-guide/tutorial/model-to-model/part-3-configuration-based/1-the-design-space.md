@@ -24,7 +24,7 @@ export const RelationshipDesignIssues = (store: ModelStore): ExprNode<t.IDecisio
     description="Design space for implementing EER relationships in a relational schema"
     store={store}
   >
-    <ElementIssue
+    <ElementLevelIssue
       name="OneToManyStrategy"
       description="How to implement a 1:N relationship"
     >
@@ -32,15 +32,13 @@ export const RelationshipDesignIssues = (store: ModelStore): ExprNode<t.IDecisio
         name="ForeignKey"
         description="Put a foreign key column on the N side table"
         isDefault={true}
-        optionType={<SimpleOption name="FK" />}
       />
       <Option
         name="JoinTable"
         description="Give the relationship a table of its own"
         isDefault={false}
-        optionType={<SimpleOption name="JT" />}
       />
-    </ElementIssue>
+    </ElementLevelIssue>
   </DecisionModel>
 )
 ```
@@ -51,9 +49,8 @@ than from a domain metamodel package:
 ```tsx
 import {
   DecisionModel,
-  ElementIssue,
+  ElementLevelIssue,
   Option,
-  SimpleOption,
 } from '@aelastics/synthesis/metamodels/decision'
 ```
 
@@ -77,6 +74,12 @@ Those names are a contract:
 - The issue's `name` is what the `@VarPoint` decorator names, and what
   the run announces when it reports the decision it took.
 
+An option never repeats the name of its issue. It sits inside the issue's
+JSX element, and the store records the link as the option's
+`parentIssue` (the inverse of the issue's `options`). That link is how a
+configuration choice, which names only an option, recovers the issue it
+answers.
+
 Spell either of them differently in one place and the two halves stop
 meeting. Nothing checks the spelling for you at build time, because the
 transformation and the decision model are separate modules by design.
@@ -99,37 +102,36 @@ comment on the decision model says why that matters:
 The two are used at different moments. `isDefault` is what
 `config init` and `--default-configs` read when they generate a
 configuration; `@Default()` is what the engine falls back to when it
-dispatches a variation point and no option's predicate matched. In a
+dispatches a variability point and no option's predicate matched. In a
 well-formed package they name the same option, and page 4 shows both
 paths ending on `ForeignKey`.
 
-## `optionType`
+## Options are plain data
 
-Each option carries an `optionType`, here a `<SimpleOption />` with a
-short name. A simple option is a plain answer: selecting it selects
-nothing further. The alternative, a composite option, carries sub-issues
-of its own, so choosing it opens further questions. This tutorial only
-needs simple options, and `FK` and `JT` are labels for them.
+`<Option>` is a plain answer: selecting it selects nothing further, and
+there is no wrapper attribute left to say so. The alternative is a
+different tag entirely: an option that opens further questions is
+authored as `<OpeningOption>` instead of `<Option>`, wrapping the
+sub-issues it opens as JSX children. `ForeignKey` and `JoinTable` both
+settle the question outright, so both are plain `<Option>` elements
+here. The [design decisions guide](../../../guides/variability.md#opening-options-an-option-that-opens-sub-issues)
+covers `OpeningOption` in full.
 
-## The three kinds of issue
+## The two kinds of issue
 
 The tag you use for the issue decides how often the question gets
 answered:
 
 | Tag | Answered | Use it when |
 | --- | --- | --- |
-| `ElementIssue` | Once per matching source element | Each element can legitimately be treated differently |
-| `ModelIssue` | Once for the model being transformed | The answer is a property of this schema as a whole |
-| `GlobalIssue` | Once for the run, independently of the source model | The answer is a property of the target, not the input |
+| `ElementLevelIssue` | Once per matching source element | Each element can legitimately be treated differently |
+| `ModelLevelIssue` | Once for the whole run | The answer is a property of the schema or the target as a whole, not of any single element |
 
-`ModelIssue` and `GlobalIssue` produce the same underlying element
-type; the two spellings differ in what they say about intent, and
-`GlobalIssue` is the one to reach for when the question has nothing to
-do with the model at all. A naming convention for generated
-identifiers is the standard example: it is settled once, and no
-individual entity or relationship gets a say.
+A naming convention for generated identifiers is the standard example
+of a `ModelLevelIssue`: it is settled once, and no individual entity or
+relationship gets a say.
 
-This package uses `ElementIssue`, and the choice is not cosmetic.
+This package uses `ElementLevelIssue`, and the choice is not cosmetic.
 Consider a schema with two 1:N relationships, one linking books to
 their publisher and one linking books to their acquisition batch. The
 first is queried on every page of the application and wants a foreign
@@ -162,7 +164,7 @@ model points into another.
 ## Further reading
 
 The [design decisions guide](../../../guides/variability.md) is the
-reference treatment of decision models, including composite options and
+reference treatment of decision models, including opening options and
 the constraints between options that this tutorial does not use.
 
 ## Next

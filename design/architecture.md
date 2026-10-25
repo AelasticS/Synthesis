@@ -2,7 +2,7 @@
 
 > Internal architecture documentation for contributors to Synthesis itself.
 > User and developer documentation lives on the
-> [documentation site](https://AelasticS.github.io/aelastics/).
+> [documentation site](https://AelasticS.github.io/Synthesis/).
 
 Synthesis is organized as a Rush monorepo with a deliberately small number
 of packages. The three aelastics libraries are standalone; the whole
@@ -20,7 +20,7 @@ domain-shaped lives with the examples.
 | apps/cli | `@aelastics/synthesis-cli` | the `synth` CLI |
 | apps/docs | `@synthesis/docs` | Docusaurus site, not in the build graph |
 | examples/tutorial | seven tutorial companions plus `metamodels/` | the tutorial suite |
-| examples/eer-to-sql | two full examples plus `metamodels/` | the full-example suite |
+| examples/advanced-eer-to-sql | two full examples plus `metamodels/` | the full-example suite |
 | templates/transformation-template | `transformation-template` | starter package |
 
 Dependency direction is strictly downward in this list: the aelastics
@@ -44,7 +44,7 @@ default jsxFactory all expect bare identifiers in scope:
 | `./m2t` | `M2T`, `Doc`, `Sec`, `P`, `SecParent`, text-document model types, `generate` |
 | `./variability` | `DecisionAwareM2M`, `VarPoint`, `VarOption`, `Default`, `Option`, the default-configuration generator |
 | `./metamodels/decision`, `./binding`, `./configuration` | internal metamodels, JSX components flat, type schemas under `/model` |
-| `./metamodels/trace`, `./metamodels/trace-extensions` | the trace metamodel and its decision-aware extensions |
+| `./metamodels/trace` | the trace metamodel |
 | `./metamodels/types/...` | the aelastics-types-aware type metamodel (framework infrastructure: the decision metamodel builds on it) |
 
 The `./metamodel` subpath exists because the schema `Model` and the JSX
@@ -66,7 +66,7 @@ by the suite whose examples share it:
   the tutorial's pivot, target of the three m2m parts and source of the
   three m2t parts.
 - `eer-metamodel` and `relational-metamodel` under
-  examples/eer-to-sql/metamodels: the full-example suite's own metamodels;
+  examples/advanced-eer-to-sql/metamodels: the full-example suite's own metamodels;
   the two full examples are a chain pair over them.
 
 Every metamodel package owns all its facets under one uniform convention:

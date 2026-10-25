@@ -199,16 +199,10 @@ export default (store) => (
     bindingModel={<BindingModel $refByName="//www.aelastics.org/EERTutorialBindings" />}
     store={store}
   >
-    <ElementChoice
+    <ElementLevelChoice
       name="ec_publishedBy"
       element={<Element $refByName="//www.aelastics.org/Library/publishedBy" />}
-      choices={[
-        <Choice
-          name="ec_publishedBy_ForeignKey"
-          issue={<ElementIssue $refByName="//www.aelastics.org/RelationshipDesign/OneToManyStrategy" />}
-          selectedOption={<Option $refByName="//www.aelastics.org/RelationshipDesign/ForeignKey" />}
-        />,
-      ]}
+      selectedOption={<Option $refByName="//www.aelastics.org/RelationshipDesign/ForeignKey" />}
     />
   </ConfigurationModel>
 )
@@ -219,15 +213,19 @@ Every path in it was introduced on an earlier page.
 the sample model. `//www.aelastics.org/EERTutorialBindings` is page 2's
 binding model, named so that a configuration can only be used with the
 transformation it was generated for.
-`//www.aelastics.org/RelationshipDesign/OneToManyStrategy` and its
-option are page 1's decision model. The three models are all present at
-once, which is what makes this file readable on its own.
+`//www.aelastics.org/RelationshipDesign/ForeignKey` is the selected
+option from page 1's decision model; its issue, `OneToManyStrategy`, is
+never named here, because it is recovered from the option's own parent
+issue. The three models are all present at once, which is what makes
+this file readable on its own.
 
-Note the shape of the containment. An `<ElementChoice>` is one source
-element's decisions, and it holds a list of `<Choice>` elements, one
-per issue that element raises. This element raises one, so there is one
-choice. The nesting is what "element issue" meant on page 1, made
-concrete.
+Note the shape now. An `<ElementLevelChoice>` is a single choice: one source
+element, deciding one issue, closed on one `selectedOption`. There is
+no separate `issue=` to set. `publishedBy` raises exactly one issue,
+`OneToManyStrategy`, so one `<ElementLevelChoice>` is all this configuration
+needs; an element that raised two issues would need two sibling
+`<ElementLevelChoice>` elements, one per issue, both naming the same
+`element=`.
 
 `config show` prints the same content as decisions:
 
@@ -247,25 +245,17 @@ Decisions:
 
 ## Flipping the choice
 
-The edit is two replacements in `~/.synth/models/demo/library-cfg.tsx`,
+The edit is one replacement in `~/.synth/models/demo/library-cfg.tsx`,
 and `synth config edit demo/library-cfg` opens the file in `$EDITOR` if
-you prefer. Change the choice's name:
-
-```tsx
-  name="ec_publishedBy_JoinTable"
-```
-
-and the option it selects:
+you prefer. Change the option it selects:
 
 ```tsx
   selectedOption={<Option $refByName="//www.aelastics.org/RelationshipDesign/JoinTable" />}
 ```
 
-The second replacement is the decision. The first only keeps the
-element's name honest, since the generator names a choice after the
-option it holds; nothing breaks if you leave it, but a file that says
-`ForeignKey` while selecting `JoinTable` is a file that will mislead
-somebody later.
+That is the whole decision. `name="ec_publishedBy"` names the element
+the choice is about, not the option it currently holds, so it does not
+need to change when the option does.
 
 Check that the file still renders before running it:
 
@@ -411,5 +401,5 @@ declaring name scopes on dedicated metamodel stages, so the same rules
 produce the natural names a database designer would have written by
 hand. Templates that take templates as parameters, the next step in
 rule reuse, are the [Templates guide's](../../../guides/templates.md)
-story, and the full-featured eer-to-sql suite applies them in
+story, and the full-featured advanced-eer-to-sql suite applies them in
 earnest.
