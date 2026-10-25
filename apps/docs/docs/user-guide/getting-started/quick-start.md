@@ -10,7 +10,7 @@ takes a local directory containing a built transformation package (see
 [Packaging Transformations](../../developer-guide/guides/packaging-transformations.md));
 the two used here, `eer-to-relational` (model-to-model) and `rel-to-sql-ddl`
 (model-to-text), ship in the repository under
-[`examples/advanced-eer-to-sql/`](https://github.com/AelasticS/Synthesis/tree/main/examples/advanced-eer-to-sql),
+[`examples/eer-database-suite/`](https://github.com/AelasticS/Synthesis/tree/main/examples/eer-database-suite),
 and
 any built example package installs the same way.
 

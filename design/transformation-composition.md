@@ -166,7 +166,7 @@ const single = runLibrary(singleTableConfig)
 ```
 
 The second order is **design-space exploration**: one source, many
-configurations, compared side by side. The advanced-eer-to-sql suite page's
+configurations, compared side by side. The eer-database-suite page's
 "One source, three configurations" section and its verification
 script do exactly this today, by hand, through the CLI. With free
 binding order it is one line per configuration, or
@@ -650,7 +650,7 @@ Engine API and model:
 - **Stage E (independent, can go first):** context lifecycle per run;
   `with`, `bindInputs`, `bindSource`/`partial`, `chainTx`; the
   read-only source contract; tests including a design-space
-  exploration test over the advanced-eer-to-sql Library sample and three
+  exploration test over the eer-database-suite Library sample and three
   configurations.
 - **Stage 1:** pure moves: the decision and configuration computation
   (index, structural validation, materialization, coverage judgment)

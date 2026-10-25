@@ -1,0 +1,28 @@
+{
+  "kind": "m2m",
+  "entry": "./dist/transformation.js",
+  "exportName": "SimpleEerToRelational",
+  "source": {
+    "metamodel": "simple-eer-metamodel-variability"
+  },
+  "target": {
+    "metamodel": "simple-relational-metamodel-variability",
+    "components": "simple-relational-metamodel-variability"
+  },
+  "parts": {
+    "metamodels": [
+      {
+        "module": "simple-eer-metamodel-variability/as-model",
+        "exportName": "EERModel"
+      }
+    ],
+    "decisionModel": {
+      "module": "./dist/decision-model.js",
+      "exportName": "RelationSchemaDesignIssues"
+    },
+    "bindingModel": {
+      "module": "./dist/binding-model.js",
+      "exportName": "ER_Bindings"
+    }
+  }
+}

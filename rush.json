@@ -354,19 +354,19 @@
     },
     {
       "packageName": "eer-to-relational",
-      "projectFolder": "examples/advanced-eer-to-sql/eer-to-relational"
+      "projectFolder": "examples/eer-database-suite/eer-to-relational"
     },
     {
       "packageName": "rel-to-sql-ddl",
-      "projectFolder": "examples/advanced-eer-to-sql/rel-to-sql-ddl"
+      "projectFolder": "examples/eer-database-suite/rel-to-sql-ddl"
     },
     {
       "packageName": "eer-to-mermaid-er",
-      "projectFolder": "examples/advanced-eer-to-sql/eer-to-mermaid-er"
+      "projectFolder": "examples/eer-database-suite/eer-to-mermaid-er"
     },
     {
       "packageName": "rel-to-mermaid",
-      "projectFolder": "examples/advanced-eer-to-sql/rel-to-mermaid"
+      "projectFolder": "examples/eer-database-suite/rel-to-mermaid"
     },
     {
       "packageName": "transformation-template",
@@ -410,7 +410,7 @@
     },
     {
       "packageName": "eer-metamodel",
-      "projectFolder": "examples/advanced-eer-to-sql/metamodels/eer"
+      "projectFolder": "examples/eer-database-suite/metamodels/eer"
     },
     {
       "packageName": "simple-eer-metamodel",
@@ -425,8 +425,20 @@
       "projectFolder": "examples/simple-eer-to-sql/eer-to-relational"
     },
     {
+      "packageName": "simple-eer-metamodel-variability",
+      "projectFolder": "examples/simple-eer-to-sql-variability/metamodels/eer"
+    },
+    {
+      "packageName": "simple-relational-metamodel-variability",
+      "projectFolder": "examples/simple-eer-to-sql-variability/metamodels/relational"
+    },
+    {
+      "packageName": "simple-eer-to-relational-variability",
+      "projectFolder": "examples/simple-eer-to-sql-variability/eer-to-relational"
+    },
+    {
       "packageName": "relational-metamodel",
-      "projectFolder": "examples/advanced-eer-to-sql/metamodels/relational"
+      "projectFolder": "examples/eer-database-suite/metamodels/relational"
     },
     {
       "packageName": "workflow-metamodel",

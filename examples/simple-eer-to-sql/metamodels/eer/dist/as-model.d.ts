@@ -2,8 +2,7 @@
 /**
  * The EER metamodel expressed as a types-metamodel model. It ships with
  * the transformation as a manifest part and is rendered into the store
- * before the decision and binding models, so the binding model can
- * reference its concepts (Attribute, Relationship) by absolute path.
+ * before every run.
  */
 import { ModelStore } from "@aelastics/synthesis/store";
 import { ExprNode } from "@aelastics/synthesis/jsx";
