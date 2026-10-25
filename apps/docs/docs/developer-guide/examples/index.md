@@ -54,10 +54,34 @@ From the [model-to-text tutorial](../tutorial/model-to-text/index.md):
 | [`examples/tutorial/sql-tutorial-structured`](https://github.com/AelasticS/Synthesis/tree/main/examples/tutorial/sql-tutorial-structured) | m2t | Part 2: named sections, and output split across two files so constraints are applied after the tables exist. |
 | [`examples/tutorial/sql-tutorial-configuration-based`](https://github.com/AelasticS/Synthesis/tree/main/examples/tutorial/sql-tutorial-configuration-based) | m2t | Part 3: the file layout and identifier quoting chosen by configuration. |
 
-## The full-example suite
+## The simple EER to relational suite (without variability)
+
+A single transformation with fixed logic, under
+[`examples/simple-eer-to-sql/`](https://github.com/AelasticS/Synthesis/tree/main/examples/simple-eer-to-sql),
+explained on [the suite page](./simple-eer-to-sql.md). It owns two
+small metamodels, `simple-eer-metamodel` and
+`simple-relational-metamodel`.
+
+| Example | Kind | What it shows |
+| --- | --- | --- |
+| [`examples/simple-eer-to-sql/eer-to-relational`](https://github.com/AelasticS/Synthesis/tree/main/examples/simple-eer-to-sql/eer-to-relational) | m2m | The plain shape of a transformation at small scale: `@E2E` rules for entities, attributes and relationships, a sample model, and a verified output and trace. |
+
+## The simple EER to relational suite (with variability)
+
+The same mapping as a configuration-based transformation with three
+design issues, under
+[`examples/simple-eer-to-sql-variability/`](https://github.com/AelasticS/Synthesis/tree/main/examples/simple-eer-to-sql-variability),
+explained on [the suite page](./simple-eer-to-sql-variability.md). It owns two
+small metamodels, `simple-eer-metamodel-variability` and `simple-relational-metamodel-variability`.
+
+| Example | Kind | What it shows |
+| --- | --- | --- |
+| [`examples/simple-eer-to-sql-variability/eer-to-relational`](https://github.com/AelasticS/Synthesis/tree/main/examples/simple-eer-to-sql-variability/eer-to-relational) | m2m | The whole configuration-based pattern at small scale: a decision model with `OneToManyStrategy`, `PrimaryKeyStrategy` and `NamingConvention`, a binding model, and `@VarPoint` / `@VarOption` / `@Default` methods. |
+
+## The EER database suite
 
 Larger packages under
-[`examples/advanced-eer-to-sql/`](https://github.com/AelasticS/Synthesis/tree/main/examples/advanced-eer-to-sql)
+[`examples/eer-database-suite/`](https://github.com/AelasticS/Synthesis/tree/main/examples/eer-database-suite)
 that stand on their own
 rather than teaching one concept at a time. Two form a chain:
 `eer-to-relational` produces exactly what `rel-to-sql-ddl` consumes.
@@ -65,30 +89,18 @@ Two diagram views bracket it: `eer-to-mermaid-er` is a sibling view
 over the same EER source, and `rel-to-mermaid` draws the produced
 relational schema.
 The suite's `metamodels/` folder holds
-[`eer-metamodel`](https://github.com/AelasticS/Synthesis/tree/main/examples/advanced-eer-to-sql/metamodels/eer)
+[`eer-metamodel`](https://github.com/AelasticS/Synthesis/tree/main/examples/eer-database-suite/metamodels/eer)
 (the full EER
 metamodel) and
-[`relational-metamodel`](https://github.com/AelasticS/Synthesis/tree/main/examples/advanced-eer-to-sql/metamodels/relational)
+[`relational-metamodel`](https://github.com/AelasticS/Synthesis/tree/main/examples/eer-database-suite/metamodels/relational)
 (the full relational one).
 
 | Example | Kind | What it shows |
 | --- | --- | --- |
-| [`examples/advanced-eer-to-sql/eer-to-relational`](https://github.com/AelasticS/Synthesis/tree/main/examples/advanced-eer-to-sql/eer-to-relational) | m2m | The full-featured EER to relational mapping: full EER semantics (aggregations with the cardinality key rule, integrity rules, user-defined domains, composite attributes, row history as an opening design option), every template kind, nine design issues, verified outputs and traces. See [the suite page](./advanced-eer-to-sql.md). |
-| [`examples/advanced-eer-to-sql/rel-to-sql-ddl`](https://github.com/AelasticS/Synthesis/tree/main/examples/advanced-eer-to-sql/rel-to-sql-ddl) | m2t | DDL from the rich content: named keys and constraints with referential actions, domains, trigger stubs, physical clustering, and dialects as extension-authored preset configurations. |
-| [`examples/advanced-eer-to-sql/eer-to-mermaid-er`](https://github.com/AelasticS/Synthesis/tree/main/examples/advanced-eer-to-sql/eer-to-mermaid-er) | m2t | The ER diagram view of the same source metamodel: Mermaid `erDiagram` text with attribute blocks for every entity kind and the identifying/non-identifying line conventions; fixed logic, run without configuration flags. |
-| [`examples/advanced-eer-to-sql/rel-to-mermaid`](https://github.com/AelasticS/Synthesis/tree/main/examples/advanced-eer-to-sql/rel-to-mermaid) | m2t | The diagram of the mapping's output: Mermaid `erDiagram` text over the produced relational schema, chained after `eer-to-relational` so different configurations of the same source become [visibly different diagrams](./advanced-eer-to-sql.md#one-source-three-configurations); fixed logic, run without configuration flags. |
-
-## The compact EER to relational suite
-
-A single configuration-based transformation with three design issues,
-under
-[`examples/simple-eer-to-sql/`](https://github.com/AelasticS/Synthesis/tree/main/examples/simple-eer-to-sql),
-explained on [the suite page](./simple-eer-to-sql.md). It owns two
-small metamodels, `simple-eer-metamodel` and `simple-relational-metamodel`.
-
-| Example | Kind | What it shows |
-| --- | --- | --- |
-| [`examples/simple-eer-to-sql/eer-to-relational`](https://github.com/AelasticS/Synthesis/tree/main/examples/simple-eer-to-sql/eer-to-relational) | m2m | The whole configuration-based pattern at small scale: a decision model with `OneToManyStrategy`, `PrimaryKeyStrategy` and `NamingConvention`, a binding model, and `@VarPoint` / `@VarOption` / `@Default` methods. |
+| [`examples/eer-database-suite/eer-to-relational`](https://github.com/AelasticS/Synthesis/tree/main/examples/eer-database-suite/eer-to-relational) | m2m | The full-featured EER to relational mapping: full EER semantics (aggregations with the cardinality key rule, integrity rules, user-defined domains, composite attributes, row history as an opening design option), every template kind, nine design issues, verified outputs and traces. See [the suite page](./eer-database-suite.md). |
+| [`examples/eer-database-suite/rel-to-sql-ddl`](https://github.com/AelasticS/Synthesis/tree/main/examples/eer-database-suite/rel-to-sql-ddl) | m2t | DDL from the rich content: named keys and constraints with referential actions, domains, trigger stubs, physical clustering, and dialects as extension-authored preset configurations. |
+| [`examples/eer-database-suite/eer-to-mermaid-er`](https://github.com/AelasticS/Synthesis/tree/main/examples/eer-database-suite/eer-to-mermaid-er) | m2t | The ER diagram view of the same source metamodel: Mermaid `erDiagram` text with attribute blocks for every entity kind and the identifying/non-identifying line conventions; fixed logic, run without configuration flags. |
+| [`examples/eer-database-suite/rel-to-mermaid`](https://github.com/AelasticS/Synthesis/tree/main/examples/eer-database-suite/rel-to-mermaid) | m2t | The diagram of the mapping's output: Mermaid `erDiagram` text over the produced relational schema, chained after `eer-to-relational` so different configurations of the same source become [visibly different diagrams](./eer-database-suite.md#one-source-three-configurations); fixed logic, run without configuration flags. |
 
 ## The workflow suite
 

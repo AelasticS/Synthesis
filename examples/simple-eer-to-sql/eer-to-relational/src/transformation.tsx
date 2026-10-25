@@ -4,10 +4,8 @@
  */
 
 import { createExprNode, ExprNode } from "@aelastics/synthesis/jsx"
-import { VarPoint, VarOption, Default, Option, DecisionAwareM2M } from "@aelastics/synthesis/variability"
-import { E2E, M2M } from "@aelastics/synthesis/m2m"
+import { E2E, M2M, abstractM2M } from "@aelastics/synthesis/m2m"
 import { ModelStore } from "@aelastics/synthesis/store"
-import * as cm from "@aelastics/synthesis/metamodels/configuration/model"
 import {
   IEntity,
   IEERSchema,
@@ -22,19 +20,14 @@ import * as rmT from "simple-relational-metamodel/model"
 import { RelSchema, Table, Column } from "simple-relational-metamodel"
 
 @M2M()
-export class SimpleEerToRelational extends DecisionAwareM2M<
-    IEERSchema,
-    rmT.IRelSchema,
-    {},
-    cm.IConfigurationModel
-> {
-  constructor(store: ModelStore, {}, configModel?: cm.IConfigurationModel) {
-    super(store, {}, configModel)
+export class SimpleEerToRelational extends abstractM2M<IEERSchema, rmT.IRelSchema> {
+  constructor(store: ModelStore) {
+    super(store)
   }
 
   main(s: IEERSchema) {
     return (
-        <RelSchema name={`${s.name}_Relational_Schema_with_Decision_Model`} store={this.context.store}>
+        <RelSchema name={`${s.name}_Relational_Schema`} store={this.context.store}>
           {s.elements
               .filter((el) => this.context.store.isTypeOf(el, Entity))
               .map((el) => this.Entity2Table(el as IEntity))}
@@ -53,22 +46,13 @@ export class SimpleEerToRelational extends DecisionAwareM2M<
 
   @E2E()
   Attribute2Column(a: IAttribute): ExprNode<rmT.IColumn> {
-    return <Column name={this.applyNaming(a.name)} isKey={a.isKey} isAutoincrement={a.isKey ? this.primaryKeyStrategy(a) : false} type={this.getColumnType(a.attrDomain)}></Column>
+    return <Column name={this.applyNaming(a.name)} isKey={a.isKey} isAutoincrement={a.isKey} type={this.getColumnType(a.attrDomain)}></Column>
   }
 
-  // @E2E is outermost: wraps the VarPoint dispatcher, so tracing happens after VarPoint selects
-  // and calls the matching VarOption method. @VarPoint must be inner (applied first) so it
-  // registers its options bucket in the registry before @VarOption decorators run on later methods.
+  // Every relationship becomes a foreign key column in the table on the
+  // side with upper bound 1; there is no join-table alternative here.
   @E2E()
-  @VarPoint("OneToManyStrategy")
-  RelationshipMapping(rel: IRelationship): ExprNode<rmT.IColumn> | ExprNode<rmT.ITable> {
-    throw new Error("Not implemented VarOptions for VarPoint RelationshipMapping")
-    // return null as unknown as ExprNode<IForeignKey> | ExprNode<ITable>;
-  }
-
-  @Default()
-  @VarOption("RelationshipMapping", Option("ForeignKey"))
-  relationshipAsForeignKey(rel: IRelationship): ExprNode<rmT.IColumn> {
+  RelationshipMapping(rel: IRelationship): ExprNode<rmT.ITable> {
     const fkSide = this.getFKSide(rel)
     const pkSide = this.getPKSide(rel)
 
@@ -86,71 +70,10 @@ export class SimpleEerToRelational extends DecisionAwareM2M<
     )
   }
 
-  @VarOption("RelationshipMapping", Option("JoinTable"))
-  relationshipAsJoinTable(rel: IRelationship): ExprNode<rmT.ITable> {
-    const role1 = rel.roles[0]
-    const role2 = rel.roles[1]
-
-    return (
-        <Table name={this.applyNaming(rel.name)}>
-          <Column
-              name={this.applyNaming(role1.domain.name + "Id_FK")}
-              type={this.getColumnType(role1.domain)}
-              isForeignKey={true}
-              references={role1.domain.name}
-              isNullable={false}
-              isKey={role1.ub === "1"}
-          />
-          <Column
-              name={this.applyNaming(role2.domain.name + "Id_FK")}
-              type={this.getColumnType(role2.domain)}
-              isForeignKey={true}
-              references={role2.domain.name}
-              isNullable={false}
-              isKey={role2.ub === "1"}
-          />
-        </Table>
-    )
-  }
-
-  // ######### START PrimaryKeyStrategy variations #############
-
-  @VarPoint("PrimaryKeyStrategy")
-  primaryKeyStrategy(a: IAttribute): boolean {
-    throw new Error("Not implemented VarOptions for VarPoint PrimaryKeyStrategy")
-  }
-
-  @VarOption("primaryKeyStrategy", Option("UseAutoIncrement"))
-  useAutoIncrement(a: IAttribute): boolean {
-    return a.isKey
-  }
-
-  @VarOption("primaryKeyStrategy", Option("UseManualIncrement"))
-  useManualIncrement(a: IAttribute): boolean {
-    return false
-  }
-  // ######### END PrimaryKeyStrategy variations #############
-
-  // ######### START NamingConvention variations #############
-  @VarPoint("NamingConvention")
-  applyNaming(name: string): string {
-    throw new Error("Not implemented VarOptions for VarPoint NamingConvention")
-  }
-
-  @VarOption("applyNaming", Option("CamelCase"))
-  applyCamelCaseNaming(name: string): string {
+  // Fixed camelCase naming: underscores are dropped.
+  private applyNaming(name: string): string {
     return name.replace(/_/g, "")
   }
-
-  @VarOption("applyNaming", Option("SnakeCase"))
-  applySnakeCaseNaming(name: string): string {
-    return name
-        .replace(/([a-z])([A-Z])/g, "$1_$2")
-        .replace(/([A-Z]+)([A-Z][a-z])/g, "$1_$2")
-        .toLowerCase()
-  }
-
-  // ######### END NamingConvention variations #############
 
   private getFKSide(rel: IRelationship): IOrdinaryMapping {
     // Return the side with upperBound = 1 (many-to-one side becomes FK side)

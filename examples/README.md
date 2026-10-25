@@ -21,9 +21,12 @@ folder's README lists its members.
 examples/
   tutorial/            the tutorial suite: metamodels/ plus the
                        eer-tutorial-* and sql-tutorial-* companions
-  simple-eer-to-sql/   the compact suite: metamodels/ plus one
-                       configuration-based transformation
-  advanced-eer-to-sql/ the full-example suite: metamodels/ plus a
+  simple-eer-to-sql/   the simple suite without variability: metamodels/
+                       plus one fixed transformation
+  simple-eer-to-sql-variability/
+                       the simple suite with variability: metamodels/
+                       plus one configuration-based transformation
+  eer-database-suite/ the EER database suite: metamodels/ plus a
                        configuration-based chain and its diagram views
   workflow/            the workflow suite: metamodels/ plus a chain,
                        its flowchart view, and the organizational example
@@ -47,27 +50,37 @@ the finished state of that part. See [the suite README](./tutorial/).
 | [sql-tutorial-structured](./tutorial/sql-tutorial-structured/) | m2t | Text Part 2: named sections and one file per document. |
 | [sql-tutorial-configuration-based](./tutorial/sql-tutorial-configuration-based/) | m2t | Text Part 3: output layout and identifier quoting decided by a configuration model. |
 
-### The full-example suite
+### The simple EER to relational suite (without variability)
 
-Larger packages that stand on their own rather than teaching one
-concept at a time. See [the suite README](./advanced-eer-to-sql/).
-
-| Example | Kind | What it shows |
-| --- | --- | --- |
-| [eer-to-relational](./advanced-eer-to-sql/eer-to-relational/) | m2m | The full-featured EER to relational mapping: full EER semantics, every template kind, nine design issues, a rich relational target, verified outputs and traces. |
-| [rel-to-sql-ddl](./advanced-eer-to-sql/rel-to-sql-ddl/) | m2t | DDL from the rich content: named keys and constraints with referential actions, domains, trigger stubs, and dialects as preset configurations. |
-| [eer-to-mermaid-er](./advanced-eer-to-sql/eer-to-mermaid-er/) | m2t | The ER diagram view of the same EER source as Mermaid `erDiagram` text; fixed logic. |
-| [rel-to-mermaid](./advanced-eer-to-sql/rel-to-mermaid/) | m2t | The diagram of the mapping's output, chained after `eer-to-relational` so different configurations become visibly different diagrams; fixed logic. |
-
-### The compact EER to relational suite
-
-The small sibling of the full-example suite: two compact metamodels and
-one configuration-based transformation with three design issues. See
+The smallest EER to relational example: two simple metamodels and one
+transformation with fixed logic. See
 [the suite README](./simple-eer-to-sql/).
 
 | Example | Kind | What it shows |
 | --- | --- | --- |
-| [eer-to-relational](./simple-eer-to-sql/eer-to-relational/) | m2m | The whole configuration-based pattern at small scale: a decision model, a binding model, `@VarPoint` / `@VarOption` / `@Default` methods, a default and an edited configuration, verified outputs and traces. |
+| [eer-to-relational](./simple-eer-to-sql/eer-to-relational/) | m2m | The plain shape of a transformation at small scale: `@E2E` rules, a sample model, verified output and trace. |
+
+### The simple EER to relational suite (with variability)
+
+The same mapping with three decisions opened: two simple metamodels and
+one configuration-based transformation with three design issues. See
+[the suite README](./simple-eer-to-sql-variability/).
+
+| Example | Kind | What it shows |
+| --- | --- | --- |
+| [eer-to-relational](./simple-eer-to-sql-variability/eer-to-relational/) | m2m | The whole configuration-based pattern at small scale: a decision model, a binding model, `@VarPoint` / `@VarOption` / `@Default` methods, a default and an edited configuration, verified outputs and traces. |
+
+### The EER database suite
+
+Larger packages that stand on their own rather than teaching one
+concept at a time. See [the suite README](./eer-database-suite/).
+
+| Example | Kind | What it shows |
+| --- | --- | --- |
+| [eer-to-relational](./eer-database-suite/eer-to-relational/) | m2m | The full-featured EER to relational mapping: full EER semantics, every template kind, nine design issues, a rich relational target, verified outputs and traces. |
+| [rel-to-sql-ddl](./eer-database-suite/rel-to-sql-ddl/) | m2t | DDL from the rich content: named keys and constraints with referential actions, domains, trigger stubs, and dialects as preset configurations. |
+| [eer-to-mermaid-er](./eer-database-suite/eer-to-mermaid-er/) | m2t | The ER diagram view of the same EER source as Mermaid `erDiagram` text; fixed logic. |
+| [rel-to-mermaid](./eer-database-suite/rel-to-mermaid/) | m2t | The diagram of the mapping's output, chained after `eer-to-relational` so different configurations become visibly different diagrams; fixed logic. |
 
 ### The workflow suite
 

@@ -49,7 +49,9 @@ Synthesis/
 │   └── docs/                  # Docusaurus documentation site
 ├── examples/
 │   ├── tutorial/              # tutorial companion suite + its metamodel packages
-│   ├── advanced-eer-to-sql/   # full-featured EER to SQL suite + its metamodel packages
+│   ├── simple-eer-to-sql/     # simple EER to relational suite, no variability
+│   ├── simple-eer-to-sql-variability/ # the same suite with variability (configuration-based)
+│   ├── eer-database-suite/    # full-featured EER database suite (m2m, SQL DDL, Mermaid) + metamodels
 │   └── workflow/              # workflow suite + its metamodel packages
 ├── templates/
 │   └── transformation-template/  # starter transformation package

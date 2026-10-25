@@ -15,14 +15,6 @@
         "module": "simple-eer-metamodel/as-model",
         "exportName": "EERModel"
       }
-    ],
-    "decisionModel": {
-      "module": "./dist/decision-model.js",
-      "exportName": "RelationSchemaDesignIssues"
-    },
-    "bindingModel": {
-      "module": "./dist/binding-model.js",
-      "exportName": "ER_Bindings"
-    }
+    ]
   }
 }

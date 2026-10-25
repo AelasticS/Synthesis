@@ -12,9 +12,9 @@ overall version history.
 
 ### Added
 
-- **The simple-eer-to-sql suite.** A compact counterpart to the
-  advanced suite: two small metamodels (`simple-eer-metamodel`,
-  `simple-relational-metamodel`) and `simple-eer-to-relational`, a
+- **The simple-eer-to-sql-variability suite.** A simple counterpart to the
+  eer-database-suite: two small metamodels (`simple-eer-metamodel-variability`,
+  `simple-relational-metamodel-variability`) and `simple-eer-to-relational-variability`, a
   configuration-based transformation with three design issues
   (`OneToManyStrategy`, `PrimaryKeyStrategy`, `NamingConvention`). Its
   README maps the paper's listings to files and walks the loop: build,
@@ -22,6 +22,12 @@ overall version history.
   it, run with it, and export the result and the trace. `npm test`
   runs the CLI smoke and `scripts/verify.mjs`, which asserts both
   runs' tables and the trace resolutions behind them.
+
+- **The simple-eer-to-sql suite.** The same mapping without variability:
+  `simple-eer-metamodel`, `simple-relational-metamodel` and
+  `simple-eer-to-relational`, a plain `abstractM2M` transformation
+  with fixed foreign key, auto increment and camelCase behavior, and its
+  own docs page.
 
 - **Declared constraints on the decision-framework metamodels.**
   `BindingElement` must reference only issues of its binding model's
@@ -103,6 +109,20 @@ overall version history.
   runs them after the gate render.
 
 ### Changed
+
+- **Examples renamed.** `examples/advanced-eer-to-sql` is now
+  `examples/eer-database-suite` (it holds m2m and m2t transformations
+  and Mermaid diagram views, not only EER to SQL). The earlier simple
+  suite moved from `examples/simple-eer-to-sql` to
+  `examples/simple-eer-to-sql-variability`; `examples/simple-eer-to-sql`
+  is now the version without variability. Docs pages follow the same
+  names and are ordered simple, simple with variability, then the
+  eer-database-suite. The packages of the variability suite are renamed
+  to match (`simple-eer-metamodel-variability`,
+  `simple-relational-metamodel-variability`,
+  `simple-eer-to-relational-variability`); the unsuffixed names now
+  belong to the suite without variability. Reinstall transformations and
+  reimport sample models that used the old names.
 
 - **Terminology follows the metamodel.** The decision framework's
   `ElementIssue` is `ElementLevelIssue`, "variation points" are
@@ -187,7 +207,7 @@ overall version history.
   counterpart. Packages, names, and the documentation page keep their
   names; the Rush project folders, the lockfile links, and the links
   in the docs, READMEs, and design notes follow the new path. The
-  simple suite's EER metamodel package is `simple-eer-metamodel`, so
+  simple suite's EER metamodel package is `simple-eer-metamodel-variability`, so
   the two never share a package name.
 
 - **Docs follow the `main` entry rule and the run flags.** The
@@ -197,6 +217,18 @@ overall version history.
   `--trace`.
 
 ### Fixed
+
+- **The eer-database-suite verify scripts run again.**
+  `scripts/verify.mjs` in `eer-to-relational`, `rel-to-sql-ddl`,
+  `eer-to-mermaid-er` and `rel-to-mermaid` imported `sample/library.tsx`,
+  which does not exist (the file is `library.eer.tsx`), so none of their
+  assertions ran. With the path fixed, two scripts still asserted formats
+  that had since changed: the patched configuration used the retired
+  `Choice`/`NoHistory` names instead of `ElementLevelChoice` named
+  `ec_<Entity>_RowHistory`, and the trace checks looked for `rule=` and
+  `issue=` attributes instead of `function=` and `Resolution` entries
+  that point at the deciding choice. Both are updated, and all four
+  scripts pass.
 
 - **The simple suite's foreign key option puts the column on the right
   table.** For a 1:N relationship the `ForeignKey` option now adds the

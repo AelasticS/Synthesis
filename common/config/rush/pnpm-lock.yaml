@@ -66,7 +66,7 @@ importers:
         version: 25.3.3
       eer-metamodel:
         specifier: workspace:*
-        version: link:../../examples/advanced-eer-to-sql/metamodels/eer
+        version: link:../../examples/eer-database-suite/metamodels/eer
       eslint:
         specifier: ~10.0.2
         version: 10.0.2(jiti@1.21.7)
@@ -78,7 +78,7 @@ importers:
         version: link:../../examples/tutorial/metamodels/rel-tutorial
       relational-metamodel:
         specifier: workspace:*
-        version: link:../../examples/advanced-eer-to-sql/metamodels/relational
+        version: link:../../examples/eer-database-suite/metamodels/relational
       typescript:
         specifier: ~5.9.3
         version: 5.9.3
@@ -141,7 +141,7 @@ importers:
         specifier: ~5.9.3
         version: 5.9.3
 
-  ../../examples/advanced-eer-to-sql/eer-to-mermaid-er:
+  ../../examples/eer-database-suite/eer-to-mermaid-er:
     dependencies:
       '@aelastics/synthesis':
         specifier: workspace:*
@@ -157,7 +157,7 @@ importers:
         specifier: ~5.9.3
         version: 5.9.3
 
-  ../../examples/advanced-eer-to-sql/eer-to-relational:
+  ../../examples/eer-database-suite/eer-to-relational:
     dependencies:
       '@aelastics/synthesis':
         specifier: workspace:*
@@ -176,7 +176,7 @@ importers:
         specifier: ~5.9.3
         version: 5.9.3
 
-  ../../examples/advanced-eer-to-sql/metamodels/eer:
+  ../../examples/eer-database-suite/metamodels/eer:
     dependencies:
       '@aelastics/synthesis':
         specifier: workspace:*
@@ -189,7 +189,7 @@ importers:
         specifier: ~5.9.3
         version: 5.9.3
 
-  ../../examples/advanced-eer-to-sql/metamodels/relational:
+  ../../examples/eer-database-suite/metamodels/relational:
     dependencies:
       '@aelastics/synthesis':
         specifier: workspace:*
@@ -202,7 +202,7 @@ importers:
         specifier: ~5.9.3
         version: 5.9.3
 
-  ../../examples/advanced-eer-to-sql/rel-to-mermaid:
+  ../../examples/eer-database-suite/rel-to-mermaid:
     dependencies:
       '@aelastics/synthesis':
         specifier: workspace:*
@@ -218,7 +218,7 @@ importers:
         specifier: ~5.9.3
         version: 5.9.3
 
-  ../../examples/advanced-eer-to-sql/rel-to-sql-ddl:
+  ../../examples/eer-database-suite/rel-to-sql-ddl:
     dependencies:
       '@aelastics/synthesis':
         specifier: workspace:*
@@ -230,6 +230,51 @@ importers:
       '@aelastics/synthesis-cli':
         specifier: workspace:*
         version: link:../../../apps/cli
+      typescript:
+        specifier: ~5.9.3
+        version: 5.9.3
+
+  ../../examples/simple-eer-to-sql-variability/eer-to-relational:
+    dependencies:
+      '@aelastics/synthesis':
+        specifier: workspace:*
+        version: link:../../../libraries/synthesis
+      simple-eer-metamodel-variability:
+        specifier: workspace:*
+        version: link:../metamodels/eer
+      simple-relational-metamodel-variability:
+        specifier: workspace:*
+        version: link:../metamodels/relational
+    devDependencies:
+      '@aelastics/synthesis-cli':
+        specifier: workspace:*
+        version: link:../../../apps/cli
+      typescript:
+        specifier: ~5.9.3
+        version: 5.9.3
+
+  ../../examples/simple-eer-to-sql-variability/metamodels/eer:
+    dependencies:
+      '@aelastics/synthesis':
+        specifier: workspace:*
+        version: link:../../../../libraries/synthesis
+      '@aelastics/types':
+        specifier: workspace:*
+        version: link:../../../../libraries/aelastics-types
+    devDependencies:
+      typescript:
+        specifier: ~5.9.3
+        version: 5.9.3
+
+  ../../examples/simple-eer-to-sql-variability/metamodels/relational:
+    dependencies:
+      '@aelastics/synthesis':
+        specifier: workspace:*
+        version: link:../../../../libraries/synthesis
+      '@aelastics/types':
+        specifier: workspace:*
+        version: link:../../../../libraries/aelastics-types
+    devDependencies:
       typescript:
         specifier: ~5.9.3
         version: 5.9.3

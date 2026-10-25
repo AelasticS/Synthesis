@@ -1,0 +1,20 @@
+import * as e from "./EER.meta.model.type.js";
+import { CpxTemplate, IStore, Template, WithRefProps } from "@aelastics/synthesis/jsx";
+export type IModelProps = WithRefProps<e.IEERSchema> & {
+    store?: IStore;
+};
+export declare const EERSchema: CpxTemplate<IModelProps, e.IEERSchema>;
+export declare const Kernel: Template<e.IKernel>;
+export declare const ERConcept: Template<e.IERConcept>;
+export declare const Weak: Template<e.IWeak>;
+export declare const Attribute: Template<e.IAttribute>;
+export declare const Domain: Template<e.IDomain>;
+export declare const Relationship: Template<e.IRelationship>;
+export declare const OrdinaryMapping: Template<e.IOrdinaryMapping>;
+export declare const WeakMapping: Template<e.IWeakMapping>;
+export declare const Subtype: Template<e.ISubtype>;
+export declare const Specialization: Template<e.ISpecialization>;
+export declare const Aggregation: Template<e.IAggregation>;
+export declare const AggregationMapping: Template<e.IAggregationMapping>;
+export declare const Role: Template<e.IOrdinaryMapping>;
+export declare const Entity: Template<e.IKernel>;

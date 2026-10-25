@@ -173,7 +173,7 @@ They belong to the same later stage as constraint naming, and none of
 the three tutorial parts has anything to say about them.
 
 All three are present in the full relational metamodel,
-`relational-metamodel`, owned by the `advanced-eer-to-sql` example suite, where
+`relational-metamodel`, owned by the `eer-database-suite` example suite, where
 `ForeignKey` and
 `Index` are declared as concepts beside `Table` and `Column`, and a
 foreign key holds a list of columns rather than a single one. That is

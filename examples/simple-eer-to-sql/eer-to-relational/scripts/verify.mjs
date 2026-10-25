@@ -1,9 +1,8 @@
 /**
  * The example's verification: beyond the generic smoke, assert the
- * exact design-space outcomes on the Company sample. Two runs: the
- * default configuration (ForeignKey, CamelCase), and the saved edited
- * configuration (JoinTable, SnakeCase), with the persisted trace
- * checked for the resolutions that produced each result.
+ * exact outcome on the Company sample. There is a single, fixed
+ * behavior (foreign key relationships, camelCase names, auto increment
+ * keys), so one run is enough.
  */
 import { execFileSync } from 'node:child_process'
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs'
@@ -32,38 +31,21 @@ try {
   cli(['transformation', 'install', pkgDir])
   cli(['model', 'import', join(pkgDir, 'sample', 'company.eer.tsx'), '--as', 'demo/company'])
 
-  // ── run 1: the default configuration ──────────────────────────────
   cli(['transformation', 'run', 'simple-eer-to-relational', '--in', 'demo/company',
-    '--default-configs', '--out', 'demo/out-default', '--trace', 'demo/tr-default'])
-  const def = read('demo/out-default')
+    '--out', 'demo/out', '--trace', 'demo/tr'])
+  const out = read('demo/out')
 
-  expect('CamelCase default keeps the entity names',
-    def.includes('<Table name="Person"') && def.includes('<Table name="Company"'))
+  expect('entity names are kept in camelCase',
+    out.includes('<Table name="Person"') && out.includes('<Table name="Company"'))
   expect('auto increment is on for the keys',
-    def.includes('name="personId" isKey={true} isAutoincrement={true}')
-    && def.includes('name="companyId" isKey={true} isAutoincrement={true}'))
-  expect('the ForeignKey default adds no join table',
-    !def.includes('<Table name="Employment"'))
+    out.includes('name="personId" isKey={true} isAutoincrement={true}')
+    && out.includes('name="companyId" isKey={true} isAutoincrement={true}'))
+  expect('the relationship adds no join table',
+    !out.includes('<Table name="Employment"'))
   expect('the foreign key column lands in the Person table (a person works in at most one company), nullable, referencing Company',
-    /<Table \$refByName="Person">\s*<Column name="CompanyIdFK"[^>]*isForeignKey=\{true\}[^>]*references="Company"[^>]*isNullable=\{true\}/.test(def))
-  expect('the default trace records the three choices by default',
-    read('demo/tr-default').includes('byDefault={true}'))
-
-  // ── run 2: the saved edited configuration ─────────────────────────
-  cli(['model', 'import', join(pkgDir, 'config', 'company.edited-cm.tsx'), '--as', 'demo/cfg-edited',
-    '--tx', 'simple-eer-to-relational', '--dependency', 'demo/company'])
-  cli(['transformation', 'run', 'simple-eer-to-relational', '--in', 'demo/company',
-    '--config', 'demo/cfg-edited', '--out', 'demo/out-edited', '--trace', 'demo/tr-edited'])
-  const edited = read('demo/out-edited')
-
-  expect('SnakeCase renames tables and columns',
-    edited.includes('<Table name="person"') && edited.includes('name="company_name"'))
-  expect('the JoinTable option creates the employment table',
-    edited.includes('<Table name="employment"'))
-  expect('the join table carries both foreign key columns',
-    edited.includes('name="person_id_fk"') && edited.includes('name="company_id_fk"'))
-  expect('the edited choice is a Resolution that was not taken by default',
-    read('demo/tr-edited').includes('byDefault={false}'))
+    /<Table \$refByName="Person">\s*<Column name="CompanyIdFK"[^>]*isForeignKey=\{true\}[^>]*references="Company"[^>]*isNullable=\{true\}/.test(out))
+  expect('the trace records the executed rules',
+    read('demo/tr').includes('RuleInvocation'))
 } catch (err) {
   if (err.stderr) {
     console.error(err.stderr.toString())

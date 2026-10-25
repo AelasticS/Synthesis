@@ -141,8 +141,8 @@ Candidates are tried in order, and the first *available* property wins:
   occupied slot skip to the next candidate instead.
 
 The last rule is what makes paired references work. The
-[full relational metamodel](https://github.com/AelasticS/Synthesis/tree/main/examples/advanced-eer-to-sql/metamodels/relational)
-of the advanced-eer-to-sql example defines one `Column`
+[full relational metamodel](https://github.com/AelasticS/Synthesis/tree/main/examples/eer-database-suite/metamodels/relational)
+of the eer-database-suite example defines one `Column`
 tag serving three contexts, and its foreign-key column pairs depend on
 the occupied slot being skipped rather than replaced:
 
