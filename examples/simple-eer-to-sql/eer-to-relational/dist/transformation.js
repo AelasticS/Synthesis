@@ -49,8 +49,8 @@ let SimpleEerToRelational = class SimpleEerToRelational extends DecisionAwareM2M
         const role1 = rel.roles[0];
         const role2 = rel.roles[1];
         return (createExprNode(Table, { name: this.applyNaming(rel.name) },
-            createExprNode(Column, { name: this.applyNaming(role1.domain.name + "Id_FK"), type: this.getColumnType(role1.domain), isForeignKey: true, references: role1.domain.name, isNullable: role1.lb !== "1" && role1.ub !== "1", isKey: role1.ub === "1" }),
-            createExprNode(Column, { name: this.applyNaming(role2.domain.name + "Id_FK"), type: this.getColumnType(role2.domain), isForeignKey: true, references: role2.domain.name, isNullable: role2.lb !== "1", isKey: role2.ub === "1" })));
+            createExprNode(Column, { name: this.applyNaming(role1.domain.name + "Id_FK"), type: this.getColumnType(role1.domain), isForeignKey: true, references: role1.domain.name, isNullable: false, isKey: role1.ub === "1" }),
+            createExprNode(Column, { name: this.applyNaming(role2.domain.name + "Id_FK"), type: this.getColumnType(role2.domain), isForeignKey: true, references: role2.domain.name, isNullable: false, isKey: role2.ub === "1" })));
     }
     // ######### START PrimaryKeyStrategy variations #############
     primaryKeyStrategy(a) {

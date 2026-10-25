@@ -98,7 +98,7 @@ export class SimpleEerToRelational extends DecisionAwareM2M<
               type={this.getColumnType(role1.domain)}
               isForeignKey={true}
               references={role1.domain.name}
-              isNullable={role1.lb !== "1" && role1.ub !== "1"}
+              isNullable={false}
               isKey={role1.ub === "1"}
           />
           <Column
@@ -106,7 +106,7 @@ export class SimpleEerToRelational extends DecisionAwareM2M<
               type={this.getColumnType(role2.domain)}
               isForeignKey={true}
               references={role2.domain.name}
-              isNullable={role2.lb !== "1"}
+              isNullable={false}
               isKey={role2.ub === "1"}
           />
         </Table>

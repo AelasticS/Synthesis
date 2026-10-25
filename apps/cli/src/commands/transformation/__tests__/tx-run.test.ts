@@ -534,9 +534,8 @@ describe('tx run --config with deleted choices (default materialization)', () =>
     expect(existsSync(join(modelsDir, 'com', 'example', 'never-dup.tsx'))).toBe(false)
   })
 
-  it('renders the configuration with its own header reference closure (helper models)', async () => {
-    // A hand-edited configuration referencing a helper workspace model:
-    // validate/show already load the header closure, so tx run must too.
+  it('validate loads the header reference closure (helper models) and rejects a cross-model choice', async () => {
+    // A hand-edited configuration referencing a helper workspace model.
     const helper = [
       '/** @jsx createExprNode */',
       '',
@@ -580,15 +579,15 @@ describe('tx run --config with deleted choices (default materialization)', () =>
     expect(edited).not.toContain(originalChoice)
     writeFileSync(join(modelsDir, 'com', 'example', 'mat-cfg-helper.tsx'), edited)
 
+    // The helper loads (the reference resolves), but the choice selects an
+    // option whose issue is not in the binding model's decision model: the
+    // declared ConfigurationModel constraint must reject it.
     const validate = await run(['model', 'validate', 'com.example/mat-cfg-helper', '--tx', 'eer-to-relational'])
-    expect(validate.error).toBeUndefined()
-
-    const { stdout, error } = await run([
-      'tx', 'run', 'eer-to-relational', '--in', 'com.example/persons',
-      '--config', 'com.example/mat-cfg-helper', '--out', 'com.example/rel-mat-helper'
-    ])
-    expect(error).toBeUndefined()
-    expect(stdout).toContain('Wrote com.example/rel-mat-helper')
+    expect(validate.code).toBe(2)
+    expect(validate.stdout).toContain(
+      "a choice selects an option whose issue is not in the binding model's decision model"
+    )
+    expect(flatten(validate.stderr)).toContain('1 declared constraint violation(s)')
   })
 })
 
