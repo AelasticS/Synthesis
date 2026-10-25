@@ -18,7 +18,7 @@ const eerPkgDir = resolve(pkgDir, '..', 'eer-to-relational')
 const cliBin = join(pkgDir, 'node_modules', '@aelastics', 'synthesis-cli', 'bin', 'run.js')
 const home = mkdtempSync(join(tmpdir(), 'synth-rel-mmd-verify-'))
 const cli = (args) =>
-  execFileSync('node', [cliBin, ...args], { env: { ...process.env, HOME: home }, stdio: 'pipe' }).toString()
+  execFileSync('node', [cliBin, ...args], { env: { ...process.env, HOME: home, USERPROFILE: home }, stdio: 'pipe' }).toString()
 
 const modelPath = (ref) => join(home, '.synth', 'models', ...ref.split('/')) + '.tsx'
 const readMmd = (dir) => {
@@ -39,7 +39,7 @@ try {
   cli(['namespace', 'mk', 'demo'])
   cli(['transformation', 'install', eerPkgDir])
   cli(['transformation', 'install', pkgDir])
-  cli(['model', 'import', join(eerPkgDir, 'sample', 'library.tsx'), '--as', 'demo/library'])
+  cli(['model', 'import', join(eerPkgDir, 'sample', 'library.eer.tsx'), '--as', 'demo/library'])
 
   // ── chain run 1: the default configuration ────────────────────────
   const defDir = join(home, 'gen-default')

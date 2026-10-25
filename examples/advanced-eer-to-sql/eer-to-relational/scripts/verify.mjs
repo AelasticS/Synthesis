@@ -16,7 +16,7 @@ const pkgDir = process.cwd()
 const cliBin = join(pkgDir, 'node_modules', '@aelastics', 'synthesis-cli', 'bin', 'run.js')
 const home = mkdtempSync(join(tmpdir(), 'synth-eer-to-sql-verify-'))
 const cli = (args) =>
-  execFileSync('node', [cliBin, ...args], { env: { ...process.env, HOME: home }, stdio: 'pipe' }).toString()
+  execFileSync('node', [cliBin, ...args], { env: { ...process.env, HOME: home, USERPROFILE: home }, stdio: 'pipe' }).toString()
 
 const modelPath = (ref) => join(home, '.synth', 'models', ...ref.split('/')) + '.tsx'
 const read = (ref) => readFileSync(modelPath(ref), 'utf-8')
@@ -32,7 +32,7 @@ try {
   cli(['init'])
   cli(['namespace', 'mk', 'demo'])
   cli(['transformation', 'install', pkgDir])
-  cli(['model', 'import', join(pkgDir, 'sample', 'library.tsx'), '--as', 'demo/library'])
+  cli(['model', 'import', join(pkgDir, 'sample', 'library.eer.tsx'), '--as', 'demo/library'])
 
   // ── run 1: the default configuration ──────────────────────────────
   cli(['transformation', 'run', 'eer-to-relational', '--in', 'demo/library',

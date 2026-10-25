@@ -14,7 +14,7 @@ const eerPkgDir = resolve(pkgDir, '..', 'eer-to-relational')
 const cliBin = join(pkgDir, 'node_modules', '@aelastics', 'synthesis-cli', 'bin', 'run.js')
 const home = mkdtempSync(join(tmpdir(), 'synth-ddl-verify-'))
 const cli = (args) =>
-  execFileSync('node', [cliBin, ...args], { env: { ...process.env, HOME: home }, stdio: 'pipe' }).toString()
+  execFileSync('node', [cliBin, ...args], { env: { ...process.env, HOME: home, USERPROFILE: home }, stdio: 'pipe' }).toString()
 
 let failures = 0
 const expect = (what, cond) => {
@@ -28,7 +28,7 @@ try {
   cli(['namespace', 'mk', 'demo'])
   cli(['transformation', 'install', eerPkgDir])
   cli(['transformation', 'install', pkgDir])
-  cli(['model', 'import', join(eerPkgDir, 'sample', 'library.tsx'), '--as', 'demo/library'])
+  cli(['model', 'import', join(eerPkgDir, 'sample', 'library.eer.tsx'), '--as', 'demo/library'])
 
   const genDir = join(home, 'generated')
   cli(['transformation', 'run', 'eer-to-relational', 'rel-to-sql-ddl',

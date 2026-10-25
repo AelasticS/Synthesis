@@ -19,7 +19,7 @@ const wfPkgDir = resolve(pkgDir, '..', 'workflow-to-bpmn')
 const cliBin = join(pkgDir, 'node_modules', '@aelastics', 'synthesis-cli', 'bin', 'run.js')
 const home = mkdtempSync(join(tmpdir(), 'synth-bpmn-mermaid-verify-'))
 const cli = (args) =>
-  execFileSync('node', [cliBin, ...args], { env: { ...process.env, HOME: home }, stdio: 'pipe' }).toString()
+  execFileSync('node', [cliBin, ...args], { env: { ...process.env, HOME: home, USERPROFILE: home }, stdio: 'pipe' }).toString()
 
 let failures = 0
 const expect = (what, cond) => {
