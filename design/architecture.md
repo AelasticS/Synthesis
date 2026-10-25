@@ -20,7 +20,10 @@ domain-shaped lives with the examples.
 | apps/cli | `@aelastics/synthesis-cli` | the `synth` CLI |
 | apps/docs | `@synthesis/docs` | Docusaurus site, not in the build graph |
 | examples/tutorial | seven tutorial companions plus `metamodels/` | the tutorial suite |
-| examples/advanced-eer-to-sql | two full examples plus `metamodels/` | the full-example suite |
+| examples/simple-eer-to-sql | one fixed m2m transformation plus `metamodels/` | the simple suite, without variability |
+| examples/simple-eer-to-sql-variability | one configuration-based m2m transformation plus `metamodels/` | the simple suite, with variability |
+| examples/eer-database-suite | m2m and m2t transformations, diagram views, plus `metamodels/` | the full-featured EER database suite |
+| examples/workflow | four transformations (m2m and m2t) plus `metamodels/` | the workflow suite |
 | templates/transformation-template | `transformation-template` | starter package |
 
 Dependency direction is strictly downward in this list: the aelastics
@@ -66,8 +69,12 @@ by the suite whose examples share it:
   the tutorial's pivot, target of the three m2m parts and source of the
   three m2t parts.
 - `eer-metamodel` and `relational-metamodel` under
-  examples/advanced-eer-to-sql/metamodels: the full-example suite's own metamodels;
-  the two full examples are a chain pair over them.
+  examples/eer-database-suite/metamodels: the EER database suite's own metamodels;
+  its transformations (m2m, SQL DDL, Mermaid diagram views) are chained over them.
+- `simple-eer-metamodel` and `simple-relational-metamodel` under
+  examples/simple-eer-to-sql/metamodels, and their `-variability` copies under
+  examples/simple-eer-to-sql-variability/metamodels: the two simple suites' own
+  small metamodels.
 
 Every metamodel package owns all its facets under one uniform convention:
 the bare package exports the JSX components, `/model` exports the type

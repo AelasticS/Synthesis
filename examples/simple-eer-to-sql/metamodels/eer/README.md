@@ -10,9 +10,9 @@ composite attributes. It is the source language of the simple
 
 Subpaths: the bare specifier `simple-eer-metamodel` exports the JSX
 components, `simple-eer-metamodel/model` the type schemas, and
-`simple-eer-metamodel/as-model` the metamodel-as-model factory (`EERModel`)
-that the transformation's binding model references.
+`simple-eer-metamodel/as-model` the metamodel-as-model factory (`EERModel`),
+which the transformation's manifest lists as a part.
 
 The richer variant, with composite attributes, user-defined domains,
 and optional attributes, lives in
-[`advanced-eer-to-sql/metamodels/eer`](../../../advanced-eer-to-sql/metamodels/eer).
+[`eer-database-suite/metamodels/eer`](../../../eer-database-suite/metamodels/eer).

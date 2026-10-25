@@ -1,0 +1,27 @@
+{
+  "name": "simple-eer-to-relational-variability",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Simple Synthesis m2m transformation: EER schema to relational schema",
+  "author": "Sinisa Neskovic",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "dist/transformation.js",
+  "files": [
+    "dist",
+    "synth.json"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "node ../../smoke.mjs && node scripts/verify.mjs"
+  },
+  "dependencies": {
+    "@aelastics/synthesis": "workspace:*",
+    "simple-eer-metamodel-variability": "workspace:*",
+    "simple-relational-metamodel-variability": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "~5.9.3",
+    "@aelastics/synthesis-cli": "workspace:*"
+  }
+}

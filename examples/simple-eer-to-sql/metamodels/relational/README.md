@@ -14,4 +14,4 @@ JSX components, `simple-relational-metamodel/model` the type schemas, and
 
 The richer variant, with first-class primary and foreign keys,
 referential actions, indexes, and wired domains, lives in
-[`advanced-eer-to-sql/metamodels/relational`](../../../advanced-eer-to-sql/metamodels/relational).
+[`eer-database-suite/metamodels/relational`](../../../eer-database-suite/metamodels/relational).

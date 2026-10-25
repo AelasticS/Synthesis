@@ -79,7 +79,7 @@ rush build
 (cd libraries/synthesis && rushx test)
 (cd apps/cli && rushx test && rushx smoke)
 # every example and template package with a test script:
-# examples/advanced-eer-to-sql/*, examples/tutorial/eer-* and sql-*,
+# examples/eer-database-suite/*, examples/tutorial/eer-* and sql-*,
 # examples/workflow/*, templates/transformation-template
 (cd examples/tutorial/eer-tutorial-basic && npm test)   # ...and so on
 (cd apps/docs && rushx build)

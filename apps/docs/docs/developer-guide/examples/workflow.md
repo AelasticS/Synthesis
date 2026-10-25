@@ -1,5 +1,5 @@
 ---
-sidebar_position: 3
+sidebar_position: 4
 title: "The workflow suite"
 ---
 
@@ -550,7 +550,7 @@ space with nothing genuinely open in it would be ceremony.
 `org-to-approval` is parameterized, but a parameter is not a
 configuration: `{worker, sensitivity}` is the run's INPUT, data that
 picks which process to derive, not a recorded closure of open design
-decisions (the [full-featured EER to SQL suite](./advanced-eer-to-sql.md) is
+decisions (the [full-featured EER to SQL suite](./eer-database-suite.md) is
 where configuration-based transformation is shown in earnest). What
 the suite adds instead is the composition story: the chain
 (`synth transformation run workflow-to-bpmn bpmn-to-mermaid --in demo/approval --out-dir ./generated`)
