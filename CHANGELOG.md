@@ -32,6 +32,13 @@ overall version history.
   `ModelLevelChoice` accept only options of an element-level and a
   model-level issue respectively. All run under `synth model validate`.
 
+- **Trace reference components.** `SourceElement` and `ChoiceRef` join
+  the trace metamodel's JSX components: a `RuleInvocation` names its
+  source element with `<SourceElement $refByName=…/>`, and a `Resolution`
+  lists the configuration choices it consulted with
+  `<ChoiceRef $refByName=…/>`, so serialized traces tag each reference
+  by its role.
+
 - **An invocation carries its own performer.** An optional override
   of the called definition's default, as BPMN call activities do; the
   flowchart view shows the effective performer. A new declared
@@ -107,6 +114,12 @@ overall version history.
   model needs its transformation's render context (`--tx`) and names
   its source model (`--dependency`, auto-detected when exactly one
   installed model defines the referenced schema).
+
+- **The docs are published from this repository.** The site moves to
+  `https://AelasticS.github.io/Synthesis/`, built and deployed by the
+  `Deploy Docs` workflow with the official GitHub Pages actions; it no
+  longer publishes to a separate Pages repository and needs no deploy
+  token. Links in the docs and READMEs follow the new address.
 
 - **The transformation entry rule is `main`.** Renamed from
   `template`: all rules are templates, and the entry rule's
