@@ -10,6 +10,19 @@ overall version history.
 
 ## [Unreleased]
 
+## [cli-v0.3.1] - 2026-10-27
+
+### Fixed
+
+- **Windows install and uninstall instructions.** The install step
+  wrote the combined system and user `PATH` into the user `PATH` and
+  asked for an elevated PowerShell, which is not needed. It now appends
+  only `C:\synthin` to the user `PATH` and shows the `tar` command
+  that extracts the bundle. The uninstall section has Windows steps
+  (delete the folder, remove the `PATH` entry, delete the workspace at
+  `%USERPROFILE%\.synth`), and the upgrade section no longer adds a
+  second `PATH` entry. Release metadata (`CITATION.cff`) is now 0.3.1.
+
 ## [cli-v0.3.0] - 2026-10-26
 
 ### Added
@@ -812,7 +825,8 @@ overall version history.
   regenerates the manifest, so the git-committed copies were never the
   consumed artifacts, only noise in diffs.
 
-[Unreleased]: https://github.com/AelasticS/Synthesis/compare/cli-v0.3.0..HEAD
+[Unreleased]: https://github.com/AelasticS/Synthesis/compare/cli-v0.3.1..HEAD
+[cli-v0.3.1]: https://github.com/AelasticS/Synthesis/compare/cli-v0.3.0..cli-v0.3.1
 [cli-v0.3.0]: https://github.com/AelasticS/Synthesis/compare/cli-v0.2.0..cli-v0.3.0
 [cli-v0.2.0]: https://github.com/AelasticS/Synthesis/compare/cli-v0.1.0..cli-v0.2.0
 [cli-v0.1.0]: https://github.com/AelasticS/Synthesis/compare/8b82ae4..cli-v0.1.0

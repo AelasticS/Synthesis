@@ -26,11 +26,11 @@ extract it, and add the resulting `synth/bin` to your `PATH`.
 
 ```bash
 # Choose one of:
-#   synth-v0.3.0-linux-x64.tar.gz
-#   synth-v0.3.0-linux-arm64.tar.gz
-#   synth-v0.3.0-darwin-x64.tar.gz
-#   synth-v0.3.0-darwin-arm64.tar.gz
-VERSION=v0.3.0
+#   synth-v0.3.1-linux-x64.tar.gz
+#   synth-v0.3.1-linux-arm64.tar.gz
+#   synth-v0.3.1-darwin-x64.tar.gz
+#   synth-v0.3.1-darwin-arm64.tar.gz
+VERSION=v0.3.1
 TARGET=linux-x64         # adjust for your platform
 URL="https://github.com/AelasticS/Synthesis/releases/download/cli-${VERSION}/synth-${VERSION}-${TARGET}.tar.gz"
 
@@ -44,21 +44,21 @@ source ~/.bashrc
 
 ### Windows
 
-Download the matching `synth-v0.3.0-win32-x64.tar.gz` from the
-[latest release](https://github.com/AelasticS/Synthesis/releases/latest)
-and extract it (with 7-Zip, or `tar -xzf` in PowerShell 5+). Then add
-the extracted `synth\bin` folder to your user `PATH`:
+Download `synth-v0.3.1-win32-x64.tar.gz` from the [Download](./download.md)
+page, then run in PowerShell (no administrator rights needed):
 
 ```powershell
-# In an elevated PowerShell, after extracting to C:\synth
-[Environment]::SetEnvironmentVariable(
-  'Path',
-  $env:Path + ';C:\synth\bin',
-  [EnvironmentVariableTarget]::User
-)
+# Extract to C:\ (the archive contains a top-level synth folder, so this creates C:\synth)
+tar -xzf "$env:USERPROFILE\Downloads\synth-v0.3.1-win32-x64.tar.gz" -C C:\
+
+# Add C:\synth\bin to your user PATH
+$userPath = [Environment]::GetEnvironmentVariable('Path', 'User')
+[Environment]::SetEnvironmentVariable('Path', "$userPath;C:\synth\bin", 'User')
 ```
 
-Open a new terminal for the PATH change to take effect.
+Open a new terminal (restart VS Code for its terminals) and check with
+`synth --version`. To install somewhere else, extract to that folder
+instead and add its `synth\bin` to `PATH`.
 
 ## Build from source
 
@@ -154,20 +154,36 @@ zsh are the first-class shells.
 
 ## Upgrading
 
-**Tarball install:** re-run the install steps above with the new version.
-Replacing the extracted directory in place is enough; your workspace at
-`~/.synth/` is untouched.
+**Tarball install:** delete the extracted `synth` folder and extract the
+new version to the same place. `PATH` already points there, so skip that
+step. Your workspace at `~/.synth/` is untouched.
 
 **Source install:** `git pull && node common/scripts/install-run-rush.js rebuild`.
 
 ## Uninstalling
 
-**Tarball install:**
+**Tarball install on Linux and macOS:**
 
 ```bash
 sudo rm -rf /usr/local/synth
-# remove the PATH entry you added in ~/.bashrc (or equivalent)
+# then remove the PATH line you added to ~/.bashrc (or your shell's rc file)
 ```
+
+**Tarball install on Windows** (PowerShell):
+
+```powershell
+Remove-Item -Recurse -Force C:\synth
+
+# Remove C:\synth\bin from your user PATH
+$userPath = [Environment]::GetEnvironmentVariable('Path', 'User')
+$kept = ($userPath -split ';') | Where-Object { $_ -and $_ -ne 'C:\synth\bin' }
+[Environment]::SetEnvironmentVariable('Path', ($kept -join ';'), 'User')
+```
+
+If you extracted somewhere else, use that folder in both places. Windows
+PowerShell cannot delete files whose full path is longer than 260
+characters; if `Remove-Item` reports "Could not find a part of the path",
+delete the folder in File Explorer instead.
 
 **Source install:**
 
@@ -175,10 +191,15 @@ sudo rm -rf /usr/local/synth
 cd apps/cli && pnpm unlink --global
 ```
 
-The workspace at `~/.synth/` is **not** removed by either. Delete it
-manually if you want to discard all locally installed transformations,
-models, and pipelines:
+**Workspace.** Uninstalling does **not** remove the workspace with your
+installed transformations, models, and pipelines. Delete it if you want
+to discard them. It is `~/.synth` unless you chose another folder with
+`synth init --path <dir>`:
 
 ```bash
-rm -rf ~/.synth
+rm -rf ~/.synth                                      # Linux and macOS
+```
+
+```powershell
+Remove-Item -Recurse -Force "$env:USERPROFILE\.synth"  # Windows
 ```
