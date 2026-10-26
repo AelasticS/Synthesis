@@ -243,6 +243,11 @@ overall version history.
 
 ### Fixed
 
+- **The transformation template's smoke test is isolated on Windows.**
+  `templates/transformation-template/scripts/smoke.mjs` sets
+  `USERPROFILE` as well as `HOME`, as the example scripts already do, so
+  `npm test` no longer fails with "Workspace not initialized".
+
 - **A `@SpecPoint` skeleton merge is serialized as the merged
   element.** The target JSX that the CLI writes for `--out` printed the
   base skeleton with its own tag and props and lost the option's
