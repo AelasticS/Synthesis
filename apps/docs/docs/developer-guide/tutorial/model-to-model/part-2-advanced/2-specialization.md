@@ -153,7 +153,10 @@ entity, and `kernelToTable` and `weakToTable` would still win for
 kernel and weak entities, because they are more specific. Declaration
 order plays no role, just as with method overriding. Two options for
 the same type could never be told apart, so the second one is rejected
-when the class is decorated.
+when the class is decorated. A subclass may declare an option for a
+type its parent covers. That overrides the parent's option for subclass
+instances only (see
+[Inheritance and Declaration Order](../../../guides/polymorphic-dispatch.md#inheritance-and-declaration-order)).
 
 ### 4. Dispatch is total: no match is an error
 

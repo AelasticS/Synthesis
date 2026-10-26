@@ -20,6 +20,33 @@ export interface ISpecOption {
   inputType: Any;
 }
 
+// An option together with the class prototype that declared it, so a
+// subclass can tell its own options from inherited ones.
+interface IRegisteredOption extends ISpecOption {
+  declaredOn: object;
+}
+
+type SpecRegistry = { [pointName: string]: IRegisteredOption[] };
+
+/**
+ * Returns the option registry owned by the class whose prototype is
+ * `target`, creating it on first use. A new registry starts as a copy of
+ * the inherited one with every option list copied as well, so options
+ * added here never reach the parent class or sibling subclasses.
+ */
+function ownRegistry(target: any): SpecRegistry {
+  if (Object.prototype.hasOwnProperty.call(target, __SpecPoint)) {
+    return target[__SpecPoint];
+  }
+  const inherited: SpecRegistry = target[__SpecPoint] ?? {};
+  const registry: SpecRegistry = {};
+  for (const pointName of Object.keys(inherited)) {
+    registry[pointName] = [...inherited[pointName]];
+  }
+  target[__SpecPoint] = registry;
+  return registry;
+}
+
 /**
  * Picks the option a point dispatches to for an element of type `aType`.
  * An option is applicable when `aType` is its declared type or a subtype
@@ -128,8 +155,10 @@ export const SpecPoint = () => {
     (descriptor.value as any)[__isSpecPoint] = true;
     appendDecoratorHistory(original, descriptor.value, "SpecPoint");
 
-    // added because in composition of decorator, descriptor will be another decorator, not a function
-    target[__SpecPoint] = { ...target[__SpecPoint], [propertyKey]: [] };
+    // Keep options already registered for this point: inherited ones, and
+    // ones written above the point in this class.
+    const registry = ownRegistry(target);
+    registry[propertyKey] = registry[propertyKey] ?? [];
 
     return descriptor;
   };
@@ -147,24 +176,24 @@ export const SpecOption = (methodName: string, type: Any) => {
     // would duplicate or conflict with that.
     guardSpecOption(descriptor.value, propertyKey)
 
-    const method: Function = target[__SpecPoint][methodName];
-    // @ts-ignore
-    if (method) {
+    // The point may be declared further down the class, so create its
+    // list if it does not exist yet.
+    const registry = ownRegistry(target);
+    const options = (registry[methodName] = registry[methodName] ?? []);
+    const option: IRegisteredOption = { specMethod: propertyKey, inputType: type, declaredOn: target };
+    const sameType = options.findIndex((o) => o.inputType === type);
+    if (sameType < 0) {
+      options.push(option);
+    } else if (options[sameType].declaredOn === target) {
       // Two options for the same type can never be told apart by dispatch:
       // reject the second one now rather than at the first matching element.
-      const duplicate = (method as unknown as ISpecOption[]).find((o) => o.inputType === type);
-      if (duplicate) {
-        throw new Error(
-          `@SpecOption '${propertyKey}': @SpecPoint '${methodName}' already has option ` +
-            `'${duplicate.specMethod}' for type '${type.name}'.`
-        );
-      }
-      let o: ISpecOption = {
-        specMethod: propertyKey,
-        inputType: type,
-      };
-      // @ts-ignore
-      method.push(o);
+      throw new Error(
+        `@SpecOption '${propertyKey}': @SpecPoint '${methodName}' already has option ` +
+          `'${options[sameType].specMethod}' for type '${type.name}'.`
+      );
+    } else {
+      // An inherited option for the same type: this class overrides it.
+      options[sameType] = option;
     }
 
     // The option is a traced function call: absorbed into the enclosing
