@@ -12,7 +12,7 @@ export const TraceModel_TypeSchema = t.schema("TraceModel_TypeSchema")
 // design/synchronizing-transformations/): one dependency record of an
 // invocation: an element (optionally narrowed to a property), a
 // produced invocation consulted via resolveTarget, or a configuration issue.
-// Unpopulated in v1; declared now so dependency data lands later
+// Not populated yet; declared now so dependency data lands later
 // without a metamodel migration.
 export const ReadRecord = t.subtype(
     ModelElement,

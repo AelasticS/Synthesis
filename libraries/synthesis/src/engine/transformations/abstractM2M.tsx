@@ -21,7 +21,6 @@ import * as tmC from "./trace/trace-meta.model-components"
 type IODescr = { type?: t.Any; instance?: IModel; jsx?: string }
 type TransformationDescr = {
   type?: tm.IM2M_Transformation
-  instance?: tm.IM2M_Trace
 }
 
 // One consultation of a variability point: which option executed, whether
@@ -323,6 +322,8 @@ export abstract class abstractM2M<
 > implements IM2M<S, D, EM, P> {
   // transformation type
   public context: M2MContext<P> = new M2MContext<P>()
+  // EM / extra: reserved for additional input models. The engine does
+  // not read it yet; callers pass {} or nothing.
   public extra?: EM
 
   public constructor(store?: ModelStore, extra?: EM) {

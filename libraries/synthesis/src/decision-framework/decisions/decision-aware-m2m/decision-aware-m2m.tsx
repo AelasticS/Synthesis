@@ -51,6 +51,8 @@ export abstract class DecisionAwareM2M<
     public override context: DecisionAwareM2MContext<P> = new DecisionAwareM2MContext<P>()
     public configModel?: CM
 
+    // `extra` (EM) is reserved for additional input models and not read
+    // by the engine yet; it is passed through to abstractM2M.
     public constructor(store?: ModelStore, extra?: EM, configModel?: CM) {
         super(store, extra)
         if (store) this.context.pushStore(store)
