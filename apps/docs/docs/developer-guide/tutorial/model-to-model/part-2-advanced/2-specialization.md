@@ -69,8 +69,9 @@ outer decorator and `@SpecPoint` the inner one.
 `@E2E` is the tracing decorator: it records that a rule ran, on which
 source element, and producing which target elements. Applied outside a
 specialization point, it sees the result the dispatch actually produced
-and records a specialization entry naming the option that was selected
-and the runtime type of the source element. Applied inside, it would
+and records one rule invocation for it: its `function` is the option
+that was selected (for example `weakToTable`), with the source element
+and the target elements the merged result created. Applied inside, it would
 see only the base rule's result, and the trace would report a table
 that never existed in that form.
 

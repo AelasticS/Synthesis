@@ -8,7 +8,7 @@ A model-to-model transformation maps a source model to a target model. In Synthe
 
 ## The Transformation Class
 
-Every transformation extends `abstractM2M<Source, Destination, ExtraModels, ConfigModel>` and is decorated with `@M2M`.
+Every transformation extends `abstractM2M<Source, Destination, ExtraModels, Param>` and is decorated with `@M2M`. A transformation with a design space extends `DecisionAwareM2M` instead, which adds the configuration model (see [Design Decisions in Transformations](./variability.md)).
 
 ```typescript
 /** @jsx createExprNode */
@@ -67,7 +67,7 @@ signature.
 class EER2RelTransformation extends abstractM2M<et.IEERSchema, rt.IRelSchema> {
 ```
 
-The decorator registers the transformation with the framework and sets up the execution context.
+The decorator marks the class as a model-to-model transformation. It does not register the class anywhere and adds no behavior: the execution context is created by `abstractM2M` itself, and the CLI finds a transformation through its package manifest (`synth.json`).
 
 ### `main()` Method
 
@@ -104,10 +104,7 @@ Entity2Table(e: et.IEntity): ExprNode<rt.ITable> {
 }
 ```
 
-The `@E2E` decorator does two things:
-
-1. **Registers the rule** so the framework knows which method handles which source type.
-2. **Creates trace records** automatically. Every time the rule executes, a `RuleInvocation` in the trace maps the source element to its target elements. The first argument must be a `ModelElement`; otherwise the call throws an Error.
+The `@E2E` decorator **creates trace records**. Every time the rule executes, a `RuleInvocation` in the trace maps the source element to its target elements, and `Resolve` uses the same records to find the target produced for a source element. The first argument must be a `ModelElement`; otherwise the call throws an Error. The decorator does not register the rule: which method handles which element is decided by the calls in your code (for example the `map` in `main()`).
 
 ### Return Type
 
@@ -225,24 +222,27 @@ Every transformation has access to `this.context`, an `M2MContext` instance.
 | `this.context.store` | The `ModelStore` containing all models |
 | `this.context.invocations` | The recorded invocations, in execution order |
 | `this.context.resolveJSXElement(source, ruleName?)` | Look up the target element for a source |
-| `this.extra` | Extra models passed to the constructor |
-| `this.configModel` | Configuration model for variability |
+| `this.context.param` | The run parameter passed as `transform(source, param)` (`--param` in the CLI) |
+| `this.extra` | Extra models passed to the constructor. Reserved for additional input models; the engine does not read it yet |
+| `this.configModel` | Configuration model for variability (only in `DecisionAwareM2M`) |
 
 ## Type Parameters
 
 The full signature of `abstractM2M` has four type parameters:
 
 ```typescript
-abstractM2M<Source, Destination, ExtraModels, ConfigModel>
+abstractM2M<Source, Destination, ExtraModels, Param>
 ```
+
+In the source code they are named `S`, `D`, `EM` and `P`.
 
 | Parameter | Purpose | Default |
 |---|---|---|
 | `Source` | Interface of the source model (e.g., `IEERSchema`) | required |
 | `Destination` | Interface of the target model (e.g., `IRelSchema`) | required |
-| `ExtraModels` | Additional input models (object type with named models) | `{}` |
-| `ConfigModel` | Decision/configuration model for variability | `undefined` |
+| `ExtraModels` | Additional input models (object type with named models). Reserved: the engine does not read them yet, so pass `{}` or nothing | `{}` |
+| `Param` | Type of the run parameter passed as `transform(source, param)` and read as `this.context.param` | `undefined` |
 
-Extra models and configuration models are covered in [Design Decisions in Transformations](./variability.md).
+The configuration model is not a parameter of `abstractM2M`. `DecisionAwareM2M<Source, Destination, ExtraModels, ConfigModel, Param>` adds it; see [Design Decisions in Transformations](./variability.md).
 
 Once your transformation is written, see [Packaging Transformations](./packaging-transformations.md) for how to build, package, and publish it so others can install it with `synth transformation install`.

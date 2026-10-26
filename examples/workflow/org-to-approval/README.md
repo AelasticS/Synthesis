@@ -6,7 +6,11 @@ hierarchy (`org-metamodel`). The logic is fixed, but every run
 requires `--param '{"worker":...,"sensitivity":...}'`: `worker` names
 the worker whose document needs approval, `sensitivity` how many
 levels of the unit chain approve it. A department approves through
-its manager, a board in parallel through its members, and the
+its manager, a board in parallel through its members. The
+specialization point `OrgUnit2Approval` returns a base skeleton (a
+`Step` with the description `Approval by <unit>`) that is merged with
+the selected option's Task or Parallel, so each approval carries that
+description. The
 verbatim parameter is recorded in the generated model's `generatedBy`
 provenance.
 

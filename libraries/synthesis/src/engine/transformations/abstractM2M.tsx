@@ -21,7 +21,6 @@ import * as tmC from "./trace/trace-meta.model-components"
 type IODescr = { type?: t.Any; instance?: IModel; jsx?: string }
 type TransformationDescr = {
   type?: tm.IM2M_Transformation
-  instance?: tm.IM2M_Trace
 }
 
 // One consultation of a variability point: which option executed, whether
@@ -323,6 +322,8 @@ export abstract class abstractM2M<
 > implements IM2M<S, D, EM, P> {
   // transformation type
   public context: M2MContext<P> = new M2MContext<P>()
+  // EM / extra: reserved for additional input models. The engine does
+  // not read it yet; callers pass {} or nothing.
   public extra?: EM
 
   public constructor(store?: ModelStore, extra?: EM) {
@@ -385,14 +386,28 @@ export abstract class abstractM2M<
       return lines.join("\n")
     }
 
-    const tagName = element.name ?? element.type.name
+    // A @SpecPoint base skeleton is never created itself: render creates
+    // the option's element (subElement) with the skeleton's props merged
+    // under the option's, and with both children lists. Serialize that
+    // merged element. Children are collected by identity, because render
+    // also appends the option's children to the skeleton's list.
+    let concrete: ExprNode<any> = element
+    let props = element.props
+    const children: unknown[] = [...element.childArray]
+    while (concrete.isAbstract && concrete.subElement) {
+      concrete = concrete.subElement
+      props = { ...props, ...concrete.props }
+      for (const child of concrete.childArray) if (!children.includes(child)) children.push(child)
+    }
+
+    const tagName = concrete.name ?? concrete.type.name
 
     // Build props string
-    const propsStr = this.formatJsxProps(element.props, level, indent)
+    const propsStr = this.formatJsxProps(props, level, indent)
 
     // Collect renderable children
     const childLines: string[] = []
-    for (const child of element.childArray) {
+    for (const child of children) {
       if (child === null || child === undefined) continue
       if (typeof child === "string") {
         childLines.push(`${" ".repeat((level + 1) * indent)}${child}`)

@@ -5,7 +5,7 @@ import { abstractM2M, E2E, SpecPoint, SpecOption } from '@aelastics/synthesis/m2
 import type { ModelStore } from '@aelastics/synthesis/store'
 import * as ot from 'org-metamodel/model'
 import * as wt from 'workflow-metamodel/model'
-import { WorkflowModel, Process, Task, Parallel } from 'workflow-metamodel'
+import { WorkflowModel, Process, Step, Task, Parallel } from 'workflow-metamodel'
 
 /** The run's parameter, handed through the engine's transform(source,
  * param) channel: whose document, and how many approval levels upward. */
@@ -40,10 +40,14 @@ export class OrgToApprovalTransformation extends abstractM2M<
 
   // ----- the approval rule: one step per unit, specialized per kind ------
 
+  // The point supplies what every approval shares, its description. The
+  // selected option supplies the concrete element: a Task for a
+  // Department, a Parallel for a Board. The two are merged, and the
+  // merged element has the option's type.
   @E2E()
   @SpecPoint()
   OrgUnit2Approval(u: ot.IOrgUnit): ExprNode<wt.IStep> {
-    return undefined! // pure dispatcher: the matching option supplies the result
+    return <Step description={`Approval by ${u.label ?? u.name}`} />
   }
 
   // A department's approval is one task, its manager's.

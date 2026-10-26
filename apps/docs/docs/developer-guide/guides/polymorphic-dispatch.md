@@ -106,6 +106,10 @@ In the example above, when transforming a `Kernel` entity named "Person":
 
 This means specialized rules only need to declare what is different. They do not need to repeat the base logic.
 
+The merge follows two rules. Props: the base rule's props are applied first and the specialized rule's over them, so a prop set by both comes from the specialized rule. Children: the base rule's children come first, then the specialized rule's. The created element is the specialized rule's element, with its type. The base rule may therefore return a more general element than its specializations: in the [workflow suite](../examples/workflow.md), `OrgUnit2Approval` returns an abstract `Step` carrying a description, and the created element is the `Task` or `Parallel` of the selected specialization, with that description. The serialized target model (for example `synth transformation run --out`) shows the created element.
+
+A base rule that returns nothing (`return undefined!`) makes the point a pure dispatcher: the selected specialization's result is returned as is, and it may then also be an array or a plain value.
+
 ## Complete Example
 
 ```typescript

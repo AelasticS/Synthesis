@@ -37,6 +37,12 @@ export const Process: Template<w.IProcess> = (props) => {
 // when nested, a process body's steps otherwise.
 const stepConnection = defaultConnectionInfo(["children", "steps"])
 
+// The abstract step, for a base skeleton at a specialization point: the
+// option's concrete step is merged into it and attaches the same way.
+export const Step: Template<w.IStep> = (props) => {
+  return new ExprNode(w.Step, props, stepConnection)
+}
+
 export const Sequence: Template<w.ISequence> = (props) => {
   return new ExprNode(w.Sequence, props, stepConnection)
 }

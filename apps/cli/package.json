@@ -21,7 +21,7 @@
   },
   "scripts": {
     "build": "heft build --clean",
-    "test": "NODE_OPTIONS='--experimental-vm-modules' heft test --clean",
+    "test": "node --experimental-vm-modules node_modules/@rushstack/heft/lib/start.js test --clean",
     "start": "node bin/run.js",
     "smoke": "bash scripts/smoke-test.sh",
     "pack:tarballs": "node config/pack-tarballs.mjs",
