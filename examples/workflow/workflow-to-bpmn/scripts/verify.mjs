@@ -1,7 +1,6 @@
 /**
  * The model expression samples verified through the real CLI. Each of
- * model-expression.tsx (one literal with creation, computation and
- * reference), configurable-approval.tsx (a model template) and
+ * model-expression.tsx (one literal with all four operators), configurable-approval.tsx (a model template) and
  * generic-approval.tsx (a higher-order model template) is imported and
  * validated, then transformed to BPMN. The import stores the source as
  * written, so the evaluated elements (names and counts) are checked in
@@ -45,7 +44,7 @@ try {
   cli(['namespace', 'mk', 'demo'])
   cli(['transformation', 'install', pkgDir])
 
-  // ── one literal: creation, computation and reference ──────────────
+  // ── one literal, all four operators ───────────────────────────────
   sample('model-expression.tsx', 'demo/model-expression', (m) => {
     expect('computation: the process is named from the variable',
       m.includes('<Process store={store} name="DocumentApproval_bpmn">'))

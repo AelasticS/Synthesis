@@ -1,11 +1,11 @@
 /** @jsx createExprNode */
 
 /**
- * One model literal using the operators of the model expression
- * algebra: model creation (the WorkflowModel and its elements),
- * computation (the process name from a variable and the approval tasks
- * generated from a number), and reference (the SubProcess invoking the
- * model-level Publishing process by name).
+ * One model literal with all four operators of the model expression
+ * algebra: model creation (the WorkflowModel), element creation (the
+ * processes and tasks), computation (the process name from a variable
+ * and the approval tasks generated from a number), and reference (the
+ * SubProcess invoking the model-level Publishing process by name).
  */
 import { createExprNode } from '@aelastics/synthesis/jsx'
 import type { ExprNode } from '@aelastics/synthesis/jsx'
@@ -19,7 +19,7 @@ export const $synth = {
   metamodel: 'workflow-metamodel',
   author: 'Sinisa Neskovic',
   version: '0.1.0',
-  description: 'A model expression: creation, computation and reference in one literal'
+  description: 'A model expression: all four operators in one literal'
 } as const satisfies SynthHeaderInput
 
 const processName = "DocumentApproval"

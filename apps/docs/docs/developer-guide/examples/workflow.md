@@ -569,7 +569,8 @@ type-checks against the manifests before anything runs, and the
 model from a higher-order template, a template taking the writing step
 as a template parameter, resolved in two steps to a model. Three more
 samples show model expressions step by step: `model-expression.tsx`
-(one literal with model creation, computation and a reference to a
+(one literal with all four [operators](../concepts.md#the-four-operators):
+model creation, element creation, computation, and a reference to a
 model-level process), `configurable-approval.tsx` (a model template
 from document, number of approvers and mode to a model), and
 `generic-approval.tsx` (a higher-order model template whose writing

@@ -27,8 +27,8 @@ Three further samples cover an inline process (`reviewed-approval.tsx`),
 choices, loops, and a twice-invoked shared definition
 (`expense-approval.tsx`), and a higher-order template
 (`templated-approval.tsx`). Three samples show model expressions:
-one literal with creation, computation and a reference
-(`model-expression.tsx`), a model template (`configurable-approval.tsx`),
+one literal with all four operators: model creation, element
+creation, computation and a reference (`model-expression.tsx`), a model template (`configurable-approval.tsx`),
 and a higher-order model template (`generic-approval.tsx`).
 
 `npm test` runs the CLI smoke (install and one real run in an

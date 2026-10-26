@@ -93,7 +93,7 @@ tables below list the quoted files.
 
 | Quoted code | File |
 | --- | --- |
-| A model literal with creation, computation and reference | [examples/workflow/workflow-to-bpmn/sample/model-expression.tsx](examples/workflow/workflow-to-bpmn/sample/model-expression.tsx) |
+| A model literal with all four operators: model creation, element creation, computation and reference | [examples/workflow/workflow-to-bpmn/sample/model-expression.tsx](examples/workflow/workflow-to-bpmn/sample/model-expression.tsx) |
 | A model template, `ConfigurableApproval` | [examples/workflow/workflow-to-bpmn/sample/configurable-approval.tsx](examples/workflow/workflow-to-bpmn/sample/configurable-approval.tsx) |
 | A higher-order model template, `GenericApproval` and `TwoStepApproval` | [examples/workflow/workflow-to-bpmn/sample/generic-approval.tsx](examples/workflow/workflow-to-bpmn/sample/generic-approval.tsx) |
 

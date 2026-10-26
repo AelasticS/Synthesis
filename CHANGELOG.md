@@ -18,9 +18,9 @@ overall version history.
   produce the generated ones.
 
 - **Model expression samples in the workflow suite.**
-  `workflow-to-bpmn/sample` gains `model-expression.tsx` (model
-  creation, computation and a reference to a model-level process in one
-  literal), `configurable-approval.tsx` (a model template) and
+  `workflow-to-bpmn/sample` gains `model-expression.tsx` (all four
+  operators in one literal: model creation, element creation,
+  computation and a reference to a model-level process), `configurable-approval.tsx` (a model template) and
   `generic-approval.tsx` (a higher-order model template whose writing
   step is a template parameter). `npm test` of `workflow-to-bpmn` now
   also runs `scripts/verify.mjs`, which imports and validates the three,
