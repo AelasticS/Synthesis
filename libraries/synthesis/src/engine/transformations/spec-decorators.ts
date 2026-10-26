@@ -21,6 +21,30 @@ export interface ISpecOption {
 }
 
 /**
+ * Picks the option a point dispatches to for an element of type `aType`.
+ * An option is applicable when `aType` is its declared type or a subtype
+ * of it. Among the applicable options the most specific one wins: the one
+ * whose type is a subtype of every other applicable option's type.
+ * Declaration order plays no role, so applicable options without a unique
+ * most specific one are an error. Returns undefined when no option is
+ * applicable.
+ */
+function selectOption(pointName: string, aType: Any, options: ISpecOption[]): ISpecOption | undefined {
+  const applicable = options.filter((o) => aType.isOfType(o.inputType));
+  const mostSpecific = applicable.filter((o) =>
+    applicable.every((other) => other === o || o.inputType.isOfType(other.inputType))
+  );
+  if (applicable.length > 0 && mostSpecific.length !== 1) {
+    const competing = applicable.map((o) => `'${o.specMethod}' (${o.inputType.name})`).join(", ");
+    throw new Error(
+      `@SpecPoint '${pointName}': no unique most specific option for type '${aType.name}' ` +
+        `among ${competing}.`
+    );
+  }
+  return mostSpecific[0];
+}
+
+/**
  * Method decorator — marks a transformation rule as a specialization point.
  *
  * Required decorator ordering (when combined with @E2E):
@@ -50,12 +74,9 @@ export const SpecPoint = () => {
       const a: IModelElement = args[0];
       const aType = this.context.store.getTypeOf(a);
 
-      // TODO handle subtyping of specPoints(VarPoints). It is needed to combine options from subtype and supertype
-      const options: ISpecOption[] = (this as any)[__SpecPoint][propertyKey];
-      const option = options?.find((option) => {
-        return option.inputType.isOfType(aType);
-      });
-      
+      const options: ISpecOption[] = (this as any)[__SpecPoint][propertyKey] ?? [];
+      const option = selectOption(propertyKey, aType, options);
+
       if (!option) {
         throw new Error(`No specialized method found`);
       }
@@ -129,6 +150,15 @@ export const SpecOption = (methodName: string, type: Any) => {
     const method: Function = target[__SpecPoint][methodName];
     // @ts-ignore
     if (method) {
+      // Two options for the same type can never be told apart by dispatch:
+      // reject the second one now rather than at the first matching element.
+      const duplicate = (method as unknown as ISpecOption[]).find((o) => o.inputType === type);
+      if (duplicate) {
+        throw new Error(
+          `@SpecOption '${propertyKey}': @SpecPoint '${methodName}' already has option ` +
+            `'${duplicate.specMethod}' for type '${type.name}'.`
+        );
+      }
       let o: ISpecOption = {
         specMethod: propertyKey,
         inputType: type,

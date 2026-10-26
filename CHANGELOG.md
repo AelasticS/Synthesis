@@ -218,6 +218,18 @@ overall version history.
 
 ### Fixed
 
+- **`@SpecPoint` selects the most specific applicable option.**
+  Dispatch now tests the element's runtime type against the option's
+  declared type: an option for `O` applies to elements of `O` and its
+  subtypes. The test was reversed, so an option for a subtype caught
+  elements of its supertype and an option for a supertype never caught
+  a subtype. Among the applicable options the most specific one wins,
+  independent of declaration order. Options without a unique most
+  specific one are an error, and a second option for the same type on
+  one point is rejected when the class is decorated. A type no option
+  applies to is still the error `No specialized method found`. No
+  shipped example changes its output.
+
 - **The eer-database-suite verify scripts run again.**
   `scripts/verify.mjs` in `eer-to-relational`, `rel-to-sql-ddl`,
   `eer-to-mermaid-er` and `rel-to-mermaid` imported `sample/library.tsx`,
