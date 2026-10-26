@@ -4,6 +4,15 @@ name: Release CLI
 # form `cli-vX.Y.Z`. Builds the CLI, packs platform tarballs with oclif,
 # and attaches them to a GitHub Release named after the tag.
 #
+# Each platform bundle is packed and smoke-tested on a runner of its own
+# platform. oclif installs the dependencies once on the build machine,
+# and esbuild ships a native binary per platform, so a bundle packed on
+# another platform would carry the wrong esbuild.
+#
+# A manual run without a tag is a dry run: it packs and smoke-tests the
+# selected branch, keeps the tarballs as run artifacts and creates no
+# release.
+#
 # The release workflow does NOT publish anything to npm. It produces
 # self-contained tarballs (each bundling Node.js + the CLI + all
 # transitive workspace deps) for users to download from GitHub Releases.
@@ -15,17 +24,35 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Tag to release (e.g. cli-v0.3.1). Must already exist.'
-        required: true
+        description: 'Tag to release (e.g. cli-v0.4.0). Must already exist. Leave empty for a dry run of the selected branch.'
+        required: false
   push:
     tags:
       - 'cli-v*'
 
 jobs:
-  build-and-release:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
+  pack:
+    name: pack ${{ matrix.target }}
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: linux-x64
+            runner: ubuntu-latest
+          - target: linux-arm64
+            runner: ubuntu-24.04-arm
+          - target: darwin-x64
+            runner: macos-15-intel
+          - target: darwin-arm64
+            runner: macos-latest
+          - target: win32-x64
+            runner: windows-latest
+    # bash on every runner. On Windows that is Git Bash, whose GNU tar
+    # accepts the --force-local flag oclif passes there.
+    defaults:
+      run:
+        shell: bash
     env:
       # Silence the oclif tool's self-update notice; it lands on stderr,
       # which Rush would otherwise report as a build warning.
@@ -35,10 +62,8 @@ jobs:
         id: tag
         run: |
           if [ -n "${{ github.event.inputs.tag }}" ]; then
-            echo "name=${{ github.event.inputs.tag }}" >> "$GITHUB_OUTPUT"
             echo "ref=refs/tags/${{ github.event.inputs.tag }}" >> "$GITHUB_OUTPUT"
           else
-            echo "name=${GITHUB_REF#refs/tags/}" >> "$GITHUB_OUTPUT"
             echo "ref=$GITHUB_REF" >> "$GITHUB_OUTPUT"
           fi
 
@@ -52,19 +77,57 @@ jobs:
         with:
           node-version: '22'
 
+      # oclif extracts the Windows Node.js download with 7-Zip
+      - name: Put 7-Zip on PATH
+        if: runner.os == 'Windows'
+        run: echo 'C:\Program Files\7-Zip' >> "$GITHUB_PATH"
+
       - name: Install Rush
         run: node common/scripts/install-run-rush.js install
 
       - name: Build CLI and its dependencies
         run: node common/scripts/install-run-rush.js build --to @aelastics/synthesis-cli
 
-      - name: Pack platform tarballs
+      - name: Pack the platform tarball
         working-directory: apps/cli
-        run: node ../../common/scripts/install-run-rushx.js pack:tarballs
+        run: node config/pack-tarballs.mjs --targets ${{ matrix.target }}
 
-      - name: List produced tarballs
-        working-directory: apps/cli/dist
-        run: ls -lh
+      - name: Smoke-test the tarball
+        working-directory: apps/cli
+        run: node config/smoke-bundle.mjs --target ${{ matrix.target }}
+
+      - name: Upload the tarball
+        uses: actions/upload-artifact@v4
+        with:
+          name: synth-${{ matrix.target }}
+          path: apps/cli/dist/synth-v*-${{ matrix.target }}.tar.gz
+          if-no-files-found: error
+
+  release:
+    needs: pack
+    if: github.event_name == 'push' || github.event.inputs.tag != ''
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Resolve tag
+        id: tag
+        run: |
+          if [ -n "${{ github.event.inputs.tag }}" ]; then
+            echo "name=${{ github.event.inputs.tag }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "name=${GITHUB_REF#refs/tags/}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Download the tarballs
+        uses: actions/download-artifact@v4
+        with:
+          pattern: synth-*
+          path: dist
+          merge-multiple: true
+
+      - name: List the tarballs
+        run: ls -lh dist
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
@@ -74,10 +137,10 @@ jobs:
           generate_release_notes: true
           fail_on_unmatched_files: true
           files: |
-            apps/cli/dist/synth-v*-linux-x64.tar.gz
-            apps/cli/dist/synth-v*-linux-arm64.tar.gz
-            apps/cli/dist/synth-v*-darwin-x64.tar.gz
-            apps/cli/dist/synth-v*-darwin-arm64.tar.gz
-            apps/cli/dist/synth-v*-win32-x64.tar.gz
+            dist/synth-v*-linux-x64.tar.gz
+            dist/synth-v*-linux-arm64.tar.gz
+            dist/synth-v*-darwin-x64.tar.gz
+            dist/synth-v*-darwin-arm64.tar.gz
+            dist/synth-v*-win32-x64.tar.gz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -10,18 +10,25 @@ overall version history.
 
 ## [Unreleased]
 
-## [cli-v0.3.1] - 2026-10-27
-
 ### Fixed
+
+- **Native macOS and Windows bundles.** The release built all five
+  bundles on one Linux runner, so every bundle carried the Linux
+  `esbuild` binary and model import failed on macOS and Windows. Each
+  bundle is now packed on a runner of its own platform (Linux x64 and
+  arm64, macOS Intel and Apple Silicon, Windows x64) and smoke-tested
+  there before the release is created: the bundled `synth` starts,
+  `synth init` creates a workspace, and the bundled `esbuild` transpiles
+  TSX. The platform note on the download page is gone.
 
 - **Windows install and uninstall instructions.** The install step
   wrote the combined system and user `PATH` into the user `PATH` and
   asked for an elevated PowerShell, which is not needed. It now appends
-  only `C:\synthin` to the user `PATH` and shows the `tar` command
+  only `C:\synth\bin` to the user `PATH` and shows the `tar` command
   that extracts the bundle. The uninstall section has Windows steps
   (delete the folder, remove the `PATH` entry, delete the workspace at
   `%USERPROFILE%\.synth`), and the upgrade section no longer adds a
-  second `PATH` entry. Release metadata (`CITATION.cff`) is now 0.3.1.
+  second `PATH` entry.
 
 ## [cli-v0.3.0] - 2026-10-26
 
@@ -825,8 +832,7 @@ overall version history.
   regenerates the manifest, so the git-committed copies were never the
   consumed artifacts, only noise in diffs.
 
-[Unreleased]: https://github.com/AelasticS/Synthesis/compare/cli-v0.3.1..HEAD
-[cli-v0.3.1]: https://github.com/AelasticS/Synthesis/compare/cli-v0.3.0..cli-v0.3.1
+[Unreleased]: https://github.com/AelasticS/Synthesis/compare/cli-v0.3.0..HEAD
 [cli-v0.3.0]: https://github.com/AelasticS/Synthesis/compare/cli-v0.2.0..cli-v0.3.0
 [cli-v0.2.0]: https://github.com/AelasticS/Synthesis/compare/cli-v0.1.0..cli-v0.2.0
 [cli-v0.1.0]: https://github.com/AelasticS/Synthesis/compare/8b82ae4..cli-v0.1.0

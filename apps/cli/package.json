@@ -25,6 +25,7 @@
     "start": "node bin/run.js",
     "smoke": "bash scripts/smoke-test.sh",
     "pack:tarballs": "node config/pack-tarballs.mjs",
+    "smoke:bundle": "node config/smoke-bundle.mjs",
     "pack:clean": "rm -rf dist tmp vendor"
   },
   "oclif": {
