@@ -14,12 +14,14 @@
  *      via file: specifiers,
  *   3. generates the package-lock.json that oclif's npm install path needs,
  *   4. runs `oclif pack tarballs`,
- *   5. restores package.json and removes the temporary files.
+ *   5. drops the commit hash oclif puts in the tarball names, so the
+ *      download links (synth-v0.3.0-linux-x64.tar.gz) stay stable,
+ *   6. restores package.json and removes the temporary files.
  *
  * Usage: node config/pack-tarballs.mjs [--targets linux-x64,...]
  */
 import { execSync } from 'node:child_process'
-import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, renameSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -121,6 +123,16 @@ try {
   cpSync(join(lockStage, 'package-lock.json'), join(cliRoot, 'package-lock.json'))
 
   run(`npx oclif pack tarballs --targets ${targets}`, cliRoot)
+
+  // oclif names a tarball synth-v<version>-<sha>-<target>.tar.gz
+  const distDir = join(cliRoot, 'dist')
+  for (const file of readdirSync(distDir)) {
+    const stable = file.replace(/^(synth-v[^-]+)-[0-9a-f]{7,}-/, '$1-')
+    if (stable !== file) {
+      renameSync(join(distDir, file), join(distDir, stable))
+      console.log(`  ${file} -> ${stable}`)
+    }
+  }
 } finally {
   writeFileSync(pkgJsonPath, originalPkgJson)
   rmSync(vendorDir, { recursive: true, force: true })
