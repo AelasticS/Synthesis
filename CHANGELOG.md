@@ -243,6 +243,10 @@ overall version history.
 
 ### Fixed
 
+- **`npm test` of the CLI runs on Windows.** The script set
+  `NODE_OPTIONS` with POSIX shell syntax, which `cmd.exe` rejects. It
+  now passes `--experimental-vm-modules` to `node` directly.
+
 - **The transformation template's smoke test is isolated on Windows.**
   `templates/transformation-template/scripts/smoke.mjs` sets
   `USERPROFILE` as well as `HOME`, as the example scripts already do, so
