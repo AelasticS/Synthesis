@@ -39,7 +39,7 @@ if (!existsSync(join(pkgDir, 'dist'))) {
 
 const home = mkdtempSync(join(tmpdir(), 'synth-example-smoke-'))
 const cli = (args) =>
-  execFileSync('node', [cliBin, ...args], { env: { ...process.env, HOME: home }, stdio: 'pipe' }).toString()
+  execFileSync('node', [cliBin, ...args], { env: { ...process.env, HOME: home, USERPROFILE: home }, stdio: 'pipe' }).toString()
 
 try {
   cli(['init'])

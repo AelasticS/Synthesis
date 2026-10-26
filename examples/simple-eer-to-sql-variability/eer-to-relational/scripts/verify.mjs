@@ -14,7 +14,7 @@ const pkgDir = process.cwd()
 const cliBin = join(pkgDir, 'node_modules', '@aelastics', 'synthesis-cli', 'bin', 'run.js')
 const home = mkdtempSync(join(tmpdir(), 'synth-simple-eer-verify-'))
 const cli = (args) =>
-  execFileSync('node', [cliBin, ...args], { env: { ...process.env, HOME: home }, stdio: 'pipe' }).toString()
+  execFileSync('node', [cliBin, ...args], { env: { ...process.env, HOME: home, USERPROFILE: home }, stdio: 'pipe' }).toString()
 
 const modelPath = (ref) => join(home, '.synth', 'models', ...ref.split('/')) + '.tsx'
 const read = (ref) => readFileSync(modelPath(ref), 'utf-8')

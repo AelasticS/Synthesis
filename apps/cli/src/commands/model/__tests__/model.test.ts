@@ -143,7 +143,7 @@ describe('model ls', () => {
     // A hand-placed model without a header: the fixture with the $synth
     // export stripped still renders but has nothing to parse
     const text = readFileSync(personsFixture, 'utf-8')
-    const headerless = text.replace(/export const \$synth = \{[\s\S]*?\} as const\n/, '')
+    const headerless = text.replace(/export const \$synth = \{[\s\S]*?\} as const\r?\n/, '')
     writeFileSync(join(modelsDir, 'com', 'example', 'raw.tsx'), headerless)
   })
 
@@ -200,7 +200,10 @@ describe('model ls', () => {
     expect(JSON.parse(jsonRes.stdout).error).toContain('no.such.ns')
   })
 
-  it('marks an unreadable model file instead of failing the listing', async () => {
+  // chmod cannot make a file unreadable on Windows
+  const itPosix = process.platform === 'win32' ? it.skip : it
+
+  itPosix('marks an unreadable model file instead of failing the listing', async () => {
     await run(['ns', 'mk', 'com.unread'])
     const filePath = join(modelsDir, 'com', 'unread', 'secret.tsx')
     writeFileSync(filePath, 'export default () => null\n')

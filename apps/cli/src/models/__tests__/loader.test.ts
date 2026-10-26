@@ -2,7 +2,7 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, 
 import { tmpdir } from 'node:os'
 import { dirname, join, resolve } from 'node:path'
 import { createRequire } from 'node:module'
-import { fileURLToPath } from 'node:url'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 
 import { ModelStore } from '@aelastics/synthesis/store'
 
@@ -31,7 +31,7 @@ afterAll(() => {
 })
 
 describe('transpileModel', () => {
-  it('emits an ESM file with package imports resolved to absolute paths', async () => {
+  it('emits an ESM file with package imports resolved to absolute file URLs', async () => {
     const outPath = await transpileModel(personsFixture)
     tempDirs.push(dirname(outPath))
     expect(existsSync(outPath)).toBe(true)
@@ -44,7 +44,7 @@ describe('transpileModel', () => {
     expect(text).not.toMatch(/from\s*["']@(?:synthesis|aelastics)\//)
     expect(text).not.toMatch(/from\s*["']eer-metamodel/)
     const eerModulePath = testRequire.resolve('eer-metamodel')
-    expect(text).toContain(eerModulePath)
+    expect(text).toContain(pathToFileURL(eerModulePath).href)
   })
 
   it('names the unresolvable specifier when a package import cannot be resolved', async () => {

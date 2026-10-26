@@ -250,6 +250,21 @@ overall version history.
   column named after the first entity to the other entity's table. The
   suite's `verify.mjs` asserts the placement.
 
+- **`synth model import` works on Windows.** The model loader treated a
+  Windows absolute path (`C:\...`) as a package name and marked the
+  model file itself external, so every import failed. It also emitted
+  package imports as plain absolute paths, which the ESM loader rejects
+  on Windows. Imports are now emitted as `file://` URLs on every
+  platform.
+
+- **The CLI tests and the example scripts run on Windows.** They
+  isolated the workspace through `HOME`, but `os.homedir()` reads
+  `USERPROFILE` on Windows, so they used the developer's real
+  `~/.synth` and collided with each other. They now set both. The test
+  harness starts the CLI without a shell, so arguments arrive verbatim
+  on every platform, and the tests accept Windows line endings, path
+  separators and oclif's Windows wrap prefix.
+
 ## [cli-v0.2.0] - 2026-09-05
 
 ### Added

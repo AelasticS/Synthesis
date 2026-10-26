@@ -1,6 +1,7 @@
 import { mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
+import { pathToFileURL } from 'node:url'
 
 import { registerModuleResolutionRoots, resolveBareSpecifier } from '../resolution.js'
 import { transpileModel } from '../loader.js'
@@ -54,7 +55,7 @@ describe('bare specifier resolution', () => {
     )
   })
 
-  it('externalizes root-resolved imports to absolute paths in transpiled models', async () => {
+  it('externalizes root-resolved imports to absolute file URLs in transpiled models', async () => {
     const root = makeRootWithPackage('synth-test-model-dep', 'model-dep')
     registerModuleResolutionRoots([root])
 
@@ -70,6 +71,8 @@ describe('bare specifier resolution', () => {
     tempDirs.push(dirname(outPath))
     const text = readFileSync(outPath, 'utf8')
     expect(text).not.toMatch(/from\s*["']synth-test-model-dep["']/)
-    expect(text).toContain(join(root, 'node_modules', 'synth-test-model-dep', 'index.js'))
+    expect(text).toContain(
+      pathToFileURL(join(root, 'node_modules', 'synth-test-model-dep', 'index.js')).href
+    )
   })
 })

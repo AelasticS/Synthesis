@@ -22,7 +22,7 @@ let otherWorkspace: string
 
 const complete = (words: string[]) => runCli(['completions', '--', ...words], { home: testHome })
 // The word under the cursor when a NEW word is being started
-const EMPTY = "''"
+const EMPTY = ''
 
 const lines = (stdout: string): string[] => stdout.split('\n').filter((line) => line !== '')
 

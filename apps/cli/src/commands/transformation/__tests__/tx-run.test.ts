@@ -19,9 +19,10 @@ let modelsDir: string
 
 const run = (args: string[]) => runCli(args, { home: testHome })
 
-// oclif wraps stderr at terminal width, inserting '·\n ›' inside messages;
-// flatten the wrapping so substring assertions can span line breaks.
-const flatten = (text: string): string => text.replace(/·?\s*\n\s*›?\s*/g, ' ')
+// oclif wraps stderr at terminal width, inserting '·\n ›' inside messages
+// ('»' on Windows); flatten the wrapping so substring assertions can span
+// line breaks.
+const flatten = (text: string): string => text.replace(/·?\s*\n\s*[›»]?\s*/g, ' ')
 
 beforeAll(async () => {
   testHome = mkdtempSync(join(tmpdir(), 'synth-tx-run-home-'))
@@ -650,7 +651,7 @@ describe('tx run --param', () => {
     const { code, stderr } = await run([
       'tx', 'run', 'eer-to-relational', '--in', 'com.example/persons',
       '--default-configs', '--out', 'com.example/never-param',
-      '--param', "'{worker: Judy}'"
+      '--param', '{worker: Judy}'
     ])
     expect(code).not.toBe(0)
     expect(flatten(stderr)).toContain('--param is not valid JSON')
@@ -659,12 +660,11 @@ describe('tx run --param', () => {
 
   it('hands the parameter to the run and records it verbatim in the provenance', async () => {
     const paramJson = '{"worker":"Judy","sensitivity":2}'
-    // the harness joins argv into a shell line, so the JSON needs quoting
     const { code } = await run([
       'tx', 'run', 'eer-to-relational', '--in', 'com.example/persons',
       '--default-configs', '--out', 'com.example/persons-rel-param',
       '--trace', 'com.example/persons-param-trace',
-      '--param', `'${paramJson}'`
+      '--param', paramJson
     ])
     expect(code).toBe(0)
     // The fixture ignores the parameter (transform(root, param) simply

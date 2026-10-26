@@ -18,7 +18,7 @@ const eerPkgDir = resolve(pkgDir, '..', 'eer-to-relational')
 const cliBin = join(pkgDir, 'node_modules', '@aelastics', 'synthesis-cli', 'bin', 'run.js')
 const home = mkdtempSync(join(tmpdir(), 'synth-rel-mmd-verify-'))
 const cli = (args) =>
-  execFileSync('node', [cliBin, ...args], { env: { ...process.env, HOME: home }, stdio: 'pipe' }).toString()
+  execFileSync('node', [cliBin, ...args], { env: { ...process.env, HOME: home, USERPROFILE: home }, stdio: 'pipe' }).toString()
 
 const modelPath = (ref) => join(home, '.synth', 'models', ...ref.split('/')) + '.tsx'
 const readMmd = (dir) => {
