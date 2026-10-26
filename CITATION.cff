@@ -1,0 +1,25 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it using the metadata from this file."
+title: "Synthesis: an embedded DSL for functional model transformations"
+type: software
+authors:
+  - given-names: Siniša
+    family-names: Nešković
+    affiliation: IT University of Copenhagen
+    orcid: "https://orcid.org/0000-0002-8309-5847"
+  - given-names: Dejan
+    family-names: Stojimirović
+    affiliation: "University of Belgrade, Faculty of Organizational Sciences"
+    orcid: "https://orcid.org/0000-0003-0444-295X"
+repository-code: "https://github.com/AelasticS/Synthesis"
+url: "https://aelastics.github.io/Synthesis/"
+license: Apache-2.0
+version: 0.3.0
+# date-released: YYYY-MM-DD
+# The maintainer sets date-released when tagging v0.3.0.
+keywords:
+  - model-driven engineering
+  - model transformation
+  - embedded DSL
+  - TypeScript
+  - JSX
