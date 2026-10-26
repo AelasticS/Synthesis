@@ -74,4 +74,53 @@ A larger version of the transformation is
 
 ## Models as Values in a Model Expression Algebra
 
-To be added.
+The running example is
+[examples/workflow/org-to-approval](examples/workflow/org-to-approval)
+with the workflow metamodel. Listing numbers are fixed in the paper; the
+tables below list the quoted files.
+
+### Engine and metamodels
+
+| Quoted code | File |
+| --- | --- |
+| `createExprNode`, the JSX factory | [libraries/synthesis/src/jsx-runtime/handle.ts](libraries/synthesis/src/jsx-runtime/handle.ts) |
+| Abstract metamodel (`ModelElement`, `Model`) | [libraries/synthesis/src/metamodel-core/models.type.ts](libraries/synthesis/src/metamodel-core/models.type.ts) |
+| Workflow metamodel | [examples/workflow/metamodels/workflow/src/workflow.meta.model.type.ts](examples/workflow/metamodels/workflow/src/workflow.meta.model.type.ts) |
+| Elementary templates of the workflow metamodel (`Task`, `Process`, `Sequence`, `Parallel`, `Step`, `SubProcess`, ...) | [examples/workflow/metamodels/workflow/src/workflow-components.ts](examples/workflow/metamodels/workflow/src/workflow-components.ts) |
+| Organization metamodel | [examples/workflow/metamodels/org/src/org.meta.model.type.ts](examples/workflow/metamodels/org/src/org.meta.model.type.ts) |
+
+### Model expressions and templates
+
+| Quoted code | File |
+| --- | --- |
+| A model literal with creation, computation and reference | [examples/workflow/workflow-to-bpmn/sample/model-expression.tsx](examples/workflow/workflow-to-bpmn/sample/model-expression.tsx) |
+| A model template, `ConfigurableApproval` | [examples/workflow/workflow-to-bpmn/sample/configurable-approval.tsx](examples/workflow/workflow-to-bpmn/sample/configurable-approval.tsx) |
+| A higher-order model template, `GenericApproval` and `TwoStepApproval` | [examples/workflow/workflow-to-bpmn/sample/generic-approval.tsx](examples/workflow/workflow-to-bpmn/sample/generic-approval.tsx) |
+
+### Transformation
+
+| Quoted code | File |
+| --- | --- |
+| Source model: the organization `AcmeCorp` | [examples/workflow/org-to-approval/sample/acme.tsx](examples/workflow/org-to-approval/sample/acme.tsx) |
+| The transformation `OrgToApprovalTransformation`, with the specialization point `OrgUnit2Approval` and its options `Department2Approval` and `Board2Approval` | [examples/workflow/org-to-approval/src/transformation.tsx](examples/workflow/org-to-approval/src/transformation.tsx) |
+
+### Generated target model and trace
+
+Run the build from the repository root and the `synth` commands from
+`examples/workflow/org-to-approval`:
+
+```bash
+rush build -t org-to-approval
+
+cd examples/workflow/org-to-approval
+synth init
+synth namespace mk demo
+synth transformation install .
+synth model import sample/acme.tsx --as demo/acme
+
+synth transformation run org-to-approval --in demo/acme --out demo/approval \
+  --param '{"worker":"Judy","sensitivity":3}' --trace demo/approval-trace
+
+synth model export demo/approval       --to approval.tsx          # the target model
+synth model export demo/approval-trace --to approval.trace.tsx    # the trace
+```
