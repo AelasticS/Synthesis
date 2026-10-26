@@ -243,6 +243,17 @@ overall version history.
 
 ### Fixed
 
+- **`@SpecOption` registration is per class and independent of
+  declaration order.** A subclass option for an inherited `@SpecPoint`
+  was added to the parent class's option list, so the parent and sibling
+  subclasses saw it, and a parent instance could dispatch to a method it
+  lacks (`this[option.specMethod] is not a function`). An option written
+  above its point was dropped, or the class failed to load. Each class
+  now has its own copy of the inherited options, `@SpecPoint` keeps
+  options registered before it, and a subclass option for a type the
+  parent covers overrides the parent's option for subclass instances.
+  Two options for the same type on one class are still rejected.
+
 - **`npm test` of the CLI runs on Windows.** The script set
   `NODE_OPTIONS` with POSIX shell syntax, which `cmd.exe` rejects. It
   now passes `--experimental-vm-modules` to `node` directly.

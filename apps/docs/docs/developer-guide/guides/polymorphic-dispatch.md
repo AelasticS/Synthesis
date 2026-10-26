@@ -94,6 +94,26 @@ Three consequences are worth knowing before you rely on this.
 
 **Two specializations for the same type are an error.** Dispatch could never choose between them, so the second one is rejected when the class is decorated, before any element is transformed.
 
+## Inheritance and Declaration Order
+
+Each transformation class has its own list of specializations for every point. A subclass starts with the specializations it inherits and adds its own. The parent class and sibling subclasses never see them, so a parent instance only dispatches to its own specializations.
+
+```typescript
+class EER2RelWithViews extends EER2RelTransformation {
+  // Added for subclass instances only.
+  @SpecOption('Entity2Table', et.Aggregation)
+  Aggregation2Table(a: et.IAggregation): ExprNode<rt.ITable> { ... }
+
+  // Overrides the parent's Kernel2Table for subclass instances.
+  @SpecOption('Entity2Table', et.Kernel)
+  Kernel2TableWithView(k: et.IKernel): ExprNode<rt.ITable> { ... }
+}
+```
+
+**A subclass specialization for a type the parent already covers overrides it.** It replaces the parent's specialization for that type in the subclass's list, as overriding a method would. Instances of the parent class keep the parent's specialization. Within one class, two specializations for the same type are still an error.
+
+**Declaration order inside a class does not matter.** A `@SpecOption` may be written above or below its `@SpecPoint`. A subclass may also redeclare an inherited point with `@SpecPoint` to change its base rule; the specializations registered for the point are kept.
+
 ## Result Merging
 
 The base rule and the specialized rule both produce JSX elements. The framework merges their results. The specialized rule's output is combined with the base rule's output.
