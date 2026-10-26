@@ -12,6 +12,24 @@ overall version history.
 
 ### Added
 
+- **Release metadata.** `CITATION.cff` describes the software for
+  citation, and `PAPERS.md` maps the listings of the papers that cite
+  this repository to their source files and to the `synth` commands that
+  produce the generated ones.
+
+- **Model expression samples in the workflow suite.**
+  `workflow-to-bpmn/sample` gains `model-expression.tsx` (model
+  creation, computation and a reference to a model-level process in one
+  literal), `configurable-approval.tsx` (a model template) and
+  `generic-approval.tsx` (a higher-order model template whose writing
+  step is a template parameter). `npm test` of `workflow-to-bpmn` now
+  also runs `scripts/verify.mjs`, which imports and validates the three,
+  transforms each to BPMN and checks the element names and counts.
+
+- **`Step` component in `workflow-metamodel`.** The abstract step, for
+  the base skeleton of a specialization point. It connects like
+  `Sequence` and `Parallel`.
+
 - **The simple-eer-to-sql-variability suite.** A simple counterpart to the
   eer-database-suite: two small metamodels (`simple-eer-metamodel-variability`,
   `simple-relational-metamodel-variability`) and `simple-eer-to-relational-variability`, a
@@ -109,6 +127,13 @@ overall version history.
   runs them after the gate render.
 
 ### Changed
+
+- **org-to-approval: the specialization point has a base skeleton.**
+  `OrgUnit2Approval` returns a `Step` with the description
+  `Approval by <unit>`, merged with the selected option's `Task` or
+  `Parallel`. The generated approvals now carry that description; the
+  board member tasks and `WriteDocument` do not. The BPMN and Mermaid
+  outputs of the chain are unchanged.
 
 - **Examples renamed.** `examples/advanced-eer-to-sql` is now
   `examples/eer-database-suite` (it holds m2m and m2t transformations
@@ -218,6 +243,14 @@ overall version history.
 
 ### Fixed
 
+- **A `@SpecPoint` skeleton merge is serialized as the merged
+  element.** The target JSX that the CLI writes for `--out` printed the
+  base skeleton with its own tag and props and lost the option's
+  element, although rendering created the right element. It now shows
+  the option's tag, the skeleton's props under the option's, and both
+  children lists. Transformations whose points are pure dispatchers are
+  not affected.
+
 - **`@SpecPoint` selects the most specific applicable option.**
   Dispatch now tests the element's runtime type against the option's
   declared type: an option for `O` applies to elements of `O` and its
@@ -264,6 +297,13 @@ overall version history.
   harness starts the CLI without a shell, so arguments arrive verbatim
   on every platform, and the tests accept Windows line endings, path
   separators and oclif's Windows wrap prefix.
+
+### Removed
+
+- **Legacy trace types.** `M2M_Trace`, `E2E_Trace`, `IM2M_Trace`,
+  `IE2E_Trace`, the unused `transformation.model.components_v2.ts` and
+  the context field `transformation.instance`. The engine records
+  traces as a `TraceModel` and never produced these.
 
 ## [cli-v0.2.0] - 2026-09-05
 
