@@ -99,5 +99,8 @@ apps/cli/package-lock.json
 # Claude Code local settings
 .claude/
 
-# Example package build output (plain tsc)
-examples/*/dist/
+# Example package build output (plain tsc), at any depth
+examples/**/dist/
+
+# Output written by the text-generation tests on every run
+libraries/synthesis/TXT_Output*/
