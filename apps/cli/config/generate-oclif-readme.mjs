@@ -9,6 +9,16 @@ export async function runAsync() {
   try {
     console.log('Generating commands.md from oclif readme...')
 
+    // oclif finds the existing commands section with a pattern that does not
+    // match CRLF line endings. On a Windows checkout it would then insert a
+    // second section instead of replacing the first, so normalize first.
+    if (existsSync('README.md')) {
+      const current = readFileSync('README.md', 'utf-8')
+      if (current.includes('\r\n')) {
+        writeFileSync('README.md', current.replace(/\r\n/g, '\n'))
+      }
+    }
+
     // Generate the readme to a temp file, then extract the commands section
     execSync('npx oclif readme --output-dir=.', { stdio: 'inherit' })
 
