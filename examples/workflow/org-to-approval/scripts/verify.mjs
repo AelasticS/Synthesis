@@ -65,10 +65,12 @@ try {
     two.includes('<Process name="ApprovalForJudy">'))
   expect('the worker writes the document',
     two.includes('<Task name="WriteDocument" performer="Judy" />'))
+  // Each approval merges the point's description (the unit's label)
+  // with the option's element.
   expect("level 1 is Engineering's manager",
-    two.includes('<Task name="ApproveByGrace" performer="Grace" />'))
+    two.includes('<Task description="Approval by Engineering" name="ApproveByGrace" performer="Grace" />'))
   expect("level 2 is the Technology Division's manager",
-    two.includes('<Task name="ApproveByDave" performer="Dave" />'))
+    two.includes('<Task description="Approval by Technology Division" name="ApproveByDave" performer="Dave" />'))
   expect('sensitivity 2 does not reach the board', !two.includes('<Parallel'))
   expect('the implicit sequence orders writing before the approvals, bottom up',
     two.indexOf('WriteDocument') < two.indexOf('ApproveByGrace')
@@ -82,14 +84,18 @@ try {
   const three = read('demo/approval3')
 
   expect('the manager approvals stay',
-    three.includes('<Task name="ApproveByGrace" performer="Grace" />')
-    && three.includes('<Task name="ApproveByDave" performer="Dave" />'))
-  expect('the board approves as a parallel block',
-    three.includes('<Parallel name="Executive Board approvals">'))
+    three.includes('<Task description="Approval by Engineering" name="ApproveByGrace" performer="Grace" />')
+    && three.includes('<Task description="Approval by Technology Division" name="ApproveByDave" performer="Dave" />'))
+  expect('the board approves as a parallel block carrying the description',
+    three.includes('<Parallel description="Approval by Executive Board" name="Executive Board approvals">'))
   expect('every board member gets an approval task',
     three.includes('<Task name="ApproveByAlice" performer="Alice" />')
     && three.includes('<Task name="ApproveByBob" performer="Bob" />')
     && three.includes('<Task name="ApproveByCarol" performer="Carol" />'))
+  expect('the member tasks inside the parallel carry no description',
+    (three.match(/description=/g) ?? []).length === 3)
+  expect('the written document is unchanged (created in main, not by the point)',
+    three.includes('<Task name="WriteDocument" performer="Judy" />'))
   expect('the header records the verbatim parameter',
     three.includes(`param: '{"worker":"Judy","sensitivity":3}'`))
 
