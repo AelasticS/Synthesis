@@ -137,21 +137,22 @@ The upside of the same rules is that options stay small. They declare
 what is different and nothing else, which is why `kernelToTable`'s
 whole body is an empty `<Table />`.
 
-### 3. Selection takes the first matching option, in declaration order
+### 3. Selection takes the most specific applicable option
 
 When the point is called, the engine reads the runtime type of the
-source element from the store, scans the options registered for that
-point in the order they were declared, and takes the first one whose
-declared type is a subtype of that runtime type.
+source element from the store. An option is applicable when that
+runtime type is the option's declared type or a subtype of it, and
+among the applicable options the most specific one is selected.
 
-For the ordinary case, where every element's runtime type is exactly
-one of the declared option types, this selects the option you expect: a
-`BookCopy` is a `Weak`, and only `em.Weak` is a subtype of `Weak`. It
-also has an edge worth knowing about. An element of the common
-supertype, a plain `Entity` here, matches the *first* registered option
-rather than being rejected, because `Kernel` is a subtype of `Entity`.
-Declaration order is therefore part of the semantics, not just of the
-reading order.
+In this transformation every entity's runtime type is exactly one of
+the declared option types, so exactly one option applies: a `BookCopy`
+is a `Weak`, so `weakToTable` applies and `kernelToTable` does not. Had
+the class an option for `Entity` as well, it would apply to every
+entity, and `kernelToTable` and `weakToTable` would still win for
+kernel and weak entities, because they are more specific. Declaration
+order plays no role, just as with method overriding. Two options for
+the same type could never be told apart, so the second one is rejected
+when the class is decorated.
 
 ### 4. Dispatch is total: no match is an error
 

@@ -82,15 +82,17 @@ Weak2Table(w: et.IWeak): ExprNode<rt.ITable> {
 When `Entity2Table` is called with a source element:
 
 1. The framework reads the runtime type of the element from the store.
-2. It scans the registered specializations in declaration order and selects the first one whose declared type matches that runtime type.
+2. It collects the applicable specializations: those whose declared type is the element's runtime type or a supertype of it. Among them it selects the most specific one, the one whose declared type is a subtype of all the others. Declaration order plays no role.
 3. The base rule runs as well: its result becomes the abstract parent, and the selected specialization's result is attached to it (see Result Merging below).
 4. If no specialization matches, the dispatch throws `No specialized method found`.
 
-Two consequences are worth knowing before you rely on this.
+Three consequences are worth knowing before you rely on this.
 
 **Dispatch is total, so the options must cover every type the rule receives.** There is no fallback to the base rule on its own. If a transformation can encounter a plain `Entity`, declare a specialization for it; otherwise the run fails at that element.
 
-**The match tests whether the specialization's declared type is a subtype of the element's runtime type.** For the ordinary case, where each element's runtime type is exactly one of the declared option types, this selects the option you expect. It also means an element of the common supertype (a plain `Entity` here) matches the first registered specialization rather than being rejected, and that a type more specific than any declared option is not matched at all. Deeper hierarchies therefore need their own explicit specializations.
+**The most specific specialization wins, as with method overriding.** A specialization declared for a type also covers its subtypes. With specializations for `Entity` and for `Kernel`, a `Kernel` element gets the `Kernel` one and a `Weak` element gets the `Entity` one, whatever order they are declared in. A specialization declared for the rule's own source type therefore acts as a catch-all for every type without a more specific one, and a deeper hierarchy needs a specialization only where its logic differs.
+
+**Two specializations for the same type are an error.** Dispatch could never choose between them, so the second one is rejected when the class is decorated, before any element is transformed.
 
 ## Result Merging
 
