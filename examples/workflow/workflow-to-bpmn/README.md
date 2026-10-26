@@ -26,10 +26,15 @@ synth model show demo/approval-bpmn
 Three further samples cover an inline process (`reviewed-approval.tsx`),
 choices, loops, and a twice-invoked shared definition
 (`expense-approval.tsx`), and a higher-order template
-(`templated-approval.tsx`).
+(`templated-approval.tsx`). Three samples show model expressions:
+one literal with creation, computation and a reference
+(`model-expression.tsx`), a model template (`configurable-approval.tsx`),
+and a higher-order model template (`generic-approval.tsx`).
 
-`npm test` runs the CLI smoke: install and one real run in an
-isolated workspace.
+`npm test` runs the CLI smoke (install and one real run in an
+isolated workspace), then `scripts/verify.mjs`, which imports and
+validates the three model expression samples, transforms each to
+BPMN, and checks the element names and counts.
 
 The flattening rules are explained on the suite page
 [The workflow suite](https://AelasticS.github.io/Synthesis/developer-guide/examples/workflow#flattening-the-tree-into-a-graph).

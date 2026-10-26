@@ -93,7 +93,9 @@ behavior action), and the metamodel keeps it explicit:
   called, and the optional occurrence name defaults to the
   definition's. `<Invoke>` is the general invocation tag, and
   `<SubProcess $refByName="X" />` is its process-call sugar over the
-  same concept.
+  same concept. `<Step>` builds the abstract step itself; it is used
+  as the base skeleton of a specialization point, whose selected
+  option supplies the concrete step.
 - Inline authoring stays as single-use sugar: an `Activity` IS a
   `Step`, so a Task or Process written directly in a body is an
   anonymous single-use definition fused with its sole occurrence,
@@ -459,7 +461,12 @@ depth: the worker's unit chain is walked upward that many levels, and
 each unit contributes one approval step by kind, through a
 `@SpecPoint`/`@SpecOption` pair per unit kind: a department the
 approval task of its manager, a board a parallel block of its members'
-approval tasks, because a board approves collectively.
+approval tasks, because a board approves collectively. The point
+`OrgUnit2Approval` is not a pure dispatcher: its body returns a base
+skeleton, a `Step` with the description every approval shares
+(`Approval by <unit>`). The selected option supplies the concrete
+element, and the two are merged: the merged element has the option's
+type, the option's properties, and the skeleton's description.
 
 Reproducibility is the provenance's job. The verbatim parameter JSON
 is recorded as `generatedBy.param` in the header of every artifact the
@@ -480,25 +487,28 @@ generatedBy: {
 Sensitivity decides how much of the hierarchy approves. At
 sensitivity 2, Judy's chain reaches her department's manager and its
 parent's, and the generated process body is three tasks in an implicit
-sequence:
+sequence. The two approvals carry the description from the point's
+skeleton; the writing task is created in `main()` and has none:
 
 ```tsx
 <Process name="ApprovalForJudy">
   <Task name="WriteDocument" performer="Judy" />
-  <Task name="ApproveByGrace" performer="Grace" />
-  <Task name="ApproveByDave" performer="Dave" />
+  <Task description="Approval by Engineering" name="ApproveByGrace" performer="Grace" />
+  <Task description="Approval by Technology Division" name="ApproveByDave" performer="Dave" />
 </Process>
 ```
 
 At sensitivity 3 the chain reaches the executive board, and the
-board's collective approval appears as a parallel block:
+board's collective approval appears as a parallel block. The block is
+the merged element and carries the description; the member tasks
+inside it come from the option alone and do not:
 
 ```tsx
 <Process name="ApprovalForJudy">
   <Task name="WriteDocument" performer="Judy" />
-  <Task name="ApproveByGrace" performer="Grace" />
-  <Task name="ApproveByDave" performer="Dave" />
-  <Parallel name="Executive Board approvals">
+  <Task description="Approval by Engineering" name="ApproveByGrace" performer="Grace" />
+  <Task description="Approval by Technology Division" name="ApproveByDave" performer="Dave" />
+  <Parallel description="Approval by Executive Board" name="Executive Board approvals">
     <Task name="ApproveByAlice" performer="Alice" />
     <Task name="ApproveByBob" performer="Bob" />
     <Task name="ApproveByCarol" performer="Carol" />
@@ -557,7 +567,13 @@ the suite adds instead is the composition story: the chain
 type-checks against the manifests before anything runs, and the
 `templated-approval.tsx` sample builds its block-structured workflow
 model from a higher-order template, a template taking the writing step
-as a template parameter, resolved in two steps to a model.
+as a template parameter, resolved in two steps to a model. Three more
+samples show model expressions step by step: `model-expression.tsx`
+(one literal with model creation, computation and a reference to a
+model-level process), `configurable-approval.tsx` (a model template
+from document, number of approvers and mode to a model), and
+`generic-approval.tsx` (a higher-order model template whose writing
+step is a template parameter).
 
 ## One process, two drawings
 
@@ -629,8 +645,11 @@ is exactly the walk between the two notations.
 - [`examples/workflow/workflow-to-bpmn`](https://github.com/AelasticS/Synthesis/tree/main/examples/workflow/workflow-to-bpmn):
   the m2m step, with the
   `approval`, `reviewed-approval` (an inline process),
-  `expense-approval` (choice, loop, invocations, documents), and
-  `templated-approval` (higher-order) samples.
+  `expense-approval` (choice, loop, invocations, documents),
+  `templated-approval` (higher-order), `model-expression`,
+  `configurable-approval` (a model template), and `generic-approval`
+  (a higher-order model template) samples, and a verification checking
+  the last three.
 - [`examples/workflow/bpmn-to-mermaid`](https://github.com/AelasticS/Synthesis/tree/main/examples/workflow/bpmn-to-mermaid):
   the m2t step over the graph,
   whose verification asserts the flattened v2 shape.

@@ -12,7 +12,9 @@ the target language of `org-to-approval`.
 
 Subpaths: the bare specifier `workflow-metamodel` exports the JSX
 components (`<Invoke>` is the general invocation tag, `<SubProcess>`
-its process-call sugar); `workflow-metamodel/model` the type schemas.
+its process-call sugar, `<Step>` the abstract step a specialization
+point can return as its base skeleton); `workflow-metamodel/model` the
+type schemas.
 
 The metamodel is explained on the suite page
 [The workflow suite](https://AelasticS.github.io/Synthesis/developer-guide/examples/workflow#the-metamodels).
