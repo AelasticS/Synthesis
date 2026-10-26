@@ -10,6 +10,8 @@ overall version history.
 
 ## [Unreleased]
 
+## [cli-v0.3.0] - 2026-10-26
+
 ### Added
 
 - **Release metadata.** `CITATION.cff` describes the software for
@@ -242,6 +244,13 @@ overall version history.
   `--trace`.
 
 ### Fixed
+
+- **Release download links match the release files.** `oclif pack
+  tarballs` put the commit hash in each tarball name
+  (`synth-v0.2.0-3ec82a1-linux-x64.tar.gz`), so the links on the
+  download page returned "not found". `apps/cli/config/pack-tarballs.mjs`
+  now drops the hash, and the files are named
+  `synth-v<version>-<target>.tar.gz`.
 
 - **`@SpecOption` registration is per class and independent of
   declaration order.** A subclass option for an inherited `@SpecPoint`
@@ -803,6 +812,7 @@ overall version history.
   regenerates the manifest, so the git-committed copies were never the
   consumed artifacts, only noise in diffs.
 
-[Unreleased]: https://github.com/AelasticS/Synthesis/compare/cli-v0.2.0..HEAD
+[Unreleased]: https://github.com/AelasticS/Synthesis/compare/cli-v0.3.0..HEAD
+[cli-v0.3.0]: https://github.com/AelasticS/Synthesis/compare/cli-v0.2.0..cli-v0.3.0
 [cli-v0.2.0]: https://github.com/AelasticS/Synthesis/compare/cli-v0.1.0..cli-v0.2.0
 [cli-v0.1.0]: https://github.com/AelasticS/Synthesis/compare/8b82ae4..cli-v0.1.0

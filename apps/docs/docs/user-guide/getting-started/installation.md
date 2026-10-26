@@ -26,11 +26,11 @@ extract it, and add the resulting `synth/bin` to your `PATH`.
 
 ```bash
 # Choose one of:
-#   synth-v0.2.0-linux-x64.tar.gz
-#   synth-v0.2.0-linux-arm64.tar.gz
-#   synth-v0.2.0-darwin-x64.tar.gz
-#   synth-v0.2.0-darwin-arm64.tar.gz
-VERSION=v0.2.0
+#   synth-v0.3.0-linux-x64.tar.gz
+#   synth-v0.3.0-linux-arm64.tar.gz
+#   synth-v0.3.0-darwin-x64.tar.gz
+#   synth-v0.3.0-darwin-arm64.tar.gz
+VERSION=v0.3.0
 TARGET=linux-x64         # adjust for your platform
 URL="https://github.com/AelasticS/Synthesis/releases/download/cli-${VERSION}/synth-${VERSION}-${TARGET}.tar.gz"
 
@@ -44,7 +44,7 @@ source ~/.bashrc
 
 ### Windows
 
-Download the matching `synth-v0.2.0-win32-x64.tar.gz` from the
+Download the matching `synth-v0.3.0-win32-x64.tar.gz` from the
 [latest release](https://github.com/AelasticS/Synthesis/releases/latest)
 and extract it (with 7-Zip, or `tar -xzf` in PowerShell 5+). Then add
 the extracted `synth\bin` folder to your user `PATH`:
