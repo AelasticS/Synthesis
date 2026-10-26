@@ -269,3 +269,47 @@ describe("@SpecPoint option selection by subtype", () => {
     }).toThrow(/@SpecOption 'second': @SpecPoint 'point' already has option 'first' for type 'Task'/)
   })
 })
+
+// Serialization of a skeleton merge: the target JSX the host writes out
+// shows the merged element (the option's tag, the skeleton's props under
+// the option's), not the skeleton.
+class SerializeTx extends abstractM2M<b.IProcess, b.IProcess> {
+  main(m: b.IProcess): ExprNode<b.IProcess> {
+    const tasks = ((m.elements ?? []) as unknown as b.INode[]).filter((e) => this.context.store.isTypeOf(e, b.Task))
+    return (
+      <Process name="Out" store={this.context.store}>
+        <Sequence name="body">{tasks.map((t) => this.retyped(t))}</Sequence>
+      </Process>
+    )
+  }
+
+  // The skeleton's type differs from the option's: the merged element
+  // has the option's type.
+  @SpecPoint()
+  retyped(a: b.INode): ExprNode<b.INode> {
+    return <Sequence name={`${a.name}_r`} />
+  }
+
+  @SpecOption("retyped", b.Task)
+  retypedTask(t: b.ITask): ExprNode<b.ITask> {
+    return <Task activity="opt" />
+  }
+}
+
+describe("@SpecPoint skeleton merge in the serialized target", () => {
+  it("the serialized target shows the merged element with the option's tag", () => {
+    const store = new ModelStore()
+    const source = (
+      <Process name="Src" store={store}>
+        <Sequence name="s1">
+          <Task name="t1" activity="a1" />
+        </Sequence>
+      </Process>
+    ).render(new Context()) as b.IProcess
+    const tx = new SerializeTx(store)
+    tx.transform(source)
+    const jsx = tx.context.output.jsx as string
+    expect(jsx).toContain('<Task name="t1_r" activity="opt" />')
+    expect(jsx).not.toContain('<Sequence name="t1_r"')
+  })
+})
