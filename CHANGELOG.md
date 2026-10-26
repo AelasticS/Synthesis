@@ -253,10 +253,6 @@ overall version history.
   on every platform, and the tests accept Windows line endings, path
   separators and oclif's Windows wrap prefix.
 
-- **The advanced-eer-to-sql verify scripts import the right sample.**
-  They referred to `sample/library.tsx`, which is named
-  `library.eer.tsx`.
-
 ## [cli-v0.2.0] - 2026-09-05
 
 ### Added
