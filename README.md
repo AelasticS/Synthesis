@@ -24,6 +24,14 @@ The full documentation site lives at
 | [@aelastics/store](https://AelasticS.github.io/Synthesis/store/intro) | Reactive model store built on MobX |
 | [@aelastics/result](https://AelasticS.github.io/Synthesis/result/intro) | Typed success/failure handling without exceptions |
 
+## Papers
+
+The example accompanying the SoSyM paper *Supporting Design Decisions in
+Rule-Based Model Transformations* is in
+[examples/simple-eer-to-sql-variability/eer-to-relational](https://github.com/AelasticS/Synthesis/tree/main/examples/simple-eer-to-sql-variability/eer-to-relational),
+where the README maps each listing to its file. [PAPERS.md](https://github.com/AelasticS/Synthesis/blob/main/PAPERS.md)
+lists the listings of all papers.
+
 ## Installing the CLI
 
 The `synth` CLI ships as platform tarballs on

@@ -42,6 +42,15 @@ echo 'export PATH="/usr/local/synth/bin:$PATH"' >> ~/.bashrc
 source ~/.bashrc
 ```
 
+**macOS: "unsafe" warning.** If macOS reports `synth` as unsafe or refuses
+to run it, remove the quarantine attribute that Gatekeeper puts on
+downloaded files. `xattr -cr` clears all extended attributes of the folder
+and everything under it:
+
+```bash
+sudo xattr -cr /usr/local/synth
+```
+
 ### Windows
 
 Download `synth-v0.4.0-win32-x64.tar.gz` from the [Download](./download.md)

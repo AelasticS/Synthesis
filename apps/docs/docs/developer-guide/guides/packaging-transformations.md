@@ -174,3 +174,17 @@ replaces it, and `synth transformation ls` shows what is current.
 Uninstalling is guarded: `synth transformation uninstall` refuses while a
 saved pipeline lists the transformation as a step (see
 [Pipelines](../../user-guide/guides/pipelines.md#guards-and-health)).
+
+### Uninstalling
+
+Install takes a **path**; uninstall takes the **name** from the manifest,
+with no version and no path:
+
+```bash
+synth transformation install ./my-transformation   # a path
+synth transformation uninstall my-transformation   # the name only
+```
+
+`synth transformation ls` lists the installed names. Passing a path
+(`./my-transformation`) or a versioned name (`my-transformation@1.0.0`)
+reports "Transformation not found". `tx uninstall` is a shorter alias.
