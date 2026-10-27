@@ -13,7 +13,9 @@ transformation author would publish: its own `package.json`, a
 sample input model, and a README that walks through what it
 demonstrates and how to run it. Every example is smoke tested through
 the real CLI by the repository's gate ladder before each merge, so the
-catalog stays executable truth rather than prose.
+catalog stays executable truth rather than prose. Every example also
+ships with the `synth` bundle, built and ready to install; see
+[Running an example](#running-an-example).
 
 Packages are grouped by suite, because that is where metamodels are
 shared: every suite owns its metamodels in a `metamodels/` folder, and
@@ -129,20 +131,67 @@ organizational example feeding the same chain, explained on
 
 ## Running an example
 
-Every example follows the same loop, spelled out in its README. For the
-Part 1 companion:
+The `synth` bundle carries every example, built and ready to install, in
+the `examples` folder of the installation: `/usr/local/synth/examples` on
+Linux and macOS and `C:\synth\examples` on Windows, if you installed as
+[Installation](../../user-guide/getting-started/installation.md) shows.
+Each example is a folder named after its transformation, with its sample
+models in `sample/`.
+
+Every example runs with the same three steps: install the transformation,
+import a sample model, run. Install comes first, because a sample imports
+its metamodel and the metamodel comes with the installed transformation.
+For the Part 1 companion:
 
 ```bash
-cd examples/tutorial/eer-tutorial-basic
+EX=/usr/local/synth/examples      # Windows PowerShell: $EX = 'C:\synth\examples'
 
 synth init
-synth namespace mk demo
-synth model import sample/library.tsx --as demo/library
-
-synth transformation install .
-synth transformation run eer-tutorial-basic --in demo/library --out demo/library-rel
-synth model show demo/library-rel
+synth transformation install $EX/eer-tutorial-basic
+synth model import $EX/eer-tutorial-basic/sample/library.tsx --as m2m-part1/library
+synth transformation run eer-tutorial-basic --in m2m-part1/library --out m2m-part1/library-rel
+synth model show m2m-part1/library-rel
 ```
+
+The commands are the same in bash and in PowerShell. Each suite page ends
+with the commands for its examples. The other tutorial companions follow,
+each in its own namespace, because several of them share a sample's file
+name:
+
+```bash
+synth transformation install $EX/eer-tutorial-advanced
+synth model import $EX/eer-tutorial-advanced/sample/library.tsx --as m2m-part2/library
+synth transformation run eer-tutorial-advanced --in m2m-part2/library --out m2m-part2/library-rel
+
+synth transformation install $EX/eer-tutorial-configuration-based
+synth model import $EX/eer-tutorial-configuration-based/sample/library.tsx --as m2m-part3/library
+synth transformation run eer-tutorial-configuration-based --in m2m-part3/library --default-configs --out m2m-part3/library-rel
+
+synth transformation install $EX/eer-tutorial-name-scopes
+synth model import $EX/eer-tutorial-name-scopes/sample/library.tsx --as m2m-part4/library
+synth transformation run eer-tutorial-name-scopes --in m2m-part4/library --out m2m-part4/library-rel
+
+synth transformation install $EX/sql-tutorial-basic
+synth model import $EX/sql-tutorial-basic/sample/library-rel.tsx --as m2t-part1/library-rel
+synth transformation run sql-tutorial-basic --in m2t-part1/library-rel --out-dir ./m2t-part1
+
+synth transformation install $EX/sql-tutorial-structured
+synth model import $EX/sql-tutorial-structured/sample/library-rel.tsx --as m2t-part2/library-rel
+synth transformation run sql-tutorial-structured --in m2t-part2/library-rel --out-dir ./m2t-part2
+
+synth transformation install $EX/sql-tutorial-configuration-based
+synth model import $EX/sql-tutorial-configuration-based/sample/library-rel.tsx --as m2t-part3/library-rel
+synth transformation run sql-tutorial-configuration-based --in m2t-part3/library-rel --default-configs --out-dir ./m2t-part3
+```
+
+`--default-configs` accepts the default design decisions of a
+configuration-based example (see
+[Configurations](../../user-guide/guides/configurations.md)), and
+`--out-dir` names the folder a model-to-text example writes its files to.
+
+To work on an example's sources instead, build it in a repository
+checkout (`rush build -t <example>`) and install it from its folder under
+`examples/`; its README shows that loop.
 
 ## Conventions
 

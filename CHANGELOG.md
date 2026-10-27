@@ -10,7 +10,53 @@ overall version history.
 
 ## [Unreleased]
 
+### Added
+
+- **Examples in the CLI bundle.** Every bundle carries the 17 example
+  transformations under `synth/examples/<name>/`, built and ready to
+  install with the existing commands, transformation first, then the
+  sample models:
+  `synth transformation install <synth>/examples/workflow-to-bpmn`,
+  `synth model import <synth>/examples/workflow-to-bpmn/sample/approval.tsx --as demo/approval`,
+  `synth transformation run workflow-to-bpmn --in demo/approval --out demo/approval-bpmn`.
+  No repository checkout is needed. Each example folder holds the built
+  transformation, `synth.json`, its README, `sample/` (and `presets/` or
+  `config/` where the example has them) and its metamodel packages in
+  `node_modules/`. The new `apps/cli/config/pack-examples.mjs` packages
+  them during `pack:tarballs`, and the release smoke test installs every
+  bundled example, imports its samples and runs it on each platform.
+
+- **One framework instance for installed metamodels.** A metamodel
+  package shipped inside an installed transformation now resolves its
+  `@aelastics/*` imports to the CLI's own packages, through a module
+  resolution hook registered at startup
+  (`apps/cli/src/support/framework-hooks.ts`). Before, it found no
+  framework outside a repository checkout, and inside one it loaded a
+  second copy whose types the engine rejected (`type WorkflowModel is
+  not a model`).
+
+### Changed
+
+- **`synth transformation install` help.** The help text and README no
+  longer show npm names, git URLs and tarballs, which were never
+  implemented. The command takes the directory of a built transformation
+  package, and the help points to the bundled examples.
+
+- **Docs: running the examples.** The examples index explains where the
+  bundled examples are and the order (transformation first, then the
+  samples), the workflow and EER database suite pages gain a "Running
+  it" section, the simple suite pages run from the bundle, and the
+  installation page has an Examples section. The Quick Start and the
+  user guide tutorial install from the bundled examples and install
+  before importing; the Quick Start uses the bundled Library sample.
+
 ### Fixed
+
+- **Docs and READMEs.** The user guide tutorial no longer claims that
+  `transformation show` lists the open issues (it shows the decision
+  model; the issues appear when a run announces its decisions). The
+  `eer-to-relational` and `rel-to-mermaid` READMEs import
+  `sample/library.eer.tsx`, the file that exists.
 
 - **Native macOS and Windows bundles.** The release built all five
   bundles on one Linux runner, so every bundle carried the Linux

@@ -6,7 +6,13 @@
  *   1. the bundled synth starts and reports the expected platform,
  *   2. the bundle carries the esbuild binary of its own platform only,
  *   3. `synth init` creates a workspace,
- *   4. the bundled esbuild transpiles TSX, as model import does.
+ *   4. the bundled esbuild transpiles TSX, as model import does,
+ *   5. the bundle carries every example under synth/examples/, and each
+ *      one runs with the commands the user guide shows: transformation
+ *      install, model import of every sample, and transformation run on
+ *      the first sample (with --default-configs when the example is
+ *      configuration-based, --out-dir when it is model-to-text). All
+ *      examples share one workspace, as they would for a user.
  *
  * Run it on a runner of the target's own platform: the checks execute the
  * bundled Node.js and esbuild binaries.
@@ -14,10 +20,12 @@
  * Usage: node config/smoke-bundle.mjs --target win32-x64
  */
 import { execFileSync, spawnSync } from 'node:child_process'
-import { existsSync, mkdirSync, mkdtempSync, readdirSync, rmSync } from 'node:fs'
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { basename, dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+
+import { exampleProjects } from './pack-examples.mjs'
 
 const cliRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const distDir = join(cliRoot, 'dist')
@@ -51,13 +59,54 @@ function check(desc, ok, detail) {
   }
 }
 
+// Extra `transformation run` arguments an example needs, as its README and
+// the user guide's examples page show them.
+const RUN_ARGS = {
+  'org-to-approval': ['--param', '{"worker":"Judy","sensitivity":2}']
+}
+
 /** Run the bundled synth the way a user does, through bin/synth(.cmd). */
 function synth(...args) {
   const result = isWindows
-    ? // a .cmd file only starts through a shell
-      spawnSync(`"${join(bundle, 'bin', 'synth.cmd')}"`, args, { env, shell: true, encoding: 'utf-8' })
+    ? // a .cmd file only starts through a shell, which needs the quoting
+      spawnSync(
+        `"${join(bundle, 'bin', 'synth.cmd')}"`,
+        args.map((a) => `"${a.replace(/"/g, '\\"')}"`),
+        { env, shell: true, encoding: 'utf-8' }
+      )
     : spawnSync(join(bundle, 'bin', 'synth'), args, { env, encoding: 'utf-8' })
   return { status: result.status, out: `${result.stdout ?? ''}${result.stderr ?? ''}` }
+}
+
+/** Install an example, import its samples and run it on the first one. */
+function runExample(examplesDir, name) {
+  const dir = join(examplesDir, name)
+  const manifest = JSON.parse(readFileSync(join(dir, 'synth.json'), 'utf-8'))
+  const steps = []
+  const step = (...args) => {
+    const result = synth(...args)
+    steps.push(`$ synth ${args.join(' ')}`, result.out.trimEnd())
+    if (result.status !== 0) throw new Error(`exit ${result.status}`)
+  }
+  try {
+    step('transformation', 'install', dir)
+    const samples = readdirSync(join(dir, 'sample')).filter((f) => f.endsWith('.tsx')).sort()
+    const refs = samples.map((file) => `${name}/${file.replace(/\.tsx$/, '').replace(/[^A-Za-z0-9_-]/g, '-')}`)
+    samples.forEach((file, i) => step('model', 'import', join(dir, 'sample', file), '--as', refs[i]))
+    const run = ['transformation', 'run', name, '--in', refs[0], ...(RUN_ARGS[name] ?? [])]
+    if (manifest.parts?.decisionModel) run.push('--default-configs')
+    if (manifest.kind === 'm2t') {
+      const outDir = join(work, 'generated', name)
+      step(...run, '--out-dir', outDir)
+      if (!existsSync(outDir) || readdirSync(outDir).length === 0) throw new Error('no files generated')
+    } else {
+      step(...run, '--out', `${name}/out`)
+      if (!existsSync(join(home, '.synth', 'models', name, 'out.tsx'))) throw new Error('no output model written')
+    }
+    check(`${name}: install, import ${samples.length} sample(s), run`, true)
+  } catch (err) {
+    check(`${name}: install, import, run`, false, `${steps.join('\n')}\n${err.message}`)
+  }
 }
 
 console.log(`Smoke-testing ${basename(tarball)}`)
@@ -85,6 +134,18 @@ try {
     transpile.status === 0 && transpile.stdout.includes('React.createElement'),
     `${transpile.stdout}${transpile.stderr}`
   )
+
+  const examplesDir = join(bundle, 'examples')
+  const bundled = existsSync(examplesDir) ? readdirSync(examplesDir).sort() : []
+  const expected = [...exampleProjects().keys()].sort()
+  check(
+    `bundle carries the ${expected.length} examples`,
+    bundled.join() === expected.join(),
+    `expected: ${expected.join(', ')}\nfound: ${bundled.join(', ') || 'none'}`
+  )
+  for (const name of bundled) {
+    runExample(examplesDir, name)
+  }
 } finally {
   rmSync(work, { recursive: true, force: true })
 }

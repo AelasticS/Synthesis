@@ -85,8 +85,9 @@ jobs:
       - name: Install Rush
         run: node common/scripts/install-run-rush.js install
 
-      - name: Build CLI and its dependencies
-        run: node common/scripts/install-run-rush.js build --to @aelastics/synthesis-cli
+      # The examples ship in the bundle under synth/examples/
+      - name: Build CLI, examples and their dependencies
+        run: node common/scripts/install-run-rush.js build --to @aelastics/synthesis-cli --to path:examples
 
       - name: Pack the platform tarball
         working-directory: apps/cli

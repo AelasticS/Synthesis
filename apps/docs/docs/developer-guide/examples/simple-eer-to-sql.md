@@ -148,18 +148,25 @@ and `NamingConvention`) closed per run by a configuration.
 
 ## Running it
 
+The example ships with `synth`; `$EX` is the
+[examples folder](./index.md#running-an-example) of the installation.
+
 ```bash
-rush build -t simple-eer-to-relational
+EX=/usr/local/synth/examples      # Windows PowerShell: $EX = 'C:\synth\examples'
 
 synth init
 synth namespace mk com.example
-synth transformation install ./examples/simple-eer-to-sql/eer-to-relational
-synth model import ./examples/simple-eer-to-sql/eer-to-relational/sample/company.eer.tsx \
+synth transformation install $EX/simple-eer-to-relational
+synth model import $EX/simple-eer-to-relational/sample/company.eer.tsx \
   --as com.example/company
 
 synth transformation run simple-eer-to-relational --in com.example/company \
   --out com.example/company-rel --trace com.example/company-trace
 ```
+
+In a repository checkout, build the package with
+`rush build -t simple-eer-to-relational` and install it from
+`./examples/simple-eer-to-sql/eer-to-relational` instead.
 
 The relational schema produced for the Company sample:
 

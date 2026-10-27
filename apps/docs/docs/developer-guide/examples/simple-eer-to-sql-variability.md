@@ -370,13 +370,15 @@ full.
 transformations](../guides/packaging-transformations.md) for the field
 reference.
 
-Build the package, install it, import the sample, and run:
+The package ships with `synth`; `$EX` is the
+[examples folder](./index.md#running-an-example) of the installation.
+Install it, import the sample, and run:
 
 ```bash
-rush build -t simple-eer-to-relational-variability
+EX=/usr/local/synth/examples      # Windows PowerShell: $EX = 'C:\synth\examples'
 
-synth transformation install ./examples/simple-eer-to-sql-variability/eer-to-relational
-synth model import ./examples/simple-eer-to-sql-variability/eer-to-relational/sample/company.eer.tsx \
+synth transformation install $EX/simple-eer-to-relational-variability
+synth model import $EX/simple-eer-to-relational-variability/sample/company.eer.tsx \
   --as com.example/company
 
 # a default configuration for each issue
@@ -392,6 +394,11 @@ synth transformation run simple-eer-to-relational-variability --in com.example/c
   --trace com.example/company-trace
 ```
 
+In a repository checkout, build the package with
+`rush build -t simple-eer-to-relational-variability` and use
+`./examples/simple-eer-to-sql-variability/eer-to-relational` in place of
+`$EX/simple-eer-to-relational-variability`.
+
 ### Using the saved edited configuration
 
 The package ships the edited configuration of the previous section, so
@@ -401,7 +408,7 @@ context (`--tx`) and the source model it configures (`--dependency`), so
 import it after the transformation and the sample:
 
 ```bash
-synth model import ./examples/simple-eer-to-sql-variability/eer-to-relational/config/company.edited-cm.tsx \
+synth model import $EX/simple-eer-to-relational-variability/config/company.edited-cm.tsx \
   --as com.example/company-edited-cfg \
   --tx simple-eer-to-relational-variability --dependency com.example/company
 

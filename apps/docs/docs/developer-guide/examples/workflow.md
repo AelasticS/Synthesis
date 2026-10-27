@@ -630,6 +630,47 @@ operator, the split AND the join drawn as diamonds labeled with their
 derived roles, bracketed by start and end events. The transformation
 is exactly the walk between the two notations.
 
+## Running it
+
+All four packages ship with `synth`; `$EX` is the
+[examples folder](./index.md#running-an-example) of the installation.
+Install the transformations first, then import the samples: the samples
+import the suite's metamodels, which come with the installed
+transformations. The refs match the commands earlier on this page.
+
+```bash
+EX=/usr/local/synth/examples      # Windows PowerShell: $EX = 'C:\synth\examples'
+
+synth init
+synth transformation install $EX/workflow-to-bpmn
+synth transformation install $EX/bpmn-to-mermaid
+synth transformation install $EX/workflow-to-mermaid
+synth transformation install $EX/org-to-approval
+
+synth model import $EX/workflow-to-bpmn/sample/approval.tsx --as demo/approval
+synth model import $EX/workflow-to-bpmn/sample/expense-approval.tsx --as demo/expense
+synth model import $EX/org-to-approval/sample/acme.tsx --as demo/acme
+
+# the flattening, then the graph drawn, then both as one chain
+synth transformation run workflow-to-bpmn --in demo/approval --out demo/approval-bpmn
+synth transformation run bpmn-to-mermaid --in demo/approval-bpmn --out-dir ./generated
+synth transformation run workflow-to-bpmn bpmn-to-mermaid --in demo/approval --out-dir ./generated
+
+# the flowchart view of the source
+synth transformation run workflow-to-mermaid --in demo/expense --out-dir ./diagrams
+
+# the organizational example
+synth transformation run org-to-approval --in demo/acme --out demo/approval2 --param '{"worker":"Judy","sensitivity":2}'
+```
+
+Windows PowerShell 5.1 drops the inner double quotes of an argument it
+passes to a program, so escape them there:
+`--param '{\"worker\":\"Judy\",\"sensitivity\":2}'`.
+
+The other `workflow-to-bpmn` samples import the same way. In a repository
+checkout, build a package with `rush build -t <package>` and install it
+from `./examples/workflow/<package>` instead.
+
 ## Where the pieces live
 
 - [`examples/workflow/metamodels/workflow`](https://github.com/AelasticS/Synthesis/tree/main/examples/workflow/metamodels/workflow),

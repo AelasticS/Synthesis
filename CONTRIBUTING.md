@@ -177,6 +177,9 @@ packs and smoke-tests all five bundles and keeps them as run artifacts;
 it creates no release. Locally, `rushx pack:tarballs --targets <target>`
 followed by `rushx smoke:bundle --target <target>` in `apps/cli` does
 the same for your own platform (on Windows, 7-Zip must be on `PATH`).
+Build the CLI and the examples first
+(`rush build --to @aelastics/synthesis-cli --to path:examples`): every
+example ships in the bundle under `synth/examples/`.
 
 Maintainer workflow:
 
@@ -206,9 +209,10 @@ Maintainer workflow:
    The tag push triggers the release workflow.
 6. **Watch the workflow** in the GitHub Actions tab. One job per
    platform runs `rush build`, packs that platform's tarball and
-   smoke-tests it (`synth --version`, `synth init`, and a TSX transpile
-   with the bundled `esbuild`). When all five pass, a last job creates
-   the GitHub Release with the tarballs attached.
+   smoke-tests it: `synth --version`, `synth init`, a TSX transpile
+   with the bundled `esbuild`, and every bundled example installed,
+   imported and run the way the user guide shows. When all five pass, a
+   last job creates the GitHub Release with the tarballs attached.
 7. **Smoke test** the release by downloading the tarball for your
    platform from the new GitHub Release, extracting it, adding
    `synth/bin` to `PATH`, and running:
