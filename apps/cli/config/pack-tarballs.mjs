@@ -13,10 +13,15 @@
  *   2. temporarily rewrites package.json to reference the vendor tarballs
  *      via file: specifiers,
  *   3. generates the package-lock.json that oclif's npm install path needs,
- *   4. runs `oclif pack tarballs`,
+ *   4. runs `oclif pack tarballs`, whose pretarball step packages the
+ *      example transformations into synth/examples/ (config/pack-examples.mjs;
+ *      added after npm pack, which would drop their node_modules),
  *   5. drops the commit hash oclif puts in the tarball names, so the
  *      download links (synth-v0.3.0-linux-x64.tar.gz) stay stable,
  *   6. restores package.json and removes the temporary files.
+ *
+ * The CLI and the examples must be built first
+ * (rush build --to @aelastics/synthesis-cli --to path:examples).
  *
  * Usage: node config/pack-tarballs.mjs [--targets linux-x64,...]
  */
@@ -25,8 +30,9 @@ import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, renameSync, r
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
+import { workspaceProjects } from './pack-examples.mjs'
+
 const cliRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..')
-const repoRoot = resolve(cliRoot, '../..')
 const vendorDir = join(cliRoot, 'vendor')
 const stageRoot = join(cliRoot, 'tmp', 'vendor-stage')
 
@@ -35,19 +41,6 @@ const targetsArg = process.argv.indexOf('--targets')
 const targets = targetsArg === -1 ? DEFAULT_TARGETS : process.argv[targetsArg + 1]
 
 const run = (cmd, cwd) => execSync(cmd, { cwd, stdio: 'inherit' })
-
-/** Map workspace package name -> absolute project folder, from rush.json. */
-function workspaceProjects() {
-  const rushJson = readFileSync(join(repoRoot, 'rush.json'), 'utf-8')
-  const projects = new Map()
-  const pairRe = /"packageName":\s*"([^"]+)",\s*"projectFolder":\s*"([^"]+)"/g
-  for (const [, name, folder] of rushJson.matchAll(pairRe)) {
-    const abs = join(repoRoot, folder)
-    // rush.json contains commented-out template entries; keep only real projects
-    if (existsSync(join(abs, 'package.json'))) projects.set(name, abs)
-  }
-  return projects
-}
 
 /** Transitive workspace-dependency closure of the CLI, in BFS order. */
 function dependencyClosure(projects, cliPkg) {
@@ -110,6 +103,8 @@ try {
     console.log(`  ${name} -> ${cliPkg.dependencies[name]}`)
   }
   if (!cliPkg.files.includes('/vendor')) cliPkg.files.push('/vendor')
+  // oclif runs this in its staging folder, apps/cli/tmp/synth
+  cliPkg.scripts.pretarball = 'node ../../config/pack-examples.mjs examples'
   writeFileSync(pkgJsonPath, JSON.stringify(cliPkg, null, 2))
 
   // npm's arborist chokes on the pnpm-symlinked node_modules in cliRoot, so

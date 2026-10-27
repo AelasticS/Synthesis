@@ -168,6 +168,18 @@ The `synth` CLI is distributed as platform tarballs attached to a
 GitHub Release. The repository is **not** published to npm. The release
 workflow lives at `.github/workflows/release-cli.yml` and is triggered
 manually (`workflow_dispatch`) or by pushing a tag of the form `cli-vX.Y.Z`.
+Each platform bundle is packed and smoke-tested on a runner of its own
+platform, because the bundled `esbuild` binary is platform specific.
+
+To try the release build without releasing, run the workflow manually
+from the Actions tab, pick your branch and leave the tag empty. The run
+packs and smoke-tests all five bundles and keeps them as run artifacts;
+it creates no release. Locally, `rushx pack:tarballs --targets <target>`
+followed by `rushx smoke:bundle --target <target>` in `apps/cli` does
+the same for your own platform (on Windows, 7-Zip must be on `PATH`).
+Build the CLI and the examples first
+(`rush build --to @aelastics/synthesis-cli --to path:examples`): every
+example ships in the bundle under `synth/examples/`.
 
 Maintainer workflow:
 
@@ -180,8 +192,7 @@ Maintainer workflow:
    Removed). Use the conventional-commits log between the previous tag
    and `HEAD` as input. Also update the documentation download page
    (`apps/docs/docs/user-guide/getting-started/download.md`): the
-   version number, the per-platform asset links, and the platform
-   support note.
+   version number and the per-platform asset links.
 4. **Commit** the version bump and changelog:
 
    ```bash
@@ -196,10 +207,12 @@ Maintainer workflow:
    ```
 
    The tag push triggers the release workflow.
-6. **Watch the workflow** in the GitHub Actions tab. It runs
-   `rush build`, then `oclif pack tarballs`, then `gh release create`
-   with the produced tarballs attached. A typical run is 5 to 10
-   minutes.
+6. **Watch the workflow** in the GitHub Actions tab. One job per
+   platform runs `rush build`, packs that platform's tarball and
+   smoke-tests it: `synth --version`, `synth init`, a TSX transpile
+   with the bundled `esbuild`, and every bundled example installed,
+   imported and run the way the user guide shows. When all five pass, a
+   last job creates the GitHub Release with the tarballs attached.
 7. **Smoke test** the release by downloading the tarball for your
    platform from the new GitHub Release, extracting it, adding
    `synth/bin` to `PATH`, and running:

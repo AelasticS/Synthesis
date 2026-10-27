@@ -11,6 +11,11 @@ declares no parts and the CLI runs it without configuration flags.
 
 ## Run
 
+The `synth` download ships this example built and ready to install, in
+the `examples` folder of the installation; see
+[Running an example](https://AelasticS.github.io/Synthesis/developer-guide/examples#running-an-example).
+The commands below work in a repository checkout.
+
 ```bash
 npm run build   # from the repository root: rush build -t workflow-to-bpmn
 

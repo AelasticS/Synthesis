@@ -23,6 +23,11 @@ declares `CompanySchema` with the entities `Person` and `Company` and a
 
 ## Run
 
+The `synth` download ships this example built and ready to install, in
+the `examples` folder of the installation; see
+[Running an example](https://AelasticS.github.io/Synthesis/developer-guide/examples#running-an-example).
+The commands below work in a repository checkout.
+
 Build, install, and run through the `synth` CLI. Run the build from the
 repository root and the `synth` commands from this directory.
 

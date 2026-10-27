@@ -695,3 +695,42 @@ All three excerpts are verbatim trims of the chain's real output;
 `rel-to-mermaid/scripts/verify.mjs` runs exactly these three
 configurations through the real CLI on every gate run and asserts
 each difference in the generated text.
+
+## Running it
+
+All four packages ship with `synth`; `$EX` is the
+[examples folder](./index.md#running-an-example) of the installation.
+Install the transformations first, then import the samples: the samples
+import the suite's metamodels, which come with the installed
+transformations. The refs match the commands earlier on this page.
+
+```bash
+EX=/usr/local/synth/examples      # Windows PowerShell: $EX = 'C:\synth\examples'
+
+synth init
+synth transformation install $EX/eer-to-relational
+synth transformation install $EX/rel-to-sql-ddl
+synth transformation install $EX/eer-to-mermaid-er
+synth transformation install $EX/rel-to-mermaid
+
+synth model import $EX/eer-to-relational/sample/library.eer.tsx --as demo/library
+
+# the diagram view of the source
+synth transformation run eer-to-mermaid-er --in demo/library --out-dir ./diagrams
+
+# the mapping with the default configuration, then the DDL
+synth transformation run eer-to-relational --in demo/library --default-configs --out demo/library-rel
+synth transformation run rel-to-sql-ddl --in demo/library-rel --default-configs --out-dir ./generated
+
+# the DDL in the PostgreSQL dialect, a preset configuration
+synth model import $EX/rel-to-sql-ddl/presets/postgres.tsx --as demo/cfg-pg --tx rel-to-sql-ddl
+synth transformation run rel-to-sql-ddl --in demo/library-rel --config demo/cfg-pg --out-dir ./generated-pg
+
+# the diagram of the mapping's output, as a chain
+synth transformation run eer-to-relational rel-to-mermaid --in demo/library --default-configs --out-dir ./diagrams
+```
+
+The packages carry more samples (`rich-library.eer.tsx`, and those of the
+model-to-text packages) that import the same way. In a repository
+checkout, build a package with `rush build -t <package>` and install it
+from `./examples/eer-database-suite/<package>` instead.

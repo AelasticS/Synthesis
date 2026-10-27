@@ -8,7 +8,9 @@ can be read, copied, or extracted as a standalone starting point,
 together with the metamodel packages it depends on. The catalog is
 presented on the docs site as
 [the examples index](https://AelasticS.github.io/Synthesis/developer-guide/examples),
-which also spells out the package conventions.
+which also spells out the package conventions. The `synth` download
+ships every example built and ready to install, in the `examples`
+folder of the installation; the index explains how to run them.
 
 ## Layout
 

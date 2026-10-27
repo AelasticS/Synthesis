@@ -12,10 +12,21 @@ explained.
 
 Prerequisites: `synth` is [installed](./getting-started/installation.md). As in
 the Quick Start, `synth transformation install` takes a local directory
-containing a built transformation package; the two used here,
+containing a built transformation package. The two used here,
 `eer-to-relational` (model-to-model) and `rel-to-sql-ddl`
-(model-to-text), ship in the repository under
-[`examples/eer-database-suite/`](https://github.com/AelasticS/Synthesis/tree/main/examples/eer-database-suite).
+(model-to-text), ship with `synth` in the `examples` folder of the
+installation. The commands below refer to that folder as `$EX`:
+
+```bash
+EX=/usr/local/synth/examples      # Linux and macOS
+```
+
+```powershell
+$EX = 'C:\synth\examples'         # Windows PowerShell
+```
+
+The other commands are the same in both shells. In PowerShell, write a
+command on one line, or end its lines with a backtick instead of `\`.
 
 ## 1. Create the workspace
 
@@ -32,7 +43,32 @@ healthy. It is worth knowing from day one, because it re-checks every
 invariant this tutorial relies on and repairs model headers with
 `doctor --fix`.
 
-## 2. Import a model
+## 2. Install transformations and see what they declare
+
+```bash
+synth transformation install $EX/eer-to-relational
+synth transformation install $EX/rel-to-sql-ddl
+synth transformation ls
+```
+
+Install comes before the model import: a model file imports its
+metamodel package (here `eer-metamodel`), and that package comes with the
+installed transformation.
+
+Before running anything, ask what a transformation is:
+
+```bash
+synth transformation show eer-to-relational
+```
+
+The output names its kind (model-to-model), its source and target
+metamodels (EER → Relational), and `variability: yes` with the decision
+model that makes it **configuration-based**: its open design issues, such
+as `NamingConvention` with options `SnakeCase` (default) and `CamelCase`,
+are closed per run. Nothing has executed yet; all of this comes from the
+package's manifest.
+
+## 3. Import a model
 
 Models are organized in **namespaces**, nested directories under
 `models/`. Create one, then import a model file into it:
@@ -42,8 +78,10 @@ synth namespace mk com.example
 synth model import ./persons.tsx --as com.example/persons
 ```
 
-`persons.tsx` is a `.tsx` module, JSX that renders into an EER model (the
-full file is shown in [Managing Models](./guides/managing-models.md#models-are-code)).
+`persons.tsx` is a `.tsx` module, JSX that renders into an EER model. Save
+the file shown in [Managing Models](./guides/managing-models.md#models-are-code)
+as `persons.tsx` in your current folder. (Any model in
+`$EX/eer-to-relational/sample/` works the same way.)
 The import is a **validation gate**, not a copy: the file is rendered for
 real against its metamodel, and broken JSX or a dangling reference rejects
 it. From now on the model is addressed by its **ref**, `com.example/persons`.
@@ -55,27 +93,6 @@ synth model show com.example/persons
 
 `model show` prints the `$synth` header the import wrote: kind, metamodel,
 author (defaulted from your `git config`), version, dates.
-
-## 3. Install transformations and see what they declare
-
-```bash
-synth transformation install ./eer-to-relational
-synth transformation install ./rel-to-sql-ddl
-synth transformation ls
-```
-
-Before running anything, ask what a transformation is:
-
-```bash
-synth transformation show eer-to-relational
-```
-
-The output names its kind (model-to-model), its source and target
-metamodels (EER → Relational), and, because this transformation is
-**configuration-based**, every open issue with its options and default, for
-example issue `NamingConvention` with options `SnakeCase` (default) and
-`CamelCase`. Nothing has executed yet; all of this comes from the package's
-manifest and decision model.
 
 ## 4. First run and the consent policy
 

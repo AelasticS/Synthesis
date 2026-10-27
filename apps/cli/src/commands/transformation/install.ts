@@ -28,28 +28,24 @@ function invalidNameReason(name: string): string | undefined {
 export default class TransformationInstall extends BaseCommand {
   static override aliases = ['tx:install']
 
-  static override description = 'Install a transformation from npm, git, or local path.'
+  static override description =
+    'Install a transformation from a local package directory. The examples that ship with synth are in the examples folder of the installation.'
 
   static override examples = [
-    '<%= config.bin %> <%= command.id %> @aelastics/eer-to-relational',
-    '<%= config.bin %> <%= command.id %> git+https://github.com/user/tx.git',
     '<%= config.bin %> <%= command.id %> ./my-transformation',
-    '<%= config.bin %> <%= command.id %> ./eer-to-relational-1.0.0.tgz'
+    '<%= config.bin %> <%= command.id %> /usr/local/synth/examples/workflow-to-bpmn'
   ]
 
   static override args = {
-    package: Args.string({
-      description: 'Package spec: npm name, git URL, local directory, or tarball.',
+    dir: Args.string({
+      description: 'Directory of a built transformation package (with synth.json or a synth block in package.json).',
       required: true
     })
   }
 
   public async execute(): Promise<void> {
     const { args, flags } = await this.parse(TransformationInstall)
-    const packageSpec = args.package
-
-    // For now, only support local directory install
-    const sourcePath = resolve(packageSpec)
+    const sourcePath = resolve(args.dir)
 
     if (!existsSync(sourcePath)) {
       this.error(`Path not found: ${sourcePath}`)
@@ -57,7 +53,7 @@ export default class TransformationInstall extends BaseCommand {
 
     const stat = statSync(sourcePath)
     if (!stat.isDirectory()) {
-      this.error(`Currently only local directory install is supported. '${packageSpec}' is not a directory.`)
+      this.error(`'${args.dir}' is not a directory. Pass the directory of a transformation package.`)
     }
 
     // Load and validate the transformation manifest (synth.json or the

@@ -48,7 +48,7 @@ This document is auto-generated from the oclif command definitions.
 * [`synth plugins update`](#synth-plugins-update)
 * [`synth transformation build`](#synth-transformation-build)
 * [`synth transformation init NAME`](#synth-transformation-init-name)
-* [`synth transformation install PACKAGE`](#synth-transformation-install-package)
+* [`synth transformation install DIR`](#synth-transformation-install-dir)
 * [`synth transformation ls`](#synth-transformation-ls)
 * [`synth transformation pack`](#synth-transformation-pack)
 * [`synth transformation publish`](#synth-transformation-publish)
@@ -58,7 +58,7 @@ This document is auto-generated from the oclif command definitions.
 * [`synth transformation uninstall NAME`](#synth-transformation-uninstall-name)
 * [`synth tx build`](#synth-tx-build)
 * [`synth tx init NAME`](#synth-tx-init-name)
-* [`synth tx install PACKAGE`](#synth-tx-install-package)
+* [`synth tx install DIR`](#synth-tx-install-dir)
 * [`synth tx ls`](#synth-tx-ls)
 * [`synth tx pack`](#synth-tx-pack)
 * [`synth tx publish`](#synth-tx-publish)
@@ -1523,16 +1523,16 @@ EXAMPLES
   $ synth transformation init eer-to-relational
 ```
 
-## `synth transformation install PACKAGE`
+## `synth transformation install DIR`
 
-Install a transformation from npm, git, or local path.
+Install a transformation from a local package directory. The examples that ship with synth are in the examples folder of the installation.
 
 ```
 USAGE
-  $ synth transformation install PACKAGE [--workspace <value>] [--ns <value>] [--json] [-q] [-v]
+  $ synth transformation install DIR [--workspace <value>] [--ns <value>] [--json] [-q] [-v]
 
 ARGUMENTS
-  PACKAGE  Package spec: npm name, git URL, local directory, or tarball.
+  DIR  Directory of a built transformation package (with synth.json or a synth block in package.json).
 
 GLOBAL FLAGS
   -q, --quiet              Suppress informational output.
@@ -1542,19 +1542,16 @@ GLOBAL FLAGS
       --workspace=<value>  Override active workspace for this invocation.
 
 DESCRIPTION
-  Install a transformation from npm, git, or local path.
+  Install a transformation from a local package directory. The examples that ship with synth are in the examples folder
+  of the installation.
 
 ALIASES
   $ synth tx install
 
 EXAMPLES
-  $ synth transformation install @aelastics/eer-to-relational
-
-  $ synth transformation install git+https://github.com/user/tx.git
-
   $ synth transformation install ./my-transformation
 
-  $ synth transformation install ./eer-to-relational-1.0.0.tgz
+  $ synth transformation install /usr/local/synth/examples/workflow-to-bpmn
 ```
 
 ## `synth transformation ls`
@@ -1858,16 +1855,16 @@ EXAMPLES
   $ synth tx init eer-to-relational
 ```
 
-## `synth tx install PACKAGE`
+## `synth tx install DIR`
 
-Install a transformation from npm, git, or local path.
+Install a transformation from a local package directory. The examples that ship with synth are in the examples folder of the installation.
 
 ```
 USAGE
-  $ synth tx install PACKAGE [--workspace <value>] [--ns <value>] [--json] [-q] [-v]
+  $ synth tx install DIR [--workspace <value>] [--ns <value>] [--json] [-q] [-v]
 
 ARGUMENTS
-  PACKAGE  Package spec: npm name, git URL, local directory, or tarball.
+  DIR  Directory of a built transformation package (with synth.json or a synth block in package.json).
 
 GLOBAL FLAGS
   -q, --quiet              Suppress informational output.
@@ -1877,19 +1874,16 @@ GLOBAL FLAGS
       --workspace=<value>  Override active workspace for this invocation.
 
 DESCRIPTION
-  Install a transformation from npm, git, or local path.
+  Install a transformation from a local package directory. The examples that ship with synth are in the examples folder
+  of the installation.
 
 ALIASES
   $ synth tx install
 
 EXAMPLES
-  $ synth tx install @aelastics/eer-to-relational
-
-  $ synth tx install git+https://github.com/user/tx.git
-
   $ synth tx install ./my-transformation
 
-  $ synth tx install ./eer-to-relational-1.0.0.tgz
+  $ synth tx install /usr/local/synth/examples/workflow-to-bpmn
 ```
 
 ## `synth tx ls`

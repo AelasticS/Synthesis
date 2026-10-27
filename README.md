@@ -31,7 +31,8 @@ The `synth` CLI ships as platform tarballs on
 runtime is required on the user's machine. See
 **[Installation](https://AelasticS.github.io/Synthesis/user-guide/getting-started/installation)**
 for step-by-step instructions for Linux, macOS, Windows, and building from
-source.
+source. The tarballs also contain every example transformation with its
+sample models, ready to install with `synth transformation install`.
 
 ## Repository layout
 

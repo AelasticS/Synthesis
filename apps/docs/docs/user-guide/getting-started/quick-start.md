@@ -7,36 +7,41 @@ sidebar_position: 3
 The session below goes from an empty workspace to generated SQL. It assumes
 `synth` is [installed](./installation.md). `synth transformation install`
 takes a local directory containing a built transformation package (see
-[Packaging Transformations](../../developer-guide/guides/packaging-transformations.md));
-the two used here, `eer-to-relational` (model-to-model) and `rel-to-sql-ddl`
-(model-to-text), ship in the repository under
-[`examples/eer-database-suite/`](https://github.com/AelasticS/Synthesis/tree/main/examples/eer-database-suite),
-and
-any built example package installs the same way.
+[Packaging Transformations](../../developer-guide/guides/packaging-transformations.md)).
+The two used here, `eer-to-relational` (model-to-model) and
+`rel-to-sql-ddl` (model-to-text), ship with `synth` together with all the
+other [examples](../../developer-guide/examples/index.md), in the
+`examples` folder of the installation. The sample model comes from there
+too.
 
 ```bash
+# Where the examples are: /usr/local/synth/examples on Linux and macOS,
+# in Windows PowerShell: $EX = 'C:\synth\examples'
+EX=/usr/local/synth/examples
+
 # Create the workspace at ~/.synth
 synth init
 
+# Install the transformations first: the sample model's metamodel
+# comes with them
+synth transformation install $EX/eer-to-relational
+synth transformation install $EX/rel-to-sql-ddl
+
 # Create a namespace and import a model through the validation gate
 synth namespace mk com.example
-synth model import ./persons.tsx --as com.example/persons
+synth model import $EX/eer-to-relational/sample/library.eer.tsx --as com.example/library
 
-# Install the transformations
-synth transformation install ./eer-to-relational
-synth transformation install ./rel-to-sql-ddl
-
-# See what a transformation declares (kind, metamodels, open decisions)
+# See what a transformation declares (kind, metamodels, decision model)
 synth transformation show eer-to-relational
 
 # Run EER -> relational. The transformation is configuration-based, so consent
 # is explicit: --default-configs accepts the generated default decisions,
 # and every applied default is announced in the output.
-synth transformation run eer-to-relational --in com.example/persons \
-  --default-configs --out com.example/persons-rel
+synth transformation run eer-to-relational --in com.example/library \
+  --default-configs --out com.example/library-rel
 
 # Generate SQL DDL files from the relational model
-synth transformation run rel-to-sql-ddl --in com.example/persons-rel \
+synth transformation run rel-to-sql-ddl --in com.example/library-rel \
   --default-configs --out-dir ./generated
 ```
 
@@ -45,8 +50,12 @@ from step to step in memory:
 
 ```bash
 synth transformation run eer-to-relational rel-to-sql-ddl \
-  --in com.example/persons --default-configs --out-dir ./generated
+  --in com.example/library --default-configs --out-dir ./generated
 ```
+
+The commands work the same in PowerShell. Only the line breaks differ:
+write a command on one line, or end its lines with a backtick instead of
+`\`.
 
 ## Next
 

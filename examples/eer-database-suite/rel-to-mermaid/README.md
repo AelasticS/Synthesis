@@ -13,6 +13,11 @@ configuration flags.
 
 ## Run
 
+The `synth` download ships this example built and ready to install, in
+the `examples` folder of the installation; see
+[Running an example](https://AelasticS.github.io/Synthesis/developer-guide/examples#running-an-example).
+The commands below work in a repository checkout.
+
 ```bash
 npm run build   # from the repository root: rush build -t rel-to-mermaid
 
@@ -20,7 +25,7 @@ synth init
 synth namespace mk demo
 synth transformation install ../eer-to-relational
 synth transformation install .
-synth model import ../eer-to-relational/sample/library.tsx --as demo/library
+synth model import ../eer-to-relational/sample/library.eer.tsx --as demo/library
 
 synth transformation run eer-to-relational rel-to-mermaid \
   --in demo/library --default-configs --out-dir ./generated

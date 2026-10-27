@@ -26,11 +26,11 @@ extract it, and add the resulting `synth/bin` to your `PATH`.
 
 ```bash
 # Choose one of:
-#   synth-v0.3.1-linux-x64.tar.gz
-#   synth-v0.3.1-linux-arm64.tar.gz
-#   synth-v0.3.1-darwin-x64.tar.gz
-#   synth-v0.3.1-darwin-arm64.tar.gz
-VERSION=v0.3.1
+#   synth-v0.4.0-linux-x64.tar.gz
+#   synth-v0.4.0-linux-arm64.tar.gz
+#   synth-v0.4.0-darwin-x64.tar.gz
+#   synth-v0.4.0-darwin-arm64.tar.gz
+VERSION=v0.4.0
 TARGET=linux-x64         # adjust for your platform
 URL="https://github.com/AelasticS/Synthesis/releases/download/cli-${VERSION}/synth-${VERSION}-${TARGET}.tar.gz"
 
@@ -44,12 +44,12 @@ source ~/.bashrc
 
 ### Windows
 
-Download `synth-v0.3.1-win32-x64.tar.gz` from the [Download](./download.md)
+Download `synth-v0.4.0-win32-x64.tar.gz` from the [Download](./download.md)
 page, then run in PowerShell (no administrator rights needed):
 
 ```powershell
 # Extract to C:\ (the archive contains a top-level synth folder, so this creates C:\synth)
-tar -xzf "$env:USERPROFILE\Downloads\synth-v0.3.1-win32-x64.tar.gz" -C C:\
+tar -xzf "$env:USERPROFILE\Downloads\synth-v0.4.0-win32-x64.tar.gz" -C C:\
 
 # Add C:\synth\bin to your user PATH
 $userPath = [Environment]::GetEnvironmentVariable('Path', 'User')
@@ -117,6 +117,29 @@ transformation, the input model, and the configuration consent. Piped,
 scripted, `--json`, `--quiet`, and CI invocations never prompt; they fail
 with strict, stable errors instead.
 
+## Examples
+
+The bundle ships all example transformations, built and ready to install,
+in the `examples` folder of the installation: `/usr/local/synth/examples`
+on Linux and macOS and `C:\synth\examples` on Windows, if you installed as
+shown above. Each example is a folder named after its transformation, with
+sample models in `sample/`.
+
+Install an example with the usual commands, the transformation first and
+then its sample models. A sample imports its metamodel, and the metamodel
+comes with the installed transformation:
+
+```bash
+EX=/usr/local/synth/examples      # Windows PowerShell: $EX = 'C:\synth\examples'
+
+synth transformation install $EX/workflow-to-bpmn
+synth model import $EX/workflow-to-bpmn/sample/approval.tsx --as demo/approval
+synth transformation run workflow-to-bpmn --in demo/approval --out demo/approval-bpmn
+```
+
+The [Examples](../../developer-guide/examples/index.md) pages explain each
+example and list the commands that run it.
+
 ## Shell completion
 
 Completion has two layers, set up once for bash or zsh.
@@ -134,7 +157,8 @@ shell's rc file).
 pipeline names, and namespaces, completed context-aware from the workspace
 (after `synth transformation run eer-to-relational`, TAB on `--in` offers
 only models matching that transformation's source metamodel). This layer is
-a wrapper script shipped in the repository at
+a wrapper script shipped in the bundle at `synth/scripts/completion/` and
+in the repository at
 [`apps/cli/scripts/completion/`](https://github.com/AelasticS/Synthesis/tree/main/apps/cli/scripts/completion)
 (`synth.bash` and `synth.zsh`); copy the one for your shell anywhere and
 source it from your rc file **after** the autocomplete setup line, so its
