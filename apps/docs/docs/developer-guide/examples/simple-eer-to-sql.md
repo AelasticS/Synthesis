@@ -162,6 +162,9 @@ synth model import $EX/simple-eer-to-relational/sample/company.eer.tsx \
 
 synth transformation run simple-eer-to-relational --in com.example/company \
   --out com.example/company-rel --trace com.example/company-trace
+
+# the content of the generated model, to compare with the schema shown below
+synth model export com.example/company-rel --to ./company-rel.tsx
 ```
 
 In a repository checkout, build the package with

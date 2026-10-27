@@ -720,6 +720,7 @@ synth transformation run eer-to-mermaid-er --in demo/library --out-dir ./diagram
 
 # the mapping with the default configuration, then the DDL
 synth transformation run eer-to-relational --in demo/library --default-configs --out demo/library-rel
+synth model export demo/library-rel --to ./library-rel.tsx   # the content of the generated model
 synth transformation run rel-to-sql-ddl --in demo/library-rel --default-configs --out-dir ./generated
 
 # the DDL in the PostgreSQL dialect, a preset configuration

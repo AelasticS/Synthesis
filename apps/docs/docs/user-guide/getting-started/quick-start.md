@@ -53,6 +53,12 @@ synth transformation run eer-to-relational rel-to-sql-ddl \
   --in com.example/library --default-configs --out-dir ./generated
 ```
 
+To remove a transformation later, use its name, not its path or version:
+
+```bash
+synth transformation uninstall rel-to-sql-ddl
+```
+
 The commands work the same in PowerShell. Only the line breaks differ:
 write a command on one line, or end its lines with a backtick instead of
 `\`.

@@ -653,6 +653,7 @@ synth model import $EX/org-to-approval/sample/acme.tsx --as demo/acme
 
 # the flattening, then the graph drawn, then both as one chain
 synth transformation run workflow-to-bpmn --in demo/approval --out demo/approval-bpmn
+synth model export demo/approval-bpmn --to ./approval-bpmn.tsx   # the content of the generated model
 synth transformation run bpmn-to-mermaid --in demo/approval-bpmn --out-dir ./generated
 synth transformation run workflow-to-bpmn bpmn-to-mermaid --in demo/approval --out-dir ./generated
 

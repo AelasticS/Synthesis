@@ -131,6 +131,13 @@ synth model show com.example/persons-rel
 Its header carries provenance: `generatedBy` records the transformation,
 its version, the configuration used, and the date.
 
+`model show` prints only the header. To see the generated model itself,
+export it to a file and open it:
+
+```bash
+synth model export com.example/persons-rel --to ./persons-rel.tsx
+```
+
 ## 5. Take control of a decision
 
 To choose `CamelCase` instead of the default, create a **configuration

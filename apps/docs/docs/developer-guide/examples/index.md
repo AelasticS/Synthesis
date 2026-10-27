@@ -151,6 +151,7 @@ synth transformation install $EX/eer-tutorial-basic
 synth model import $EX/eer-tutorial-basic/sample/library.tsx --as m2m-part1/library
 synth transformation run eer-tutorial-basic --in m2m-part1/library --out m2m-part1/library-rel
 synth model show m2m-part1/library-rel
+synth model export m2m-part1/library-rel --to ./library-rel.tsx   # the full content
 ```
 
 The commands are the same in bash and in PowerShell. Each suite page ends

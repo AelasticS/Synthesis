@@ -145,6 +145,14 @@ namespace that transitively references a model inside it (implies
 verbatim, header included: the counterpart of `model import` for sharing a
 model outside the workspace.
 
+Export is also how you read the content of a model, for example one a
+transformation generated: `model show` prints only the header, so export the
+model and open the file:
+
+```bash
+synth model export com.example/persons-rel --to ./persons-rel.tsx
+```
+
 ## Deleting and the dependency graph
 
 Deletion is protected by the reverse-dependency graph built from `$synth`

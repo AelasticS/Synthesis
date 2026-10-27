@@ -263,6 +263,13 @@ workspace as a new `.tsx` file.
 synth model show demo/library-rel
 ```
 
+`model show` prints only the header. To see the content of the generated
+model, export it to a file:
+
+```bash
+synth model export demo/library-rel --to ./library-rel.tsx
+```
+
 ```text
 Ref:         demo/library-rel
 Path:        ~/.synth/models/demo/library-rel.tsx

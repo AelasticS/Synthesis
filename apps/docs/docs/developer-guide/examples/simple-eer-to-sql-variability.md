@@ -392,6 +392,9 @@ synth config edit com.example/company-cfg
 synth transformation run simple-eer-to-relational-variability --in com.example/company \
   --config com.example/company-cfg --out com.example/company-rel \
   --trace com.example/company-trace
+
+# the content of the generated model
+synth model export com.example/company-rel --to ./company-rel.tsx
 ```
 
 In a repository checkout, build the package with
@@ -418,6 +421,9 @@ synth config show com.example/company-edited-cfg
 synth transformation run simple-eer-to-relational-variability --in com.example/company \
   --config com.example/company-edited-cfg --out com.example/company-rel-edited \
   --trace com.example/company-edited-trace
+
+# the content of the generated model
+synth model export com.example/company-rel-edited --to ./company-rel-edited.tsx
 ```
 
 The imported model is a separate workspace model, so a configuration
