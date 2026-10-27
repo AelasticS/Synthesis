@@ -26,11 +26,11 @@ extract it, and add the resulting `synth/bin` to your `PATH`.
 
 ```bash
 # Choose one of:
-#   synth-v0.4.0-linux-x64.tar.gz
-#   synth-v0.4.0-linux-arm64.tar.gz
-#   synth-v0.4.0-darwin-x64.tar.gz
-#   synth-v0.4.0-darwin-arm64.tar.gz
-VERSION=v0.4.0
+#   synth-v0.4.1-linux-x64.tar.gz
+#   synth-v0.4.1-linux-arm64.tar.gz
+#   synth-v0.4.1-darwin-x64.tar.gz
+#   synth-v0.4.1-darwin-arm64.tar.gz
+VERSION=v0.4.1
 TARGET=linux-x64         # adjust for your platform
 URL="https://github.com/AelasticS/Synthesis/releases/download/cli-${VERSION}/synth-${VERSION}-${TARGET}.tar.gz"
 
@@ -53,12 +53,12 @@ sudo xattr -cr /usr/local/synth
 
 ### Windows
 
-Download `synth-v0.4.0-win32-x64.tar.gz` from the [Download](./download.md)
+Download `synth-v0.4.1-win32-x64.tar.gz` from the [Download](./download.md)
 page, then run in PowerShell (no administrator rights needed):
 
 ```powershell
 # Extract to C:\ (the archive contains a top-level synth folder, so this creates C:\synth)
-tar -xzf "$env:USERPROFILE\Downloads\synth-v0.4.0-win32-x64.tar.gz" -C C:\
+tar -xzf "$env:USERPROFILE\Downloads\synth-v0.4.1-win32-x64.tar.gz" -C C:\
 
 # Add C:\synth\bin to your user PATH
 $userPath = [Environment]::GetEnvironmentVariable('Path', 'User')

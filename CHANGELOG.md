@@ -10,6 +10,35 @@ overall version history.
 
 ## [Unreleased]
 
+## [cli-v0.4.1] - 2026-10-27
+
+### Added
+
+- **`model export` in the docs.** The tutorials and example pages now show
+  `synth model export <ref> --to <file>` after the commands that generate a
+  model (`model show` prints only the `$synth` header), so a reader can
+  open the generated model and compare it with the listing shown.
+- **Uninstalling a transformation.** The Packaging transformations guide
+  and the Quick Start show `synth transformation uninstall <name>`: install
+  takes a path, uninstall takes the name from the manifest, without a
+  version and without a path.
+- **macOS "unsafe" warning.** The Installation page explains how to clear
+  the quarantine attribute with `sudo xattr -cr /usr/local/synth`.
+- **Papers section in the README.** A link to the example that accompanies
+  the SoSyM paper, `examples/simple-eer-to-sql-variability/eer-to-relational`.
+
+### Changed
+
+- **`PAPERS.md` links are absolute.** They point to the GitHub repository,
+  because Zenodo resolves relative links against itself and they broke.
+- **simple-eer-to-sql-variability README.** The Run section gives the
+  tarball form (`$EX/...`) and the repository form side by side, as the docs
+  pages do, and the listing 4 to 7 description says which rules are fixed and
+  where the configuration decides.
+- Release metadata (`CITATION.cff`) and the download links are now 0.4.1.
+
+## [cli-v0.4.0] - 2026-10-27
+
 ### Added
 
 - **Examples in the CLI bundle.** Every bundle carries the 17 example
@@ -878,7 +907,9 @@ overall version history.
   regenerates the manifest, so the git-committed copies were never the
   consumed artifacts, only noise in diffs.
 
-[Unreleased]: https://github.com/AelasticS/Synthesis/compare/cli-v0.3.0..HEAD
+[Unreleased]: https://github.com/AelasticS/Synthesis/compare/cli-v0.4.1..HEAD
+[cli-v0.4.1]: https://github.com/AelasticS/Synthesis/compare/cli-v0.4.0..cli-v0.4.1
+[cli-v0.4.0]: https://github.com/AelasticS/Synthesis/compare/cli-v0.3.0..cli-v0.4.0
 [cli-v0.3.0]: https://github.com/AelasticS/Synthesis/compare/cli-v0.2.0..cli-v0.3.0
 [cli-v0.2.0]: https://github.com/AelasticS/Synthesis/compare/cli-v0.1.0..cli-v0.2.0
 [cli-v0.1.0]: https://github.com/AelasticS/Synthesis/compare/8b82ae4..cli-v0.1.0

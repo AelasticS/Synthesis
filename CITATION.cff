@@ -14,7 +14,7 @@ authors:
 repository-code: "https://github.com/AelasticS/Synthesis"
 url: "https://aelastics.github.io/Synthesis/"
 license: Apache-2.0
-version: 0.4.0
+version: 0.4.1
 # date-released: YYYY-MM-DD
 # The maintainer sets date-released for the release that Zenodo archives.
 keywords:
